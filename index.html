@@ -1,0 +1,1178 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NovaTime | Minecraft Server</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700&family=Rajdhani:wght@400;500;600;700&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+        
+        /* Кастомный скроллбар */
+        ::-webkit-scrollbar {
+            width: 10px;
+            height: 10px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 5px;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(45deg, rgba(255,255,255,0.3), rgba(200,200,200,0.5));
+            border-radius: 5px;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(45deg, rgba(255,255,255,0.4), rgba(200,200,200,0.6));
+        }
+        
+        body {
+            color: #fff;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            overflow-x: hidden;
+            font-family: 'Rajdhani', sans-serif;
+            scrollbar-width: thin;
+            scrollbar-color: rgba(255,255,255,0.3) rgba(0,0,0,0.2);
+        }
+        
+        .video-background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: -2;
+            opacity: 0.7;
+        }
+        
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(ellipse at center, rgba(0,0,0,0.5) 0%, rgba(0,0,0,0.9) 100%);
+            z-index: -1;
+        }
+        
+        header {
+            padding: 25px 0;
+            backdrop-filter: blur(12px);
+            background: rgba(0, 0, 0, 0.25);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+            box-shadow: 0 5px 40px rgba(0,0,0,0.4);
+            position: relative;
+            z-index: 10;
+        }
+        
+        .nav-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 40px;
+        }
+        
+        .logo {
+            font-size: 32px;
+            font-weight: 700;
+            color: white;
+            text-decoration: none;
+            letter-spacing: 3px;
+            transition: all 0.5s ease;
+            position: relative;
+            padding: 8px 15px;
+            font-family: 'Orbitron', sans-serif;
+            text-shadow: 0 0 10px rgba(255,255,255,0.3);
+            background: linear-gradient(to right, #fff, #aaa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .logo::before {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 2px;
+            background: linear-gradient(to right, transparent, white, transparent);
+            transition: width 0.5s ease;
+        }
+        
+        .logo:hover::before {
+            width: 100%;
+        }
+        
+        .logo:hover {
+            text-shadow: 0 0 20px rgba(255,255,255,0.6);
+        }
+        
+        .nav-links {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+        }
+        
+        .nav-link {
+            color: white;
+            text-decoration: none;
+            font-weight: 600;
+            padding: 10px 20px;
+            border-radius: 6px;
+            transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            position: relative;
+            overflow: hidden;
+            letter-spacing: 1px;
+            font-size: 17px;
+            text-transform: uppercase;
+            border: 1px solid transparent;
+        }
+        
+        .nav-link::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            transition: 0.5s;
+        }
+        
+        .nav-link:hover {
+            border-color: rgba(255,255,255,0.3);
+            text-shadow: 0 0 10px rgba(255,255,255,0.7);
+            box-shadow: 0 0 15px rgba(255,255,255,0.1);
+        }
+        
+        .nav-link:hover::before {
+            left: 100%;
+        }
+        
+        .nav-link.loading::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #fff, transparent);
+            animation: loading 1.5s infinite;
+        }
+        
+        @keyframes loading {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+        
+        .play-btn {
+            background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05));
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            color: white;
+            padding: 12px 35px;
+            border-radius: 8px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 5px 30px rgba(0, 0, 0, 0.3);
+            font-size: 18px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            z-index: 1;
+            text-shadow: 0 0 5px rgba(0,0,0,0.5);
+            transform: translateY(0);
+            animation: float 4s ease-in-out infinite;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0) scale(1); }
+            50% { transform: translateY(-8px) scale(1.02); }
+        }
+        
+        .play-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: 0.7s;
+            z-index: -1;
+        }
+        
+        .play-btn:hover {
+            border-color: white;
+            box-shadow: 0 0 30px rgba(255, 255, 255, 0.5);
+            animation: none;
+            transform: translateY(-5px) scale(1.05);
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        
+        .play-btn:hover::before {
+            left: 100%;
+        }
+        
+        .play-btn::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.15) 0%, transparent 70%);
+            transform: scale(0);
+            transition: transform 0.7s ease;
+            pointer-events: none;
+        }
+        
+        .play-btn:hover::after {
+            transform: scale(1);
+        }
+        
+        .ip-display {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0.95);
+            background: rgba(0, 0, 0, 0.9);
+            padding: 20px 40px;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.1);
+            box-shadow: 0 10px 40px rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            z-index: 100;
+            text-align: center;
+            max-width: 90%;
+        }
+        
+        .ip-display.show {
+            opacity: 1;
+            transform: translate(-50%, -50%) scale(1);
+        }
+        
+        .ip-display::after {
+            content: '✓';
+            position: absolute;
+            top: -15px;
+            right: -15px;
+            width: 30px;
+            height: 30px;
+            background: #4CAF50;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            box-shadow: 0 0 15px rgba(76, 175, 80, 0.7);
+            opacity: 0;
+            transition: opacity 0.2s ease;
+        }
+        
+        .ip-display.show::after {
+            opacity: 1;
+        }
+        
+        main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 60px 20px;
+            position: relative;
+            z-index: 5;
+        }
+        
+        .server-title {
+            font-size: 82px;
+            margin-bottom: 30px;
+            letter-spacing: 4px;
+            font-weight: 700;
+            background: linear-gradient(to right, #fff, #aaa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            transition: all 0.5s ease;
+            position: relative;
+            padding: 0 25px;
+            font-family: 'Orbitron', sans-serif;
+            text-shadow: 0 0 20px rgba(255,255,255,0.3);
+        }
+        
+        .server-title:hover {
+            text-shadow: 0 0 30px rgba(255,255,255,0.6);
+        }
+        
+        .server-title::after {
+            content: '';
+            position: absolute;
+            bottom: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 3px;
+            background: linear-gradient(to right, transparent, white, transparent);
+            transition: width 0.5s ease;
+        }
+        
+        .server-title:hover::after {
+            width: 100%;
+        }
+        
+        .server-description {
+            max-width: 800px;
+            margin-bottom: 50px;
+            line-height: 1.7;
+            font-size: 18px;
+            color: rgba(255,255,255,0.9);
+            text-shadow: 0 0 10px rgba(0,0,0,0.5);
+            padding: 0 20px;
+        }
+        
+        .stats-container {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            margin-top: 80px;
+            flex-wrap: wrap;
+        }
+        
+        .stat-item {
+            background: rgba(0, 0, 0, 0.5);
+            padding: 25px 30px;
+            border-radius: 12px;
+            min-width: 200px;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            transition: all 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            backdrop-filter: blur(6px);
+            box-shadow: 0 10px 35px rgba(0,0,0,0.3);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .stat-item:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 15px 45px rgba(0,0,0,0.4);
+            border-color: rgba(255,255,255,0.3);
+            background: rgba(0, 0, 0, 0.6);
+        }
+        
+        .stat-label {
+            font-size: 18px;
+            font-weight: 600;
+            color: rgba(255, 255, 255, 0.8);
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .stat-value {
+            font-size: 28px;
+            font-weight: 600;
+            margin: 15px 0;
+            color: #4CAF50;
+            text-shadow: 0 0 10px rgba(76, 175, 80, 0.3);
+            font-family: 'Orbitron', sans-serif;
+            position: relative;
+        }
+        
+        .stat-value::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 50px;
+            height: 2px;
+            background: rgba(76, 175, 80, 0.5);
+        }
+        
+        .stat-value-soon {
+            font-size: 28px;
+            font-weight: 600;
+            margin: 15px 0;
+            color: #4CAF50;
+            text-shadow: 0 0 10px rgba(76, 175, 80, 0.3);
+            font-family: 'Orbitron', sans-serif;
+            position: relative;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 0.7; }
+            50% { opacity: 1; text-shadow: 0 0 15px rgba(76, 175, 80, 0.6); }
+            100% { opacity: 0.7; }
+        }
+        
+        footer {
+            background: rgba(0, 0, 0, 0.85);
+            padding: 40px 0;
+            text-align: center;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(8px);
+            position: relative;
+            z-index: 10;
+        }
+        
+        .footer-links {
+            margin-top: 25px;
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 25px;
+        }
+        
+        .footer-link {
+            color: rgba(255,255,255,0.7);
+            text-decoration: none;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            position: relative;
+            padding: 0 15px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .footer-link::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 0;
+            height: 1px;
+            background: rgba(255,255,255,0.5);
+            transition: width 0.3s ease;
+        }
+        
+        .footer-link:hover {
+            color: white;
+            text-shadow: 0 0 10px rgba(255,255,255,0.5);
+        }
+        
+        .footer-link:hover::after {
+            width: 100%;
+        }
+        
+        .copyright {
+            margin-top: 30px;
+            font-size: 14px;
+            color: rgba(255,255,255,0.5);
+            line-height: 1.6;
+        }
+        
+        /* Модальные окна */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+            will-change: opacity;
+        }
+        
+        .modal.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+        
+        .modal-content {
+            background: rgba(0, 0, 0, 0.9);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 15px;
+            width: 90%;
+            max-width: 800px;
+            max-height: 80vh;
+            overflow-y: auto;
+            padding: 30px;
+            position: relative;
+            transform: scale(0.95);
+            transition: transform 0.3s ease, opacity 0.3s ease;
+            opacity: 0;
+            box-shadow: 0 0 50px rgba(255, 255, 255, 0.1);
+            will-change: transform, opacity;
+        }
+        
+        .modal.active .modal-content {
+            transform: scale(1);
+            opacity: 1;
+        }
+        
+        .modal-close {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            width: 30px;
+            height: 30px;
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            border-radius: 50%;
+            color: white;
+            font-size: 18px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal-close:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: rotate(90deg);
+        }
+        
+        .modal-title {
+            font-size: 28px;
+            margin-bottom: 20px;
+            color: white;
+            text-align: center;
+            font-family: 'Orbitron', sans-serif;
+            letter-spacing: 2px;
+            text-shadow: 0 0 10px rgba(255,255,255,0.3);
+        }
+        
+        .modal-text {
+            color: rgba(255,255,255,0.8);
+            line-height: 1.7;
+            font-size: 16px;
+        }
+        
+        .modal-text p {
+            margin-bottom: 15px;
+        }
+        
+        .modal-text strong {
+            color: white;
+            font-weight: 600;
+        }
+        
+        .payment-methods {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 30px;
+        }
+        
+        .payment-method {
+            width: 60px;
+            height: 40px;
+            object-fit: contain;
+            filter: grayscale(30%);
+            transition: all 0.3s ease;
+        }
+        
+        .payment-method:hover {
+            filter: grayscale(0%);
+            transform: scale(1.1);
+        }
+        
+        /* Стили для модального окна доната */
+        .donate-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 20px;
+            margin-top: 30px;
+        }
+        
+        .donate-item {
+            background: rgba(30, 30, 30, 0.7);
+            border-radius: 10px;
+            padding: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .donate-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+            border-color: rgba(255, 255, 255, 0.3);
+            background: rgba(40, 40, 40, 0.8);
+        }
+        
+        .donate-icon {
+            width: 60px;
+            height: 60px;
+            margin: 0 auto 10px;
+            display: block;
+            object-fit: contain;
+        }
+        
+        .donate-name {
+            font-weight: 600;
+            text-align: center;
+            margin-bottom: 5px;
+            color: #fff;
+            font-size: 18px;
+        }
+        
+        .donate-price {
+            text-align: center;
+            color: #4CAF50;
+            font-weight: 600;
+            font-size: 16px;
+        }
+        
+        /* Анимации */
+        .animate-delay-1 {
+            animation-delay: 0.2s;
+        }
+        
+        .animate-delay-2 {
+            animation-delay: 0.4s;
+        }
+        
+        .animate-delay-3 {
+            animation-delay: 0.6s;
+        }
+        
+        /* Адаптив */
+        @media (max-width: 992px) {
+            .server-title {
+                font-size: 64px;
+            }
+            
+            .stats-container {
+                gap: 25px;
+            }
+            
+            .stat-item {
+                min-width: 180px;
+                padding: 20px 25px;
+            }
+            
+            .donate-grid {
+                grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .nav-container {
+                flex-direction: column;
+                gap: 20px;
+            }
+            
+            .nav-links {
+                flex-direction: column;
+                width: 100%;
+            }
+            
+            .server-title {
+                font-size: 48px;
+            }
+            
+            .stats-container {
+                gap: 15px;
+            }
+            
+            .stat-item {
+                min-width: 150px;
+                padding: 15px 20px;
+            }
+            
+            .modal-content {
+                padding: 20px;
+            }
+            
+            .modal-title {
+                font-size: 24px;
+            }
+            
+            .play-btn {
+                padding: 10px 25px;
+                font-size: 16px;
+            }
+            
+            .donate-grid {
+                grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+                gap: 15px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .server-title {
+                font-size: 36px;
+            }
+            
+            .server-description {
+                font-size: 16px;
+            }
+            
+            .stat-item {
+                min-width: 120px;
+                padding: 12px 15px;
+            }
+            
+            .stat-value, .stat-value-soon {
+                font-size: 22px;
+            }
+            
+            .footer-links {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .modal-content {
+                width: 95%;
+                padding: 15px;
+            }
+            
+            .modal-title {
+                font-size: 20px;
+            }
+            
+            .modal-text {
+                font-size: 14px;
+            }
+            
+            .payment-methods {
+                gap: 10px;
+            }
+            
+            .payment-method {
+                width: 50px;
+                height: 30px;
+            }
+            
+            .donate-grid {
+                grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+                gap: 10px;
+            }
+            
+            .donate-icon {
+                width: 50px;
+                height: 50px;
+            }
+            
+            .donate-name {
+                font-size: 16px;
+            }
+            
+            .donate-price {
+                font-size: 14px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <video class="video-background" autoplay muted loop playsinline>
+        <source src="Img/62813.webm" type="video/webm">
+    </video>
+    <div class="overlay"></div>
+    
+    <!-- Модальное окно Договора-оферты -->
+    <div class="modal" id="offer-modal">
+        <div class="modal-content">
+            <button class="modal-close" id="offer-close">&times;</button>
+            <h2 class="modal-title">ДОГОВОР-ОФЕРТА</h2>
+            <div class="modal-text">
+                <p><strong>1. Общие положения</strong></p>
+                <p>1.2. Настоящий Договор является официальным предложением (публичной офертой) Создателя сервера (в дальнейшем «Исполнитель») для полностью дееспособного физического (далее – «Заказчик»), которое примет настоящее предложение, на указанных ниже условиях.</p>
+                <p>1.2. Моментом полного и безоговорочного принятия Заказчиком предложения Исполнителя заключить Договор оферты (акцептом оферты) считается факт подтверждения готовности совершить оплату услуги Исполнителя, посредством нажатия кнопки «Купить» на страницах сайтов NovaTime.</p>
+                <p>1.3. Осуществляя акцепт Договора в порядке, определенном п. 1.3 Договора, Заказчик подтверждает, что он ознакомлен, согласен, полностью и безоговорочно принимает все условия Договора в том виде, в каком они изложены в тексте Договора, в том числе в приложениях к Договору, являющихся его неотъемлемой частью.</p>
+                <p>1.4. Клиент согласен, что акцепт Договора в порядке, указанном в п. 1.2 Договора является заключением Договора на условиях, изложенных в нем.</p>
+                <p>1.5. Договор не может быть отозван.</p>
+                <p>1.6. Договор не требует скрепления печатями и/или подписания Заказчиком и Исполнителем (далее по тексту - Стороны) и сохраняет при этом юридическую силу.</p>
+                
+                <p><strong>2. Предмет договора</strong></p>
+                <p>2.1. Предметом настоящего Договора является возмездное оказание Исполнителем услуг в соответствии с условиями настоящего Договора.</p>
+                <p>2.2. Заказчик полностью принимает условия Договора и оплачивает услуги Исполнителя в соответствии с условиями настоящего Договора.</p>
+                
+                <p><strong>3. Оплата Услуг</strong></p>
+                <p>3.1. Стоимость услуг по Договору определяется в соответствии с действующими ценами и прописана на сайтах NovaTime</p>
+                <p>3.2. Стоимость услуги может быть изменена Исполнителем в одностороннем порядке.</p>
+                <p>3.3. Способы оплаты услуги указаны при оформлении платежа.</p>
+                
+                <p><strong>4. Интеллектуальная собственность</strong></p>
+                <p>4.1. Вся текстовая информация и графические изображения, находящиеся на сайтах NovaTime являются собственностью Исполнителя.</p>
+                
+                <p><strong>5. Особые условия и ответственность сторон.</strong></p>
+                <p>5.1. Исполнитель несет ответственность за своевременность предоставляемых услуг при выполнении Заказчиком установленных требований и правил, размещенных на сайтах NovaTime</p>
+                <p>5.2. Исполнитель освобождается от ответственности за нарушение условий Договора, если такое нарушение вызвано действием обстоятельств непреодолимой силы (форс-мажор), включая: действия органов государственной власти, пожар, наводнение, землетрясение, другие стихийные действия, отсутствие электроэнергии, забастовки, гражданские волнения, беспорядки, любые иные обстоятельства, не ограничиваясь перечисленным, которые могут повлиять на выполнение Исполнителем Договора.</p>
+                <p>5.3. Исполнитель не несет ответственности за качество каналов связи общего пользования или служб, предоставляющих доступ Заказчика к его услугам.</p>
+                
+                <p><strong>6. Конфиденциальность и защита персональной информации</strong></p>
+                <p>6.1. Исполнитель обязуется не разглашать полученную от Заказчика информацию.</p>
+                <p>6.2. Не считается нарушением обязательств разглашение информации в соответствии с обоснованными и применимыми требованиями закона.</p>
+                <p>6.3. Исполнитель не несет ответственности за сведения, предоставленные Заказчиком на сайтах NovaTime в общедоступной форме.</p>
+                
+                <p><strong>7. Порядок рассмотрения претензий и споров</strong></p>
+                <p>7.1. Претензии Заказчика по предоставляемым услугам принимаются Исполнителем к рассмотрению по электронной почте в течение 3 (рабочих) дней с момента возникновения спорной ситуации.</p>
+                <p>7.2. При рассмотрении спорных ситуаций Исполнитель вправе запросить у Заказчика всю интересующую документацию относительно рассматриваемого случая. В случае непредоставления Заказчиком документов в течение 1 рабочего дня после дня требования, претензия рассмотрению Исполнителем не подлежит.</p>
+                <p>7.3. Исполнитель и Заказчик, принимая во внимания характер оказываемой услуги, обязуются в случае возникновения споров и разногласий, связанных с оказанием услуг, применять досудебный порядок урегулирования спора. В случае невозможности урегулирования спора в досудебном порядке стороны вправе обратиться в суд.</p>
+                
+                <p><strong>8. Прочие условия</strong></p>
+                <p>8.1. Заказчик обладает всеми правами и полномочиями, необходимыми для заключения и исполнения Договора.</p>
+                <p>8.2. Заказчик вправе в любое время в одностороннем порядке отказаться от услуг Исполнителя. В случае одностороннего отказа Заказчика от услуг Исполнителя произведенная оплата не возвращается.</p>
+                <p>8.3. Исполнитель оставляет за собой право изменять или дополнять любые из условий настоящего Договора в любое время, опубликовывая все изменения на своем сайте.</p>
+                <p>8.4. Договор считается совершенным и исполненным со стороны Исполнителя и Пользователя, в случае успешного получения Пользователем покупки на сервере проекта (IP - mc.novatime.pp.ua). В случае неисполнения договора Исполнителем, если с момента Оплаты услуг прошло не более 14 дней, Пользователь имеет право запросить возврат денежных средств или замену товара или товаров на сайте на сумму не превышающую первоначальную покупку.</p>
+                <p>8.5. По всем вопросам, не урегулированным настоящим Договором, стороны руководствуются действующим законодательством Республики Украины.</p>
+                <p>8.6. Признание судом недействительности какого-либо положения настоящего Договора и правил не влечет за собой недействительность остальных положений.</p>
+                <p>8.7. Исполнитель оставляет за собой право удалить аккаунт Заказчика в случае если Заказчик не заходил на сервер проекта (IP - mc.novatime.pp.ua) в течении последнего месяца.</p>
+                
+                <p><strong>9. Контактные данные</strong></p>
+                <p>Электронная почта: frotrest5776@gmail.com</p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Модальное окно О донате -->
+    <div class="modal" id="donate-modal">
+        <div class="modal-content">
+            <button class="modal-close" id="donate-close">&times;</button>
+            <h2 class="modal-title">ДОНАТ</h2>
+            <div class="modal-text">
+                <p><strong>Покупая у нас донат, вы можете быть уверены, что получите все возможности.</strong> После покупки донат приходит автоматически, но если этого не произошло достаточно просто перезайти на сервер.</p>
+                
+                <p><strong>Забота о донатерах</strong><br>
+                Мы не берем комиссию при покупках, донат у нас никогда не пропадает. Всем доступна доплата, благодаря которой привилегия выше стоит разницу в цене с меньшей.</p>
+                
+                <p><strong>Остались вопросы?</strong><br>
+                Наша служба поддержки всегда будет рада помочь вам! Если вы не можете обратиться через нашу почту, внизу сайта указана почта.</p>
+                
+                <div class="donate-grid">
+                    <div class="donate-item">
+                        <img src="Img/elite.png" alt="ELITE" class="donate-icon">
+                        <div class="donate-name">ELITE</div>
+                        <div class="donate-price">0.55$</div>
+                    </div>
+                    <div class="donate-item">
+                        <img src="Img/legend.png" alt="LEGEND" class="donate-icon">
+                        <div class="donate-name">LEGEND</div>
+                        <div class="donate-price">1.00$</div>
+                    </div>
+                    <div class="donate-item">
+                        <img src="Img/knight.png" alt="KNIGHT" class="donate-icon">
+                        <div class="donate-name">KNIGHT</div>
+                        <div class="donate-price">1.20$</div>
+                    </div>
+                    <div class="donate-item">
+                        <img src="Img/hero.png" alt="HERO" class="donate-icon">
+                        <div class="donate-name">HERO</div>
+                        <div class="donate-price">1.40$</div>
+                    </div>
+                    <div class="donate-item">
+                        <img src="Img/master.png" alt="MASTER" class="donate-icon">
+                        <div class="donate-name">MASTER</div>
+                        <div class="donate-price">1.60$</div>
+                    </div>
+                    <div class="donate-item">
+                        <img src="Img/titan.png" alt="TITAN" class="donate-icon">
+                        <div class="donate-name">TITAN</div>
+                        <div class="donate-price">1.80$</div>
+                    </div>
+                    <div class="donate-item">
+                        <img src="Img/emperor.png" alt="EMPEROR" class="donate-icon">
+                        <div class="donate-name">EMPEROR</div>
+                        <div class="donate-price">2.00$</div>
+                    </div>
+                    <div class="donate-item">
+                        <img src="Img/phantom.png" alt="PHANTOM" class="donate-icon">
+                        <div class="donate-name">PHANTOM</div>
+                        <div class="donate-price">2.40$</div>
+                    </div>
+                    <div class="donate-item">
+                        <img src="Img/shadow.png" alt="SHADOW" class="donate-icon">
+                        <div class="donate-name">SHADOW</div>
+                        <div class="donate-price">2.80$</div>
+                    </div>
+                    <div class="donate-item">
+                        <img src="Img/mythical.png" alt="MYTHICAL" class="donate-icon">
+                        <div class="donate-name">MYTHICAL</div>
+                        <div class="donate-price">3.00$</div>
+                    </div>
+                    <div class="donate-item">
+                        <img src="Img/celestial.png" alt="CELESTIAL" class="donate-icon">
+                        <div class="donate-name">CELESTIAL</div>
+                        <div class="donate-price">3.25$</div>
+                    </div>
+                    <div class="donate-item">
+                        <img src="Img/monarch.png" alt="MONARCH" class="donate-icon">
+                        <div class="donate-name">MONARCH</div>
+                        <div class="donate-price">3.60$</div>
+                    </div>
+                    <div class="donate-item">
+                        <img src="Img/d-helper.png" alt="D.HELPER" class="donate-icon">
+                        <div class="donate-name">D.HELPER</div>
+                        <div class="donate-price">4.50$</div>
+                    </div>
+                </div>
+                
+                <p><strong>Как купить донат?</strong><br>
+                Оплатить заказ можно банковскими картами Visa, MasterCard, также можно с помощью PayPal.</p>
+                
+                <p>Чтобы оплатить покупку, вы будете перенаправлены на сервер платежной системы, на котором нужно ввести необходимые данные.</p>
+                
+                <p>Наши платежные системы обладают подтвержденным сертификатом соответствия требованиям стандарта PCI DSS в части хранения, обработки и передачи данных держателей карт. Стандарт безопасности банковских карт PCI DSS поддерживается международными платежными системами, включая MasterCard и Visa, Inc. Платежные системы также является участником программы непрерывного соответствия Compliance Control PCI DSS Compliance Process (P.D.C.P.). Ваши конфиденциальные данные, необходимые для оплаты (реквизиты карты, регистрационные данные и др.), не поступают в интернет-магазин — их обработка производится на стороне процессингового центра и полностью защищена.</p>
+                
+                <p>Стоимость оказания услуг находится на сайте NovaTime. C покупателя может взиматься комиссия.</p>
+                
+                <p>Возврат услуги осуществляется согласно пункту 8.4 Договора-оферты.</p>
+                
+                <div class="payment-methods">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/5e/Visa_Inc._logo.svg/2560px-Visa_Inc._logo.svg.png" alt="Visa" class="payment-method">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/2a/Mastercard-logo.svg/1280px-Mastercard-logo.svg.png" alt="MasterCard" class="payment-method">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/b/b5/PayPal.svg/1200px-PayPal.svg.png" alt="PayPal" class="payment-method">
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <header class="animate__animated animate__fadeInDown">
+        <div class="nav-container">
+            <a href="#" class="logo animate__animated animate__fadeIn">NOVATIME</a>
+            <div class="nav-links">
+                <a href="#" class="nav-link animate__animated animate__fadeIn animate__delay-1">Главная</a>
+                <a href="#" class="nav-link animate__animated animate__fadeIn animate__delay-2" id="donate-nav-link">Донат</a>
+                <a href="https://docs.google.com/document/d/1151IAVoHDf41oOzDiGKv_GnRoFedwPo0TrERYTfUt8w/edit?tab=t.0" class="nav-link animate__animated animate__fadeIn animate__delay-2" id="rules-link">Правила</a>
+                <a href="https://tlauncher.ru/" class="nav-link animate__animated animate__fadeIn animate__delay-3" id="launcher-link">Лаунчер</a>
+                <button class="play-btn animate__animated animate__fadeIn animate__delay-3" id="play-btn">Начать Играть</button>
+            </div>
+        </div>
+    </header>
+    
+    <main>
+        <h1 class="server-title animate__animated animate__fadeIn">NovaTime</h1>
+        <p class="server-description animate__animated animate__fadeIn animate__delay-1">Добро пожаловать на официальный сайт Minecraft сервера NovaTime. Только здесь вы получите уникальные эмоции!</p>
+        
+        <div class="ip-display" id="ip-display">
+            IP сервера скопирован:<br>
+            <strong style="font-size: 26px; font-family: 'Orbitron', sans-serif;">mc.novatime.pp.ua</strong>
+        </div>
+        
+        <div class="stats-container">
+            <div class="stat-item animate__animated animate__fadeInUp animate-delay-1">
+                <div class="stat-label">Онлайн</div>
+                <div class="stat-value-soon">-</div>
+            </div>
+            <div class="stat-item animate__animated animate__fadeInUp animate-delay-2">
+                <div class="stat-label">Количество банов</div>
+                <div class="stat-value-soon">-</div>
+            </div>
+            <div class="stat-item animate__animated animate__fadeInUp animate-delay-3">
+                <div class="stat-label">Последний вайп</div>
+                <div class="stat-value-soon">-</div>
+            </div>
+            <div class="stat-item animate__animated animate__fadeInUp">
+                <div class="stat-label">Новых игроков</div>
+                <div class="stat-value-soon">-</div>
+            </div>
+        </div>
+    </main>
+    
+    <footer class="animate__animated animate__fadeInUp">
+        <div class="footer-links">
+            <a href="#" class="footer-link" id="offer-link">Договор-оферта</a>
+            <a href="#" class="footer-link" id="donate-link">Порядок проведения оплаты и безопасность операций</a>
+        </div>
+        <div class="copyright">
+            Полное или частичное копирование сайта запрещено © NovaTime<br>
+            Почта для связи: frotrest5776@gmail.com
+        </div>
+    </footer>
+    
+    <script>
+        // Автокопирование IP при нажатии
+        const playBtn = document.getElementById('play-btn');
+        const ipDisplay = document.getElementById('ip-display');
+        
+        playBtn.addEventListener('click', function() {
+            // Копируем IP в буфер обмена
+            navigator.clipboard.writeText('mc.novatime.pp.ua')
+                .then(() => {
+                    // Показываем уведомление
+                    ipDisplay.classList.add('show');
+                    
+                    // Скрываем через 1.5 секунды
+                    setTimeout(() => {
+                        ipDisplay.classList.remove('show');
+                    }, 1500);
+                })
+                .catch(err => {
+                    // Альтернативный метод для старых браузеров
+                    const tempInput = document.createElement('input');
+                    tempInput.value = 'mc.novatime.pp.ua';
+                    document.body.appendChild(tempInput);
+                    tempInput.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(tempInput);
+                    
+                    ipDisplay.classList.add('show');
+                    setTimeout(() => {
+                        ipDisplay.classList.remove('show');
+                    }, 1500);
+                });
+        });
+        
+        // Обработка ссылок с анимацией загрузки
+        const rulesLink = document.getElementById('rules-link');
+        const launcherLink = document.getElementById('launcher-link');
+        const donateNavLink = document.getElementById('donate-nav-link');
+        
+        function handleLinkClick(e, link) {
+            e.preventDefault();
+            link.classList.add('loading');
+            
+            setTimeout(() => {
+                window.location.href = link.href;
+            }, 800); // Быстрое перенаправление
+        }
+        
+        rulesLink.addEventListener('click', (e) => handleLinkClick(e, rulesLink));
+        launcherLink.addEventListener('click', (e) => handleLinkClick(e, launcherLink));
+        
+        // Плавный скролл для всех ссылок
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function(e) {
+                e.preventDefault();
+                document.querySelector(this.getAttribute('href')).scrollIntoView({
+                    behavior: 'smooth'
+                });
+            });
+        });
+        
+        // Анимация при загрузке
+        document.addEventListener('DOMContentLoaded', () => {
+            setTimeout(() => {
+                document.querySelector('.server-title').classList.add('animate__pulse');
+            }, 1000);
+            
+            // Воспроизведение видео с тихим звуком
+            const video = document.querySelector('.video-background');
+            video.volume = 0.2; // Установка тихого звука
+        });
+        
+        // Модальные окна
+        const offerModal = document.getElementById('offer-modal');
+        const donateModal = document.getElementById('donate-modal');
+        const offerLink = document.getElementById('offer-link');
+        const donateLink = document.getElementById('donate-link');
+        const offerClose = document.getElementById('offer-close');
+        const donateClose = document.getElementById('donate-close');
+        
+        // Оптимизация анимации модальных окон
+        function toggleModal(modal, show) {
+            if (show) {
+                modal.style.display = 'flex';
+                setTimeout(() => {
+                    modal.classList.add('active');
+                    document.body.style.overflow = 'hidden';
+                }, 10);
+            } else {
+                modal.classList.remove('active');
+                setTimeout(() => {
+                    modal.style.display = 'none';
+                    document.body.style.overflow = 'auto';
+                }, 300);
+            }
+        }
+        
+        // Открытие модальных окон
+        offerLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            toggleModal(offerModal, true);
+        });
+        
+        donateLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            toggleModal(donateModal, true);
+        });
+        
+        donateNavLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            toggleModal(donateModal, true);
+        });
+        
+        // Закрытие модальных окон
+        offerClose.addEventListener('click', () => {
+            toggleModal(offerModal, false);
+        });
+        
+        donateClose.addEventListener('click', () => {
+            toggleModal(donateModal, false);
+        });
+        
+        // Закрытие при клике вне окна
+        window.addEventListener('click', (e) => {
+            if (e.target === offerModal) {
+                toggleModal(offerModal, false);
+            }
+            if (e.target === donateModal) {
+                toggleModal(donateModal, false);
+            }
+        });
+        
+        // Закрытие по ESC
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                toggleModal(offerModal, false);
+                toggleModal(donateModal, false);
+            }
+        });
+        
+        // Предзагрузка изображений платежных систем
+        function preloadImages() {
+            const images = [
+                'https://upload.wikimedia.org/wikipedia/commons/thumb/5/5e/Visa_Inc._logo.svg/2560px-Visa_Inc._logo.svg.png',
+                'https://upload.wikimedia.org/wikipedia/commons/thumb/2/2a/Mastercard-logo.svg/1280px-Mastercard-logo.svg.png',
+                'https://upload.wikimedia.org/wikipedia/commons/thumb/b/b5/PayPal.svg/1200px-PayPal.svg.png',
+                'Img/elite.png',
+                'Img/legend.png',
+                'Img/knight.png',
+                'Img/hero.png',
+                'Img/master.png',
+                'Img/titan.png',
+                'Img/emperor.png',
+                'Img/phantom.png',
+                'Img/shadow.png',
+                'Img/mythical.png',
+                'Img/celestial.png',
+                'Img/monarch.png',
+                'Img/d-helper.png'
+            ];
+            
+            images.forEach(img => {
+                new Image().src = img;
+            });
+        }
+        
+        // Запуск предзагрузки после загрузки страницы
+        window.addEventListener('load', preloadImages);
+    </script>
+</body>
+</html>
