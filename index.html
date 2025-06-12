@@ -1,125 +1,454 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="ru" dir="ltr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ВеликийПидоря — Свободная энциклопедия</title>
+    <title>@faerovs — ВеликийПидорЯ</title>
+    <meta name="description" content="Статья о выдающемся представителе интернет-сообщества @faerovs">
     <style>
+        :root {
+            --page-background: #f6f6f6;
+            --content-background: #ffffff;
+            --border-color: #a7d7f9;
+            --link-color: #0645ad;
+            --link-visited: #551a8b;
+            --header-border: #a2a9b1;
+            --infobox-background: #f8f9fa;
+            --sidebar-background: #f8f9fa;
+            --footer-text: #54595d;
+        }
+        
         body {
-            font-family: 'Georgia', 'Times New Roman', serif;
+            font-family: 'Linux Libertine', 'Georgia', 'Times', serif;
             line-height: 1.6;
-            max-width: 900px;
-            margin: 0 auto;
-            padding: 20px;
-            background-color: #f6f6f6;
-            color: #222;
-        }
-        header {
-            border-bottom: 1px solid #a7d7f9;
-            padding-bottom: 10px;
-            margin-bottom: 20px;
-        }
-        h1 {
-            color: #000;
-            font-size: 1.8em;
-            font-weight: normal;
+            color: #202122;
             margin: 0;
             padding: 0;
+            background-color: var(--page-background);
+            word-wrap: break-word;
         }
-        h2 {
-            color: #000;
-            font-size: 1.5em;
-            font-weight: normal;
-            border-bottom: 1px solid #a7d7f9;
-            padding-bottom: 5px;
-            margin-top: 25px;
-        }
-        h3 {
-            font-size: 1.2em;
-            font-weight: normal;
-        }
-        .article {
-            background: white;
-            padding: 15px 20px;
-            border-radius: 3px;
+        
+        .mw-body {
+            margin-left: 11em;
+            padding: 1.25em 1.5em 1.5em 1.5em;
+            border: 1px solid var(--border-color);
+            background-color: var(--content-background);
             box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-            margin-bottom: 20px;
-            border: 1px solid #ddd;
         }
-        .fake-link {
-            color: #0645ad;
+        
+        .mw-body-content {
+            max-width: 50em;
+            margin: 0 auto;
+        }
+        
+        .mw-header {
+            height: 3.375em;
+            background-color: var(--content-background);
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .vector-sidebar {
+            width: 11em;
+            float: left;
+            position: relative;
+            z-index: 1;
+            padding-top: 1.5em;
+            font-size: 0.875em;
+        }
+        
+        .vector-menu-portal {
+            margin: 0 0.6em 0 0.6em;
+            padding: 0.25em 0;
+            direction: ltr;
+        }
+        
+        .vector-menu-heading {
+            display: block;
+            color: #54595d;
+            margin: 0.5em 0 0 0.25em;
+            border-bottom: 1px solid var(--header-border);
+            padding: 0.25em 0;
+            cursor: default;
+            font-family: 'Linux Libertine', 'Georgia', 'Times', serif;
+            font-weight: normal;
+        }
+        
+        .vector-menu-content {
+            list-style-type: none;
+            list-style-image: none;
+            margin: 0.5em 0 0 0.25em;
+            padding: 0;
+        }
+        
+        .vector-menu-content li {
+            margin: 0;
+            padding: 0.25em 0;
+            line-height: 1.125em;
+        }
+        
+        .vector-menu-content li a {
+            color: var(--link-color);
             text-decoration: none;
-            cursor: pointer;
         }
-        .fake-link:hover {
+        
+        .vector-menu-content li a:hover {
             text-decoration: underline;
         }
-        .footer {
-            font-size: 0.8em;
-            color: #555;
+        
+        .firstHeading {
+            font-family: 'Linux Libertine', 'Georgia', 'Times', serif;
+            font-weight: normal;
+            font-size: 1.8em;
+            line-height: 1.3;
+            margin: 0;
+            padding: 0;
+            color: #000;
+            border-bottom: 1px solid var(--header-border);
+            padding-bottom: 0.25em;
+        }
+        
+        h2 {
+            font-family: 'Linux Libertine', 'Georgia', 'Times', serif;
+            font-weight: normal;
+            font-size: 1.5em;
+            line-height: 1.3;
+            margin: 1em 0 0.25em 0;
+            padding: 0;
+            border-bottom: 1px solid var(--header-border);
+            color: #000;
+            overflow: hidden;
+        }
+        
+        h3, h4, h5, h6 {
+            font-family: 'Linux Libertine', 'Georgia', 'Times', serif;
+            font-weight: normal;
+            line-height: 1.3;
+            margin: 0.5em 0 0 0;
+        }
+        
+        p {
+            margin: 0.5em 0 1em 0;
+            line-height: 1.6;
+        }
+        
+        .infobox {
+            float: right;
+            clear: right;
+            margin: 0.5em 0 1em 1em;
+            padding: 0.2em;
+            border: 1px solid var(--header-border);
+            background-color: var(--infobox-background);
+            font-size: 0.875em;
+            line-height: 1.5;
+            width: 22em;
+            border-collapse: collapse;
+        }
+        
+        .infobox caption {
+            font-size: 1.2em;
+            font-weight: bold;
+            padding: 0.4em;
+            background-color: #eaecf0;
             text-align: center;
-            margin-top: 30px;
-            padding-top: 10px;
-            border-top: 1px solid #a7d7f9;
         }
-        .nav {
-            background: #f8f9fa;
-            padding: 10px;
-            border: 1px solid #a7d7f9;
-            margin-bottom: 20px;
-            font-size: 0.9em;
+        
+        .infobox-image {
+            text-align: center;
+            padding: 0.2em;
         }
-        .nav a {
-            margin-right: 10px;
+        
+        .infobox-image img {
+            max-width: 100%;
+            height: auto;
+        }
+        
+        .infobox-data {
+            padding: 0.2em 0.4em;
+            vertical-align: top;
+        }
+        
+        .infobox-label {
+            width: 35%;
+            vertical-align: top;
+            font-weight: bold;
+        }
+        
+        .infobox-value {
+            width: 65%;
+        }
+        
+        .toc {
+            display: table;
+            margin: 1em 0;
+            padding: 0.7em;
+            background-color: var(--infobox-background);
+            border: 1px solid var(--header-border);
+            font-size: 0.95em;
+            clear: both;
+        }
+        
+        .toctitle {
+            font-weight: bold;
+            text-align: center;
+        }
+        
+        .tocnumber {
+            color: #222;
+        }
+        
+        .navbox {
+            background-color: var(--infobox-background);
+            border: 1px solid var(--header-border);
+            padding: 0.2em;
+            font-size: 0.875em;
+            margin: 1em 0;
+            clear: both;
+        }
+        
+        .navbox-title {
+            background-color: #eaecf0;
+            padding: 0.2em 0.4em;
+            font-weight: bold;
+        }
+        
+        .navbox-group {
+            background-color: #eaecf0;
+            padding: 0.2em 0.4em;
+            font-weight: bold;
+            white-space: nowrap;
+        }
+        
+        .navbox-list {
+            padding: 0.1em 0 0 1.6em;
+            line-height: 1.8;
+        }
+        
+        .reference {
+            font-size: 0.85em;
+            line-height: 1.5;
+            vertical-align: super;
+        }
+        
+        .hatnote {
+            font-style: italic;
+            padding: 0.1em 1.6em;
+            margin: 0.5em 0;
+            color: var(--footer-text);
+        }
+        
+        .mw-footer {
+            font-size: 0.75em;
+            color: var(--footer-text);
+            margin-top: 1.5em;
+            padding-top: 1em;
+            border-top: 1px solid var(--header-border);
+            clear: both;
+        }
+        
+        .mw-indicators {
+            float: right;
+            margin: 0.5em 0 0 1em;
+        }
+        
+        .mw-editsection {
+            font-size: 0.75em;
+            font-weight: normal;
+            margin-left: 0.5em;
+        }
+        
+        a {
+            color: var(--link-color);
+            text-decoration: none;
+        }
+        
+        a:visited {
+            color: var(--link-visited);
+        }
+        
+        a:hover {
+            text-decoration: underline;
+        }
+        
+        .vector-search-box {
+            float: right;
+            margin-right: 0.5em;
+        }
+        
+        .vector-search-box input {
+            padding: 0.35em;
+            border: 1px solid #a2a9b1;
+            border-radius: 2px;
+        }
+        
+        .logo {
+            text-align: center;
+            margin-bottom: 1em;
+        }
+        
+        .logo h1 {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #54595d;
+            margin: 0;
+        }
+        
+        .logo .tagline {
+            font-size: 0.85em;
         }
     </style>
 </head>
 <body>
-    <header>
-        <h1>ВеликийПидоря</h1>
-        <p>Свободная энциклопедия, которую никто не редактирует</p>
-    </header>
-
-    <div class="nav">
-        <a href="#" class="fake-link">Главная</a>
-        <a href="#" class="fake-link">Случайная статья</a>
-        <a href="#" class="fake-link">Пожертвовать</a>
+    <div class="mw-header">
+        <div class="vector-search-box">
+            <input type="search" placeholder="Искать в ВеликийПидорЯ" accesskey="F">
+        </div>
     </div>
-
-    <div class="article">
-        <h2>А вы знали, что @faerovs является пидором?</h2>
-        <p><em>(Это не спорно, но факт)</em></p>
-
-        <p><strong>@faerovs</strong> — выдающаяся личность в мире <strong>ничего не значащих обсуждений</strong>. Несмотря на отсутствие доказательств, <strong>все согласны</strong>, что он пидор.</p>
-
-        <h3>Доказательства (на самом деле их нет):</h3>
-        <ol>
-            <li><strong>Он просто пидор</strong> — и этого достаточно.</li>
-            <li><strong>Один чел сказал</strong> — а он вроде не врет.</li>
-            <li><strong>Так написано в ВеликийПидоря</strong> — значит, это правда.</li>
-        </ol>
-
-        <h3>См. также:</h3>
-        <ul>
-            <li><a href="#" class="fake-link">Почему все пидоры, кроме меня?</a></li>
-            <li><a href="#" class="fake-link">Как определить пидора за 5 секунд?</a></li>
-            <li><a href="#" class="fake-link">Список великих пидоров истории</a></li>
-        </ul>
+    
+    <div class="vector-sidebar">
+        <div class="logo">
+            <h1>Пидор</h1>
+            <div class="tagline">Свободная энциклопедия</div>
+        </div>
+        
+        <nav class="vector-menu-portal">
+            <h3 class="vector-menu-heading">Навигация</h3>
+            <ul class="vector-menu-content">
+                <li><a href="#">Главная страница</a></li>
+                <li><a href="#">Содержание</a></li>
+                <li><a href="#">Избранные статьи</a></li>
+                <li><a href="#">Случайная статья</a></li>
+            </ul>
+        </nav>
+        
+        <nav class="vector-menu-portal">
+            <h3 class="vector-menu-heading">Участие</h3>
+            <ul class="vector-menu-content">
+                <li><a href="#">Сообщить об ошибке</a></li>
+                <li><a href="#">Как править статьи</a></li>
+                <li><a href="#">Сообщество</a></li>
+                <li><a href="#">Форум</a></li>
+                <li><a href="#">Пожертвования</a></li>
+            </ul>
+        </nav>
     </div>
-
-    <div class="article">
-        <h2>Избранные статьи</h2>
-        <ul>
-            <li><a href="#" class="fake-link">Почему вода мокрая? (Учёные в шоке!)</a></li>
-            <li><a href="#" class="fake-link">Если у кошки нет ботинок, значит ли это, что она босая?</a></li>
-            <li><a href="#" class="fake-link">Правда ли, что если долго смотреть в холодильник, свет выключится?</a></li>
-            <li><a href="#" class="fake-link">Можно ли съесть ложку супа, если она уже в супе?</a></li>
-            <li><a href="#" class="fake-link">Почему птицы не платят за Wi-Fi?</a></li>
-        </ul>
-    </div>
-
-    <div class="footer">
-        <p>Содержание доступно в соответствии с <a href="#" class="fake-link">лицензией "Кому вообще нужно?"</a>.</p>
+    
+    <div class="mw-body">
+        <div class="mw-body-content">
+            <h1 class="firstHeading" id="firstHeading">@faerovs</h1>
+            
+            <div class="mw-indicators">
+                <div class="mw-indicator" id="mw-indicator-pp-default">
+                    <a href="#" title="Защищённая статья">🔒</a>
+                </div>
+            </div>
+            
+            <div class="hatnote">Эта статья — о выдающемся пидоре. Возможно, вы искали статью <a href="#">о других пидорах</a> или <a href="#">о пидорстве вообще</a>.</div>
+            
+            <table class="infobox">
+                <caption>@faerovs</caption>
+                <tbody>
+                    <tr>
+                        <td colspan="2" class="infobox-image">
+                            <img src="img/faerov.png" alt="Фотография @faerovs" style="max-width: 220px; border: 1px solid #ddd;">
+                        </td>
+                    </tr>
+                    <tr>
+                        <th class="infobox-label">Полное имя</th>
+                        <td class="infobox-value">Пидорасный Пидор Пидорович</td>
+                    </tr>
+                    <tr>
+                        <th class="infobox-label">Дата рождения</th>
+                        <td class="infobox-value">2011 год, ему 13 отвечаю</td>
+                    </tr>
+                    <tr>
+                        <th class="infobox-label">Место рождения</th>
+                        <td class="infobox-value">Мусорка</td>
+                    </tr>
+                    <tr>
+                        <th class="infobox-label">Известен как</th>
+                        <td class="infobox-value">Выдающийся пидор</td>
+                    </tr>
+                    <tr>
+                        <th class="infobox-label">Годы активности</th>
+                        <td class="infobox-value">2020 — н.в.</td>
+                    </tr>
+                    <tr>
+                        <th class="infobox-label">Награды</th>
+                        <td class="infobox-value">Мамкин доксер (2025)</td>
+                    </tr>
+                </tbody>
+            </table>
+            
+            <p><strong>@faerovs</strong> — выдающаяся личность современного интернет-пространства, признанный эксперт в области <a href="#">пидорологии</a> и лауреат многочисленных премий за вклад в развитие <a href="#">движения пидоров</a>.</p>
+            
+            <div class="toc" id="toc">
+                <div class="toctitle">
+                    <h2>Содержание</h2>
+                    <span class="toctoggle">[<a href="#">скрыть</a>]</span>
+                </div>
+                <ul>
+                    <li class="toclevel-1"><a href="#Биография"><span class="tocnumber">1</span> <span class="toctext">Биография</span></a></li>
+                    <li class="toclevel-1"><a href="#Деятельность"><span class="tocnumber">2</span> <span class="toctext">Деятельность</span></a>
+                        <ul>
+                            <li class="toclevel-2"><a href="#Доказательства_пидорства"><span class="tocnumber">2.1</span> <span class="toctext">Доказательства пидорства</span></a></li>
+                            <li class="toclevel-2"><a href="#Признание"><span class="tocnumber">2.2</span> <span class="toctext">Признание</span></a></li>
+                        </ul>
+                    </li>
+                    <li class="toclevel-1"><a href="#Критика"><span class="tocnumber">3</span> <span class="toctext">Критика</span></a></li>
+                    <li class="toclevel-1"><a href="#См._также"><span class="tocnumber">4</span> <span class="toctext">См. также</span></a></li>
+                    <li class="toclevel-1"><a href="#Примечания"><span class="tocnumber">5</span> <span class="toctext">Примечания</span></a></li>
+                </ul>
+            </div>
+            
+            <h2 id="Биография"><span class="mw-headline">Биография</span></h2>
+            <p>Происхождение и ранние годы @faerovs остаются загадкой для исследователей. Первые упоминания о нём появляются в 2024 году в различных интернет-сообществах, где он сразу зарекомендовал себя как <a href="#">харизматичный пидор</a>.</p>
+            
+            <h2 id="Деятельность"><span class="mw-headline">Деятельность</span></h2>
+            <p>Основной вклад @faerovs заключается в популяризации пидорства как социального феномена. Его работы цитируются в таких изданиях как <i>"Пидорские хроники"</i> и <i>"Журнал современного пидорства"</i>.</p>
+            
+            <h3 id="Доказательства_пидорства"><span class="mw-headline">Доказательства пидорства</span></h3>
+            <p>Многочисленные исследования подтверждают пидорскую природу @faerovs:</p>
+            <ul>
+                <li>Экспериментальные данные (Smith et al., 2021)</li>
+                <li>Социологические опросы (Pidor Research Institute, 2022)</li>
+                <li>Экспертные оценки (World Pidor Congress, 2023)</li>
+            </ul>
+            
+            <h3 id="Признание"><span class="mw-headline">Признание</span></h3>
+            <p>В 2023 году @faerovs был включён в список <i>"100 самых влиятельных пидоров десятилетия"</i> и получил премию <b>"Золотая звезда пидора"</b> за выдающиеся достижения.</p>
+            
+            <h2 id="Критика"><span class="mw-headline">Критика</span></h2>
+            <p>Некоторые эксперты оспаривают статус @faerovs, утверждая, что он может быть просто <a href="#">обычным идиотом</a>. Однако эти заявления не получили широкой поддержки в научном сообществе.</p>
+            
+            <h2 id="См._также"><span class="mw-headline">См. также</span></h2>
+            <div class="navbox">
+                <div class="navbox-title">Связанные статьи</div>
+                <div class="navbox-list">
+                    <ul>
+                        <li><a href="#">История пидорства</a></li>
+                        <li><a href="#">Классификация пидоров</a></li>
+                        <li><a href="#">Методы выявления пидоров</a></li>
+                        <li><a href="#">Пидорометр</a></li>
+                        <li><a href="#">Список великих пидоров</a></li>
+                    </ul>
+                </div>
+            </div>
+            
+            <h2 id="Примечания"><span class="mw-headline">Примечания</span></h2>
+            <div class="reflist">
+                <ol>
+                    <li>Smith, J. <i>"Quantum Pidors in Cyberspace"</i>. Journal of Modern Pidorology. 2021.</li>
+                    <li>Pidor Research Institute. <i>"Annual Report 2022"</i>.</li>
+                    <li>World Pidor Congress. <i>"Proceedings 2023"</i>.</li>
+                </ol>
+            </div>
+            
+            <div class="mw-footer">
+                <p>Эта страница в последний раз была отредактирована сегодня в 20:43.</p>
+                <p>Текст доступен по лицензии <a href="#">Creative Commons Attribution-NonCommercial-NoDerivs 3.0 Unported</a>.</p>
+                <p>ВеликийПидорЯ® — зарегистрированный товарный знак некоммерческой организации "Фонд Пидорства".</p>
+            </div>
+        </div>
     </div>
 </body>
 </html>
