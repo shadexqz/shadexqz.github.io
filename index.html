@@ -1,454 +1,1081 @@
 <!DOCTYPE html>
-<html lang="ru" dir="ltr">
+<html lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>@faerovs — ВеликийПидорЯ</title>
-    <meta name="description" content="Статья о выдающемся представителе интернет-сообщества @faerovs">
+    <title>Crypto Mining Simulator</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --page-background: #f6f6f6;
-            --content-background: #ffffff;
-            --border-color: #a7d7f9;
-            --link-color: #0645ad;
-            --link-visited: #551a8b;
-            --header-border: #a2a9b1;
-            --infobox-background: #f8f9fa;
-            --sidebar-background: #f8f9fa;
-            --footer-text: #54595d;
+            --primary: #6a11cb;
+            --secondary: #2575fc;
+            --accent: #f9c74f;
+            --dark: #1a1a2e;
+            --darker: #0f3460;
+            --success: #4cc9f0;
+            --danger: #f94144;
+            --text: #e6e6e6;
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
         }
         
         body {
-            font-family: 'Linux Libertine', 'Georgia', 'Times', serif;
-            line-height: 1.6;
-            color: #202122;
-            margin: 0;
-            padding: 0;
-            background-color: var(--page-background);
-            word-wrap: break-word;
-        }
-        
-        .mw-body {
-            margin-left: 11em;
-            padding: 1.25em 1.5em 1.5em 1.5em;
-            border: 1px solid var(--border-color);
-            background-color: var(--content-background);
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-        }
-        
-        .mw-body-content {
-            max-width: 50em;
-            margin: 0 auto;
-        }
-        
-        .mw-header {
-            height: 3.375em;
-            background-color: var(--content-background);
-            border-bottom: 1px solid var(--border-color);
-        }
-        
-        .vector-sidebar {
-            width: 11em;
-            float: left;
-            position: relative;
-            z-index: 1;
-            padding-top: 1.5em;
-            font-size: 0.875em;
-        }
-        
-        .vector-menu-portal {
-            margin: 0 0.6em 0 0.6em;
-            padding: 0.25em 0;
-            direction: ltr;
-        }
-        
-        .vector-menu-heading {
-            display: block;
-            color: #54595d;
-            margin: 0.5em 0 0 0.25em;
-            border-bottom: 1px solid var(--header-border);
-            padding: 0.25em 0;
-            cursor: default;
-            font-family: 'Linux Libertine', 'Georgia', 'Times', serif;
-            font-weight: normal;
-        }
-        
-        .vector-menu-content {
-            list-style-type: none;
-            list-style-image: none;
-            margin: 0.5em 0 0 0.25em;
-            padding: 0;
-        }
-        
-        .vector-menu-content li {
-            margin: 0;
-            padding: 0.25em 0;
-            line-height: 1.125em;
-        }
-        
-        .vector-menu-content li a {
-            color: var(--link-color);
-            text-decoration: none;
-        }
-        
-        .vector-menu-content li a:hover {
-            text-decoration: underline;
-        }
-        
-        .firstHeading {
-            font-family: 'Linux Libertine', 'Georgia', 'Times', serif;
-            font-weight: normal;
-            font-size: 1.8em;
-            line-height: 1.3;
-            margin: 0;
-            padding: 0;
-            color: #000;
-            border-bottom: 1px solid var(--header-border);
-            padding-bottom: 0.25em;
-        }
-        
-        h2 {
-            font-family: 'Linux Libertine', 'Georgia', 'Times', serif;
-            font-weight: normal;
-            font-size: 1.5em;
-            line-height: 1.3;
-            margin: 1em 0 0.25em 0;
-            padding: 0;
-            border-bottom: 1px solid var(--header-border);
-            color: #000;
-            overflow: hidden;
-        }
-        
-        h3, h4, h5, h6 {
-            font-family: 'Linux Libertine', 'Georgia', 'Times', serif;
-            font-weight: normal;
-            line-height: 1.3;
-            margin: 0.5em 0 0 0;
-        }
-        
-        p {
-            margin: 0.5em 0 1em 0;
+            font-family: 'Ubuntu', sans-serif;
+            background: linear-gradient(135deg, var(--dark), var(--darker));
+            color: var(--text);
+            min-height: 100vh;
+            padding: 10px;
             line-height: 1.6;
         }
         
-        .infobox {
-            float: right;
-            clear: right;
-            margin: 0.5em 0 1em 1em;
-            padding: 0.2em;
-            border: 1px solid var(--header-border);
-            background-color: var(--infobox-background);
-            font-size: 0.875em;
-            line-height: 1.5;
-            width: 22em;
-            border-collapse: collapse;
-        }
-        
-        .infobox caption {
-            font-size: 1.2em;
-            font-weight: bold;
-            padding: 0.4em;
-            background-color: #eaecf0;
-            text-align: center;
-        }
-        
-        .infobox-image {
-            text-align: center;
-            padding: 0.2em;
-        }
-        
-        .infobox-image img {
+        .container {
             max-width: 100%;
-            height: auto;
+            margin: 0 auto;
+            padding: 10px;
         }
         
-        .infobox-data {
-            padding: 0.2em 0.4em;
-            vertical-align: top;
-        }
-        
-        .infobox-label {
-            width: 35%;
-            vertical-align: top;
-            font-weight: bold;
-        }
-        
-        .infobox-value {
-            width: 65%;
-        }
-        
-        .toc {
-            display: table;
-            margin: 1em 0;
-            padding: 0.7em;
-            background-color: var(--infobox-background);
-            border: 1px solid var(--header-border);
-            font-size: 0.95em;
-            clear: both;
-        }
-        
-        .toctitle {
-            font-weight: bold;
-            text-align: center;
-        }
-        
-        .tocnumber {
-            color: #222;
-        }
-        
-        .navbox {
-            background-color: var(--infobox-background);
-            border: 1px solid var(--header-border);
-            padding: 0.2em;
-            font-size: 0.875em;
-            margin: 1em 0;
-            clear: both;
-        }
-        
-        .navbox-title {
-            background-color: #eaecf0;
-            padding: 0.2em 0.4em;
-            font-weight: bold;
-        }
-        
-        .navbox-group {
-            background-color: #eaecf0;
-            padding: 0.2em 0.4em;
-            font-weight: bold;
-            white-space: nowrap;
-        }
-        
-        .navbox-list {
-            padding: 0.1em 0 0 1.6em;
-            line-height: 1.8;
-        }
-        
-        .reference {
-            font-size: 0.85em;
-            line-height: 1.5;
-            vertical-align: super;
-        }
-        
-        .hatnote {
-            font-style: italic;
-            padding: 0.1em 1.6em;
-            margin: 0.5em 0;
-            color: var(--footer-text);
-        }
-        
-        .mw-footer {
-            font-size: 0.75em;
-            color: var(--footer-text);
-            margin-top: 1.5em;
-            padding-top: 1em;
-            border-top: 1px solid var(--header-border);
-            clear: both;
-        }
-        
-        .mw-indicators {
-            float: right;
-            margin: 0.5em 0 0 1em;
-        }
-        
-        .mw-editsection {
-            font-size: 0.75em;
-            font-weight: normal;
-            margin-left: 0.5em;
-        }
-        
-        a {
-            color: var(--link-color);
-            text-decoration: none;
-        }
-        
-        a:visited {
-            color: var(--link-visited);
-        }
-        
-        a:hover {
-            text-decoration: underline;
-        }
-        
-        .vector-search-box {
-            float: right;
-            margin-right: 0.5em;
-        }
-        
-        .vector-search-box input {
-            padding: 0.35em;
-            border: 1px solid #a2a9b1;
-            border-radius: 2px;
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 15px;
+            margin-bottom: 15px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
         }
         
         .logo {
-            text-align: center;
-            margin-bottom: 1em;
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: linear-gradient(to right, var(--accent), var(--success));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
         
-        .logo h1 {
-            font-size: 1.5em;
+        .balance {
+            font-size: 1.2rem;
             font-weight: bold;
-            color: #54595d;
-            margin: 0;
+            color: var(--accent);
+            display: flex;
+            align-items: center;
+            gap: 5px;
         }
         
-        .logo .tagline {
-            font-size: 0.85em;
+        .section {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 15px;
+            padding: 15px;
+            margin-bottom: 15px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .section-title {
+            font-size: 1.3rem;
+            margin-bottom: 15px;
+            color: var(--success);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .mining-rig {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .equipment-image {
+            width: 200px;
+            height: 150px;
+            object-fit: contain;
+            border-radius: 10px;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+        }
+        
+        .mining-stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            width: 100%;
+        }
+        
+        .stat-card {
+            background: rgba(0, 0, 0, 0.2);
+            padding: 10px;
+            border-radius: 10px;
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-weight: bold;
+            color: var(--accent);
+            font-size: 1.1rem;
+        }
+        
+        .stat-label {
+            font-size: 0.8rem;
+            opacity: 0.8;
+        }
+        
+        .mine-btn {
+            background: linear-gradient(to right, var(--primary), var(--secondary));
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 50px;
+            font-weight: bold;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(106, 17, 203, 0.4);
+            width: 100%;
+            margin-top: 10px;
+        }
+        
+        .mine-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(106, 17, 203, 0.6);
+        }
+        
+        .mine-btn:active {
+            transform: translateY(0);
+        }
+        
+        .upgrades-list {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 10px;
+        }
+        
+        .upgrade-item {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+            padding: 15px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            transition: all 0.3s;
+        }
+        
+        .upgrade-item:hover {
+            background: rgba(0, 0, 0, 0.3);
+        }
+        
+        .upgrade-image {
+            width: 60px;
+            height: 60px;
+            object-fit: contain;
+            border-radius: 8px;
+        }
+        
+        .upgrade-info {
+            flex: 1;
+        }
+        
+        .upgrade-name {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .upgrade-description {
+            font-size: 0.8rem;
+            opacity: 0.8;
+            margin-bottom: 5px;
+        }
+        
+        .upgrade-stats {
+            display: flex;
+            gap: 10px;
+            font-size: 0.8rem;
+        }
+        
+        .upgrade-stat {
+            display: flex;
+            align-items: center;
+            gap: 3px;
+        }
+        
+        .upgrade-btn {
+            background: linear-gradient(to right, var(--success), #2a9d8f);
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 50px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            white-space: nowrap;
+        }
+        
+        .upgrade-btn:disabled {
+            background: #666;
+            cursor: not-allowed;
+        }
+        
+        .tabs {
+            display: flex;
+            margin-bottom: 15px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .tab {
+            padding: 10px 15px;
+            cursor: pointer;
+            opacity: 0.7;
+            transition: all 0.3s;
+            border-bottom: 2px solid transparent;
+        }
+        
+        .tab.active {
+            opacity: 1;
+            border-bottom: 2px solid var(--accent);
+            color: var(--accent);
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .achievement {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 10px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+            margin-bottom: 10px;
+        }
+        
+        .achievement-icon {
+            width: 40px;
+            height: 40px;
+            background: var(--darker);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+        }
+        
+        .achievement.unlocked .achievement-icon {
+            background: linear-gradient(to right, var(--primary), var(--secondary));
+            color: white;
+        }
+        
+        .achievement-info {
+            flex: 1;
+        }
+        
+        .achievement-name {
+            font-weight: bold;
+        }
+        
+        .achievement-description {
+            font-size: 0.8rem;
+            opacity: 0.8;
+        }
+        
+        .achievement-progress {
+            height: 5px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 5px;
+            margin-top: 5px;
+            overflow: hidden;
+        }
+        
+        .achievement-progress-bar {
+            height: 100%;
+            background: linear-gradient(to right, var(--success), var(--accent));
+            width: 0%;
+        }
+        
+        .shop-items {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+        
+        .shop-item {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .shop-item-image {
+            width: 80px;
+            height: 80px;
+            object-fit: contain;
+        }
+        
+        .shop-item-name {
+            font-weight: bold;
+            text-align: center;
+        }
+        
+        .shop-item-price {
+            color: var(--accent);
+            font-weight: bold;
+        }
+        
+        .shop-item-btn {
+            background: linear-gradient(to right, var(--primary), var(--secondary));
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 50px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            width: 100%;
+        }
+        
+        .shop-item-btn:disabled {
+            background: #666;
+            cursor: not-allowed;
+        }
+        
+        .leaderboard {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .leaderboard-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+        }
+        
+        .leaderboard-position {
+            font-weight: bold;
+            width: 30px;
+            text-align: center;
+        }
+        
+        .leaderboard-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--darker);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .leaderboard-info {
+            flex: 1;
+        }
+        
+        .leaderboard-name {
+            font-weight: bold;
+        }
+        
+        .leaderboard-balance {
+            color: var(--accent);
+            font-size: 0.8rem;
+        }
+        
+        .notification {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 50px;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            animation: slideIn 0.3s, fadeOut 0.5s 2.5s forwards;
+        }
+        
+        @keyframes slideIn {
+            from { top: -50px; opacity: 0; }
+            to { top: 20px; opacity: 1; }
+        }
+        
+        @keyframes fadeOut {
+            from { opacity: 1; }
+            to { opacity: 0; }
+        }
+        
+        .power-icon {
+            color: var(--success);
+        }
+        
+        .energy-icon {
+            color: var(--accent);
+        }
+        
+        .coin-icon {
+            color: var(--accent);
+        }
+        
+        .progress-bar {
+            height: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 5px;
+            margin: 10px 0;
+            overflow: hidden;
+        }
+        
+        .progress-bar-fill {
+            height: 100%;
+            background: linear-gradient(to right, var(--success), var(--accent));
+            width: 0%;
+            transition: width 0.3s;
+        }
+        
+        .energy-warning {
+            color: var(--danger);
+            font-size: 0.8rem;
+            text-align: center;
+            margin-top: 5px;
+            display: none;
         }
     </style>
 </head>
 <body>
-    <div class="mw-header">
-        <div class="vector-search-box">
-            <input type="search" placeholder="Искать в ВеликийПидорЯ" accesskey="F">
+    <div class="container">
+        <div class="header">
+            <div class="logo">Crypto Miner</div>
+            <div class="balance">
+                <span class="coin-icon">💰</span>
+                <span id="balance">0</span> BTC
+            </div>
+        </div>
+        
+        <div class="section">
+            <div class="section-title">
+                <span>⛏️</span>
+                <span>Майнинг ферма</span>
+            </div>
+            <div class="mining-rig">
+                <img id="equipment-image" class="equipment-image" src="https://i.imgur.com/JVY9FQa.png" alt="Mining Equipment">
+                <div class="mining-stats">
+                    <div class="stat-card">
+                        <div class="stat-value" id="mining-power">1</div>
+                        <div class="stat-label">Мощность (H/s)</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="energy-consumption">10</div>
+                        <div class="stat-label">Энергопотребление</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="bitcoin-mined">0</div>
+                        <div class="stat-label">Всего BTC</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="energy-level">100%</div>
+                        <div class="stat-label">Энергия</div>
+                    </div>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-bar-fill" id="energy-bar"></div>
+                </div>
+                <div class="energy-warning" id="energy-warning">⚠️ Низкий уровень энергии! Купите больше энергии в магазине.</div>
+                <button class="mine-btn" id="mine-btn">МАЙНИТЬ</button>
+            </div>
+        </div>
+        
+        <div class="section">
+            <div class="tabs">
+                <div class="tab active" data-tab="upgrades">Улучшения</div>
+                <div class="tab" data-tab="shop">Магазин</div>
+                <div class="tab" data-tab="achievements">Достижения</div>
+                <div class="tab" data-tab="leaderboard">Топ игроков</div>
+            </div>
+            
+            <div class="tab-content active" id="upgrades-tab">
+                <div class="upgrades-list" id="upgrades-list">
+                    <!-- Upgrades will be added here dynamically -->
+                </div>
+            </div>
+            
+            <div class="tab-content" id="shop-tab">
+                <div class="shop-items" id="shop-items">
+                    <!-- Shop items will be added here dynamically -->
+                </div>
+            </div>
+            
+            <div class="tab-content" id="achievements-tab">
+                <div id="achievements-list">
+                    <!-- Achievements will be added here dynamically -->
+                </div>
+            </div>
+            
+            <div class="tab-content" id="leaderboard-tab">
+                <div class="leaderboard" id="leaderboard">
+                    <!-- Leaderboard will be added here dynamically -->
+                </div>
+            </div>
         </div>
     </div>
     
-    <div class="vector-sidebar">
-        <div class="logo">
-            <h1>Пидор</h1>
-            <div class="tagline">Свободная энциклопедия</div>
-        </div>
+    <script>
+        // Game state
+        const state = {
+            balance: 0,
+            bitcoinMined: 0,
+            miningPower: 1,
+            energy: 100,
+            maxEnergy: 100,
+            energyConsumption: 10,
+            lastMineTime: Date.now(),
+            playTime: 0,
+            equipment: {
+                gpu: {
+                    level: 1,
+                    image: 'https://i.imgur.com/JVY9FQa.png'
+                },
+                asic: {
+                    owned: false,
+                    level: 0,
+                    image: 'https://i.imgur.com/8QZQZQZ.png'
+                },
+                cooling: {
+                    level: 0,
+                    image: 'https://i.imgur.com/4QZQZQZ.png'
+                }
+            },
+            upgrades: [],
+            achievements: [],
+            energyDrinks: 0,
+            lastSaveTime: Date.now()
+        };
         
-        <nav class="vector-menu-portal">
-            <h3 class="vector-menu-heading">Навигация</h3>
-            <ul class="vector-menu-content">
-                <li><a href="#">Главная страница</a></li>
-                <li><a href="#">Содержание</a></li>
-                <li><a href="#">Избранные статьи</a></li>
-                <li><a href="#">Случайная статья</a></li>
-            </ul>
-        </nav>
+        // Game data
+        const gameData = {
+            upgrades: [
+                {
+                    id: 'gpu',
+                    name: 'Видеокарта',
+                    description: 'Увеличивает мощность майнинга',
+                    image: 'https://i.imgur.com/JVY9FQa.png',
+                    levels: [
+                        { cost: 100, power: 2, energy: 15 },
+                        { cost: 250, power: 3, energy: 20 },
+                        { cost: 500, power: 5, energy: 25 },
+                        { cost: 1000, power: 8, energy: 30 },
+                        { cost: 2000, power: 12, energy: 35 }
+                    ]
+                },
+                {
+                    id: 'asic',
+                    name: 'ASIC майнер',
+                    description: 'Значительно увеличивает мощность',
+                    image: 'https://i.imgur.com/8QZQZQZ.png',
+                    levels: [
+                        { cost: 5000, power: 20, energy: 50 },
+                        { cost: 10000, power: 35, energy: 70 },
+                        { cost: 20000, power: 50, energy: 90 }
+                    ]
+                },
+                {
+                    id: 'cooling',
+                    name: 'Система охлаждения',
+                    description: 'Уменьшает энергопотребление',
+                    image: 'https://i.imgur.com/4QZQZQZ.png',
+                    levels: [
+                        { cost: 300, energy: -5 },
+                        { cost: 700, energy: -10 },
+                        { cost: 1500, energy: -15 }
+                    ]
+                }
+            ],
+            shopItems: [
+                {
+                    id: 'energy-drink',
+                    name: 'Энергетик',
+                    description: '+20 энергии',
+                    image: 'https://i.imgur.com/5QZQZQZ.png',
+                    cost: 50,
+                    effect: () => { state.energy = Math.min(state.energy + 20, state.maxEnergy); }
+                },
+                {
+                    id: 'energy-upgrade',
+                    name: 'Улучшение энергии',
+                    description: '+50 к максимальной энергии',
+                    image: 'https://i.imgur.com/6QZQZQZ.png',
+                    cost: 200,
+                    effect: () => { state.maxEnergy += 50; state.energy = state.maxEnergy; }
+                },
+                {
+                    id: 'power-boost',
+                    name: 'Временный буст',
+                    description: '2x мощность на 30 сек',
+                    image: 'https://i.imgur.com/7QZQZQZ.png',
+                    cost: 150,
+                    effect: () => {
+                        const originalPower = state.miningPower;
+                        state.miningPower *= 2;
+                        showNotification('⚡ Буст активирован! Мощность x2');
+                        setTimeout(() => {
+                            state.miningPower = originalPower;
+                            showNotification('⚡ Буст закончился');
+                        }, 30000);
+                    }
+                }
+            ],
+            achievements: [
+                {
+                    id: 'first-bitcoin',
+                    name: 'Первый биткоин',
+                    description: 'Добыть 1 BTC',
+                    target: 1,
+                    reward: 100,
+                    image: '🥇'
+                },
+                {
+                    id: 'mining-pro',
+                    name: 'Профессиональный майнер',
+                    description: 'Добыть 10 BTC',
+                    target: 10,
+                    reward: 500,
+                    image: '⛏️'
+                },
+                {
+                    id: 'rich',
+                    name: 'Богач',
+                    description: 'Заработать 5000 BTC',
+                    target: 5000,
+                    reward: 1000,
+                    image: '💰'
+                },
+                {
+                    id: 'upgrade-master',
+                    name: 'Мастер улучшений',
+                    description: 'Купить все улучшения',
+                    target: 5,
+                    reward: 2000,
+                    image: '🏆'
+                }
+            ],
+            leaderboard: [
+                { id: 1, name: 'Сатоши Накамото', balance: 1000000 },
+                { id: 2, name: 'Виталик', balance: 500000 },
+                { id: 3, name: 'Илон Маск', balance: 250000 },
+                { id: 4, name: 'Криптоэнтузиаст', balance: 100000 },
+                { id: 5, name: 'Новичок', balance: 50000 }
+            ]
+        };
         
-        <nav class="vector-menu-portal">
-            <h3 class="vector-menu-heading">Участие</h3>
-            <ul class="vector-menu-content">
-                <li><a href="#">Сообщить об ошибке</a></li>
-                <li><a href="#">Как править статьи</a></li>
-                <li><a href="#">Сообщество</a></li>
-                <li><a href="#">Форум</a></li>
-                <li><a href="#">Пожертвования</a></li>
-            </ul>
-        </nav>
-    </div>
-    
-    <div class="mw-body">
-        <div class="mw-body-content">
-            <h1 class="firstHeading" id="firstHeading">@faerovs</h1>
+        // DOM elements
+        const elements = {
+            balance: document.getElementById('balance'),
+            miningPower: document.getElementById('mining-power'),
+            energyConsumption: document.getElementById('energy-consumption'),
+            bitcoinMined: document.getElementById('bitcoin-mined'),
+            energyLevel: document.getElementById('energy-level'),
+            energyBar: document.getElementById('energy-bar'),
+            energyWarning: document.getElementById('energy-warning'),
+            mineBtn: document.getElementById('mine-btn'),
+            equipmentImage: document.getElementById('equipment-image'),
+            upgradesList: document.getElementById('upgrades-list'),
+            shopItems: document.getElementById('shop-items'),
+            achievementsList: document.getElementById('achievements-list'),
+            leaderboard: document.getElementById('leaderboard'),
+            tabs: document.querySelectorAll('.tab'),
+            tabContents: document.querySelectorAll('.tab-content')
+        };
+        
+        // Initialize Telegram WebApp
+        const tg = window.Telegram.WebApp;
+        tg.expand();
+        
+        // Initialize game
+        function initGame() {
+            loadGame();
+            renderUpgrades();
+            renderShop();
+            renderAchievements();
+            renderLeaderboard();
+            updateUI();
             
-            <div class="mw-indicators">
-                <div class="mw-indicator" id="mw-indicator-pp-default">
-                    <a href="#" title="Защищённая статья">🔒</a>
+            // Auto-save every 30 seconds
+            setInterval(saveGame, 30000);
+            
+            // Auto-mine every second
+            setInterval(autoMine, 1000);
+            
+            // Energy regeneration
+            setInterval(regenerateEnergy, 5000);
+            
+            // Tab switching
+            elements.tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    const tabId = tab.getAttribute('data-tab');
+                    switchTab(tabId);
+                });
+            });
+        }
+        
+        // Switch tabs
+        function switchTab(tabId) {
+            elements.tabs.forEach(tab => {
+                if (tab.getAttribute('data-tab') === tabId) {
+                    tab.classList.add('active');
+                } else {
+                    tab.classList.remove('active');
+                }
+            });
+            
+            elements.tabContents.forEach(content => {
+                if (content.id === `${tabId}-tab`) {
+                    content.classList.add('active');
+                } else {
+                    content.classList.remove('active');
+                }
+            });
+        }
+        
+        // Load game from localStorage
+        function loadGame() {
+            const savedGame = localStorage.getItem('cryptoMiningSimulatorSave');
+            if (savedGame) {
+                const parsed = JSON.parse(savedGame);
+                Object.assign(state, parsed);
+                
+                // Update last mine time to prevent cheating
+                const timeDiff = Date.now() - state.lastSaveTime;
+                const mineCycles = Math.floor(timeDiff / 1000);
+                if (mineCycles > 0) {
+                    autoMine(mineCycles);
+                }
+            }
+        }
+        
+        // Save game to localStorage
+        function saveGame() {
+            state.lastSaveTime = Date.now();
+            localStorage.setItem('cryptoMiningSimulatorSave', JSON.stringify(state));
+        }
+        
+        // Update all UI elements
+        function updateUI() {
+            elements.balance.textContent = state.balance.toFixed(8);
+            elements.miningPower.textContent = state.miningPower.toFixed(2);
+            elements.energyConsumption.textContent = state.energyConsumption;
+            elements.bitcoinMined.textContent = state.bitcoinMined.toFixed(8);
+            
+            const energyPercent = Math.floor((state.energy / state.maxEnergy) * 100);
+            elements.energyLevel.textContent = `${energyPercent}%`;
+            elements.energyBar.style.width = `${energyPercent}%`;
+            
+            if (state.energy < 20) {
+                elements.energyWarning.style.display = 'block';
+            } else {
+                elements.energyWarning.style.display = 'none';
+            }
+            
+            // Update equipment image
+            if (state.equipment.asic.owned) {
+                elements.equipmentImage.src = state.equipment.asic.image;
+            } else {
+                elements.equipmentImage.src = state.equipment.gpu.image;
+            }
+        }
+        
+        // Mine function
+        function mine() {
+            if (state.energy >= state.energyConsumption) {
+                state.balance += state.miningPower / 100;
+                state.bitcoinMined += state.miningPower / 100;
+                state.energy -= state.energyConsumption;
+                state.lastMineTime = Date.now();
+                
+                // Check achievements
+                checkAchievements();
+                
+                updateUI();
+                saveGame();
+                
+                showNotification(`+${(state.miningPower / 100).toFixed(8)} BTC`);
+            } else {
+                showNotification('⚠️ Недостаточно энергии!');
+            }
+        }
+        
+        // Auto mine function
+        function autoMine(cycles = 1) {
+            if (state.energy >= state.energyConsumption) {
+                const mineAmount = (state.miningPower / 100) * cycles;
+                state.balance += mineAmount;
+                state.bitcoinMined += mineAmount;
+                state.energy -= state.energyConsumption * cycles;
+                state.playTime += cycles;
+                
+                // Ensure energy doesn't go below 0
+                state.energy = Math.max(0, state.energy);
+                
+                // Check achievements
+                checkAchievements();
+                
+                updateUI();
+            }
+        }
+        
+        // Regenerate energy
+        function regenerateEnergy() {
+            if (state.energy < state.maxEnergy) {
+                state.energy = Math.min(state.energy + 5, state.maxEnergy);
+                updateUI();
+            }
+        }
+        
+        // Upgrade equipment
+        function upgradeEquipment(upgradeId) {
+            const upgrade = gameData.upgrades.find(u => u.id === upgradeId);
+            const currentLevel = state.equipment[upgradeId]?.level || 0;
+            
+            if (currentLevel < upgrade.levels.length) {
+                const nextLevel = upgrade.levels[currentLevel];
+                
+                if (state.balance >= nextLevel.cost) {
+                    state.balance -= nextLevel.cost;
+                    
+                    if (upgradeId === 'asic' && currentLevel === 0) {
+                        state.equipment.asic.owned = true;
+                    }
+                    
+                    state.equipment[upgradeId].level++;
+                    
+                    if (nextLevel.power) {
+                        state.miningPower += nextLevel.power;
+                    }
+                    
+                    if (nextLevel.energy) {
+                        state.energyConsumption += nextLevel.energy;
+                    }
+                    
+                    showNotification(`Улучшение ${upgrade.name} до уровня ${state.equipment[upgradeId].level}`);
+                    renderUpgrades();
+                    updateUI();
+                    saveGame();
+                } else {
+                    showNotification('⚠️ Недостаточно BTC!');
+                }
+            } else {
+                showNotification('⚠️ Максимальный уровень достигнут!');
+            }
+        }
+        
+        // Buy shop item
+        function buyShopItem(itemId) {
+            const item = gameData.shopItems.find(i => i.id === itemId);
+            
+            if (state.balance >= item.cost) {
+                state.balance -= item.cost;
+                item.effect();
+                showNotification(`Куплено: ${item.name}`);
+                updateUI();
+                saveGame();
+            } else {
+                showNotification('⚠️ Недостаточно BTC!');
+            }
+        }
+        
+        // Check achievements
+        function checkAchievements() {
+            gameData.achievements.forEach(achievement => {
+                if (!state.achievements.includes(achievement.id)) {
+                    let completed = false;
+                    
+                    if (achievement.id === 'first-bitcoin' && state.bitcoinMined >= 1) {
+                        completed = true;
+                    } else if (achievement.id === 'mining-pro' && state.bitcoinMined >= 10) {
+                        completed = true;
+                    } else if (achievement.id === 'rich' && state.balance >= 5000) {
+                        completed = true;
+                    } else if (achievement.id === 'upgrade-master') {
+                        const totalUpgrades = gameData.upgrades.reduce((sum, upgrade) => sum + upgrade.levels.length, 0);
+                        const ownedUpgrades = Object.values(state.equipment).reduce((sum, eq) => sum + (eq.level || 0), 0);
+                        if (ownedUpgrades >= totalUpgrades) {
+                            completed = true;
+                        }
+                    }
+                    
+                    if (completed) {
+                        state.achievements.push(achievement.id);
+                        state.balance += achievement.reward;
+                        showNotification(`🎉 Достижение: ${achievement.name}! +${achievement.reward} BTC`);
+                        renderAchievements();
+                        updateUI();
+                        saveGame();
+                    }
+                }
+            });
+        }
+        
+        // Render upgrades
+        function renderUpgrades() {
+            elements.upgradesList.innerHTML = '';
+            
+            gameData.upgrades.forEach(upgrade => {
+                const currentLevel = state.equipment[upgrade.id]?.level || 0;
+                const maxLevel = upgrade.levels.length;
+                
+                if (currentLevel < maxLevel || (upgrade.id === 'asic' && !state.equipment.asic.owned)) {
+                    const nextLevel = upgrade.levels[currentLevel] || upgrade.levels[0];
+                    
+                    const upgradeEl = document.createElement('div');
+                    upgradeEl.className = 'upgrade-item';
+                    
+                    upgradeEl.innerHTML = `
+                        <img src="${upgrade.image}" class="upgrade-image" alt="${upgrade.name}">
+                        <div class="upgrade-info">
+                            <div class="upgrade-name">${upgrade.name} ${currentLevel > 0 ? `Ур. ${currentLevel}` : ''}</div>
+                            <div class="upgrade-description">${upgrade.description}</div>
+                            <div class="upgrade-stats">
+                                ${nextLevel.power ? `<div class="upgrade-stat"><span>⚡</span> +${nextLevel.power} мощность</div>` : ''}
+                                ${nextLevel.energy ? `<div class="upgrade-stat"><span>🔋</span> ${nextLevel.energy > 0 ? '+' : ''}${nextLevel.energy} энергия</div>` : ''}
+                            </div>
+                        </div>
+                        <button class="upgrade-btn" ${state.balance >= nextLevel.cost ? '' : 'disabled'}>
+                            ${nextLevel.cost} BTC
+                        </button>
+                    `;
+                    
+                    upgradeEl.querySelector('button').addEventListener('click', () => upgradeEquipment(upgrade.id));
+                    elements.upgradesList.appendChild(upgradeEl);
+                }
+            });
+        }
+        
+        // Render shop
+        function renderShop() {
+            elements.shopItems.innerHTML = '';
+            
+            gameData.shopItems.forEach(item => {
+                const shopItemEl = document.createElement('div');
+                shopItemEl.className = 'shop-item';
+                
+                shopItemEl.innerHTML = `
+                    <img src="${item.image}" class="shop-item-image" alt="${item.name}">
+                    <div class="shop-item-name">${item.name}</div>
+                    <div class="shop-item-price">${item.cost} BTC</div>
+                    <button class="shop-item-btn" ${state.balance >= item.cost ? '' : 'disabled'}>
+                        Купить
+                    </button>
+                `;
+                
+                shopItemEl.querySelector('button').addEventListener('click', () => buyShopItem(item.id));
+                elements.shopItems.appendChild(shopItemEl);
+            });
+        }
+        
+        // Render achievements
+        function renderAchievements() {
+            elements.achievementsList.innerHTML = '';
+            
+            gameData.achievements.forEach(achievement => {
+                const isUnlocked = state.achievements.includes(achievement.id);
+                let progress = 0;
+                
+                if (achievement.id === 'first-bitcoin') {
+                    progress = Math.min(state.bitcoinMined / 1, 1);
+                } else if (achievement.id === 'mining-pro') {
+                    progress = Math.min(state.bitcoinMined / 10, 1);
+                } else if (achievement.id === 'rich') {
+                    progress = Math.min(state.balance / 5000, 1);
+                } else if (achievement.id === 'upgrade-master') {
+                    const totalUpgrades = gameData.upgrades.reduce((sum, upgrade) => sum + upgrade.levels.length, 0);
+                    const ownedUpgrades = Object.values(state.equipment).reduce((sum, eq) => sum + (eq.level || 0), 0);
+                    progress = Math.min(ownedUpgrades / totalUpgrades, 1);
+                }
+                
+                const achievementEl = document.createElement('div');
+                achievementEl.className = `achievement ${isUnlocked ? 'unlocked' : ''}`;
+                
+                achievementEl.innerHTML = `
+                    <div class="achievement-icon">${achievement.image}</div>
+                    <div class="achievement-info">
+                        <div class="achievement-name">${achievement.name}</div>
+                        <div class="achievement-description">${achievement.description}</div>
+                        ${!isUnlocked ? `
+                            <div class="achievement-progress">
+                                <div class="achievement-progress-bar" style="width: ${progress * 100}%"></div>
+                            </div>
+                        ` : ''}
+                    </div>
+                    ${isUnlocked ? `<div class="achievement-reward">+${achievement.reward} BTC</div>` : ''}
+                `;
+                
+                elements.achievementsList.appendChild(achievementEl);
+            });
+        }
+        
+        // Render leaderboard
+        function renderLeaderboard() {
+            elements.leaderboard.innerHTML = '';
+            
+            // Add current player to leaderboard
+            const playerItem = document.createElement('div');
+            playerItem.className = 'leaderboard-item';
+            playerItem.innerHTML = `
+                <div class="leaderboard-position">#?</div>
+                <div class="leaderboard-avatar">👤</div>
+                <div class="leaderboard-info">
+                    <div class="leaderboard-name">Вы</div>
+                    <div class="leaderboard-balance">${state.balance.toFixed(8)} BTC</div>
                 </div>
-            </div>
+            `;
+            elements.leaderboard.appendChild(playerItem);
             
-            <div class="hatnote">Эта статья — о выдающемся пидоре. Возможно, вы искали статью <a href="#">о других пидорах</a> или <a href="#">о пидорстве вообще</a>.</div>
+            // Add top players
+            gameData.leaderboard.forEach((player, index) => {
+                const playerItem = document.createElement('div');
+                playerItem.className = 'leaderboard-item';
+                playerItem.innerHTML = `
+                    <div class="leaderboard-position">#${index + 1}</div>
+                    <div class="leaderboard-avatar">${player.name.charAt(0)}</div>
+                    <div class="leaderboard-info">
+                        <div class="leaderboard-name">${player.name}</div>
+                        <div class="leaderboard-balance">${player.balance.toFixed(8)} BTC</div>
+                    </div>
+                `;
+                elements.leaderboard.appendChild(playerItem);
+            });
+        }
+        
+        // Show notification
+        function showNotification(message) {
+            const notification = document.createElement('div');
+            notification.className = 'notification';
+            notification.textContent = message;
+            document.body.appendChild(notification);
             
-            <table class="infobox">
-                <caption>@faerovs</caption>
-                <tbody>
-                    <tr>
-                        <td colspan="2" class="infobox-image">
-                            <img src="img/faerov.png" alt="Фотография @faerovs" style="max-width: 220px; border: 1px solid #ddd;">
-                        </td>
-                    </tr>
-                    <tr>
-                        <th class="infobox-label">Полное имя</th>
-                        <td class="infobox-value">Пидорасный Пидор Пидорович</td>
-                    </tr>
-                    <tr>
-                        <th class="infobox-label">Дата рождения</th>
-                        <td class="infobox-value">2011 год, ему 13 отвечаю</td>
-                    </tr>
-                    <tr>
-                        <th class="infobox-label">Место рождения</th>
-                        <td class="infobox-value">Мусорка</td>
-                    </tr>
-                    <tr>
-                        <th class="infobox-label">Известен как</th>
-                        <td class="infobox-value">Выдающийся пидор</td>
-                    </tr>
-                    <tr>
-                        <th class="infobox-label">Годы активности</th>
-                        <td class="infobox-value">2020 — н.в.</td>
-                    </tr>
-                    <tr>
-                        <th class="infobox-label">Награды</th>
-                        <td class="infobox-value">Мамкин доксер (2025)</td>
-                    </tr>
-                </tbody>
-            </table>
-            
-            <p><strong>@faerovs</strong> — выдающаяся личность современного интернет-пространства, признанный эксперт в области <a href="#">пидорологии</a> и лауреат многочисленных премий за вклад в развитие <a href="#">движения пидоров</a>.</p>
-            
-            <div class="toc" id="toc">
-                <div class="toctitle">
-                    <h2>Содержание</h2>
-                    <span class="toctoggle">[<a href="#">скрыть</a>]</span>
-                </div>
-                <ul>
-                    <li class="toclevel-1"><a href="#Биография"><span class="tocnumber">1</span> <span class="toctext">Биография</span></a></li>
-                    <li class="toclevel-1"><a href="#Деятельность"><span class="tocnumber">2</span> <span class="toctext">Деятельность</span></a>
-                        <ul>
-                            <li class="toclevel-2"><a href="#Доказательства_пидорства"><span class="tocnumber">2.1</span> <span class="toctext">Доказательства пидорства</span></a></li>
-                            <li class="toclevel-2"><a href="#Признание"><span class="tocnumber">2.2</span> <span class="toctext">Признание</span></a></li>
-                        </ul>
-                    </li>
-                    <li class="toclevel-1"><a href="#Критика"><span class="tocnumber">3</span> <span class="toctext">Критика</span></a></li>
-                    <li class="toclevel-1"><a href="#См._также"><span class="tocnumber">4</span> <span class="toctext">См. также</span></a></li>
-                    <li class="toclevel-1"><a href="#Примечания"><span class="tocnumber">5</span> <span class="toctext">Примечания</span></a></li>
-                </ul>
-            </div>
-            
-            <h2 id="Биография"><span class="mw-headline">Биография</span></h2>
-            <p>Происхождение и ранние годы @faerovs остаются загадкой для исследователей. Первые упоминания о нём появляются в 2024 году в различных интернет-сообществах, где он сразу зарекомендовал себя как <a href="#">харизматичный пидор</a>.</p>
-            
-            <h2 id="Деятельность"><span class="mw-headline">Деятельность</span></h2>
-            <p>Основной вклад @faerovs заключается в популяризации пидорства как социального феномена. Его работы цитируются в таких изданиях как <i>"Пидорские хроники"</i> и <i>"Журнал современного пидорства"</i>.</p>
-            
-            <h3 id="Доказательства_пидорства"><span class="mw-headline">Доказательства пидорства</span></h3>
-            <p>Многочисленные исследования подтверждают пидорскую природу @faerovs:</p>
-            <ul>
-                <li>Экспериментальные данные (Smith et al., 2021)</li>
-                <li>Социологические опросы (Pidor Research Institute, 2022)</li>
-                <li>Экспертные оценки (World Pidor Congress, 2023)</li>
-            </ul>
-            
-            <h3 id="Признание"><span class="mw-headline">Признание</span></h3>
-            <p>В 2023 году @faerovs был включён в список <i>"100 самых влиятельных пидоров десятилетия"</i> и получил премию <b>"Золотая звезда пидора"</b> за выдающиеся достижения.</p>
-            
-            <h2 id="Критика"><span class="mw-headline">Критика</span></h2>
-            <p>Некоторые эксперты оспаривают статус @faerovs, утверждая, что он может быть просто <a href="#">обычным идиотом</a>. Однако эти заявления не получили широкой поддержки в научном сообществе.</p>
-            
-            <h2 id="См._также"><span class="mw-headline">См. также</span></h2>
-            <div class="navbox">
-                <div class="navbox-title">Связанные статьи</div>
-                <div class="navbox-list">
-                    <ul>
-                        <li><a href="#">История пидорства</a></li>
-                        <li><a href="#">Классификация пидоров</a></li>
-                        <li><a href="#">Методы выявления пидоров</a></li>
-                        <li><a href="#">Пидорометр</a></li>
-                        <li><a href="#">Список великих пидоров</a></li>
-                    </ul>
-                </div>
-            </div>
-            
-            <h2 id="Примечания"><span class="mw-headline">Примечания</span></h2>
-            <div class="reflist">
-                <ol>
-                    <li>Smith, J. <i>"Quantum Pidors in Cyberspace"</i>. Journal of Modern Pidorology. 2021.</li>
-                    <li>Pidor Research Institute. <i>"Annual Report 2022"</i>.</li>
-                    <li>World Pidor Congress. <i>"Proceedings 2023"</i>.</li>
-                </ol>
-            </div>
-            
-            <div class="mw-footer">
-                <p>Эта страница в последний раз была отредактирована сегодня в 20:43.</p>
-                <p>Текст доступен по лицензии <a href="#">Creative Commons Attribution-NonCommercial-NoDerivs 3.0 Unported</a>.</p>
-                <p>ВеликийПидорЯ® — зарегистрированный товарный знак некоммерческой организации "Фонд Пидорства".</p>
-            </div>
-        </div>
-    </div>
+            setTimeout(() => {
+                notification.remove();
+            }, 3000);
+        }
+        
+        // Event listeners
+        elements.mineBtn.addEventListener('click', mine);
+        
+        // Initialize the game
+        initGame();
+    </script>
 </body>
 </html>
