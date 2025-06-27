@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Crypto Mining Simulator</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
         :root {
             --primary: #6a11cb;
@@ -18,225 +17,103 @@
             --text: #e6e6e6;
         }
         
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
-        
         body {
-            font-family: 'Ubuntu', sans-serif;
-            background: linear-gradient(135deg, var(--dark), var(--darker));
+            font-family: Arial, sans-serif;
+            background: var(--dark);
             color: var(--text);
-            min-height: 100vh;
             padding: 10px;
             line-height: 1.6;
-        }
-        
-        .container {
-            max-width: 100%;
-            margin: 0 auto;
-            padding: 10px;
         }
         
         .header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 15px;
-            background: rgba(0, 0, 0, 0.3);
-            border-radius: 15px;
-            margin-bottom: 15px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            padding: 10px;
+            background: var(--darker);
+            border-radius: 10px;
+            margin-bottom: 10px;
         }
         
         .logo {
-            font-size: 1.5rem;
-            font-weight: 700;
-            background: linear-gradient(to right, var(--accent), var(--success));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+            font-weight: bold;
+            color: var(--accent);
         }
         
         .balance {
-            font-size: 1.2rem;
             font-weight: bold;
             color: var(--accent);
-            display: flex;
-            align-items: center;
-            gap: 5px;
         }
         
         .section {
-            background: rgba(0, 0, 0, 0.3);
-            border-radius: 15px;
-            padding: 15px;
-            margin-bottom: 15px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            background: var(--darker);
+            border-radius: 10px;
+            padding: 10px;
+            margin-bottom: 10px;
         }
         
         .section-title {
-            font-size: 1.3rem;
-            margin-bottom: 15px;
             color: var(--success);
-            display: flex;
-            align-items: center;
-            gap: 10px;
+            margin-bottom: 10px;
+            font-size: 1.1em;
         }
         
         .mining-rig {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 15px;
+            text-align: center;
         }
         
         .equipment-image {
-            width: 200px;
-            height: 150px;
+            width: 150px;
+            height: 100px;
             object-fit: contain;
-            border-radius: 10px;
-            background: rgba(0, 0, 0, 0.5);
-            padding: 10px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+            margin: 10px auto;
+            background: rgba(0,0,0,0.3);
+            border-radius: 5px;
         }
         
-        .mining-stats {
+        .stats {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 10px;
-            width: 100%;
+            margin: 10px 0;
         }
         
-        .stat-card {
-            background: rgba(0, 0, 0, 0.2);
-            padding: 10px;
-            border-radius: 10px;
+        .stat {
+            background: rgba(0,0,0,0.2);
+            padding: 5px;
+            border-radius: 5px;
             text-align: center;
         }
         
         .stat-value {
             font-weight: bold;
             color: var(--accent);
-            font-size: 1.1rem;
-        }
-        
-        .stat-label {
-            font-size: 0.8rem;
-            opacity: 0.8;
         }
         
         .mine-btn {
             background: linear-gradient(to right, var(--primary), var(--secondary));
             color: white;
             border: none;
-            padding: 12px 25px;
-            border-radius: 50px;
-            font-weight: bold;
-            font-size: 1.1rem;
-            cursor: pointer;
-            transition: all 0.3s;
-            box-shadow: 0 4px 15px rgba(106, 17, 203, 0.4);
+            padding: 10px;
+            border-radius: 5px;
             width: 100%;
+            font-weight: bold;
             margin-top: 10px;
-        }
-        
-        .mine-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(106, 17, 203, 0.6);
-        }
-        
-        .mine-btn:active {
-            transform: translateY(0);
-        }
-        
-        .upgrades-list {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 10px;
-        }
-        
-        .upgrade-item {
-            background: rgba(0, 0, 0, 0.2);
-            border-radius: 10px;
-            padding: 15px;
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            transition: all 0.3s;
-        }
-        
-        .upgrade-item:hover {
-            background: rgba(0, 0, 0, 0.3);
-        }
-        
-        .upgrade-image {
-            width: 60px;
-            height: 60px;
-            object-fit: contain;
-            border-radius: 8px;
-        }
-        
-        .upgrade-info {
-            flex: 1;
-        }
-        
-        .upgrade-name {
-            font-weight: bold;
-            margin-bottom: 5px;
-        }
-        
-        .upgrade-description {
-            font-size: 0.8rem;
-            opacity: 0.8;
-            margin-bottom: 5px;
-        }
-        
-        .upgrade-stats {
-            display: flex;
-            gap: 10px;
-            font-size: 0.8rem;
-        }
-        
-        .upgrade-stat {
-            display: flex;
-            align-items: center;
-            gap: 3px;
-        }
-        
-        .upgrade-btn {
-            background: linear-gradient(to right, var(--success), #2a9d8f);
-            color: white;
-            border: none;
-            padding: 8px 15px;
-            border-radius: 50px;
-            font-weight: bold;
             cursor: pointer;
-            transition: all 0.3s;
-            white-space: nowrap;
-        }
-        
-        .upgrade-btn:disabled {
-            background: #666;
-            cursor: not-allowed;
         }
         
         .tabs {
             display: flex;
-            margin-bottom: 15px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            margin-bottom: 10px;
         }
         
         .tab {
-            padding: 10px 15px;
+            padding: 5px 10px;
             cursor: pointer;
-            opacity: 0.7;
-            transition: all 0.3s;
-            border-bottom: 2px solid transparent;
         }
         
         .tab.active {
-            opacity: 1;
             border-bottom: 2px solid var(--accent);
             color: var(--accent);
         }
@@ -249,833 +126,440 @@
             display: block;
         }
         
-        .achievement {
+        .upgrade {
             display: flex;
-            align-items: center;
-            gap: 15px;
+            background: rgba(0,0,0,0.2);
             padding: 10px;
-            background: rgba(0, 0, 0, 0.2);
-            border-radius: 10px;
-            margin-bottom: 10px;
-        }
-        
-        .achievement-icon {
-            width: 40px;
-            height: 40px;
-            background: var(--darker);
-            border-radius: 50%;
-            display: flex;
+            border-radius: 5px;
+            margin-bottom: 5px;
             align-items: center;
-            justify-content: center;
-            font-size: 1.2rem;
         }
         
-        .achievement.unlocked .achievement-icon {
-            background: linear-gradient(to right, var(--primary), var(--secondary));
-            color: white;
-        }
-        
-        .achievement-info {
+        .upgrade-info {
             flex: 1;
         }
         
-        .achievement-name {
+        .upgrade-name {
             font-weight: bold;
         }
         
-        .achievement-description {
-            font-size: 0.8rem;
-            opacity: 0.8;
-        }
-        
-        .achievement-progress {
-            height: 5px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 5px;
-            margin-top: 5px;
-            overflow: hidden;
-        }
-        
-        .achievement-progress-bar {
-            height: 100%;
-            background: linear-gradient(to right, var(--success), var(--accent));
-            width: 0%;
-        }
-        
-        .shop-items {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-        }
-        
-        .shop-item {
-            background: rgba(0, 0, 0, 0.2);
-            border-radius: 10px;
-            padding: 15px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 10px;
-        }
-        
-        .shop-item-image {
-            width: 80px;
-            height: 80px;
-            object-fit: contain;
-        }
-        
-        .shop-item-name {
-            font-weight: bold;
-            text-align: center;
-        }
-        
-        .shop-item-price {
-            color: var(--accent);
-            font-weight: bold;
-        }
-        
-        .shop-item-btn {
-            background: linear-gradient(to right, var(--primary), var(--secondary));
-            color: white;
+        .upgrade-btn {
+            background: var(--success);
             border: none;
             padding: 5px 10px;
-            border-radius: 50px;
-            font-size: 0.8rem;
+            border-radius: 5px;
+            color: white;
             cursor: pointer;
-            width: 100%;
         }
         
-        .shop-item-btn:disabled {
+        .upgrade-btn:disabled {
             background: #666;
             cursor: not-allowed;
         }
         
-        .leaderboard {
+        .shop-item {
             display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-        
-        .leaderboard-item {
-            display: flex;
-            align-items: center;
-            gap: 10px;
+            background: rgba(0,0,0,0.2);
             padding: 10px;
-            background: rgba(0, 0, 0, 0.2);
-            border-radius: 10px;
-        }
-        
-        .leaderboard-position {
-            font-weight: bold;
-            width: 30px;
-            text-align: center;
-        }
-        
-        .leaderboard-avatar {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background: var(--darker);
-            display: flex;
+            border-radius: 5px;
+            margin-bottom: 5px;
             align-items: center;
-            justify-content: center;
         }
         
-        .leaderboard-info {
-            flex: 1;
-        }
-        
-        .leaderboard-name {
-            font-weight: bold;
-        }
-        
-        .leaderboard-balance {
-            color: var(--accent);
-            font-size: 0.8rem;
+        .shop-item-btn {
+            background: var(--primary);
+            border: none;
+            padding: 5px 10px;
+            border-radius: 5px;
+            color: white;
+            cursor: pointer;
         }
         
         .notification {
             position: fixed;
-            top: 20px;
+            top: 10px;
             left: 50%;
             transform: translateX(-50%);
-            background: rgba(0, 0, 0, 0.8);
+            background: rgba(0,0,0,0.8);
             color: white;
-            padding: 10px 20px;
-            border-radius: 50px;
-            z-index: 1000;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            animation: slideIn 0.3s, fadeOut 0.5s 2.5s forwards;
-        }
-        
-        @keyframes slideIn {
-            from { top: -50px; opacity: 0; }
-            to { top: 20px; opacity: 1; }
-        }
-        
-        @keyframes fadeOut {
-            from { opacity: 1; }
-            to { opacity: 0; }
-        }
-        
-        .power-icon {
-            color: var(--success);
-        }
-        
-        .energy-icon {
-            color: var(--accent);
-        }
-        
-        .coin-icon {
-            color: var(--accent);
-        }
-        
-        .progress-bar {
-            height: 10px;
-            background: rgba(255, 255, 255, 0.1);
+            padding: 5px 10px;
             border-radius: 5px;
-            margin: 10px 0;
-            overflow: hidden;
+            z-index: 100;
+            animation: fadeInOut 3s;
         }
         
-        .progress-bar-fill {
-            height: 100%;
-            background: linear-gradient(to right, var(--success), var(--accent));
-            width: 0%;
-            transition: width 0.3s;
-        }
-        
-        .energy-warning {
-            color: var(--danger);
-            font-size: 0.8rem;
-            text-align: center;
-            margin-top: 5px;
-            display: none;
+        @keyframes fadeInOut {
+            0% { opacity: 0; top: 0; }
+            10% { opacity: 1; top: 10px; }
+            90% { opacity: 1; top: 10px; }
+            100% { opacity: 0; top: 0; }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <div class="logo">Crypto Miner</div>
-            <div class="balance">
-                <span class="coin-icon">💰</span>
-                <span id="balance">0</span> BTC
+    <div class="header">
+        <div class="logo">💰 Mining Sim</div>
+        <div class="balance" id="balance">0 BTC</div>
+    </div>
+    
+    <div class="section">
+        <div class="section-title">⛏️ Ваша майнинг ферма</div>
+        <div class="mining-rig">
+            <img id="equipment-image" class="equipment-image" src="https://i.imgur.com/JVY9FQa.png">
+            <div class="stats">
+                <div class="stat">
+                    <div class="stat-value" id="mining-power">1</div>
+                    <div>Мощность</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-value" id="energy">100%</div>
+                    <div>Энергия</div>
+                </div>
             </div>
+            <button class="mine-btn" id="mine-btn">МАЙНИТЬ</button>
+        </div>
+    </div>
+    
+    <div class="section">
+        <div class="tabs">
+            <div class="tab active" data-tab="upgrades">Улучшения</div>
+            <div class="tab" data-tab="shop">Магазин</div>
+            <div class="tab" data-tab="stats">Статистика</div>
         </div>
         
-        <div class="section">
-            <div class="section-title">
-                <span>⛏️</span>
-                <span>Майнинг ферма</span>
-            </div>
-            <div class="mining-rig">
-                <img id="equipment-image" class="equipment-image" src="https://i.imgur.com/JVY9FQa.png" alt="Mining Equipment">
-                <div class="mining-stats">
-                    <div class="stat-card">
-                        <div class="stat-value" id="mining-power">1</div>
-                        <div class="stat-label">Мощность (H/s)</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-value" id="energy-consumption">10</div>
-                        <div class="stat-label">Энергопотребление</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-value" id="bitcoin-mined">0</div>
-                        <div class="stat-label">Всего BTC</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-value" id="energy-level">100%</div>
-                        <div class="stat-label">Энергия</div>
-                    </div>
-                </div>
-                <div class="progress-bar">
-                    <div class="progress-bar-fill" id="energy-bar"></div>
-                </div>
-                <div class="energy-warning" id="energy-warning">⚠️ Низкий уровень энергии! Купите больше энергии в магазине.</div>
-                <button class="mine-btn" id="mine-btn">МАЙНИТЬ</button>
-            </div>
+        <div class="tab-content active" id="upgrades-tab">
+            <div id="upgrades-list"></div>
         </div>
         
-        <div class="section">
-            <div class="tabs">
-                <div class="tab active" data-tab="upgrades">Улучшения</div>
-                <div class="tab" data-tab="shop">Магазин</div>
-                <div class="tab" data-tab="achievements">Достижения</div>
-                <div class="tab" data-tab="leaderboard">Топ игроков</div>
+        <div class="tab-content" id="shop-tab">
+            <div id="shop-items"></div>
+        </div>
+        
+        <div class="tab-content" id="stats-tab">
+            <div class="stat">
+                <div class="stat-value" id="total-mined">0</div>
+                <div>Всего добыто</div>
             </div>
-            
-            <div class="tab-content active" id="upgrades-tab">
-                <div class="upgrades-list" id="upgrades-list">
-                    <!-- Upgrades will be added here dynamically -->
-                </div>
-            </div>
-            
-            <div class="tab-content" id="shop-tab">
-                <div class="shop-items" id="shop-items">
-                    <!-- Shop items will be added here dynamically -->
-                </div>
-            </div>
-            
-            <div class="tab-content" id="achievements-tab">
-                <div id="achievements-list">
-                    <!-- Achievements will be added here dynamically -->
-                </div>
-            </div>
-            
-            <div class="tab-content" id="leaderboard-tab">
-                <div class="leaderboard" id="leaderboard">
-                    <!-- Leaderboard will be added here dynamically -->
-                </div>
+            <div class="stat">
+                <div class="stat-value" id="play-time">0</div>
+                <div>Время игры</div>
             </div>
         </div>
     </div>
     
     <script>
-        // Game state
-        const state = {
-            balance: 0,
-            bitcoinMined: 0,
-            miningPower: 1,
-            energy: 100,
-            maxEnergy: 100,
-            energyConsumption: 10,
-            lastMineTime: Date.now(),
-            playTime: 0,
-            equipment: {
-                gpu: {
-                    level: 1,
-                    image: 'https://i.imgur.com/JVY9FQa.png'
-                },
-                asic: {
-                    owned: false,
-                    level: 0,
-                    image: 'https://i.imgur.com/8QZQZQZ.png'
-                },
-                cooling: {
-                    level: 0,
-                    image: 'https://i.imgur.com/4QZQZQZ.png'
-                }
-            },
-            upgrades: [],
-            achievements: [],
-            energyDrinks: 0,
-            lastSaveTime: Date.now()
-        };
-        
-        // Game data
+        // Игровые данные
         const gameData = {
             upgrades: [
                 {
                     id: 'gpu',
                     name: 'Видеокарта',
-                    description: 'Увеличивает мощность майнинга',
                     image: 'https://i.imgur.com/JVY9FQa.png',
                     levels: [
-                        { cost: 100, power: 2, energy: 15 },
-                        { cost: 250, power: 3, energy: 20 },
-                        { cost: 500, power: 5, energy: 25 },
-                        { cost: 1000, power: 8, energy: 30 },
-                        { cost: 2000, power: 12, energy: 35 }
+                        { cost: 100, power: 2 },
+                        { cost: 250, power: 3 },
+                        { cost: 500, power: 5 },
+                        { cost: 1000, power: 8 },
+                        { cost: 2000, power: 12 }
                     ]
                 },
                 {
                     id: 'asic',
                     name: 'ASIC майнер',
-                    description: 'Значительно увеличивает мощность',
                     image: 'https://i.imgur.com/8QZQZQZ.png',
                     levels: [
-                        { cost: 5000, power: 20, energy: 50 },
-                        { cost: 10000, power: 35, energy: 70 },
-                        { cost: 20000, power: 50, energy: 90 }
+                        { cost: 5000, power: 20 },
+                        { cost: 10000, power: 35 },
+                        { cost: 20000, power: 50 }
                     ]
                 },
                 {
                     id: 'cooling',
-                    name: 'Система охлаждения',
-                    description: 'Уменьшает энергопотребление',
+                    name: 'Охлаждение',
                     image: 'https://i.imgur.com/4QZQZQZ.png',
                     levels: [
-                        { cost: 300, energy: -5 },
-                        { cost: 700, energy: -10 },
-                        { cost: 1500, energy: -15 }
+                        { cost: 300, energy: 10 },
+                        { cost: 700, energy: 15 },
+                        { cost: 1500, energy: 20 }
                     ]
                 }
             ],
             shopItems: [
                 {
-                    id: 'energy-drink',
+                    id: 'energy',
                     name: 'Энергетик',
                     description: '+20 энергии',
-                    image: 'https://i.imgur.com/5QZQZQZ.png',
                     cost: 50,
-                    effect: () => { state.energy = Math.min(state.energy + 20, state.maxEnergy); }
+                    effect: (game) => { game.state.energy = Math.min(game.state.energy + 20, 100); }
                 },
                 {
                     id: 'energy-upgrade',
-                    name: 'Улучшение энергии',
+                    name: 'Блок питания',
                     description: '+50 к максимальной энергии',
-                    image: 'https://i.imgur.com/6QZQZQZ.png',
                     cost: 200,
-                    effect: () => { state.maxEnergy += 50; state.energy = state.maxEnergy; }
-                },
-                {
-                    id: 'power-boost',
-                    name: 'Временный буст',
-                    description: '2x мощность на 30 сек',
-                    image: 'https://i.imgur.com/7QZQZQZ.png',
-                    cost: 150,
-                    effect: () => {
-                        const originalPower = state.miningPower;
-                        state.miningPower *= 2;
-                        showNotification('⚡ Буст активирован! Мощность x2');
-                        setTimeout(() => {
-                            state.miningPower = originalPower;
-                            showNotification('⚡ Буст закончился');
-                        }, 30000);
-                    }
+                    effect: (game) => { game.state.maxEnergy += 50; game.state.energy = game.state.maxEnergy; }
                 }
-            ],
-            achievements: [
-                {
-                    id: 'first-bitcoin',
-                    name: 'Первый биткоин',
-                    description: 'Добыть 1 BTC',
-                    target: 1,
-                    reward: 100,
-                    image: '🥇'
-                },
-                {
-                    id: 'mining-pro',
-                    name: 'Профессиональный майнер',
-                    description: 'Добыть 10 BTC',
-                    target: 10,
-                    reward: 500,
-                    image: '⛏️'
-                },
-                {
-                    id: 'rich',
-                    name: 'Богач',
-                    description: 'Заработать 5000 BTC',
-                    target: 5000,
-                    reward: 1000,
-                    image: '💰'
-                },
-                {
-                    id: 'upgrade-master',
-                    name: 'Мастер улучшений',
-                    description: 'Купить все улучшения',
-                    target: 5,
-                    reward: 2000,
-                    image: '🏆'
-                }
-            ],
-            leaderboard: [
-                { id: 1, name: 'Сатоши Накамото', balance: 1000000 },
-                { id: 2, name: 'Виталик', balance: 500000 },
-                { id: 3, name: 'Илон Маск', balance: 250000 },
-                { id: 4, name: 'Криптоэнтузиаст', balance: 100000 },
-                { id: 5, name: 'Новичок', balance: 50000 }
             ]
         };
-        
-        // DOM elements
-        const elements = {
-            balance: document.getElementById('balance'),
-            miningPower: document.getElementById('mining-power'),
-            energyConsumption: document.getElementById('energy-consumption'),
-            bitcoinMined: document.getElementById('bitcoin-mined'),
-            energyLevel: document.getElementById('energy-level'),
-            energyBar: document.getElementById('energy-bar'),
-            energyWarning: document.getElementById('energy-warning'),
-            mineBtn: document.getElementById('mine-btn'),
-            equipmentImage: document.getElementById('equipment-image'),
-            upgradesList: document.getElementById('upgrades-list'),
-            shopItems: document.getElementById('shop-items'),
-            achievementsList: document.getElementById('achievements-list'),
-            leaderboard: document.getElementById('leaderboard'),
-            tabs: document.querySelectorAll('.tab'),
-            tabContents: document.querySelectorAll('.tab-content')
-        };
-        
-        // Initialize Telegram WebApp
-        const tg = window.Telegram.WebApp;
-        tg.expand();
-        
-        // Initialize game
-        function initGame() {
-            loadGame();
-            renderUpgrades();
-            renderShop();
-            renderAchievements();
-            renderLeaderboard();
-            updateUI();
+
+        // Состояние игры
+        class Game {
+            constructor() {
+                this.state = {
+                    balance: 0,
+                    totalMined: 0,
+                    miningPower: 1,
+                    energy: 100,
+                    maxEnergy: 100,
+                    playTime: 0,
+                    lastUpdate: Date.now(),
+                    equipment: {
+                        gpu: { level: 0 },
+                        asic: { level: 0, owned: false },
+                        cooling: { level: 0 }
+                    }
+                };
+                
+                this.load();
+                this.initTelegram();
+                this.initUI();
+                this.initGameLoop();
+            }
             
-            // Auto-save every 30 seconds
-            setInterval(saveGame, 30000);
+            initTelegram() {
+                this.tg = window.Telegram.WebApp;
+                this.tg.expand();
+                
+                if (this.tg.initDataUnsafe.user) {
+                    const user = this.tg.initDataUnsafe.user;
+                    this.userId = user.id;
+                    this.username = user.username || `${user.first_name}${user.last_name ? ' ' + user.last_name : ''}`;
+                }
+            }
             
-            // Auto-mine every second
-            setInterval(autoMine, 1000);
-            
-            // Energy regeneration
-            setInterval(regenerateEnergy, 5000);
-            
-            // Tab switching
-            elements.tabs.forEach(tab => {
-                tab.addEventListener('click', () => {
-                    const tabId = tab.getAttribute('data-tab');
-                    switchTab(tabId);
+            initUI() {
+                // Элементы UI
+                this.ui = {
+                    balance: document.getElementById('balance'),
+                    miningPower: document.getElementById('mining-power'),
+                    energy: document.getElementById('energy'),
+                    totalMined: document.getElementById('total-mined'),
+                    playTime: document.getElementById('play-time'),
+                    mineBtn: document.getElementById('mine-btn'),
+                    equipmentImage: document.getElementById('equipment-image'),
+                    upgradesList: document.getElementById('upgrades-list'),
+                    shopItems: document.getElementById('shop-items'),
+                    tabs: document.querySelectorAll('.tab'),
+                    tabContents: document.querySelectorAll('.tab-content')
+                };
+                
+                // Обработчики событий
+                this.ui.mineBtn.addEventListener('click', () => this.mine());
+                
+                this.ui.tabs.forEach(tab => {
+                    tab.addEventListener('click', () => {
+                        const tabId = tab.getAttribute('data-tab');
+                        this.switchTab(tabId);
+                    });
                 });
-            });
-        }
-        
-        // Switch tabs
-        function switchTab(tabId) {
-            elements.tabs.forEach(tab => {
-                if (tab.getAttribute('data-tab') === tabId) {
-                    tab.classList.add('active');
+                
+                // Инициализация вкладок
+                this.renderUpgrades();
+                this.renderShop();
+                this.updateUI();
+            }
+            
+            initGameLoop() {
+                setInterval(() => {
+                    this.state.playTime++;
+                    this.updateUI();
+                    this.save();
+                }, 1000);
+            }
+            
+            switchTab(tabId) {
+                this.ui.tabs.forEach(tab => {
+                    if (tab.getAttribute('data-tab') === tabId) {
+                        tab.classList.add('active');
+                    } else {
+                        tab.classList.remove('active');
+                    }
+                });
+                
+                this.ui.tabContents.forEach(content => {
+                    if (content.id === `${tabId}-tab`) {
+                        content.classList.add('active');
+                    } else {
+                        content.classList.remove('active');
+                    }
+                });
+            }
+            
+            mine() {
+                if (this.state.energy > 0) {
+                    const mined = this.state.miningPower / 10;
+                    this.state.balance += mined;
+                    this.state.totalMined += mined;
+                    this.state.energy -= 1;
+                    
+                    this.showNotification(`+${mined.toFixed(2)} BTC`);
+                    this.updateUI();
+                    this.save();
                 } else {
-                    tab.classList.remove('active');
-                }
-            });
-            
-            elements.tabContents.forEach(content => {
-                if (content.id === `${tabId}-tab`) {
-                    content.classList.add('active');
-                } else {
-                    content.classList.remove('active');
-                }
-            });
-        }
-        
-        // Load game from localStorage
-        function loadGame() {
-            const savedGame = localStorage.getItem('cryptoMiningSimulatorSave');
-            if (savedGame) {
-                const parsed = JSON.parse(savedGame);
-                Object.assign(state, parsed);
-                
-                // Update last mine time to prevent cheating
-                const timeDiff = Date.now() - state.lastSaveTime;
-                const mineCycles = Math.floor(timeDiff / 1000);
-                if (mineCycles > 0) {
-                    autoMine(mineCycles);
+                    this.showNotification('Недостаточно энергии!');
                 }
             }
-        }
-        
-        // Save game to localStorage
-        function saveGame() {
-            state.lastSaveTime = Date.now();
-            localStorage.setItem('cryptoMiningSimulatorSave', JSON.stringify(state));
-        }
-        
-        // Update all UI elements
-        function updateUI() {
-            elements.balance.textContent = state.balance.toFixed(8);
-            elements.miningPower.textContent = state.miningPower.toFixed(2);
-            elements.energyConsumption.textContent = state.energyConsumption;
-            elements.bitcoinMined.textContent = state.bitcoinMined.toFixed(8);
             
-            const energyPercent = Math.floor((state.energy / state.maxEnergy) * 100);
-            elements.energyLevel.textContent = `${energyPercent}%`;
-            elements.energyBar.style.width = `${energyPercent}%`;
-            
-            if (state.energy < 20) {
-                elements.energyWarning.style.display = 'block';
-            } else {
-                elements.energyWarning.style.display = 'none';
-            }
-            
-            // Update equipment image
-            if (state.equipment.asic.owned) {
-                elements.equipmentImage.src = state.equipment.asic.image;
-            } else {
-                elements.equipmentImage.src = state.equipment.gpu.image;
-            }
-        }
-        
-        // Mine function
-        function mine() {
-            if (state.energy >= state.energyConsumption) {
-                state.balance += state.miningPower / 100;
-                state.bitcoinMined += state.miningPower / 100;
-                state.energy -= state.energyConsumption;
-                state.lastMineTime = Date.now();
-                
-                // Check achievements
-                checkAchievements();
-                
-                updateUI();
-                saveGame();
-                
-                showNotification(`+${(state.miningPower / 100).toFixed(8)} BTC`);
-            } else {
-                showNotification('⚠️ Недостаточно энергии!');
-            }
-        }
-        
-        // Auto mine function
-        function autoMine(cycles = 1) {
-            if (state.energy >= state.energyConsumption) {
-                const mineAmount = (state.miningPower / 100) * cycles;
-                state.balance += mineAmount;
-                state.bitcoinMined += mineAmount;
-                state.energy -= state.energyConsumption * cycles;
-                state.playTime += cycles;
-                
-                // Ensure energy doesn't go below 0
-                state.energy = Math.max(0, state.energy);
-                
-                // Check achievements
-                checkAchievements();
-                
-                updateUI();
-            }
-        }
-        
-        // Regenerate energy
-        function regenerateEnergy() {
-            if (state.energy < state.maxEnergy) {
-                state.energy = Math.min(state.energy + 5, state.maxEnergy);
-                updateUI();
-            }
-        }
-        
-        // Upgrade equipment
-        function upgradeEquipment(upgradeId) {
-            const upgrade = gameData.upgrades.find(u => u.id === upgradeId);
-            const currentLevel = state.equipment[upgradeId]?.level || 0;
-            
-            if (currentLevel < upgrade.levels.length) {
+            upgrade(upgradeId) {
+                const upgrade = gameData.upgrades.find(u => u.id === upgradeId);
+                const currentLevel = this.state.equipment[upgradeId].level;
                 const nextLevel = upgrade.levels[currentLevel];
                 
-                if (state.balance >= nextLevel.cost) {
-                    state.balance -= nextLevel.cost;
+                if (nextLevel && this.state.balance >= nextLevel.cost) {
+                    this.state.balance -= nextLevel.cost;
+                    this.state.equipment[upgradeId].level++;
                     
                     if (upgradeId === 'asic' && currentLevel === 0) {
-                        state.equipment.asic.owned = true;
+                        this.state.equipment.asic.owned = true;
+                        this.ui.equipmentImage.src = upgrade.image;
                     }
                     
-                    state.equipment[upgradeId].level++;
-                    
                     if (nextLevel.power) {
-                        state.miningPower += nextLevel.power;
+                        this.state.miningPower += nextLevel.power;
                     }
                     
                     if (nextLevel.energy) {
-                        state.energyConsumption += nextLevel.energy;
+                        this.state.maxEnergy += nextLevel.energy;
+                        this.state.energy = this.state.maxEnergy;
                     }
                     
-                    showNotification(`Улучшение ${upgrade.name} до уровня ${state.equipment[upgradeId].level}`);
-                    renderUpgrades();
-                    updateUI();
-                    saveGame();
+                    this.showNotification(`Улучшено: ${upgrade.name} ${this.state.equipment[upgradeId].level} ур.`);
+                    this.renderUpgrades();
+                    this.updateUI();
+                    this.save();
                 } else {
-                    showNotification('⚠️ Недостаточно BTC!');
+                    this.showNotification('Недостаточно BTC!');
                 }
-            } else {
-                showNotification('⚠️ Максимальный уровень достигнут!');
             }
-        }
-        
-        // Buy shop item
-        function buyShopItem(itemId) {
-            const item = gameData.shopItems.find(i => i.id === itemId);
             
-            if (state.balance >= item.cost) {
-                state.balance -= item.cost;
-                item.effect();
-                showNotification(`Куплено: ${item.name}`);
-                updateUI();
-                saveGame();
-            } else {
-                showNotification('⚠️ Недостаточно BTC!');
-            }
-        }
-        
-        // Check achievements
-        function checkAchievements() {
-            gameData.achievements.forEach(achievement => {
-                if (!state.achievements.includes(achievement.id)) {
-                    let completed = false;
-                    
-                    if (achievement.id === 'first-bitcoin' && state.bitcoinMined >= 1) {
-                        completed = true;
-                    } else if (achievement.id === 'mining-pro' && state.bitcoinMined >= 10) {
-                        completed = true;
-                    } else if (achievement.id === 'rich' && state.balance >= 5000) {
-                        completed = true;
-                    } else if (achievement.id === 'upgrade-master') {
-                        const totalUpgrades = gameData.upgrades.reduce((sum, upgrade) => sum + upgrade.levels.length, 0);
-                        const ownedUpgrades = Object.values(state.equipment).reduce((sum, eq) => sum + (eq.level || 0), 0);
-                        if (ownedUpgrades >= totalUpgrades) {
-                            completed = true;
-                        }
-                    }
-                    
-                    if (completed) {
-                        state.achievements.push(achievement.id);
-                        state.balance += achievement.reward;
-                        showNotification(`🎉 Достижение: ${achievement.name}! +${achievement.reward} BTC`);
-                        renderAchievements();
-                        updateUI();
-                        saveGame();
-                    }
-                }
-            });
-        }
-        
-        // Render upgrades
-        function renderUpgrades() {
-            elements.upgradesList.innerHTML = '';
-            
-            gameData.upgrades.forEach(upgrade => {
-                const currentLevel = state.equipment[upgrade.id]?.level || 0;
-                const maxLevel = upgrade.levels.length;
+            buyShopItem(itemId) {
+                const item = gameData.shopItems.find(i => i.id === itemId);
                 
-                if (currentLevel < maxLevel || (upgrade.id === 'asic' && !state.equipment.asic.owned)) {
-                    const nextLevel = upgrade.levels[currentLevel] || upgrade.levels[0];
+                if (this.state.balance >= item.cost) {
+                    this.state.balance -= item.cost;
+                    item.effect(this);
+                    this.showNotification(`Куплено: ${item.name}`);
+                    this.updateUI();
+                    this.save();
+                } else {
+                    this.showNotification('Недостаточно BTC!');
+                }
+            }
+            
+            updateUI() {
+                this.ui.balance.textContent = `${this.state.balance.toFixed(2)} BTC`;
+                this.ui.miningPower.textContent = this.state.miningPower.toFixed(1);
+                this.ui.energy.textContent = `${Math.floor((this.state.energy / this.state.maxEnergy) * 100)}%`;
+                this.ui.totalMined.textContent = this.state.totalMined.toFixed(2);
+                
+                const hours = Math.floor(this.state.playTime / 3600);
+                const minutes = Math.floor((this.state.playTime % 3600) / 60);
+                const seconds = this.state.playTime % 60;
+                this.ui.playTime.textContent = `${hours}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            }
+            
+            renderUpgrades() {
+                this.ui.upgradesList.innerHTML = '';
+                
+                gameData.upgrades.forEach(upgrade => {
+                    const currentLevel = this.state.equipment[upgrade.id].level;
+                    const nextLevel = upgrade.levels[currentLevel];
                     
-                    const upgradeEl = document.createElement('div');
-                    upgradeEl.className = 'upgrade-item';
-                    
-                    upgradeEl.innerHTML = `
-                        <img src="${upgrade.image}" class="upgrade-image" alt="${upgrade.name}">
-                        <div class="upgrade-info">
-                            <div class="upgrade-name">${upgrade.name} ${currentLevel > 0 ? `Ур. ${currentLevel}` : ''}</div>
-                            <div class="upgrade-description">${upgrade.description}</div>
-                            <div class="upgrade-stats">
-                                ${nextLevel.power ? `<div class="upgrade-stat"><span>⚡</span> +${nextLevel.power} мощность</div>` : ''}
-                                ${nextLevel.energy ? `<div class="upgrade-stat"><span>🔋</span> ${nextLevel.energy > 0 ? '+' : ''}${nextLevel.energy} энергия</div>` : ''}
+                    if (nextLevel || (upgrade.id === 'asic' && !this.state.equipment.asic.owned)) {
+                        const upgradeEl = document.createElement('div');
+                        upgradeEl.className = 'upgrade';
+                        
+                        const canAfford = this.state.balance >= (nextLevel ? nextLevel.cost : upgrade.levels[0].cost);
+                        
+                        upgradeEl.innerHTML = `
+                            <div class="upgrade-info">
+                                <div class="upgrade-name">${upgrade.name} ${currentLevel > 0 ? `(${currentLevel} ур.)` : ''}</div>
+                                ${nextLevel ? `
+                                    <div>Стоимость: ${nextLevel.cost} BTC</div>
+                                    ${nextLevel.power ? `<div>+${nextLevel.power} мощности</div>` : ''}
+                                    ${nextLevel.energy ? `<div>+${nextLevel.energy} энергии</div>` : ''}
+                                ` : `
+                                    <div>Стоимость: ${upgrade.levels[0].cost} BTC</div>
+                                    <div>Разблокирует ${upgrade.name}</div>
+                                `}
                             </div>
+                            <button class="upgrade-btn" ${canAfford ? '' : 'disabled'}>
+                                ${nextLevel ? 'Улучшить' : 'Купить'}
+                            </button>
+                        `;
+                        
+                        upgradeEl.querySelector('button').addEventListener('click', () => this.upgrade(upgrade.id));
+                        this.ui.upgradesList.appendChild(upgradeEl);
+                    }
+                });
+            }
+            
+            renderShop() {
+                this.ui.shopItems.innerHTML = '';
+                
+                gameData.shopItems.forEach(item => {
+                    const shopItemEl = document.createElement('div');
+                    shopItemEl.className = 'shop-item';
+                    
+                    const canAfford = this.state.balance >= item.cost;
+                    
+                    shopItemEl.innerHTML = `
+                        <div class="upgrade-info">
+                            <div class="upgrade-name">${item.name}</div>
+                            <div>${item.description}</div>
+                            <div>${item.cost} BTC</div>
                         </div>
-                        <button class="upgrade-btn" ${state.balance >= nextLevel.cost ? '' : 'disabled'}>
-                            ${nextLevel.cost} BTC
+                        <button class="shop-item-btn" ${canAfford ? '' : 'disabled'}>
+                            Купить
                         </button>
                     `;
                     
-                    upgradeEl.querySelector('button').addEventListener('click', () => upgradeEquipment(upgrade.id));
-                    elements.upgradesList.appendChild(upgradeEl);
+                    shopItemEl.querySelector('button').addEventListener('click', () => this.buyShopItem(item.id));
+                    this.ui.shopItems.appendChild(shopItemEl);
+                });
+            }
+            
+            showNotification(message) {
+                const notification = document.createElement('div');
+                notification.className = 'notification';
+                notification.textContent = message;
+                document.body.appendChild(notification);
+                
+                setTimeout(() => {
+                    notification.remove();
+                }, 3000);
+            }
+            
+            save() {
+                localStorage.setItem('miningSimulatorSave', JSON.stringify(this.state));
+            }
+            
+            load() {
+                const saved = localStorage.getItem('miningSimulatorSave');
+                if (saved) {
+                    this.state = JSON.parse(saved);
+                    
+                    // Восстановление энергии за время отсутствия
+                    const now = Date.now();
+                    const diffHours = (now - this.state.lastUpdate) / (1000 * 60 * 60);
+                    this.state.energy = Math.min(this.state.energy + diffHours * 5, this.state.maxEnergy);
+                    this.state.lastUpdate = now;
                 }
-            });
+            }
         }
-        
-        // Render shop
-        function renderShop() {
-            elements.shopItems.innerHTML = '';
-            
-            gameData.shopItems.forEach(item => {
-                const shopItemEl = document.createElement('div');
-                shopItemEl.className = 'shop-item';
-                
-                shopItemEl.innerHTML = `
-                    <img src="${item.image}" class="shop-item-image" alt="${item.name}">
-                    <div class="shop-item-name">${item.name}</div>
-                    <div class="shop-item-price">${item.cost} BTC</div>
-                    <button class="shop-item-btn" ${state.balance >= item.cost ? '' : 'disabled'}>
-                        Купить
-                    </button>
-                `;
-                
-                shopItemEl.querySelector('button').addEventListener('click', () => buyShopItem(item.id));
-                elements.shopItems.appendChild(shopItemEl);
-            });
-        }
-        
-        // Render achievements
-        function renderAchievements() {
-            elements.achievementsList.innerHTML = '';
-            
-            gameData.achievements.forEach(achievement => {
-                const isUnlocked = state.achievements.includes(achievement.id);
-                let progress = 0;
-                
-                if (achievement.id === 'first-bitcoin') {
-                    progress = Math.min(state.bitcoinMined / 1, 1);
-                } else if (achievement.id === 'mining-pro') {
-                    progress = Math.min(state.bitcoinMined / 10, 1);
-                } else if (achievement.id === 'rich') {
-                    progress = Math.min(state.balance / 5000, 1);
-                } else if (achievement.id === 'upgrade-master') {
-                    const totalUpgrades = gameData.upgrades.reduce((sum, upgrade) => sum + upgrade.levels.length, 0);
-                    const ownedUpgrades = Object.values(state.equipment).reduce((sum, eq) => sum + (eq.level || 0), 0);
-                    progress = Math.min(ownedUpgrades / totalUpgrades, 1);
-                }
-                
-                const achievementEl = document.createElement('div');
-                achievementEl.className = `achievement ${isUnlocked ? 'unlocked' : ''}`;
-                
-                achievementEl.innerHTML = `
-                    <div class="achievement-icon">${achievement.image}</div>
-                    <div class="achievement-info">
-                        <div class="achievement-name">${achievement.name}</div>
-                        <div class="achievement-description">${achievement.description}</div>
-                        ${!isUnlocked ? `
-                            <div class="achievement-progress">
-                                <div class="achievement-progress-bar" style="width: ${progress * 100}%"></div>
-                            </div>
-                        ` : ''}
-                    </div>
-                    ${isUnlocked ? `<div class="achievement-reward">+${achievement.reward} BTC</div>` : ''}
-                `;
-                
-                elements.achievementsList.appendChild(achievementEl);
-            });
-        }
-        
-        // Render leaderboard
-        function renderLeaderboard() {
-            elements.leaderboard.innerHTML = '';
-            
-            // Add current player to leaderboard
-            const playerItem = document.createElement('div');
-            playerItem.className = 'leaderboard-item';
-            playerItem.innerHTML = `
-                <div class="leaderboard-position">#?</div>
-                <div class="leaderboard-avatar">👤</div>
-                <div class="leaderboard-info">
-                    <div class="leaderboard-name">Вы</div>
-                    <div class="leaderboard-balance">${state.balance.toFixed(8)} BTC</div>
-                </div>
-            `;
-            elements.leaderboard.appendChild(playerItem);
-            
-            // Add top players
-            gameData.leaderboard.forEach((player, index) => {
-                const playerItem = document.createElement('div');
-                playerItem.className = 'leaderboard-item';
-                playerItem.innerHTML = `
-                    <div class="leaderboard-position">#${index + 1}</div>
-                    <div class="leaderboard-avatar">${player.name.charAt(0)}</div>
-                    <div class="leaderboard-info">
-                        <div class="leaderboard-name">${player.name}</div>
-                        <div class="leaderboard-balance">${player.balance.toFixed(8)} BTC</div>
-                    </div>
-                `;
-                elements.leaderboard.appendChild(playerItem);
-            });
-        }
-        
-        // Show notification
-        function showNotification(message) {
-            const notification = document.createElement('div');
-            notification.className = 'notification';
-            notification.textContent = message;
-            document.body.appendChild(notification);
-            
-            setTimeout(() => {
-                notification.remove();
-            }, 3000);
-        }
-        
-        // Event listeners
-        elements.mineBtn.addEventListener('click', mine);
-        
-        // Initialize the game
-        initGame();
+
+        // Инициализация игры
+        const game = new Game();
     </script>
 </body>
 </html>
