@@ -3,21 +3,34 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SHDQ Coin Tap</title>
+    <title>SHDQ Coin</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/tonweb/dist/tonweb.min.js"></script>
     <style>
+        :root {
+            --bg-color: #121212;
+            --card-color: #1E1E1E;
+            --text-color: #FFFFFF;
+            --accent-color: #BB86FC;
+            --secondary-color: #03DAC6;
+            --disabled-color: #424242;
+            --border-radius: 16px;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
         body {
-            font-family: 'Arial', sans-serif;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
             margin: 0;
             padding: 0;
-            background-color: #f5f5f5;
-            color: #333;
-            transition: all 0.3s ease;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            transition: var(--transition);
+            line-height: 1.5;
         }
         
         .container {
             max-width: 100%;
-            padding: 20px;
+            padding: 16px;
             box-sizing: border-box;
         }
         
@@ -25,60 +38,143 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 20px;
+            margin-bottom: 24px;
         }
         
         .profile {
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 12px;
         }
         
         .avatar {
-            width: 50px;
-            height: 50px;
+            width: 48px;
+            height: 48px;
             border-radius: 50%;
             object-fit: cover;
-            border: 2px solid #4CAF50;
+            border: 2px solid var(--accent-color);
         }
         
-        .balance {
-            font-size: 18px;
-            font-weight: bold;
-            color: #4CAF50;
+        .wallet-btn {
+            background: var(--accent-color);
+            color: var(--bg-color);
+            border: none;
+            padding: 8px 16px;
+            border-radius: var(--border-radius);
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .wallet-btn:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+        }
+        
+        .wallet-btn:active {
+            transform: translateY(0);
+        }
+        
+        .wallet-connected {
+            background: var(--secondary-color);
+        }
+        
+        .balance-card {
+            background: var(--card-color);
+            border-radius: var(--border-radius);
+            padding: 20px;
+            margin-bottom: 20px;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: var(--transition);
+        }
+        
+        .balance-amount {
+            font-size: 32px;
+            font-weight: 700;
+            margin: 8px 0;
+            color: var(--accent-color);
+        }
+        
+        .balance-label {
+            font-size: 14px;
+            opacity: 0.8;
         }
         
         .coin {
-            width: 150px;
-            height: 150px;
-            margin: 30px auto;
+            width: 160px;
+            height: 160px;
+            margin: 24px auto;
             cursor: pointer;
-            transition: transform 0.1s;
+            transition: var(--transition);
             user-select: none;
+            background: linear-gradient(145deg, #2c2c2c, #1e1e1e);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2),
+                        inset 0 4px 8px rgba(255, 255, 255, 0.05);
+            border: 4px solid var(--accent-color);
+            color: var(--accent-color);
+            font-weight: 700;
+            font-size: 24px;
         }
         
         .coin:active {
-            transform: scale(0.95);
+            transform: scale(0.95) rotate(5deg);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1),
+                        inset 0 2px 4px rgba(255, 255, 255, 0.05);
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        
+        .stat-card {
+            background: var(--card-color);
+            border-radius: var(--border-radius);
+            padding: 16px;
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 18px;
+            font-weight: 600;
+            margin: 4px 0;
+            color: var(--secondary-color);
+        }
+        
+        .stat-label {
+            font-size: 12px;
+            opacity: 0.7;
         }
         
         .upgrades {
-            margin-top: 30px;
+            margin-top: 20px;
         }
         
         .upgrade-item {
-            background: white;
-            border-radius: 10px;
-            padding: 15px;
-            margin-bottom: 10px;
+            background: var(--card-color);
+            border-radius: var(--border-radius);
+            padding: 16px;
+            margin-bottom: 12px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-            transition: transform 0.2s;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            transition: var(--transition);
         }
         
         .upgrade-item:hover {
-            transform: translateY(-3px);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
         }
         
         .upgrade-info {
@@ -86,46 +182,60 @@
         }
         
         .upgrade-name {
-            font-weight: bold;
-            margin-bottom: 5px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+        
+        .upgrade-description {
+            font-size: 12px;
+            opacity: 0.7;
+            margin-bottom: 4px;
         }
         
         .upgrade-level {
-            color: #666;
-            font-size: 14px;
+            font-size: 12px;
+            color: var(--secondary-color);
         }
         
-        .upgrade-cost {
-            background: #4CAF50;
-            color: white;
+        .upgrade-btn {
+            background: var(--accent-color);
+            color: var(--bg-color);
             border: none;
-            padding: 8px 12px;
-            border-radius: 5px;
-            font-weight: bold;
+            padding: 8px 16px;
+            border-radius: var(--border-radius);
+            font-weight: 600;
             cursor: pointer;
+            transition: var(--transition);
+            min-width: 80px;
+            text-align: center;
         }
         
-        .upgrade-cost:disabled {
-            background: #ccc;
+        .upgrade-btn:disabled {
+            background: var(--disabled-color);
             cursor: not-allowed;
         }
         
         .tab-container {
             display: flex;
-            margin-bottom: 20px;
+            margin-bottom: 16px;
+            background: var(--card-color);
+            border-radius: var(--border-radius);
+            padding: 4px;
         }
         
         .tab {
             flex: 1;
             text-align: center;
-            padding: 10px;
-            background: #ddd;
+            padding: 12px;
             cursor: pointer;
+            border-radius: calc(var(--border-radius) - 4px);
+            transition: var(--transition);
+            font-weight: 500;
         }
         
         .tab.active {
-            background: #4CAF50;
-            color: white;
+            background: rgba(187, 134, 252, 0.2);
+            color: var(--accent-color);
         }
         
         .tab-content {
@@ -136,36 +246,75 @@
             display: block;
         }
         
-        .stats {
-            background: white;
-            border-radius: 10px;
-            padding: 15px;
-            margin-bottom: 20px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        .section-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin: 20px 0 12px;
         }
         
-        .stat-item {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 8px;
+        @keyframes coinSpin {
+            0% { transform: scale(1) rotate(0deg); }
+            50% { transform: scale(1.1) rotate(5deg); }
+            100% { transform: scale(1) rotate(0deg); }
         }
         
-        .stat-label {
-            color: #666;
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-5px); }
+            100% { transform: translateY(0px); }
         }
         
-        .stat-value {
-            font-weight: bold;
+        .spin {
+            animation: coinSpin 0.4s ease-out;
         }
         
-        @keyframes coinBounce {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.1); }
-            100% { transform: scale(1); }
+        .float {
+            animation: float 3s ease-in-out infinite;
         }
         
-        .bounce {
-            animation: coinBounce 0.3s;
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(187, 134, 252, 0.4); }
+            70% { box-shadow: 0 0 0 10px rgba(187, 134, 252, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(187, 134, 252, 0); }
+        }
+        
+        .notification {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--secondary-color);
+            color: var(--bg-color);
+            padding: 12px 24px;
+            border-radius: var(--border-radius);
+            font-weight: 600;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .notification.show {
+            opacity: 1;
+        }
+        
+        .progress-bar {
+            height: 4px;
+            background: var(--disabled-color);
+            border-radius: 2px;
+            margin-top: 8px;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: var(--secondary-color);
+            border-radius: 2px;
+            transition: width 0.3s ease;
         }
     </style>
 </head>
@@ -174,60 +323,104 @@
         <header>
             <div class="profile">
                 <img id="user-avatar" class="avatar" src="https://via.placeholder.com/50" alt="Avatar">
-                <span id="user-name">User</span>
+                <div>
+                    <div id="user-name">User</div>
+                    <div id="user-id" style="font-size: 12px; opacity: 0.7;"></div>
+                </div>
             </div>
-            <div class="balance" id="balance">0 SHDQ</div>
+            <button id="wallet-btn" class="wallet-btn">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M18 7H21C21.2652 7 21.5196 7.10536 21.7071 7.29289C21.8946 7.48043 22 7.73478 22 8V20C22 20.2652 21.8946 20.5196 21.7071 20.7071C21.5196 20.8946 21.2652 21 21 21H3C2.73478 21 2.48043 20.8946 2.29289 20.7071C2.10536 20.5196 2 20.2652 2 20V4C2 3.73478 2.10536 3.48043 2.29289 3.29289C2.48043 3.10536 2.73478 3 3 3H18V7Z" fill="currentColor"/>
+                    <path d="M18 7V3H6C5.46957 3 4.96086 3.21071 4.58579 3.58579C4.21071 3.96086 4 4.46957 4 5V19C4 19.5304 4.21071 20.0391 4.58579 20.4142C4.96086 20.7893 5.46957 21 6 21H18V17" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M15 14C15.5523 14 16 13.5523 16 13C16 12.4477 15.5523 12 15 12C14.4477 12 14 12.4477 14 13C14 13.5523 14.4477 14 15 14Z" fill="currentColor"/>
+                </svg>
+                Connect Wallet
+            </button>
         </header>
         
-        <div class="tab-container">
-            <div class="tab active" data-tab="tap">Tap</div>
-            <div class="tab" data-tab="upgrades">Upgrades</div>
-            <div class="tab" data-tab="stats">Stats</div>
+        <div class="balance-card float">
+            <div class="balance-label">Your Balance</div>
+            <div class="balance-amount" id="balance">0</div>
+            <div class="balance-label">SHDQ</div>
+            <div class="progress-bar">
+                <div class="progress-fill" id="balance-progress"></div>
+            </div>
         </div>
         
-        <div class="tab-content active" id="tap-tab">
-            <img src="https://via.placeholder.com/150/4CAF50/FFFFFF?text=SHDQ" alt="SHDQ Coin" class="coin" id="coin">
-            <div class="stats">
-                <div class="stat-item">
-                    <span class="stat-label">Coins per tap:</span>
-                    <span class="stat-value" id="coins-per-tap">1</span>
+        <div class="tab-container">
+            <div class="tab active" data-tab="main">Main</div>
+            <div class="tab" data-tab="upgrades">Upgrades</div>
+            <div class="tab" data-tab="wallet">Wallet</div>
+        </div>
+        
+        <div class="tab-content active" id="main-tab">
+            <div class="coin" id="coin">SHDQ</div>
+            
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-label">Per Tap</div>
+                    <div class="stat-value" id="coins-per-tap">1</div>
                 </div>
-                <div class="stat-item">
-                    <span class="stat-label">Coins per second:</span>
-                    <span class="stat-value" id="coins-per-second">0</span>
+                <div class="stat-card">
+                    <div class="stat-label">Per Second</div>
+                    <div class="stat-value" id="coins-per-second">0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Total Earned</div>
+                    <div class="stat-value" id="total-coins">0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Total Taps</div>
+                    <div class="stat-value" id="total-taps">0</div>
                 </div>
             </div>
         </div>
         
         <div class="tab-content" id="upgrades-tab">
-            <h2>Tap Upgrades</h2>
+            <div class="section-title">Tap Upgrades</div>
             <div class="upgrades" id="tap-upgrades">
-                <!-- Will be filled by JS -->
+                <!-- Filled by JS -->
             </div>
             
-            <h2>Auto Clickers</h2>
+            <div class="section-title">Auto Clickers</div>
             <div class="upgrades" id="auto-upgrades">
-                <!-- Will be filled by JS -->
+                <!-- Filled by JS -->
+            </div>
+            
+            <div class="section-title">Mega Upgrades</div>
+            <div class="upgrades" id="mega-upgrades">
+                <!-- Filled by JS -->
             </div>
         </div>
         
-        <div class="tab-content" id="stats-tab">
-            <div class="stats">
-                <div class="stat-item">
-                    <span class="stat-label">Total coins earned:</span>
-                    <span class="stat-value" id="total-coins">0</span>
+        <div class="tab-content" id="wallet-tab">
+            <div class="section-title">Wallet Connection</div>
+            <div class="stat-card">
+                <div class="stat-label">TON Wallet</div>
+                <div class="stat-value" id="wallet-address">Not connected</div>
+            </div>
+            
+            <div class="section-title">Transactions</div>
+            <div class="upgrades">
+                <div class="upgrade-item">
+                    <div class="upgrade-info">
+                        <div class="upgrade-name">Withdraw SHDQ</div>
+                        <div class="upgrade-description">Transfer your coins to your wallet</div>
+                    </div>
+                    <button class="upgrade-btn" id="withdraw-btn" disabled>Withdraw</button>
                 </div>
-                <div class="stat-item">
-                    <span class="stat-label">Total taps:</span>
-                    <span class="stat-value" id="total-taps">0</span>
-                </div>
-                <div class="stat-item">
-                    <span class="stat-label">Time played:</span>
-                    <span class="stat-value" id="time-played">0s</span>
+                <div class="upgrade-item">
+                    <div class="upgrade-info">
+                        <div class="upgrade-name">Deposit SHDQ</div>
+                        <div class="upgrade-description">Buy more coins with TON</div>
+                    </div>
+                    <button class="upgrade-btn" id="deposit-btn" disabled>Deposit</button>
                 </div>
             </div>
         </div>
     </div>
+
+    <div class="notification" id="notification"></div>
 
     <script>
         // Game state
@@ -241,15 +434,29 @@
                     level: 0,
                     cost: 10,
                     costMultiplier: 1.5,
-                    value: 1
+                    value: 1,
+                    name: "Tap Power",
+                    description: "Increase coins per tap"
                 },
                 autoClicker: {
                     level: 0,
                     cost: 50,
                     costMultiplier: 1.8,
-                    value: 0.1
+                    value: 0.1,
+                    name: "Auto Clicker",
+                    description: "Earn coins automatically"
+                },
+                megaBoost: {
+                    level: 0,
+                    cost: 1000,
+                    costMultiplier: 2.5,
+                    value: 2,
+                    name: "Mega Boost",
+                    description: "Double all your income"
                 }
             },
+            walletConnected: false,
+            walletAddress: null,
             lastSave: Date.now()
         };
 
@@ -260,11 +467,18 @@
         const coinsPerSecondEl = document.getElementById('coins-per-second');
         const totalCoinsEl = document.getElementById('total-coins');
         const totalTapsEl = document.getElementById('total-taps');
-        const timePlayedEl = document.getElementById('time-played');
         const tapUpgradesEl = document.getElementById('tap-upgrades');
         const autoUpgradesEl = document.getElementById('auto-upgrades');
+        const megaUpgradesEl = document.getElementById('mega-upgrades');
         const userAvatar = document.getElementById('user-avatar');
         const userName = document.getElementById('user-name');
+        const userId = document.getElementById('user-id');
+        const walletBtn = document.getElementById('wallet-btn');
+        const walletAddressEl = document.getElementById('wallet-address');
+        const withdrawBtn = document.getElementById('withdraw-btn');
+        const depositBtn = document.getElementById('deposit-btn');
+        const notification = document.getElementById('notification');
+        const balanceProgress = document.getElementById('balance-progress');
         
         // Tab switching
         const tabs = document.querySelectorAll('.tab');
@@ -287,12 +501,29 @@
         if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
             const user = tg.initDataUnsafe.user;
             userName.textContent = user.first_name || 'User';
+            userId.textContent = `@${user.username || 'user'}`;
             
             if (user.photo_url) {
                 userAvatar.src = user.photo_url;
             }
             
             tg.expand();
+            tg.enableClosingConfirmation();
+            
+            // Set theme params
+            const themeParams = tg.themeParams;
+            if (themeParams.bg_color) {
+                document.documentElement.style.setProperty('--bg-color', themeParams.bg_color);
+            }
+            if (themeParams.text_color) {
+                document.documentElement.style.setProperty('--text-color', themeParams.text_color);
+            }
+            if (themeParams.button_color) {
+                document.documentElement.style.setProperty('--accent-color', themeParams.button_color);
+            }
+            if (themeParams.secondary_bg_color) {
+                document.documentElement.style.setProperty('--card-color', themeParams.secondary_bg_color);
+            }
         }
 
         // Load game state from localStorage
@@ -301,10 +532,26 @@
             if (saved) {
                 try {
                     const parsed = JSON.parse(saved);
+                    
+                    // Calculate offline progress
+                    const now = Date.now();
+                    const offlineTime = now - (parsed.lastSave || now);
+                    const offlineSeconds = Math.min(offlineTime / 1000, 86400); // Max 24 hours
+                    
+                    // Add offline income
+                    if (offlineSeconds > 10) { // Only if offline for more than 10 seconds
+                        const offlineIncome = calculateCoinsPerSecond(parsed) * offlineSeconds;
+                        parsed.balance += offlineIncome;
+                        parsed.totalCoins += offlineIncome;
+                        parsed.playTime += offlineSeconds;
+                        
+                        showNotification(`+${formatNumber(Math.floor(offlineIncome))} SHDQ (offline)`);
+                    }
+                    
                     gameState = {
                         ...gameState,
                         ...parsed,
-                        lastSave: Date.now()
+                        lastSave: now
                     };
                 } catch (e) {
                     console.error('Failed to load game:', e);
@@ -320,39 +567,82 @@
 
         // Format number with commas
         function formatNumber(num) {
-            return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+            return num.toLocaleString('en');
+        }
+
+        // Show notification
+        function showNotification(message) {
+            notification.textContent = message;
+            notification.classList.add('show');
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
         }
 
         // Update UI with current game state
         function updateUI() {
-            balanceEl.textContent = `${formatNumber(Math.floor(gameState.balance))} SHDQ`;
+            balanceEl.textContent = formatNumber(Math.floor(gameState.balance));
             coinsPerTapEl.textContent = formatNumber(calculateTapPower());
             coinsPerSecondEl.textContent = formatNumber(calculateCoinsPerSecond());
-            totalCoinsEl.textContent = formatNumber(gameState.totalCoins);
+            totalCoinsEl.textContent = formatNumber(Math.floor(gameState.totalCoins));
             totalTapsEl.textContent = formatNumber(gameState.totalTaps);
             
-            // Update time played
-            const hours = Math.floor(gameState.playTime / 3600);
-            const minutes = Math.floor((gameState.playTime % 3600) / 60);
-            const seconds = Math.floor(gameState.playTime % 60);
+            // Update progress bar (visual indicator of progress to next 1000 coins)
+            const progress = (gameState.balance % 1000) / 10;
+            balanceProgress.style.width = `${progress}%`;
             
-            if (hours > 0) {
-                timePlayedEl.textContent = `${hours}h ${minutes}m ${seconds}s`;
-            } else if (minutes > 0) {
-                timePlayedEl.textContent = `${minutes}m ${seconds}s`;
+            // Update wallet UI
+            if (gameState.walletConnected) {
+                walletBtn.classList.add('wallet-connected');
+                walletBtn.innerHTML = `
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M9 12L11 14L15 10M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    Connected
+                `;
+                
+                const shortAddress = gameState.walletAddress 
+                    ? `${gameState.walletAddress.substring(0, 4)}...${gameState.walletAddress.substring(gameState.walletAddress.length - 4)}`
+                    : 'Connected';
+                walletAddressEl.textContent = shortAddress;
+                
+                withdrawBtn.disabled = false;
+                depositBtn.disabled = false;
             } else {
-                timePlayedEl.textContent = `${seconds}s`;
+                walletBtn.classList.remove('wallet-connected');
+                walletBtn.innerHTML = `
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M18 7H21C21.2652 7 21.5196 7.10536 21.7071 7.29289C21.8946 7.48043 22 7.73478 22 8V20C22 20.2652 21.8946 20.5196 21.7071 20.7071C21.5196 20.8946 21.2652 21 21 21H3C2.73478 21 2.48043 20.8946 2.29289 20.7071C2.10536 20.5196 2 20.2652 2 20V4C2 3.73478 2.10536 3.48043 2.29289 3.29289C2.48043 3.10536 2.73478 3 3 3H18V7Z" fill="currentColor"/>
+                        <path d="M18 7V3H6C5.46957 3 4.96086 3.21071 4.58579 3.58579C4.21071 3.96086 4 4.46957 4 5V19C4 19.5304 4.21071 20.0391 4.58579 20.4142C4.96086 20.7893 5.46957 21 6 21H18V17" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M15 14C15.5523 14 16 13.5523 16 13C16 12.4477 15.5523 12 15 12C14.4477 12 14 12.4477 14 13C14 13.5523 14.4477 14 15 14Z" fill="currentColor"/>
+                    </svg>
+                    Connect Wallet
+                `;
+                walletAddressEl.textContent = 'Not connected';
+                
+                withdrawBtn.disabled = true;
+                depositBtn.disabled = true;
             }
         }
 
         // Calculate total tap power
-        function calculateTapPower() {
-            return 1 + gameState.upgrades.tapPower.level * gameState.upgrades.tapPower.value;
+        function calculateTapPower(state = gameState) {
+            const basePower = 1;
+            const tapPower = state.upgrades.tapPower.level * state.upgrades.tapPower.value;
+            const megaBoost = state.upgrades.megaBoost.level > 0 ? 
+                Math.pow(state.upgrades.megaBoost.value, state.upgrades.megaBoost.level) : 1;
+            
+            return (basePower + tapPower) * megaBoost;
         }
 
         // Calculate coins per second from auto clickers
-        function calculateCoinsPerSecond() {
-            return gameState.upgrades.autoClicker.level * gameState.upgrades.autoClicker.value;
+        function calculateCoinsPerSecond(state = gameState) {
+            const autoClickers = state.upgrades.autoClicker.level * state.upgrades.autoClicker.value;
+            const megaBoost = state.upgrades.megaBoost.level > 0 ? 
+                Math.pow(state.upgrades.megaBoost.value, state.upgrades.megaBoost.level) : 1;
+            
+            return autoClickers * megaBoost;
         }
 
         // Handle coin tap
@@ -363,10 +653,34 @@
             gameState.totalCoins += coinsEarned;
             gameState.totalTaps += 1;
             
-            coin.classList.add('bounce');
-            setTimeout(() => coin.classList.remove('bounce'), 300);
+            coin.classList.add('spin');
+            setTimeout(() => coin.classList.remove('spin'), 400);
+            
+            // Show floating +X text
+            const plusText = document.createElement('div');
+            plusText.textContent = `+${formatNumber(coinsEarned)}`;
+            plusText.style.position = 'absolute';
+            plusText.style.color = '#BB86FC';
+            plusText.style.fontWeight = 'bold';
+            plusText.style.fontSize = '18px';
+            plusText.style.pointerEvents = 'none';
+            plusText.style.left = `${coin.getBoundingClientRect().left + coin.offsetWidth / 2 - 20}px`;
+            plusText.style.top = `${coin.getBoundingClientRect().top - 20}px';
+            plusText.style.opacity = '1';
+            plusText.style.transition = 'all 1s ease-out';
+            document.body.appendChild(plusText);
+            
+            setTimeout(() => {
+                plusText.style.opacity = '0';
+                plusText.style.top = `${coin.getBoundingClientRect().top - 60}px`;
+            }, 50);
+            
+            setTimeout(() => {
+                document.body.removeChild(plusText);
+            }, 1000);
             
             updateUI();
+            saveGame();
         }
 
         // Buy upgrade
@@ -378,9 +692,13 @@
                 gameState.balance -= cost;
                 upgrade.level += 1;
                 
+                showNotification(`${upgrade.name} upgraded to level ${upgrade.level}!`);
+                
                 updateUI();
                 renderUpgrades();
                 saveGame();
+            } else {
+                showNotification(`Not enough SHDQ! Need ${formatNumber(cost)}`);
             }
         }
 
@@ -390,10 +708,11 @@
             tapUpgradesEl.innerHTML = `
                 <div class="upgrade-item">
                     <div class="upgrade-info">
-                        <div class="upgrade-name">Tap Power</div>
+                        <div class="upgrade-name">${gameState.upgrades.tapPower.name}</div>
+                        <div class="upgrade-description">${gameState.upgrades.tapPower.description}</div>
                         <div class="upgrade-level">Level: ${gameState.upgrades.tapPower.level}</div>
                     </div>
-                    <button class="upgrade-cost" onclick="buyUpgrade('tapPower')" ${gameState.balance < Math.floor(gameState.upgrades.tapPower.cost * Math.pow(gameState.upgrades.tapPower.costMultiplier, gameState.upgrades.tapPower.level)) ? 'disabled' : ''}>
+                    <button class="upgrade-btn" onclick="buyUpgrade('tapPower')" ${gameState.balance < Math.floor(gameState.upgrades.tapPower.cost * Math.pow(gameState.upgrades.tapPower.costMultiplier, gameState.upgrades.tapPower.level)) ? 'disabled' : ''}>
                         ${formatNumber(Math.floor(gameState.upgrades.tapPower.cost * Math.pow(gameState.upgrades.tapPower.costMultiplier, gameState.upgrades.tapPower.level)))}
                     </button>
                 </div>
@@ -403,14 +722,90 @@
             autoUpgradesEl.innerHTML = `
                 <div class="upgrade-item">
                     <div class="upgrade-info">
-                        <div class="upgrade-name">Auto Clicker</div>
+                        <div class="upgrade-name">${gameState.upgrades.autoClicker.name}</div>
+                        <div class="upgrade-description">${gameState.upgrades.autoClicker.description}</div>
                         <div class="upgrade-level">Level: ${gameState.upgrades.autoClicker.level}</div>
                     </div>
-                    <button class="upgrade-cost" onclick="buyUpgrade('autoClicker')" ${gameState.balance < Math.floor(gameState.upgrades.autoClicker.cost * Math.pow(gameState.upgrades.autoClicker.costMultiplier, gameState.upgrades.autoClicker.level)) ? 'disabled' : ''}>
+                    <button class="upgrade-btn" onclick="buyUpgrade('autoClicker')" ${gameState.balance < Math.floor(gameState.upgrades.autoClicker.cost * Math.pow(gameState.upgrades.autoClicker.costMultiplier, gameState.upgrades.autoClicker.level)) ? 'disabled' : ''}>
                         ${formatNumber(Math.floor(gameState.upgrades.autoClicker.cost * Math.pow(gameState.upgrades.autoClicker.costMultiplier, gameState.upgrades.autoClicker.level)))}
                     </button>
                 </div>
             `;
+            
+            // Mega upgrades
+            megaUpgradesEl.innerHTML = `
+                <div class="upgrade-item">
+                    <div class="upgrade-info">
+                        <div class="upgrade-name">${gameState.upgrades.megaBoost.name}</div>
+                        <div class="upgrade-description">${gameState.upgrades.megaBoost.description}</div>
+                        <div class="upgrade-level">Level: ${gameState.upgrades.megaBoost.level}</div>
+                    </div>
+                    <button class="upgrade-btn" onclick="buyUpgrade('megaBoost')" ${gameState.balance < Math.floor(gameState.upgrades.megaBoost.cost * Math.pow(gameState.upgrades.megaBoost.costMultiplier, gameState.upgrades.megaBoost.level)) ? 'disabled' : ''}>
+                        ${formatNumber(Math.floor(gameState.upgrades.megaBoost.cost * Math.pow(gameState.upgrades.megaBoost.costMultiplier, gameState.upgrades.megaBoost.level)))}
+                    </button>
+                </div>
+            `;
+        }
+
+        // Connect TON wallet
+        async function connectWallet() {
+            if (window.ton) {
+                try {
+                    const accounts = await window.ton.send('ton_requestAccounts');
+                    if (accounts && accounts.length > 0) {
+                        gameState.walletConnected = true;
+                        gameState.walletAddress = accounts[0];
+                        showNotification('TON Wallet connected!');
+                        updateUI();
+                        saveGame();
+                    }
+                } catch (error) {
+                    console.error('Wallet connection error:', error);
+                    showNotification('Failed to connect wallet');
+                }
+            } else {
+                showNotification('TON Wallet extension not found');
+            }
+        }
+
+        // Withdraw coins
+        async function withdrawCoins() {
+            if (!gameState.walletConnected) {
+                showNotification('Connect wallet first');
+                return;
+            }
+            
+            if (gameState.balance < 1000) {
+                showNotification('Minimum withdrawal: 1000 SHDQ');
+                return;
+            }
+            
+            // In a real app, you would send a transaction here
+            showNotification(`Withdrawal request sent for ${formatNumber(Math.floor(gameState.balance))} SHDQ`);
+            
+            // Simulate withdrawal
+            gameState.balance = 0;
+            updateUI();
+            saveGame();
+        }
+
+        // Deposit coins
+        async function depositCoins() {
+            if (!gameState.walletConnected) {
+                showNotification('Connect wallet first');
+                return;
+            }
+            
+            // In a real app, you would process a payment here
+            showNotification('Redirecting to payment...');
+            
+            // Simulate deposit after delay
+            setTimeout(() => {
+                gameState.balance += 10000;
+                showNotification('+10,000 SHDQ deposited!');
+                updateUI();
+                saveGame();
+            }, 2000);
         }
 
         // Game loop for passive income
@@ -440,6 +835,9 @@
             
             // Set up event listeners
             coin.addEventListener('click', handleTap);
+            walletBtn.addEventListener('click', connectWallet);
+            withdrawBtn.addEventListener('click', withdrawCoins);
+            depositBtn.addEventListener('click', depositCoins);
             
             // Start game loop
             requestAnimationFrame(gameLoop);
