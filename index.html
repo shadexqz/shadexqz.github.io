@@ -3,163 +3,125 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bitcoin Clicker</title>
+    <title>Bitcoin Miner</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
+        :root {
+            --primary: #FF9500;
+            --primary-dark: #F7931A;
+            --secondary: #2DD4BF;
+            --dark: #1E293B;
+            --darker: #0F172A;
+            --light: #F8FAFC;
+            --gray: #94A3B8;
+            --success: #10B981;
+            --danger: #EF4444;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
         body {
-            font-family: 'Segoe UI', system-ui, sans-serif;
-            background: linear-gradient(135deg, #1a1a2e, #16213e);
-            color: #e6e6e6;
-            padding: 20px;
-            max-width: 100%;
-            overflow-x: hidden;
+            background-color: var(--darker);
+            color: var(--light);
+            min-height: 100vh;
+            padding-bottom: 80px;
         }
 
         .container {
             max-width: 600px;
             margin: 0 auto;
+            padding: 0 16px;
         }
 
+        /* Header */
         .header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 30px;
+            padding: 20px 0;
+            position: relative;
         }
 
         .logo {
             display: flex;
             align-items: center;
+            gap: 10px;
         }
 
-        .logo i {
-            font-size: 2rem;
-            color: #f7931a;
-            margin-right: 10px;
+        .logo-icon {
+            font-size: 28px;
+            color: var(--primary);
         }
 
-        .tabs {
+        .logo-text {
+            font-weight: 700;
+            font-size: 20px;
+            background: linear-gradient(to right, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .balance-container {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            padding: 10px 16px;
             display: flex;
-            margin-bottom: 20px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            align-items: center;
+            gap: 8px;
         }
 
-        .tab {
-            padding: 10px 20px;
-            cursor: pointer;
-            border-bottom: 3px solid transparent;
-            transition: all 0.3s;
+        .balance-icon {
+            color: var(--primary);
+            font-size: 16px;
         }
 
-        .tab.active {
-            border-bottom: 3px solid #f7931a;
-            color: #f7931a;
+        .balance-amount {
+            font-weight: 600;
+            font-size: 16px;
         }
 
-        .tab-content {
-            display: none;
-        }
-
-        .tab-content.active {
-            display: block;
-        }
-
-        .bitcoin-display {
+        /* Main game area */
+        .game-area {
+            margin-top: 30px;
             text-align: center;
+        }
+
+        .bitcoin-container {
+            position: relative;
             margin-bottom: 30px;
         }
 
         .bitcoin-icon {
-            color: #f7931a;
-            filter: drop-shadow(0 0 10px rgba(247, 147, 26, 0.5));
-            margin-bottom: 15px;
+            width: 150px;
+            height: 150px;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto;
+            font-size: 70px;
+            color: white;
+            box-shadow: 0 10px 30px rgba(247, 147, 26, 0.3);
+            cursor: pointer;
             transition: transform 0.2s;
+            user-select: none;
         }
 
-        .balance {
-            font-size: 2.5rem;
-            margin-bottom: 20px;
-            font-weight: bold;
-        }
-
-        .mine-btn {
-            background: linear-gradient(to right, #f7931a, #ffaa33);
-            border: none;
-            padding: 15px 30px;
-            font-size: 1.2rem;
-            border-radius: 50px;
-            color: white;
-            cursor: pointer;
-            transition: transform 0.1s;
-            box-shadow: 0 4px 15px rgba(247, 147, 26, 0.4));
-            width: 80%;
-            max-width: 300px;
-        }
-
-        .mine-btn:active {
+        .bitcoin-icon:active {
             transform: scale(0.95);
-        }
-
-        .upgrade-item {
-            display: flex;
-            align-items: center;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 10px;
-            padding: 15px;
-            margin-bottom: 15px;
-        }
-
-        .upgrade-item i {
-            font-size: 2rem;
-            margin-right: 15px;
-            color: #f7931a;
-        }
-
-        .upgrade-info {
-            flex-grow: 1;
-        }
-
-        .buy-btn {
-            background: linear-gradient(to right, #2a9d8f, #3abbb1);
-            border: none;
-            padding: 8px 15px;
-            border-radius: 20px;
-            color: white;
-            cursor: pointer;
-            transition: all 0.3s;
-            white-space: nowrap;
-        }
-
-        .buy-btn:disabled {
-            background: #666;
-            cursor: not-allowed;
-        }
-
-        .buy-btn:hover:not(:disabled) {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-        }
-
-        .stat-item {
-            display: flex;
-            align-items: center;
-            margin-bottom: 10px;
-            padding: 10px;
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 8px;
-        }
-
-        .stat-item i {
-            margin-right: 10px;
-            width: 20px;
-            color: #f7931a;
         }
 
         .click-effect {
             position: absolute;
             width: 20px;
             height: 20px;
-            background: rgba(247, 147, 26, 0.7);
+            background: rgba(255, 149, 0, 0.7);
             border-radius: 50%;
             pointer-events: none;
             transform: translate(-50%, -50%);
@@ -177,328 +139,808 @@
             }
         }
 
+        .stats-container {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-item {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            padding: 12px 16px;
+            min-width: 120px;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: var(--gray);
+            margin-bottom: 4px;
+        }
+
+        .stat-value {
+            font-weight: 600;
+            font-size: 16px;
+        }
+
+        /* Bottom navigation */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: var(--dark);
+            display: flex;
+            justify-content: space-around;
+            padding: 12px 0;
+            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.2);
+            z-index: 100;
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: var(--gray);
+            text-decoration: none;
+            font-size: 12px;
+            gap: 4px;
+            transition: color 0.2s;
+        }
+
+        .nav-item i {
+            font-size: 20px;
+        }
+
+        .nav-item.active {
+            color: var(--primary);
+        }
+
+        /* Tab content */
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Upgrades tab */
+        .upgrades-container {
+            margin-top: 20px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        .upgrade-card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            padding: 16px;
+            transition: transform 0.2s;
+        }
+
+        .upgrade-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .upgrade-icon {
+            width: 50px;
+            height: 50px;
+            background: rgba(255, 149, 0, 0.1);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            color: var(--primary);
+            margin-bottom: 12px;
+        }
+
+        .upgrade-name {
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .upgrade-effect {
+            font-size: 12px;
+            color: var(--secondary);
+            margin-bottom: 12px;
+        }
+
+        .upgrade-price {
+            font-size: 14px;
+            color: var(--gray);
+            margin-bottom: 12px;
+        }
+
+        .buy-btn {
+            width: 100%;
+            background: linear-gradient(to right, var(--primary), var(--primary-dark));
+            border: none;
+            border-radius: 8px;
+            padding: 8px;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+
+        .buy-btn:disabled {
+            background: var(--gray);
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+
+        /* Profile tab */
+        .profile-header {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-top: 20px;
+            margin-bottom: 30px;
+        }
+
+        .profile-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 36px;
+            color: white;
+        }
+
+        .profile-info h2 {
+            font-size: 20px;
+            margin-bottom: 4px;
+        }
+
+        .profile-info p {
+            color: var(--gray);
+            font-size: 14px;
+        }
+
+        .profile-stats {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .stat-row:last-child {
+            border-bottom: none;
+        }
+
+        .stat-title {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--gray);
+        }
+
+        .stat-title i {
+            width: 20px;
+            text-align: center;
+        }
+
+        /* Achievements tab */
+        .achievements-container {
+            margin-top: 20px;
+        }
+
+        .achievement-card {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 16px;
+        }
+
+        .achievement-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: rgba(255, 149, 0, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            color: var(--primary);
+        }
+
+        .achievement-info {
+            flex: 1;
+        }
+
+        .achievement-name {
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .achievement-desc {
+            font-size: 12px;
+            color: var(--gray);
+        }
+
+        .achievement-progress {
+            height: 4px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 2px;
+            margin-top: 8px;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(to right, var(--primary), var(--secondary));
+            width: 0%;
+            transition: width 0.3s;
+        }
+
+        .achievement-locked .achievement-icon {
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--gray);
+        }
+
+        .achievement-locked .achievement-name,
+        .achievement-locked .achievement-desc {
+            opacity: 0.6;
+        }
+
+        /* Notification */
         .notification {
             position: fixed;
             top: 20px;
             left: 50%;
             transform: translateX(-50%);
             background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
             color: white;
-            padding: 10px 20px;
-            border-radius: 5px;
-            z-index: 100;
+            padding: 12px 24px;
+            border-radius: 8px;
+            z-index: 1000;
             opacity: 0;
             transition: opacity 0.3s;
+            max-width: 90%;
+            text-align: center;
         }
 
         .notification.show {
             opacity: 1;
         }
 
-        .achievement {
-            display: flex;
-            align-items: center;
-            margin-bottom: 15px;
-            padding: 10px;
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 8px;
+        .notification.success {
+            background: rgba(16, 185, 129, 0.9);
         }
 
-        .achievement i {
-            font-size: 1.5rem;
-            margin-right: 15px;
-            color: #f7931a;
-        }
+        /* Responsive adjustments */
+        @media (max-width: 480px) {
+            .upgrades-container {
+                grid-template-columns: 1fr;
+            }
 
-        .achievement.locked {
-            opacity: 0.5;
-        }
+            .stats-container {
+                flex-direction: column;
+                align-items: center;
+            }
 
-        .achievement.locked i {
-            color: #666;
+            .stat-item {
+                width: 100%;
+                text-align: center;
+            }
+
+            .bitcoin-icon {
+                width: 120px;
+                height: 120px;
+                font-size: 50px;
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <div class="header">
+        <header class="header">
             <div class="logo">
-                <i class="fab fa-bitcoin"></i>
-                <h1>Bitcoin Clicker</h1>
+                <div class="logo-icon"><i class="fab fa-bitcoin"></i></div>
+                <div class="logo-text">Bitcoin Miner</div>
             </div>
-            <div class="balance">
-                <span id="balance">0</span> SAT
+            <div class="balance-container">
+                <div class="balance-icon"><i class="fas fa-coins"></i></div>
+                <div class="balance-amount" id="balance">0</div>
+                <div>SAT</div>
             </div>
-        </div>
+        </header>
 
-        <div class="tabs">
-            <div class="tab active" data-tab="main"><i class="fas fa-home"></i> Главная</div>
-            <div class="tab" data-tab="upgrades"><i class="fas fa-arrow-up-wide-short"></i> Улучшения</div>
-            <div class="tab" data-tab="stats"><i class="fas fa-chart-line"></i> Статистика</div>
-            <div class="tab" data-tab="achievements"><i class="fas fa-trophy"></i> Достижения</div>
-        </div>
-
-        <div id="main" class="tab-content active">
-            <div class="bitcoin-display">
-                <i class="fab fa-bitcoin fa-5x bitcoin-icon" id="bitcoin-icon"></i>
-                <button id="click-btn" class="mine-btn">
-                    <i class="fas fa-pickaxe"></i> Майнить
-                </button>
-            </div>
-        </div>
-
-        <div id="upgrades" class="tab-content">
-            <h3><i class="fas fa-arrow-up-wide-short"></i> Улучшения</h3>
-            
-            <div class="upgrade-item">
-                <i class="fas fa-gpu"></i>
-                <div class="upgrade-info">
-                    <h4>Мощная видеокарта</h4>
-                    <p>+5 SAT/клик</p>
+        <main class="game-area">
+            <!-- Main Tab -->
+            <div id="main-tab" class="tab-content active">
+                <div class="bitcoin-container">
+                    <div class="bitcoin-icon" id="bitcoin-btn">
+                        <i class="fab fa-bitcoin"></i>
+                    </div>
                 </div>
-                <button class="buy-btn" data-cost="100" data-upgrade="click">
-                    Купить <i class="fas fa-coins"></i> 100
-                </button>
-            </div>
 
-            <div class="upgrade-item">
-                <i class="fas fa-server"></i>
-                <div class="upgrade-info">
-                    <h4>Майнинг ферма</h4>
-                    <p>+1 SAT/сек</p>
-                </div>
-                <button class="buy-btn" data-cost="500" data-upgrade="auto">
-                    Купить <i class="fas fa-coins"></i> 500
-                </button>
-            </div>
-
-            <div class="upgrade-item">
-                <i class="fas fa-robot"></i>
-                <div class="upgrade-info">
-                    <h4>Майнинг бот</h4>
-                    <p>+5 SAT/сек</p>
-                </div>
-                <button class="buy-btn" data-cost="2500" data-upgrade="auto">
-                    Купить <i class="fas fa-coins"></i> 2500
-                </button>
-            </div>
-
-            <div class="upgrade-item">
-                <i class="fas fa-industry"></i>
-                <div class="upgrade-info">
-                    <h4>Майнинг завод</h4>
-                    <p>+25 SAT/сек</p>
-                </div>
-                <button class="buy-btn" data-cost="10000" data-upgrade="auto">
-                    Купить <i class="fas fa-coins"></i> 10000
-                </button>
-            </div>
-        </div>
-
-        <div id="stats" class="tab-content">
-            <h3><i class="fas fa-chart-line"></i> Статистика</h3>
-            <div class="stat-item">
-                <i class="fas fa-hand-pointer"></i>
-                <span>Всего кликов: <span id="total-clicks">0</span></span>
-            </div>
-            <div class="stat-item">
-                <i class="fas fa-bolt"></i>
-                <span>SAT/клик: <span id="per-click">1</span></span>
-            </div>
-            <div class="stat-item">
-                <i class="fas fa-clock"></i>
-                <span>SAT/сек: <span id="per-second">0</span></span>
-            </div>
-            <div class="stat-item">
-                <i class="fas fa-coins"></i>
-                <span>Всего добыто: <span id="total-earned">0</span> SAT</span>
-            </div>
-            <div class="stat-item">
-                <i class="fas fa-calendar"></i>
-                <span>Время игры: <span id="play-time">0</span> сек</span>
-            </div>
-        </div>
-
-        <div id="achievements" class="tab-content">
-            <h3><i class="fas fa-trophy"></i> Достижения</h3>
-            
-            <div class="achievement locked" data-achievement="first-click" data-required="1">
-                <i class="fas fa-award"></i>
-                <div>
-                    <h4>Первый шаг</h4>
-                    <p>Совершите первый клик</p>
+                <div class="stats-container">
+                    <div class="stat-item">
+                        <div class="stat-label">За клик</div>
+                        <div class="stat-value" id="per-click">1 SAT</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">В секунду</div>
+                        <div class="stat-value" id="per-second">0 SAT</div>
+                    </div>
                 </div>
             </div>
 
-            <div class="achievement locked" data-achievement="hundred-clicks" data-required="100">
-                <i class="fas fa-medal"></i>
-                <div>
-                    <h4>Усердный майнер</h4>
-                    <p>Совершите 100 кликов</p>
+            <!-- Upgrades Tab -->
+            <div id="upgrades-tab" class="tab-content">
+                <h2>Улучшения</h2>
+                <div class="upgrades-container" id="upgrades-container">
+                    <!-- Upgrades will be added here dynamically -->
                 </div>
             </div>
 
-            <div class="achievement locked" data-achievement="thousand-sat" data-required="1000">
-                <i class="fas fa-gem"></i>
-                <div>
-                    <h4>Богатенький</h4>
-                    <p>Заработайте 1000 SAT</p>
+            <!-- Profile Tab -->
+            <div id="profile-tab" class="tab-content">
+                <div class="profile-header">
+                    <div class="profile-avatar" id="user-avatar">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <div class="profile-info">
+                        <h2 id="username">Майнер</h2>
+                        <p>Уровень: <span id="user-level">1</span></p>
+                    </div>
+                </div>
+
+                <div class="profile-stats">
+                    <div class="stat-row">
+                        <div class="stat-title">
+                            <i class="fas fa-hand-pointer"></i>
+                            <span>Всего кликов</span>
+                        </div>
+                        <div class="stat-value" id="total-clicks">0</div>
+                    </div>
+                    <div class="stat-row">
+                        <div class="stat-title">
+                            <i class="fas fa-coins"></i>
+                            <span>Всего добыто</span>
+                        </div>
+                        <div class="stat-value" id="total-earned">0 SAT</div>
+                    </div>
+                    <div class="stat-row">
+                        <div class="stat-title">
+                            <i class="fas fa-clock"></i>
+                            <span>Время игры</span>
+                        </div>
+                        <div class="stat-value" id="play-time">0 сек</div>
+                    </div>
+                    <div class="stat-row">
+                        <div class="stat-title">
+                            <i class="fas fa-trophy"></i>
+                            <span>Достижения</span>
+                        </div>
+                        <div class="stat-value" id="achievements-count">0/8</div>
+                    </div>
                 </div>
             </div>
 
-            <div class="achievement locked" data-achievement="first-upgrade" data-required="1">
-                <i class="fas fa-star"></i>
-                <div>
-                    <h4>Инвестор</h4>
-                    <p>Купите первое улучшение</p>
+            <!-- Achievements Tab -->
+            <div id="achievements-tab" class="tab-content">
+                <h2>Достижения</h2>
+                <div class="achievements-container" id="achievements-container">
+                    <!-- Achievements will be added here dynamically -->
                 </div>
             </div>
-        </div>
+        </main>
     </div>
 
-    <div id="notification" class="notification"></div>
+    <!-- Bottom Navigation -->
+    <nav class="bottom-nav">
+        <a href="#" class="nav-item active" data-tab="main-tab">
+            <i class="fas fa-home"></i>
+            <span>Главная</span>
+        </a>
+        <a href="#" class="nav-item" data-tab="upgrades-tab">
+            <i class="fas fa-arrow-up"></i>
+            <span>Улучшения</span>
+        </a>
+        <a href="#" class="nav-item" data-tab="profile-tab">
+            <i class="fas fa-user"></i>
+            <span>Профиль</span>
+        </a>
+        <a href="#" class="nav-item" data-tab="achievements-tab">
+            <i class="fas fa-trophy"></i>
+            <span>Достижения</span>
+        </a>
+    </nav>
+
+    <!-- Notification -->
+    <div class="notification" id="notification"></div>
 
     <script>
-        // Игровые переменные
-        let balance = 0;
-        let perClick = 1;
-        let perSecond = 0;
-        let totalClicks = 0;
-        let totalEarned = 0;
-        let playTime = 0;
-        let achievements = {
-            'first-click': false,
-            'hundred-clicks': false,
-            'thousand-sat': false,
-            'first-upgrade': false
+        // Game state
+        const gameState = {
+            balance: 0,
+            perClick: 1,
+            perSecond: 0,
+            totalClicks: 0,
+            totalEarned: 0,
+            playTime: 0,
+            upgrades: [
+                { id: 'gpu', name: 'Видеокарта', icon: 'fa-microchip', effect: '+1 SAT/клик', price: 100, value: 1, owned: false, type: 'click' },
+                { id: 'farm', name: 'Ферма', icon: 'fa-server', effect: '+1 SAT/сек', price: 500, value: 1, owned: false, type: 'auto' },
+                { id: 'bot', name: 'Майнинг бот', icon: 'fa-robot', effect: '+5 SAT/сек', price: 2500, value: 5, owned: false, type: 'auto' },
+                { id: 'factory', name: 'Завод', icon: 'fa-industry', effect: '+10 SAT/сек', price: 10000, value: 10, owned: false, type: 'auto' },
+                { id: 'asic', name: 'ASIC', icon: 'fa-microchip', effect: '+5 SAT/клик', price: 5000, value: 5, owned: false, type: 'click' },
+                { id: 'mining-pool', name: 'Пулы', icon: 'fa-network-wired', effect: '+25 SAT/сек', price: 50000, value: 25, owned: false, type: 'auto' },
+                { id: 'quantum', name: 'Квантовый компьютер', icon: 'fa-atom', effect: '+100 SAT/сек', price: 250000, value: 100, owned: false, type: 'auto' },
+                { id: 'blockchain', name: 'Собственный блокчейн', icon: 'fa-link', effect: '+500 SAT/сек', price: 1000000, value: 500, owned: false, type: 'auto' }
+            ],
+            achievements: [
+                { id: 'first-click', name: 'Первый шаг', description: 'Совершите первый клик', icon: 'fa-award', required: 1, progress: 0, unlocked: false },
+                { id: 'hundred-clicks', name: 'Усердный майнер', description: '100 кликов', icon: 'fa-medal', required: 100, progress: 0, unlocked: false },
+                { id: 'thousand-clicks', name: 'Профессионал', description: '1,000 кликов', icon: 'fa-trophy', required: 1000, progress: 0, unlocked: false },
+                { id: 'first-upgrade', name: 'Инвестор', description: 'Купите первое улучшение', icon: 'fa-star', required: 1, progress: 0, unlocked: false },
+                { id: 'thousand-sat', name: 'Богатенький', description: 'Заработайте 1,000 SAT', icon: 'fa-coins', required: 1000, progress: 0, unlocked: false },
+                { id: 'million-sat', name: 'Криптовалютный магнат', description: 'Заработайте 1,000,000 SAT', icon: 'fa-gem', required: 1000000, progress: 0, unlocked: false },
+                { id: 'all-upgrades', name: 'Максимальная мощность', description: 'Купите все улучшения', icon: 'fa-crown', required: 8, progress: 0, unlocked: false },
+                { id: 'full-auto', name: 'Автоматизация', description: 'Зарабатывайте 1,000 SAT/сек', icon: 'fa-cogs', required: 1000, progress: 0, unlocked: false }
+            ],
+            username: 'Майнер',
+            level: 1
         };
 
-        // Элементы DOM
+        // DOM elements
         const balanceElement = document.getElementById('balance');
-        const clickBtn = document.getElementById('click-btn');
         const perClickElement = document.getElementById('per-click');
         const perSecondElement = document.getElementById('per-second');
         const totalClicksElement = document.getElementById('total-clicks');
         const totalEarnedElement = document.getElementById('total-earned');
         const playTimeElement = document.getElementById('play-time');
-        const bitcoinIcon = document.getElementById('bitcoin-icon');
+        const achievementsCountElement = document.getElementById('achievements-count');
+        const bitcoinBtn = document.getElementById('bitcoin-btn');
+        const upgradesContainer = document.getElementById('upgrades-container');
+        const achievementsContainer = document.getElementById('achievements-container');
         const notification = document.getElementById('notification');
-
-        // Табы
-        const tabs = document.querySelectorAll('.tab');
+        const usernameElement = document.getElementById('username');
+        const userLevelElement = document.getElementById('user-level');
+        const userAvatar = document.getElementById('user-avatar');
+        const navItems = document.querySelectorAll('.nav-item');
         const tabContents = document.querySelectorAll('.tab-content');
 
-        tabs.forEach(tab => {
-            tab.addEventListener('click', () => {
-                tabs.forEach(t => t.classList.remove('active'));
-                tabContents.forEach(c => c.classList.remove('active'));
-                
-                tab.classList.add('active');
-                document.getElementById(tab.dataset.tab).classList.add('active');
-            });
-        });
-
-        // Клик по кнопке майнинга
-        clickBtn.addEventListener('click', () => {
-            balance += perClick;
-            totalEarned += perClick;
-            totalClicks++;
+        // Initialize the game
+        function initGame() {
+            loadGame();
+            renderUpgrades();
+            renderAchievements();
             updateUI();
+            setupEventListeners();
+            startGameLoop();
             
-            // Анимация клика
-            bitcoinIcon.style.transform = 'scale(1.1)';
-            setTimeout(() => {
-                bitcoinIcon.style.transform = 'scale(1)';
-            }, 200);
+            // Check if this is a first visit
+            if (!localStorage.getItem('bitcoinMinerFirstVisit')) {
+                showNotification('Добро пожаловать в Bitcoin Miner!');
+                localStorage.setItem('bitcoinMinerFirstVisit', 'true');
+            }
+        }
 
-            // Проверка достижений
-            checkAchievement('first-click', 1);
-            checkAchievement('hundred-clicks', totalClicks);
-        });
-
-        // Покупка улучшений
-        document.querySelectorAll('.buy-btn').forEach(btn => {
-            btn.addEventListener('click', function() {
-                const cost = parseInt(this.dataset.cost);
-                if (balance >= cost) {
-                    balance -= cost;
-                    
-                    if (this.dataset.upgrade === 'click') {
-                        perClick += 5;
-                    } else if (this.dataset.upgrade === 'auto') {
-                        perSecond += parseInt(this.parentElement.querySelector('p').textContent.match(/\d+/)[0]);
-                    }
-                    
-                    this.disabled = true;
-                    this.innerHTML = '<i class="fas fa-check"></i> Куплено';
-                    
-                    // Проверка достижения
-                    checkAchievement('first-upgrade', 1);
-                    
-                    updateUI();
-                    showNotification('Улучшение куплено!');
-                } else {
-                    showNotification('Недостаточно SAT!');
+        // Set up event listeners
+        function setupEventListeners() {
+            // Bitcoin click button
+            bitcoinBtn.addEventListener('click', handleClick);
+            
+            // Navigation tabs
+            navItems.forEach(item => {
+                item.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const tabId = item.getAttribute('data-tab');
+                    switchTab(tabId);
+                });
+            });
+            
+            // Click effects
+            document.addEventListener('click', (e) => {
+                if (e.target === bitcoinBtn || e.target.closest('#bitcoin-btn')) {
+                    createClickEffect(e.clientX, e.clientY);
                 }
             });
-        });
-
-        // Пассивный доход
-        setInterval(() => {
-            balance += perSecond;
-            totalEarned += perSecond;
-            playTime++;
-            updateUI();
-            
-            // Проверка достижения
-            checkAchievement('thousand-sat', balance);
-        }, 1000);
-
-        // Обновление интерфейса
-        function updateUI() {
-            balanceElement.textContent = balance.toLocaleString();
-            perClickElement.textContent = perClick.toLocaleString();
-            perSecondElement.textContent = perSecond.toLocaleString();
-            totalClicksElement.textContent = totalClicks.toLocaleString();
-            totalEarnedElement.textContent = totalEarned.toLocaleString();
-            playTimeElement.textContent = playTime.toLocaleString();
         }
 
-        // Уведомления
-        function showNotification(message) {
+        // Handle bitcoin click
+        function handleClick() {
+            gameState.balance += gameState.perClick;
+            gameState.totalEarned += gameState.perClick;
+            gameState.totalClicks++;
+            
+            // Animate button
+            bitcoinBtn.style.transform = 'scale(0.95)';
+            setTimeout(() => {
+                bitcoinBtn.style.transform = 'scale(1)';
+            }, 100);
+            
+            // Check achievements
+            checkAchievement('first-click', 1);
+            checkAchievement('hundred-clicks', gameState.totalClicks);
+            checkAchievement('thousand-clicks', gameState.totalClicks);
+            
+            updateUI();
+            saveGame();
+        }
+
+        // Create click effect animation
+        function createClickEffect(x, y) {
+            const effect = document.createElement('div');
+            effect.className = 'click-effect';
+            effect.style.left = `${x}px`;
+            effect.style.top = `${y}px`;
+            document.body.appendChild(effect);
+            
+            setTimeout(() => {
+                effect.remove();
+            }, 1000);
+        }
+
+        // Switch between tabs
+        function switchTab(tabId) {
+            // Update active nav item
+            navItems.forEach(item => {
+                item.classList.remove('active');
+                if (item.getAttribute('data-tab') === tabId) {
+                    item.classList.add('active');
+                }
+            });
+            
+            // Update active tab content
+            tabContents.forEach(tab => {
+                tab.classList.remove('active');
+                if (tab.id === tabId) {
+                    tab.classList.add('active');
+                }
+            });
+        }
+
+        // Render upgrades in the shop
+        function renderUpgrades() {
+            upgradesContainer.innerHTML = '';
+            
+            gameState.upgrades.forEach(upgrade => {
+                const upgradeCard = document.createElement('div');
+                upgradeCard.className = 'upgrade-card';
+                upgradeCard.innerHTML = `
+                    <div class="upgrade-icon">
+                        <i class="fas ${upgrade.icon}"></i>
+                    </div>
+                    <div class="upgrade-name">${upgrade.name}</div>
+                    <div class="upgrade-effect">${upgrade.effect}</div>
+                    <div class="upgrade-price">${formatNumber(upgrade.price)} SAT</div>
+                    <button class="buy-btn" 
+                            data-id="${upgrade.id}" 
+                            ${upgrade.owned || gameState.balance < upgrade.price ? 'disabled' : ''}>
+                        ${upgrade.owned ? '<i class="fas fa-check"></i> Куплено' : 'Купить'}
+                    </button>
+                `;
+                
+                upgradesContainer.appendChild(upgradeCard);
+            });
+            
+            // Add event listeners to buy buttons
+            document.querySelectorAll('.buy-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const upgradeId = btn.getAttribute('data-id');
+                    buyUpgrade(upgradeId);
+                });
+            });
+        }
+
+        // Buy an upgrade
+        function buyUpgrade(id) {
+            const upgrade = gameState.upgrades.find(u => u.id === id);
+            
+            if (!upgrade || upgrade.owned || gameState.balance < upgrade.price) return;
+            
+            gameState.balance -= upgrade.price;
+            upgrade.owned = true;
+            
+            if (upgrade.type === 'click') {
+                gameState.perClick += upgrade.value;
+            } else if (upgrade.type === 'auto') {
+                gameState.perSecond += upgrade.value;
+            }
+            
+            // Check achievements
+            checkAchievement('first-upgrade', 1);
+            
+            const ownedUpgrades = gameState.upgrades.filter(u => u.owned).length;
+            checkAchievement('all-upgrades', ownedUpgrades);
+            
+            updateUI();
+            renderUpgrades();
+            showNotification(`Улучшение "${upgrade.name}" куплено!`, 'success');
+            saveGame();
+        }
+
+        // Render achievements
+        function renderAchievements() {
+            achievementsContainer.innerHTML = '';
+            
+            gameState.achievements.forEach(ach => {
+                const progress = Math.min(ach.progress / ach.required * 100, 100);
+                const isUnlocked = ach.unlocked || ach.progress >= ach.required;
+                
+                const achievementCard = document.createElement('div');
+                achievementCard.className = `achievement-card ${isUnlocked ? '' : 'achievement-locked'}`;
+                achievementCard.innerHTML = `
+                    <div class="achievement-icon">
+                        <i class="fas ${ach.icon}"></i>
+                    </div>
+                    <div class="achievement-info">
+                        <div class="achievement-name">${ach.name}</div>
+                        <div class="achievement-desc">${ach.description}</div>
+                        ${!isUnlocked ? `
+                        <div class="achievement-progress">
+                            <div class="progress-bar" style="width: ${progress}%"></div>
+                        </div>
+                        ` : ''}
+                    </div>
+                    ${isUnlocked ? '<i class="fas fa-check-circle" style="color: var(--success);"></i>' : ''}
+                `;
+                
+                achievementsContainer.appendChild(achievementCard);
+            });
+            
+            // Update achievements count
+            const unlockedCount = gameState.achievements.filter(a => a.unlocked).length;
+            achievementsCountElement.textContent = `${unlockedCount}/${gameState.achievements.length}`;
+        }
+
+        // Check achievements progress
+        function checkAchievement(id, value) {
+            const achievement = gameState.achievements.find(a => a.id === id);
+            if (!achievement || achievement.unlocked) return;
+            
+            achievement.progress = value;
+            
+            if (achievement.progress >= achievement.required && !achievement.unlocked) {
+                achievement.unlocked = true;
+                showNotification(`Достижение получено: ${achievement.name}`, 'success');
+                
+                // Check if all achievements are unlocked
+                const allUnlocked = gameState.achievements.every(a => a.unlocked);
+                if (allUnlocked) {
+                    showNotification('Поздравляем! Вы получили все достижения!', 'success');
+                }
+                
+                renderAchievements();
+                saveGame();
+            }
+        }
+
+        // Update all UI elements
+        function updateUI() {
+            balanceElement.textContent = formatNumber(gameState.balance);
+            perClickElement.textContent = `${formatNumber(gameState.perClick)} SAT`;
+            perSecondElement.textContent = `${formatNumber(gameState.perSecond)} SAT`;
+            totalClicksElement.textContent = formatNumber(gameState.totalClicks);
+            totalEarnedElement.textContent = `${formatNumber(gameState.totalEarned)} SAT`;
+            playTimeElement.textContent = `${formatNumber(gameState.playTime)} сек`;
+            
+            // Update username and level
+            usernameElement.textContent = gameState.username;
+            userLevelElement.textContent = gameState.level;
+            
+            // Check other achievements
+            checkAchievement('thousand-sat', gameState.totalEarned);
+            checkAchievement('million-sat', gameState.totalEarned);
+            checkAchievement('full-auto', gameState.perSecond);
+        }
+
+        // Format numbers with commas
+        function formatNumber(num) {
+            return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+        }
+
+        // Show notification
+        function showNotification(message, type = '') {
             notification.textContent = message;
+            notification.className = 'notification';
+            if (type) notification.classList.add(type);
             notification.classList.add('show');
+            
             setTimeout(() => {
                 notification.classList.remove('show');
-            }, 2000);
+            }, 3000);
         }
 
-        // Проверка достижений
-        function checkAchievement(id, value) {
-            const achievement = document.querySelector(`[data-achievement="${id}"]`);
-            const required = parseInt(achievement?.dataset.required);
-            
-            if (!achievements[id] && value >= required) {
-                achievements[id] = true;
-                achievement.classList.remove('locked');
-                showNotification(`Достижение получено: ${achievement.querySelector('h4').textContent}`);
-            }
-        }
-
-        // Эффекты кликов
-        document.addEventListener('click', function(e) {
-            if (e.target === clickBtn || e.target.closest('#click-btn')) {
-                const clickEffect = document.createElement('div');
-                clickEffect.className = 'click-effect';
-                clickEffect.style.left = `${e.clientX}px`;
-                clickEffect.style.top = `${e.clientY}px`;
-                document.body.appendChild(clickEffect);
+        // Game loop for passive income
+        function startGameLoop() {
+            setInterval(() => {
+                gameState.balance += gameState.perSecond;
+                gameState.totalEarned += gameState.perSecond;
+                gameState.playTime++;
                 
-                setTimeout(() => {
-                    clickEffect.remove();
-                }, 1000);
-            }
-        });
+                updateUI();
+                saveGame();
+            }, 1000);
+        }
+
+        // Save game state to localStorage
+        function saveGame() {
+            const saveData = {
+                balance: gameState.balance,
+                perClick: gameState.perClick,
+                perSecond: gameState.perSecond,
+                totalClicks: gameState.totalClicks,
+                totalEarned: gameState.totalEarned,
+                playTime: gameState.playTime,
+                upgrades: gameState.upgrades,
+                achievements: gameState.achievements,
+                username: gameState.username,
+                level: gameState.level
+            };
+            
+            localStorage.setItem('bitcoinMinerSave', JSON.stringify(saveData));
+        }
+
+        // Load game state from localStorage
+        function loadGame() {
+            const saveData = localStorage.getItem('bitcoinMinerSave');
+            if (!saveData) return;
+            
+            const loadedData = JSON.parse(saveData);
+            
+            // Apply loaded data
+            gameState.balance = loadedData.balance || 0;
+            gameState.perClick = loadedData.perClick || 1;
+            gameState.perSecond = loadedData.perSecond || 0;
+            gameState.totalClicks = loadedData.totalClicks || 0;
+            gameState.totalEarned = loadedData.totalEarned || 0;
+            gameState.playTime = loadedData.playTime || 0;
+            gameState.upgrades = loadedData.upgrades || gameState.upgrades;
+            gameState.achievements = loadedData.achievements || gameState.achievements;
+            gameState.username = loadedData.username || 'Майнер';
+            gameState.level = loadedData.level || 1;
+            
+            // Calculate level based on total earned
+            gameState.level = Math.floor(Math.log10(gameState.totalEarned + 1)) + 1;
+            
+            // Update avatar based on level
+            updateAvatar();
+        }
+
+        // Update user avatar based on level
+        function updateAvatar() {
+            const level = gameState.level;
+            let icon = 'fa-user';
+            
+            if (level >= 10) icon = 'fa-crown';
+            else if (level >= 7) icon = 'fa-user-tie';
+            else if (level >= 5) icon = 'fa-user-astronaut';
+            else if (level >= 3) icon = 'fa-user-ninja';
+            
+            userAvatar.innerHTML = `<i class="fas ${icon}"></i>`;
+        }
+
+        // Initialize the game when DOM is loaded
+        document.addEventListener('DOMContentLoaded', initGame);
     </script>
 </body>
 </html>
