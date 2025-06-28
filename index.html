@@ -3,65 +3,536 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pixel Miner Tycoon</title>
-    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css">
-    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore-compat.js"></script>
-    <script src="firebase.js"></script>
+    <title>HookahAtHome</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+        .container {
+            max-width: 100%;
+            padding: 15px;
+            box-sizing: border-box;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .header img {
+            max-width: 100%;
+            border-radius: 10px;
+            margin-bottom: 10px;
+        }
+        .header h1 {
+            color: #2c3e50;
+            margin: 0;
+        }
+        .section {
+            background-color: white;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .section-title {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #2c3e50;
+        }
+        .btn-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 10px;
+        }
+        .btn {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 10px 15px;
+            font-size: 14px;
+            cursor: pointer;
+            flex: 1 1 calc(50% - 8px);
+            min-width: 0;
+            text-align: center;
+            transition: background-color 0.3s;
+        }
+        .btn:hover {
+            background-color: #2980b9;
+        }
+        .btn-secondary {
+            background-color: #95a5a6;
+        }
+        .btn-secondary:hover {
+            background-color: #7f8c8d;
+        }
+        .btn-danger {
+            background-color: #e74c3c;
+        }
+        .btn-danger:hover {
+            background-color: #c0392b;
+        }
+        .btn-success {
+            background-color: #2ecc71;
+        }
+        .btn-success:hover {
+            background-color: #27ae60;
+        }
+        .order-summary {
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 15px;
+        }
+        .order-item {
+            margin-bottom: 8px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #eee;
+        }
+        .order-item:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+        .price {
+            font-weight: bold;
+            color: #27ae60;
+        }
+        .total {
+            font-size: 18px;
+            font-weight: bold;
+            margin-top: 10px;
+            color: #2c3e50;
+        }
+        .payment-details {
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            padding: 12px;
+            margin-top: 15px;
+        }
+        .hidden {
+            display: none;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        .form-group input, .form-group textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+        .emoji {
+            font-size: 20px;
+            margin-right: 5px;
+        }
+        .back-btn {
+            margin-bottom: 15px;
+        }
+    </style>
 </head>
 <body>
-    <div class="game-container">
-        <header>
-            <h1>⛏️ PIXEL MINER TYCOON</h1>
-            <div class="stats">
-                <div class="stat">
-                    <span id="gold-value">0</span>
-                    <img src="assets/ores/gold.png" alt="Gold" class="ore-icon">
-                </div>
-                <div class="stat">
-                    <span id="depth-value">0m</span>
-                    <img src="assets/icons/depth.png" alt="Depth" class="ore-icon">
+    <div class="container">
+        <!-- Главный экран -->
+        <div id="main-screen">
+            <div class="header">
+                <img src="https://via.placeholder.com/300x200?text=HookahAtHome" alt="HookahAtHome" id="header-image">
+                <h1>HookahAtHome</h1>
+                <p>Добро пожаловать в наш сервис доставки кальянов!</p>
+            </div>
+            
+            <div class="section">
+                <div class="section-title">Выберите действие:</div>
+                <button class="btn" onclick="showScreen('new-order')">🛍 Сделать заказ</button>
+                <button class="btn btn-secondary" onclick="showScreen('my-orders')">📋 Мои заказы</button>
+                <button class="btn btn-secondary" onclick="contactSupport()">🆘 Поддержка</button>
+            </div>
+        </div>
+        
+        <!-- Экран нового заказа -->
+        <div id="new-order" class="hidden">
+            <button class="btn back-btn" onclick="showScreen('main-screen')">← Назад</button>
+            
+            <div class="section">
+                <div class="section-title"><span class="emoji">🍇</span> Выберите вкус:</div>
+                <div class="btn-group">
+                    <button class="btn" onclick="selectFlavor('Арарам')">🍇 Арарам</button>
+                    <button class="btn" onclick="selectFlavor('Барбарис-конфетти')">🍬 Барбарис-конфетти</button>
+                    <button class="btn" onclick="selectFlavor('Арбуз')">🍉 Арбуз</button>
+                    <button class="btn" onclick="selectFlavor('Смородина')">🫐 Смородина</button>
+                    <button class="btn" onclick="selectFlavor('Вишня-макарун')">🍒 Вишня-макарун</button>
+                    <button class="btn" onclick="selectFlavor('Тропический напиток с розой')">🌹 Тропический напиток с розой</button>
+                    <button class="btn" onclick="selectFlavor('Ежевика')">🫐 Ежевика</button>
+                    <button class="btn" onclick="selectFlavor('Земляника со сливками')">🍓 Земляника со сливками</button>
+                    <button class="btn" onclick="selectFlavor('Яблочные конфеты')">🍏 Яблочные конфеты</button>
                 </div>
             </div>
-        </header>
-
-        <main>
-            <div class="mine-area">
-                <div class="depth-meter">
-                    <div class="depth-fill" id="depth-fill"></div>
+        </div>
+        
+        <!-- Экран выбора наполнения -->
+        <div id="liquid-screen" class="hidden">
+            <button class="btn back-btn" onclick="showScreen('new-order')">← Назад</button>
+            
+            <div class="section">
+                <div class="section-title"><span class="emoji">💧</span> Выберите наполнение для колбы:</div>
+                <div class="btn-group">
+                    <button class="btn" onclick="selectLiquid('Кола', 250)">🥤 Кола (+250₽)</button>
+                    <button class="btn" onclick="selectLiquid('Молоко', 250)">🥛 Молоко (+250₽)</button>
+                    <button class="btn" onclick="selectLiquid('Вино', 250)">🍷 Вино (+250₽)</button>
+                    <button class="btn" onclick="selectLiquid('Чай', 250)">🍵 Чай (+250₽)</button>
+                    <button class="btn" onclick="selectLiquid('Фанта', 250)">🍊 Фанта (+250₽)</button>
+                    <button class="btn" onclick="selectLiquid('Без наполнения', 0)">🚫 Без наполнения</button>
                 </div>
-                <button id="mine-btn" class="pixel-btn">
-                    <img src="assets/pickaxes/wood.png" id="pickaxe-img" alt="Pickaxe">
-                </button>
-                <div class="miner-animation" id="miner-animation"></div>
             </div>
-
-            <div class="notification" id="notification"></div>
-
-            <div class="shop">
-                <h2>🛒 МАГАЗИН КИРОК</h2>
-                <div class="pickaxes-grid" id="pickaxes-grid"></div>
+        </div>
+        
+        <!-- Экран выбора фруктовой основы -->
+        <div id="fruit-screen" class="hidden">
+            <button class="btn back-btn" onclick="showScreen('liquid-screen')">← Назад</button>
+            
+            <div class="section">
+                <div class="section-title"><span class="emoji">🍊</span> Выберите фруктовую основу:</div>
+                <div class="btn-group">
+                    <button class="btn" onclick="selectFruitBase('Апельсин', 250)">🍊 Апельсин (+250₽)</button>
+                    <button class="btn" onclick="selectFruitBase('Грейпфрут', 250)">🍇 Грейпфрут (+250₽)</button>
+                    <button class="btn" onclick="selectFruitBase('Мандарин', 250)">🍊 Мандарин (+250₽)</button>
+                    <button class="btn" onclick="selectFruitBase('Без основы', 0)">🚫 Без фруктовой основы</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Экран выбора крепости -->
+        <div id="strength-screen" class="hidden">
+            <button class="btn back-btn" onclick="showScreen('fruit-screen')">← Назад</button>
+            
+            <div class="section">
+                <div class="section-title"><span class="emoji">⚡</span> Выберите крепость:</div>
+                <div class="btn-group">
+                    <button class="btn" onclick="selectStrength('Легкая')">🌱 Легкая</button>
+                    <button class="btn" onclick="selectStrength('Средняя')">🍃 Средняя</button>
+                    <button class="btn" onclick="selectStrength('Крепкая')">💪 Крепкая</button>
+                    <button class="btn" onclick="selectStrength('Очень крепкая')">🔥 Очень крепкая</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Экран выбора города -->
+        <div id="city-screen" class="hidden">
+            <button class="btn back-btn" onclick="showScreen('strength-screen')">← Назад</button>
+            
+            <div class="section">
+                <div class="section-title"><span class="emoji">📍</span> Выберите город доставки:</div>
+                <div class="btn-group">
+                    <button class="btn" onclick="selectCity('Валуйки', 0)">🏙 Валуйки (бесплатно)</button>
+                    <button class="btn" onclick="selectCity('Другой город', 500)">🚕 Другой город (+500 руб)</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Экран ввода адреса -->
+        <div id="address-screen" class="hidden">
+            <button class="btn back-btn" onclick="showScreen('city-screen')">← Назад</button>
+            
+            <div class="section">
+                <div class="section-title"><span class="emoji">🏠</span> Введите адрес доставки:</div>
+                <div class="form-group">
+                    <textarea id="address-input" rows="4" placeholder="Улица, дом, квартира, подъезд, код"></textarea>
+                </div>
+                <button class="btn btn-success" onclick="submitOrder()">✅ Подтвердить заказ</button>
+            </div>
+        </div>
+        
+        <!-- Экран подтверждения заказа -->
+        <div id="order-confirmation" class="hidden">
+            <div class="section">
+                <div class="section-title" style="text-align: center; color: #27ae60;">✨ ЗАКАЗ ПРИНЯТ! ✨</div>
                 
-                <h2>⚙️ УЛУЧШЕНИЯ</h2>
-                <div class="upgrades-grid" id="upgrades-grid"></div>
+                <div class="order-summary">
+                    <div id="order-details"></div>
+                </div>
+                
+                <div class="payment-details">
+                    <div class="section-title"><span class="emoji">💳</span> Реквизиты для оплаты:</div>
+                    <p><b>Т-Банк</b></p>
+                    <p id="card-number">0000 0000 0000 0000</p>
+                    <p><b>Владимир А.</b></p>
+                    
+                    <div style="margin-top: 15px;">
+                        <p><b>ВАЖНО!</b> В комментарии платежа укажите:</p>
+                        <p id="order-id" style="font-family: monospace; font-size: 16px;">ORDER_12345</p>
+                    </div>
+                </div>
+                
+                <button class="btn" onclick="showScreen('main-screen')">Вернуться на главную</button>
             </div>
-        </main>
-
-        <footer>
-            <button id="save-btn" class="pixel-btn">💾 СОХРАНИТЬ</button>
-            <button id="leaderboard-btn" class="pixel-btn">🏆 ТОП ИГРОКОВ</button>
-        </footer>
-    </div>
-
-    <div class="modal" id="leaderboard-modal">
-        <div class="modal-content">
-            <span class="close">&times;</span>
-            <h2>🏆 ТОП ШАХТЁРОВ</h2>
-            <ol id="leaderboard-list"></ol>
+        </div>
+        
+        <!-- Экран моих заказов -->
+        <div id="my-orders" class="hidden">
+            <button class="btn back-btn" onclick="showScreen('main-screen')">← Назад</button>
+            
+            <div class="section">
+                <div class="section-title">📋 Мои заказы</div>
+                <div id="orders-list">
+                    <!-- Здесь будут отображаться заказы -->
+                    <p>Загрузка ваших заказов...</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Экран деталей заказа -->
+        <div id="order-details-screen" class="hidden">
+            <button class="btn back-btn" onclick="showScreen('my-orders')">← Назад</button>
+            
+            <div class="section">
+                <div class="section-title" id="order-details-title">Детали заказа #12345</div>
+                <div id="order-full-details">
+                    <!-- Здесь будут отображаться детали заказа -->
+                </div>
+            </div>
         </div>
     </div>
 
-    <script src="script.js"></script>
+    <script>
+        // Данные заказа
+        const orderData = {
+            flavor: '',
+            liquid: 'Без наполнения',
+            liquidCost: 0,
+            fruitBase: 'Без основы',
+            fruitBaseCost: 0,
+            strength: '',
+            city: '',
+            deliveryCost: 0,
+            address: '',
+            totalCost: 1500, // Базовая стоимость
+            orderId: Math.floor(Math.random() * 90000) + 10000 // Генерация случайного ID заказа
+        };
+        
+        // Показываем экран
+        function showScreen(screenId) {
+            document.querySelectorAll('div[id$="-screen"], #main-screen, #new-order').forEach(screen => {
+                screen.classList.add('hidden');
+            });
+            document.getElementById(screenId).classList.remove('hidden');
+            
+            // Если это экран деталей заказа, обновляем информацию
+            if (screenId === 'order-confirmation') {
+                updateOrderConfirmation();
+            } else if (screenId === 'my-orders') {
+                loadUserOrders();
+            }
+        }
+        
+        // Выбор вкуса
+        function selectFlavor(flavor) {
+            orderData.flavor = flavor;
+            showScreen('liquid-screen');
+        }
+        
+        // Выбор наполнения
+        function selectLiquid(liquid, cost) {
+            orderData.liquid = liquid;
+            orderData.liquidCost = cost;
+            showScreen('fruit-screen');
+        }
+        
+        // Выбор фруктовой основы
+        function selectFruitBase(fruitBase, cost) {
+            orderData.fruitBase = fruitBase;
+            orderData.fruitBaseCost = cost;
+            showScreen('strength-screen');
+        }
+        
+        // Выбор крепости
+        function selectStrength(strength) {
+            orderData.strength = strength;
+            showScreen('city-screen');
+        }
+        
+        // Выбор города
+        function selectCity(city, cost) {
+            orderData.city = city;
+            orderData.deliveryCost = cost;
+            showScreen('address-screen');
+        }
+        
+        // Подтверждение заказа
+        function submitOrder() {
+            const addressInput = document.getElementById('address-input');
+            if (!addressInput.value.trim()) {
+                alert('Пожалуйста, введите адрес доставки');
+                return;
+            }
+            
+            orderData.address = addressInput.value.trim();
+            orderData.totalCost += orderData.liquidCost + orderData.fruitBaseCost + orderData.deliveryCost;
+            
+            // Здесь можно добавить отправку данных на сервер
+            
+            showScreen('order-confirmation');
+        }
+        
+        // Обновление экрана подтверждения заказа
+        function updateOrderConfirmation() {
+            const orderDetails = document.getElementById('order-details');
+            const cardNumber = document.getElementById('card-number');
+            const orderIdElement = document.getElementById('order-id');
+            
+            // Формируем детали заказа
+            let detailsHTML = `
+                <div class="order-item"><b>Вкус:</b> ${orderData.flavor}</div>
+                <div class="order-item"><b>Крепость:</b> ${orderData.strength}</div>
+                <div class="order-item"><b>Наполнение колбы:</b> ${orderData.liquid}${orderData.liquidCost > 0 ? ' (+250 руб)' : ''}</div>
+                ${orderData.fruitBase !== 'Без основы' ? `<div class="order-item"><b>Фруктовая основа:</b> ${orderData.fruitBase} (+250 руб)</div>` : ''}
+                <div class="order-item"><b>Город:</b> ${orderData.city}</div>
+                <div class="order-item"><b>Адрес:</b> ${orderData.address}</div>
+                
+                <div class="order-item"><b>Товар:</b> 1500 руб</div>
+                ${orderData.deliveryCost > 0 ? `<div class="order-item"><b>Доставка:</b> ${orderData.deliveryCost} руб</div>` : '<div class="order-item"><b>Доставка:</b> Бесплатно</div>'}
+                ${orderData.liquidCost > 0 ? `<div class="order-item"><b>Наполнение колбы:</b> ${orderData.liquidCost} руб</div>` : ''}
+                ${orderData.fruitBaseCost > 0 ? `<div class="order-item"><b>Фруктовая основа:</b> ${orderData.fruitBaseCost} руб</div>` : ''}
+                <div class="total">Итого: ${orderData.totalCost} руб</div>
+            `;
+            
+            orderDetails.innerHTML = detailsHTML;
+            orderIdElement.textContent = `ORDER_${orderData.orderId}`;
+            
+            // Здесь можно установить реальные реквизиты из .env
+            cardNumber.textContent = '5536 9138 2975 2468'; // Пример номера карты
+        }
+        
+        // Загрузка заказов пользователя
+        function loadUserOrders() {
+            // Здесь должна быть логика загрузки заказов пользователя с сервера
+            // Для демонстрации используем mock-данные
+            
+            const ordersList = document.getElementById('orders-list');
+            
+            // Mock данные
+            const mockOrders = [
+                {
+                    id: orderData.orderId,
+                    date: new Date().toLocaleDateString(),
+                    status: 'Ожидает оплаты',
+                    total: orderData.totalCost
+                },
+                {
+                    id: 12345,
+                    date: '01.06.2023',
+                    status: 'Завершен',
+                    total: 2000
+                }
+            ];
+            
+            let ordersHTML = '';
+            
+            if (mockOrders.length === 0) {
+                ordersHTML = '<p>У вас пока нет заказов</p>';
+            } else {
+                mockOrders.forEach(order => {
+                    ordersHTML += `
+                        <div class="order-item" onclick="showOrderDetails(${order.id})" style="cursor: pointer; padding: 10px; border-bottom: 1px solid #eee;">
+                            <div><b>Заказ #${order.id}</b></div>
+                            <div>${order.date} • ${order.status}</div>
+                            <div class="price">${order.total} руб</div>
+                        </div>
+                    `;
+                });
+            }
+            
+            ordersList.innerHTML = ordersHTML;
+        }
+        
+        // Показать детали заказа
+        function showOrderDetails(orderId) {
+            // Здесь должна быть логика загрузки деталей конкретного заказа с сервера
+            // Для демонстрации используем mock-данные
+            
+            const orderTitle = document.getElementById('order-details-title');
+            const orderDetails = document.getElementById('order-full-details');
+            
+            orderTitle.textContent = `Детали заказа #${orderId}`;
+            
+            // Mock данные
+            const mockOrderDetails = {
+                id: orderId,
+                date: '01.06.2023',
+                status: orderId === orderData.orderId ? 'Ожидает оплаты' : 'Завершен',
+                flavor: orderId === orderData.orderId ? orderData.flavor : 'Арбуз',
+                strength: orderId === orderData.orderId ? orderData.strength : 'Средняя',
+                liquid: orderId === orderData.orderId ? orderData.liquid : 'Кола (+250 руб)',
+                fruitBase: orderId === orderData.orderId ? orderData.fruitBase : 'Апельсин (+250 руб)',
+                city: orderId === orderData.orderId ? orderData.city : 'Валуйки',
+                address: orderId === orderData.orderId ? orderData.address : 'ул. Ленина, 10, кв. 5',
+                total: orderId === orderData.orderId ? orderData.totalCost : 2000,
+                paymentStatus: orderId === orderData.orderId ? 'Не оплачен' : 'Оплачен'
+            };
+            
+            let detailsHTML = `
+                <div class="order-item"><b>Дата:</b> ${mockOrderDetails.date}</div>
+                <div class="order-item"><b>Статус:</b> ${mockOrderDetails.status}</div>
+                <div class="order-item"><b>Вкус:</b> ${mockOrderDetails.flavor}</div>
+                <div class="order-item"><b>Крепость:</b> ${mockOrderDetails.strength}</div>
+                <div class="order-item"><b>Наполнение колбы:</b> ${mockOrderDetails.liquid}</div>
+                <div class="order-item"><b>Фруктовая основа:</b> ${mockOrderDetails.fruitBase}</div>
+                <div class="order-item"><b>Город:</b> ${mockOrderDetails.city}</div>
+                <div class="order-item"><b>Адрес:</b> ${mockOrderDetails.address}</div>
+                <div class="order-item"><b>Статус оплаты:</b> ${mockOrderDetails.paymentStatus}</div>
+                <div class="total" style="margin-top: 15px;">Итого: ${mockOrderDetails.total} руб</div>
+            `;
+            
+            if (mockOrderDetails.status === 'Ожидает оплаты') {
+                detailsHTML += `
+                    <button class="btn btn-success" style="margin-top: 15px;" onclick="payForOrder(${orderId})">
+                        💳 Оплатить заказ
+                    </button>
+                `;
+            }
+            
+            orderDetails.innerHTML = detailsHTML;
+            showScreen('order-details-screen');
+        }
+        
+        // Оплата заказа
+        function payForOrder(orderId) {
+            alert(`Оплата заказа #${orderId}\n\nВы будете перенаправлены на страницу оплаты`);
+            // Здесь должна быть логика перенаправления на платежную систему
+        }
+        
+        // Связь с поддержкой
+        function contactSupport() {
+            Telegram.WebApp.openTelegramLink('tg://resolve?domain=alimov_Vol');
+        }
+        
+        // Инициализация WebApp
+        document.addEventListener('DOMContentLoaded', function() {
+            Telegram.WebApp.expand();
+            Telegram.WebApp.enableClosingConfirmation();
+            
+            // Получаем данные пользователя из Telegram
+            const user = Telegram.WebApp.initDataUnsafe.user;
+            if (user) {
+                console.log('User:', user);
+                // Можно использовать user.id, user.first_name и т.д.
+            }
+            
+            // Загружаем данные из .env (в реальном приложении это должно приходить с сервера)
+            const tinkoffCard = '5536 9138 2975 2468'; // Пример номера карты
+            document.getElementById('card-number').textContent = tinkoffCard;
+        });
+    </script>
 </body>
 </html>
