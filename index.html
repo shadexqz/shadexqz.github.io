@@ -3,49 +3,37 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Крипто Майнер</title>
+    <title>SHDQ Miner</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Rubik:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --primary: #00ffaa;
-            --primary-dark: #00cc88;
-            --secondary: #00aaff;
-            --dark: #0a0e17;
-            --darker: #05080f;
-            --light: #e0f7fa;
-            --gray: #7f8c8d;
-            --success: #2ecc71;
-            --warning: #f39c12;
-            --danger: #e74c3c;
-            --gpu-blue: #3498db;
-            --gpu-red: #e74c3c;
-            --gpu-green: #2ecc71;
-            --gpu-purple: #9b59b6;
+            --black: #000000;
+            --white: #ffffff;
+            --gray-dark: #222222;
+            --gray-light: #dddddd;
+            --green: #00aa00;
+            --red: #aa0000;
         }
 
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Rubik', sans-serif;
+            font-family: 'Courier New', monospace;
         }
 
         body {
-            background-color: var(--darker);
-            color: var(--light);
+            background-color: var(--black);
+            color: var(--white);
             min-height: 100vh;
-            padding-bottom: 90px;
-            background-image: 
-                radial-gradient(circle at 10% 20%, rgba(0, 255, 170, 0.05) 0%, transparent 20%),
-                radial-gradient(circle at 90% 80%, rgba(0, 170, 255, 0.05) 0%, transparent 20%);
-            overflow-x: hidden;
+            padding-bottom: 80px;
+            line-height: 1.5;
         }
 
         .container {
-            max-width: 600px;
+            max-width: 800px;
             margin: 0 auto;
-            padding: 0 16px;
+            padding: 0 20px;
         }
 
         /* Header */
@@ -54,195 +42,188 @@
             justify-content: space-between;
             align-items: center;
             padding: 20px 0;
-            position: relative;
+            border-bottom: 1px solid var(--gray-dark);
+            margin-bottom: 20px;
         }
 
         .logo {
             display: flex;
             align-items: center;
             gap: 10px;
-        }
-
-        .logo-icon {
-            font-size: 28px;
-            color: var(--primary);
-            animation: pulse 2s infinite;
-        }
-
-        @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.1); }
-            100% { transform: scale(1); }
-        }
-
-        .logo-text {
-            font-weight: 700;
-            font-size: 20px;
-            background: linear-gradient(to right, var(--primary), var(--secondary));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            font-family: 'JetBrains Mono', monospace;
+            font-weight: bold;
+            font-size: 1.2rem;
         }
 
         .balance-container {
-            background: rgba(0, 0, 0, 0.3);
-            border-radius: 12px;
-            padding: 10px 16px;
             display: flex;
             align-items: center;
             gap: 8px;
-            border: 1px solid rgba(0, 255, 170, 0.2);
-            backdrop-filter: blur(5px);
+            font-family: 'Courier New', monospace;
+            font-size: 1.1rem;
         }
 
-        .balance-icon {
-            color: var(--primary);
-            font-size: 16px;
-        }
-
-        .balance-amount {
-            font-weight: 600;
-            font-size: 16px;
-            font-family: 'JetBrains Mono', monospace;
-        }
-
-        /* Main game area */
-        .game-area {
-            margin-top: 30px;
+        /* Mining section */
+        .mining-section {
+            margin-bottom: 30px;
             text-align: center;
         }
 
-        .mining-section {
-            position: relative;
-            margin-bottom: 40px;
-        }
-
         .mining-rig {
-            position: relative;
-            width: 200px;
-            height: 200px;
-            margin: 0 auto;
-            background: rgba(0, 0, 0, 0.3);
-            border-radius: 16px;
-            border: 1px solid rgba(0, 255, 170, 0.2);
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
-            backdrop-filter: blur(5px);
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            margin-bottom: 20px;
         }
 
         .gpu-slot {
-            width: 100%;
-            height: 40px;
-            background: rgba(0, 0, 0, 0.2);
-            border-radius: 8px;
-            margin: 5px 0;
-            border: 1px dashed rgba(255, 255, 255, 0.1);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            color: var(--gray);
-            font-size: 12px;
-            transition: all 0.3s;
+            border: 1px solid var(--gray-dark);
+            padding: 15px 10px;
+            text-align: center;
+            background-color: var(--black);
+            position: relative;
         }
 
         .gpu-slot.filled {
-            border: 1px solid var(--primary);
-            color: var(--light);
-            background: rgba(0, 255, 170, 0.1);
+            border-color: var(--white);
         }
 
-        .gpu-slot.filled i {
-            margin-right: 8px;
-            animation: mining 1s infinite;
+        .gpu-slot i {
+            font-size: 2rem;
+            margin-bottom: 5px;
         }
 
-        @keyframes mining {
-            0% { opacity: 0.7; }
-            50% { opacity: 1; }
-            100% { opacity: 0.7; }
+        .gpu-name {
+            font-size: 0.8rem;
+            margin-bottom: 5px;
+        }
+
+        .gpu-stats {
+            font-size: 0.7rem;
+            color: var(--gray-light);
         }
 
         .mining-btn {
-            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-            border: none;
-            border-radius: 12px;
-            padding: 15px 30px;
-            color: var(--darker);
-            font-weight: 700;
-            font-size: 18px;
+            background-color: var(--black);
+            color: var(--white);
+            border: 1px solid var(--white);
+            padding: 10px 30px;
+            font-size: 1rem;
             cursor: pointer;
-            margin-top: 20px;
-            box-shadow: 0 5px 15px rgba(0, 255, 170, 0.3);
+            margin-top: 10px;
             transition: all 0.2s;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin: 20px auto 0;
         }
 
-        .mining-btn:active {
-            transform: scale(0.95);
-            box-shadow: 0 2px 10px rgba(0, 255, 170, 0.3);
+        .mining-btn:hover {
+            background-color: var(--white);
+            color: var(--black);
         }
 
-        .hash-particle {
-            position: absolute;
-            background: var(--primary);
-            border-radius: 50%;
-            pointer-events: none;
-            transform: translate(-50%, -50%);
-            animation: float 1s ease-out forwards;
-            opacity: 0.8;
-        }
-
-        @keyframes float {
-            0% {
-                transform: translate(-50%, -50%) scale(0.5);
-                opacity: 1;
-            }
-            100% {
-                transform: translate(var(--tx, -50%), var(--ty, -150%)) scale(0);
-                opacity: 0;
-            }
-        }
-
-        .stats-container {
+        /* Stats */
+        .stats {
             display: grid;
-            grid-template-columns: 1fr 1fr;
+            grid-template-columns: repeat(2, 1fr);
             gap: 15px;
             margin-bottom: 30px;
         }
 
         .stat-card {
-            background: rgba(0, 0, 0, 0.3);
-            border-radius: 12px;
+            border: 1px solid var(--gray-dark);
             padding: 15px;
-            border: 1px solid rgba(0, 255, 170, 0.1);
-            backdrop-filter: blur(5px);
         }
 
         .stat-title {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            margin-bottom: 8px;
-            font-size: 14px;
-            color: var(--gray);
-        }
-
-        .stat-title i {
-            width: 20px;
-            text-align: center;
+            font-size: 0.9rem;
+            margin-bottom: 10px;
+            color: var(--gray-light);
         }
 
         .stat-value {
-            font-weight: 700;
-            font-size: 18px;
-            font-family: 'JetBrains Mono', monospace;
+            font-size: 1.2rem;
+            font-family: 'Courier New', monospace;
+        }
+
+        /* Shop */
+        .shop {
+            margin-bottom: 30px;
+        }
+
+        .shop-categories {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            overflow-x: auto;
+            padding-bottom: 5px;
+        }
+
+        .category-btn {
+            background-color: var(--black);
+            color: var(--white);
+            border: 1px solid var(--gray-dark);
+            padding: 5px 15px;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+
+        .category-btn.active {
+            border-color: var(--white);
+            font-weight: bold;
+        }
+
+        .shop-items {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 10px;
+        }
+
+        .shop-item {
+            border: 1px solid var(--gray-dark);
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .item-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .item-icon {
+            font-size: 1.5rem;
+            width: 40px;
+            text-align: center;
+        }
+
+        .item-name {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .item-stats {
+            font-size: 0.8rem;
+            color: var(--gray-light);
+        }
+
+        .item-price {
+            font-family: 'Courier New', monospace;
+            margin-bottom: 5px;
+        }
+
+        .buy-btn {
+            background-color: var(--black);
+            color: var(--white);
+            border: 1px solid var(--white);
+            padding: 5px 15px;
+            cursor: pointer;
+            min-width: 80px;
+            text-align: center;
+        }
+
+        .buy-btn:disabled {
+            border-color: var(--gray-dark);
+            color: var(--gray-dark);
+            cursor: not-allowed;
         }
 
         /* Bottom navigation */
@@ -251,320 +232,37 @@
             bottom: 0;
             left: 0;
             right: 0;
-            background: rgba(10, 14, 23, 0.9);
+            background-color: var(--black);
             display: flex;
             justify-content: space-around;
             padding: 15px 0;
-            box-shadow: 0 -2px 15px rgba(0, 0, 0, 0.3);
-            z-index: 100;
-            backdrop-filter: blur(10px);
-            border-top: 1px solid rgba(0, 255, 170, 0.1);
+            border-top: 1px solid var(--gray-dark);
         }
 
         .nav-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            color: var(--gray);
+            color: var(--white);
             text-decoration: none;
-            font-size: 12px;
-            gap: 5px;
-            transition: all 0.2s;
+            text-align: center;
+            font-size: 0.9rem;
         }
 
         .nav-item i {
-            font-size: 22px;
+            display: block;
+            margin-bottom: 5px;
+            font-size: 1.2rem;
         }
 
         .nav-item.active {
-            color: var(--primary);
-            transform: translateY(-5px);
-        }
-
-        .nav-item.active i {
-            text-shadow: 0 0 10px rgba(0, 255, 170, 0.5);
+            font-weight: bold;
         }
 
         /* Tab content */
         .tab-content {
             display: none;
-            animation: fadeIn 0.3s ease;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
         }
 
         .tab-content.active {
             display: block;
-        }
-
-        /* Shop tab */
-        .shop-tab {
-            padding-bottom: 30px;
-        }
-
-        .shop-categories {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
-            overflow-x: auto;
-            padding-bottom: 5px;
-        }
-
-        .category-btn {
-            background: rgba(0, 0, 0, 0.3);
-            border: 1px solid rgba(0, 255, 170, 0.1);
-            border-radius: 20px;
-            padding: 8px 16px;
-            font-size: 14px;
-            color: var(--gray);
-            cursor: pointer;
-            white-space: nowrap;
-            transition: all 0.2s;
-        }
-
-        .category-btn.active {
-            background: var(--primary);
-            color: var(--darker);
-            font-weight: 600;
-        }
-
-        .shop-items {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 15px;
-        }
-
-        .shop-item {
-            background: rgba(0, 0, 0, 0.3);
-            border-radius: 12px;
-            padding: 15px;
-            border: 1px solid rgba(0, 255, 170, 0.1);
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            backdrop-filter: blur(5px);
-            transition: all 0.2s;
-        }
-
-        .shop-item:hover {
-            border-color: var(--primary);
-            transform: translateY(-3px);
-        }
-
-        .item-icon {
-            width: 50px;
-            height: 50px;
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 24px;
-        }
-
-        .item-icon.gpu {
-            background: rgba(52, 152, 219, 0.1);
-            color: var(--gpu-blue);
-        }
-
-        .item-icon.rig {
-            background: rgba(46, 204, 113, 0.1);
-            color: var(--gpu-green);
-        }
-
-        .item-icon.cooling {
-            background: rgba(155, 89, 182, 0.1);
-            color: var(--gpu-purple);
-        }
-
-        .item-icon.power {
-            background: rgba(231, 76, 60, 0.1);
-            color: var(--gpu-red);
-        }
-
-        .item-info {
-            flex: 1;
-        }
-
-        .item-name {
-            font-weight: 600;
-            margin-bottom: 5px;
-        }
-
-        .item-stats {
-            font-size: 12px;
-            color: var(--gray);
-            margin-bottom: 5px;
-        }
-
-        .item-price {
-            font-size: 14px;
-            font-weight: 600;
-            font-family: 'JetBrains Mono', monospace;
-            color: var(--primary);
-        }
-
-        .buy-btn {
-            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-            border: none;
-            border-radius: 8px;
-            padding: 8px 15px;
-            color: var(--darker);
-            font-weight: 600;
-            font-size: 14px;
-            cursor: pointer;
-            transition: all 0.2s;
-            white-space: nowrap;
-        }
-
-        .buy-btn:disabled {
-            background: var(--gray);
-            cursor: not-allowed;
-            color: var(--dark);
-        }
-
-        .buy-btn:active:not(:disabled) {
-            transform: scale(0.95);
-        }
-
-        /* Profile tab */
-        .profile-header {
-            display: flex;
-            align-items: center;
-            gap: 20px;
-            margin-bottom: 30px;
-        }
-
-        .profile-avatar {
-            width: 80px;
-            height: 80px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 36px;
-            color: white;
-            flex-shrink: 0;
-        }
-
-        .profile-info {
-            flex: 1;
-        }
-
-        .profile-name {
-            font-weight: 700;
-            font-size: 20px;
-            margin-bottom: 5px;
-        }
-
-        .profile-level {
-            display: inline-block;
-            background: rgba(0, 0, 0, 0.3);
-            border-radius: 20px;
-            padding: 3px 12px;
-            font-size: 12px;
-            color: var(--primary);
-            border: 1px solid var(--primary);
-        }
-
-        .profile-stats {
-            background: rgba(0, 0, 0, 0.3);
-            border-radius: 12px;
-            padding: 20px;
-            margin-bottom: 30px;
-            border: 1px solid rgba(0, 255, 170, 0.1);
-            backdrop-filter: blur(5px);
-        }
-
-        .stat-row {
-            display: flex;
-            justify-content: space-between;
-            padding: 12px 0;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-        }
-
-        .stat-row:last-child {
-            border-bottom: none;
-        }
-
-        /* Achievements tab */
-        .achievements-grid {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 15px;
-            margin-bottom: 30px;
-        }
-
-        .achievement-card {
-            background: rgba(0, 0, 0, 0.3);
-            border-radius: 12px;
-            padding: 15px;
-            border: 1px solid rgba(0, 255, 170, 0.1);
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            backdrop-filter: blur(5px);
-        }
-
-        .achievement-icon {
-            width: 50px;
-            height: 50px;
-            border-radius: 10px;
-            background: rgba(0, 255, 170, 0.1);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 24px;
-            color: var(--primary);
-            flex-shrink: 0;
-        }
-
-        .achievement-info {
-            flex: 1;
-        }
-
-        .achievement-name {
-            font-weight: 600;
-            margin-bottom: 5px;
-        }
-
-        .achievement-desc {
-            font-size: 12px;
-            color: var(--gray);
-            margin-bottom: 5px;
-        }
-
-        .achievement-progress {
-            height: 4px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 2px;
-            margin-top: 8px;
-            overflow: hidden;
-        }
-
-        .progress-bar {
-            height: 100%;
-            background: linear-gradient(to right, var(--primary), var(--secondary));
-            width: 0%;
-            transition: width 0.3s;
-        }
-
-        .achievement-locked .achievement-icon {
-            background: rgba(255, 255, 255, 0.05);
-            color: var(--gray);
-        }
-
-        .achievement-locked .achievement-name,
-        .achievement-locked .achievement-desc {
-            opacity: 0.6;
-        }
-
-        .achievement-badge {
-            color: var(--success);
-            font-size: 20px;
         }
 
         /* Notification */
@@ -573,67 +271,27 @@
             top: 20px;
             left: 50%;
             transform: translateX(-50%);
-            background: rgba(0, 0, 0, 0.8);
-            backdrop-filter: blur(10px);
-            color: white;
-            padding: 12px 24px;
-            border-radius: 8px;
-            z-index: 1000;
+            background-color: var(--black);
+            color: var(--white);
+            border: 1px solid var(--white);
+            padding: 10px 20px;
+            z-index: 100;
             opacity: 0;
             transition: opacity 0.3s;
-            max-width: 90%;
-            text-align: center;
-            border: 1px solid var(--primary);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
         }
 
         .notification.show {
             opacity: 1;
         }
 
-        .notification.success {
-            background: rgba(46, 204, 113, 0.9);
-        }
-
-        .notification.warning {
-            background: rgba(243, 156, 18, 0.9);
-        }
-
-        /* Offline mining indicator */
-        .offline-mining {
-            position: fixed;
-            bottom: 80px;
-            left: 0;
-            right: 0;
-            background: rgba(0, 0, 0, 0.7);
-            color: var(--primary);
-            padding: 10px;
-            text-align: center;
-            font-size: 14px;
-            backdrop-filter: blur(5px);
-            border-top: 1px solid var(--primary);
-            border-bottom: 1px solid var(--primary);
-            display: none;
-        }
-
-        /* Responsive adjustments */
-        @media (max-width: 480px) {
-            .stats-container {
-                grid-template-columns: 1fr;
-            }
-
+        /* Responsive */
+        @media (max-width: 600px) {
             .mining-rig {
-                width: 180px;
-                height: 180px;
+                grid-template-columns: repeat(2, 1fr);
             }
-
-            .shop-item {
-                flex-direction: column;
-                text-align: center;
-            }
-
-            .item-icon {
-                margin-bottom: 10px;
+            
+            .stats {
+                grid-template-columns: 1fr;
             }
         }
     </style>
@@ -642,153 +300,117 @@
     <div class="container">
         <header class="header">
             <div class="logo">
-                <div class="logo-icon"><i class="fab fa-bitcoin"></i></div>
-                <div class="logo-text">Крипто Майнер</div>
+                <i class="fas fa-server"></i>
+                <span>SHDQ MINER v1.0</span>
             </div>
             <div class="balance-container">
-                <div class="balance-icon"><i class="fas fa-coins"></i></div>
-                <div class="balance-amount" id="balance">0</div>
-                <div>SAT</div>
+                <span id="balance">0.0000000</span> SHDQ
             </div>
         </header>
 
-        <main class="game-area">
-            <!-- Main Tab -->
-            <div id="main-tab" class="tab-content active">
+        <main>
+            <!-- Mining Tab -->
+            <div id="mining-tab" class="tab-content active">
                 <div class="mining-section">
                     <div class="mining-rig" id="mining-rig">
-                        <div class="gpu-slot" id="gpu-slot-1"><i class="fas fa-microchip"></i> Слот GPU #1</div>
-                        <div class="gpu-slot" id="gpu-slot-2"><i class="fas fa-microchip"></i> Слот GPU #2</div>
-                        <div class="gpu-slot" id="gpu-slot-3"><i class="fas fa-microchip"></i> Слот GPU #3</div>
-                        <div class="gpu-slot" id="gpu-slot-4"><i class="fas fa-microchip"></i> Слот GPU #4</div>
+                        <div class="gpu-slot" id="gpu-slot-1">
+                            <i class="fas fa-microchip"></i>
+                            <div class="gpu-name">GPU SLOT #1</div>
+                            <div class="gpu-stats">EMPTY</div>
+                        </div>
+                        <div class="gpu-slot" id="gpu-slot-2">
+                            <i class="fas fa-microchip"></i>
+                            <div class="gpu-name">GPU SLOT #2</div>
+                            <div class="gpu-stats">EMPTY</div>
+                        </div>
+                        <div class="gpu-slot" id="gpu-slot-3">
+                            <i class="fas fa-microchip"></i>
+                            <div class="gpu-name">GPU SLOT #3</div>
+                            <div class="gpu-stats">EMPTY</div>
+                        </div>
+                        <div class="gpu-slot" id="gpu-slot-4">
+                            <i class="fas fa-microchip"></i>
+                            <div class="gpu-name">GPU SLOT #4</div>
+                            <div class="gpu-stats">EMPTY</div>
+                        </div>
                     </div>
                     <button class="mining-btn" id="mining-btn">
-                        <i class="fas fa-power-off"></i> Майнить
+                        <i class="fas fa-power-off"></i> START MINING
                     </button>
                 </div>
 
-                <div class="stats-container">
+                <div class="stats">
                     <div class="stat-card">
-                        <div class="stat-title">
-                            <i class="fas fa-bolt"></i>
-                            <span>Хешрейт</span>
-                        </div>
-                        <div class="stat-value" id="hashrate">0 H/s</div>
+                        <div class="stat-title">HASHRATE</div>
+                        <div class="stat-value" id="hashrate">0.0000000 H/s</div>
                     </div>
                     <div class="stat-card">
-                        <div class="stat-title">
-                            <i class="fas fa-coins"></i>
-                            <span>Доходность</span>
-                        </div>
-                        <div class="stat-value" id="earn-rate">0 SAT/сек</div>
+                        <div class="stat-title">EARN RATE</div>
+                        <div class="stat-value" id="earn-rate">0.0000000 SHDQ/s</div>
                     </div>
                     <div class="stat-card">
-                        <div class="stat-title">
-                            <i class="fas fa-tachometer-alt"></i>
-                            <span>Мощность</span>
-                        </div>
+                        <div class="stat-title">POWER USAGE</div>
                         <div class="stat-value" id="power">0 W</div>
                     </div>
                     <div class="stat-card">
-                        <div class="stat-title">
-                            <i class="fas fa-thermometer-half"></i>
-                            <span>Температура</span>
-                        </div>
-                        <div class="stat-value" id="temperature">0°C</div>
+                        <div class="stat-title">TOTAL MINED</div>
+                        <div class="stat-value" id="total-mined">0.0000000 SHDQ</div>
                     </div>
                 </div>
             </div>
 
             <!-- Shop Tab -->
-            <div id="shop-tab" class="tab-content shop-tab">
-                <h2>Магазин</h2>
-                <div class="shop-categories">
-                    <button class="category-btn active" data-category="gpu">Видеокарты</button>
-                    <button class="category-btn" data-category="rig">Фермы</button>
-                    <button class="category-btn" data-category="cooling">Охлаждение</button>
-                    <button class="category-btn" data-category="power">Питание</button>
-                </div>
-                <div class="shop-items" id="shop-items">
-                    <!-- Items will be loaded here -->
+            <div id="shop-tab" class="tab-content">
+                <div class="shop">
+                    <div class="shop-categories">
+                        <button class="category-btn active" data-category="gpu">GPU</button>
+                        <button class="category-btn" data-category="rig">RIGS</button>
+                        <button class="category-btn" data-category="cooling">COOLING</button>
+                        <button class="category-btn" data-category="power">POWER</button>
+                    </div>
+                    <div class="shop-items" id="shop-items">
+                        <!-- Items will be loaded here -->
+                    </div>
                 </div>
             </div>
 
-            <!-- Profile Tab -->
-            <div id="profile-tab" class="tab-content">
-                <div class="profile-header">
-                    <div class="profile-avatar" id="user-avatar">
-                        <i class="fas fa-user"></i>
-                    </div>
-                    <div class="profile-info">
-                        <div class="profile-name" id="username">Майнер</div>
-                        <div class="profile-level">Уровень <span id="user-level">1</span></div>
-                    </div>
-                </div>
-
-                <div class="profile-stats">
-                    <div class="stat-row">
-                        <div class="stat-title">
-                            <i class="fas fa-hand-pointer"></i>
-                            <span>Всего кликов</span>
-                        </div>
+            <!-- Stats Tab -->
+            <div id="stats-tab" class="tab-content">
+                <div class="stats">
+                    <div class="stat-card">
+                        <div class="stat-title">TOTAL CLICKS</div>
                         <div class="stat-value" id="total-clicks">0</div>
                     </div>
-                    <div class="stat-row">
-                        <div class="stat-title">
-                            <i class="fas fa-coins"></i>
-                            <span>Всего добыто</span>
-                        </div>
-                        <div class="stat-value" id="total-earned">0 SAT</div>
+                    <div class="stat-card">
+                        <div class="stat-title">PLAY TIME</div>
+                        <div class="stat-value" id="play-time">0s</div>
                     </div>
-                    <div class="stat-row">
-                        <div class="stat-title">
-                            <i class="fas fa-clock"></i>
-                            <span>Время игры</span>
-                        </div>
-                        <div class="stat-value" id="play-time">0 сек</div>
+                    <div class="stat-card">
+                        <div class="stat-title">GPUS INSTALLED</div>
+                        <div class="stat-value" id="gpus-installed">0</div>
                     </div>
-                    <div class="stat-row">
-                        <div class="stat-title">
-                            <i class="fas fa-trophy"></i>
-                            <span>Достижения</span>
-                        </div>
-                        <div class="stat-value" id="achievements-count">0/12</div>
+                    <div class="stat-card">
+                        <div class="stat-title">VERSION</div>
+                        <div class="stat-value">1.0.0</div>
                     </div>
-                </div>
-            </div>
-
-            <!-- Achievements Tab -->
-            <div id="achievements-tab" class="tab-content">
-                <h2>Достижения</h2>
-                <div class="achievements-grid" id="achievements-container">
-                    <!-- Achievements will be loaded here -->
                 </div>
             </div>
         </main>
     </div>
 
-    <!-- Offline mining notification -->
-    <div class="offline-mining" id="offline-mining">
-        <i class="fas fa-cloud"></i> Майнинг продолжается в оффлайне!
-    </div>
-
     <!-- Bottom Navigation -->
     <nav class="bottom-nav">
-        <a href="#" class="nav-item active" data-tab="main-tab">
+        <a href="#" class="nav-item active" data-tab="mining-tab">
             <i class="fas fa-desktop"></i>
-            <span>Майнинг</span>
+            <span>MINING</span>
         </a>
         <a href="#" class="nav-item" data-tab="shop-tab">
             <i class="fas fa-shopping-cart"></i>
-            <span>Магазин</span>
+            <span>SHOP</span>
         </a>
-        <a href="#" class="nav-item" data-tab="profile-tab">
-            <i class="fas fa-user"></i>
-            <span>Профиль</span>
-        </a>
-        <a href="#" class="nav-item" data-tab="achievements-tab">
-            <i class="fas fa-trophy"></i>
-            <span>Достижения</span>
+        <a href="#" class="nav-item" data-tab="stats-tab">
+            <i class="fas fa-chart-bar"></i>
+            <span>STATS</span>
         </a>
     </nav>
 
@@ -802,88 +424,137 @@
             hashrate: 0,
             earnRate: 0,
             power: 0,
-            temperature: 0,
+            totalMined: 0,
             totalClicks: 0,
-            totalEarned: 0,
             playTime: 0,
+            gpusInstalled: 0,
             lastUpdate: Date.now(),
             gpus: [],
-            installedGPUs: 0,
-            username: 'Майнер',
-            level: 1,
-            achievements: [],
             shopItems: [
-                // Видеокарты
-                { id: 'gpu1', name: 'GTX 1050', icon: 'fa-microchip', category: 'gpu', 
-                  hashrate: 10, power: 75, price: 500, owned: 0, max: 4, 
-                  description: 'Базовая видеокарта для начала майнинга' },
-                { id: 'gpu2', name: 'RTX 2060', icon: 'fa-microchip', category: 'gpu', 
-                  hashrate: 35, power: 160, price: 2500, owned: 0, max: 4, 
-                  description: 'Средний уровень производительности' },
-                { id: 'gpu3', name: 'RTX 3070', icon: 'fa-microchip', category: 'gpu', 
-                  hashrate: 80, power: 220, price: 8000, owned: 0, max: 4, 
-                  description: 'Хороший баланс цены и производительности' },
-                { id: 'gpu4', name: 'RTX 3090', icon: 'fa-microchip', category: 'gpu', 
-                  hashrate: 150, power: 350, price: 20000, owned: 0, max: 4, 
-                  description: 'Мощная карта для профессионального майнинга' },
-                
-                // Фермы
-                { id: 'rig1', name: 'Базовая ферма', icon: 'fa-server', category: 'rig', 
-                  hashrate: 0, power: 0, price: 10000, owned: 0, max: 1, 
-                  description: 'Позволяет установить до 8 видеокарт', gpuSlots: 8 },
-                { id: 'rig2', name: 'Профессиональная ферма', icon: 'fa-server', category: 'rig', 
-                  hashrate: 0, power: 0, price: 50000, owned: 0, max: 1, 
-                  description: 'Позволяет установить до 12 видеокарт', gpuSlots: 12 },
-                
-                // Охлаждение
-                { id: 'cooling1', name: 'Вентиляторы', icon: 'fa-fan', category: 'cooling', 
-                  hashrate: 0, power: 0, price: 3000, owned: 0, max: 1, 
-                  description: 'Снижает температуру на 10°C', cooling: 10 },
-                { id: 'cooling2', name: 'Водяное охлаждение', icon: 'fa-water', category: 'cooling', 
-                  hashrate: 0, power: 0, price: 15000, owned: 0, max: 1, 
-                  description: 'Снижает температуру на 25°C', cooling: 25 },
-                
-                // Питание
-                { id: 'psu1', name: 'Блок питания 600W', icon: 'fa-plug', category: 'power', 
-                  hashrate: 0, power: 0, price: 5000, owned: 0, max: 1, 
-                  description: 'Поддерживает до 600W мощности', maxPower: 600 },
-                { id: 'psu2', name: 'Блок питания 1200W', icon: 'fa-plug', category: 'power', 
-                  hashrate: 0, power: 0, price: 15000, owned: 0, max: 1, 
-                  description: 'Поддерживает до 1200W мощности', maxPower: 1200 },
-                { id: 'psu3', name: 'Промышленный БП', icon: 'fa-plug', category: 'power', 
-                  hashrate: 0, power: 0, price: 40000, owned: 0, max: 1, 
-                  description: 'Поддерживает до 2400W мощности', maxPower: 2400 }
-            ],
-            achievements: [
-                { id: 'first-click', name: 'Первый хеш', description: 'Совершите первый клик', 
-                  icon: 'fa-award', required: 1, progress: 0, unlocked: false, reward: 100 },
-                { id: 'hundred-clicks', name: 'Усердный майнер', description: '100 кликов', 
-                  icon: 'fa-medal', required: 100, progress: 0, unlocked: false, reward: 500 },
-                { id: 'thousand-clicks', name: 'Профессионал', description: '1,000 кликов', 
-                  icon: 'fa-trophy', required: 1000, progress: 0, unlocked: false, reward: 2000 },
-                { id: 'first-gpu', name: 'Первая видеокарта', description: 'Купите первую видеокарту', 
-                  icon: 'fa-microchip', required: 1, progress: 0, unlocked: false, reward: 1000 },
-                { id: 'full-rig', name: 'Полная ферма', description: 'Заполните все слоты видеокартами', 
-                  icon: 'fa-server', required: 4, progress: 0, unlocked: false, reward: 5000 },
-                { id: 'thousand-sat', name: 'Богатенький', description: 'Заработайте 1,000 SAT', 
-                  icon: 'fa-coins', required: 1000, progress: 0, unlocked: false, reward: 1000 },
-                { id: 'million-sat', name: 'Криптовалютный магнат', description: 'Заработайте 1,000,000 SAT', 
-                  icon: 'fa-gem', required: 1000000, progress: 0, unlocked: false, reward: 100000 },
-                { id: 'all-gpus', name: 'Коллекционер', description: 'Купите все виды видеокарт', 
-                  icon: 'fa-layer-group', required: 4, progress: 0, unlocked: false, reward: 10000 },
-                { id: 'max-hashrate', name: 'Максимальный хешрейт', description: 'Достигните 1,000 H/s', 
-                  icon: 'fa-tachometer-alt', required: 1000, progress: 0, unlocked: false, reward: 20000 },
-                { id: 'cool-rig', name: 'Прохладная ферма', description: 'Снизьте температуру ниже 50°C', 
-                  icon: 'fa-snowflake', required: 1, progress: 0, unlocked: false, reward: 5000 },
-                { id: 'power-user', name: 'Энергетик', description: 'Используйте более 1,000W мощности', 
-                  icon: 'fa-bolt', required: 1000, progress: 0, unlocked: false, reward: 10000 },
-                { id: 'all-achievements', name: 'Легенда майнинга', description: 'Получите все достижения', 
-                  icon: 'fa-crown', required: 11, progress: 0, unlocked: false, reward: 100000 }
+                // GPUs
+                { 
+                    id: 'gpu1', 
+                    name: 'GTX 1050', 
+                    icon: 'fa-microchip', 
+                    category: 'gpu',
+                    hashrate: 0.0000125, 
+                    power: 75, 
+                    price: 1.0000000,
+                    owned: 0,
+                    max: 1
+                },
+                { 
+                    id: 'gpu2', 
+                    name: 'RTX 2060', 
+                    icon: 'fa-microchip', 
+                    category: 'gpu',
+                    hashrate: 0.0000625, 
+                    power: 160, 
+                    price: 5.0000000,
+                    owned: 0,
+                    max: 1
+                },
+                { 
+                    id: 'gpu3', 
+                    name: 'RTX 3070', 
+                    icon: 'fa-microchip', 
+                    category: 'gpu',
+                    hashrate: 0.0001250, 
+                    power: 220, 
+                    price: 12.5000000,
+                    owned: 0,
+                    max: 1
+                },
+                { 
+                    id: 'gpu4', 
+                    name: 'RTX 3090', 
+                    icon: 'fa-microchip', 
+                    category: 'gpu',
+                    hashrate: 0.0002500, 
+                    power: 350, 
+                    price: 25.0000000,
+                    owned: 0,
+                    max: 1
+                },
+                // Rigs
+                { 
+                    id: 'rig1', 
+                    name: 'BASIC RIG', 
+                    icon: 'fa-server', 
+                    category: 'rig',
+                    hashrate: 0, 
+                    power: 0, 
+                    price: 10.0000000,
+                    owned: 0,
+                    max: 1,
+                    gpuSlots: 6
+                },
+                { 
+                    id: 'rig2', 
+                    name: 'ADVANCED RIG', 
+                    icon: 'fa-server', 
+                    category: 'rig',
+                    hashrate: 0, 
+                    power: 0, 
+                    price: 50.0000000,
+                    owned: 0,
+                    max: 1,
+                    gpuSlots: 12
+                },
+                // Cooling
+                { 
+                    id: 'cooling1', 
+                    name: 'FANS', 
+                    icon: 'fa-fan', 
+                    category: 'cooling',
+                    hashrate: 0, 
+                    power: 0, 
+                    price: 5.0000000,
+                    owned: 0,
+                    max: 1,
+                    cooling: 10
+                },
+                { 
+                    id: 'cooling2', 
+                    name: 'WATER COOLING', 
+                    icon: 'fa-water', 
+                    category: 'cooling',
+                    hashrate: 0, 
+                    power: 0, 
+                    price: 25.0000000,
+                    owned: 0,
+                    max: 1,
+                    cooling: 25
+                },
+                // Power
+                { 
+                    id: 'psu1', 
+                    name: '600W PSU', 
+                    icon: 'fa-plug', 
+                    category: 'power',
+                    hashrate: 0, 
+                    power: 0, 
+                    price: 5.0000000,
+                    owned: 0,
+                    max: 1,
+                    maxPower: 600
+                },
+                { 
+                    id: 'psu2', 
+                    name: '1200W PSU', 
+                    icon: 'fa-plug', 
+                    category: 'power',
+                    hashrate: 0, 
+                    power: 0, 
+                    price: 15.0000000,
+                    owned: 0,
+                    max: 1,
+                    maxPower: 1200
+                }
             ],
             maxGPUSlots: 4,
-            cooling: 0,
-            maxPower: 0,
-            offlineEarnings: 0
+            maxPower: 500,
+            cooling: 0
         };
 
         // DOM elements
@@ -891,22 +562,16 @@
         const hashrateElement = document.getElementById('hashrate');
         const earnRateElement = document.getElementById('earn-rate');
         const powerElement = document.getElementById('power');
-        const temperatureElement = document.getElementById('temperature');
+        const totalMinedElement = document.getElementById('total-mined');
         const totalClicksElement = document.getElementById('total-clicks');
-        const totalEarnedElement = document.getElementById('total-earned');
         const playTimeElement = document.getElementById('play-time');
-        const achievementsCountElement = document.getElementById('achievements-count');
+        const gpusInstalledElement = document.getElementById('gpus-installed');
         const miningBtn = document.getElementById('mining-btn');
         const shopItemsContainer = document.getElementById('shop-items');
-        const achievementsContainer = document.getElementById('achievements-container');
         const notification = document.getElementById('notification');
-        const usernameElement = document.getElementById('username');
-        const userLevelElement = document.getElementById('user-level');
-        const userAvatar = document.getElementById('user-avatar');
         const navItems = document.querySelectorAll('.nav-item');
         const tabContents = document.querySelectorAll('.tab-content');
         const categoryButtons = document.querySelectorAll('.category-btn');
-        const offlineMiningElement = document.getElementById('offline-mining');
         const gpuSlots = [
             document.getElementById('gpu-slot-1'),
             document.getElementById('gpu-slot-2'),
@@ -919,15 +584,9 @@
             loadGame();
             calculateStats();
             renderShopItems('gpu');
-            renderAchievements();
             updateUI();
             setupEventListeners();
             startGameLoop();
-            
-            // Check for offline earnings
-            checkOfflineEarnings();
-            
-            // Update GPU slots
             updateGPUSlots();
         }
 
@@ -954,69 +613,40 @@
                 });
             });
             
-            // Hash particles
-            document.addEventListener('click', (e) => {
-                if (e.target === miningBtn || e.target.closest('#mining-btn')) {
-                    createHashParticles(e.clientX, e.clientY);
-                }
-            });
-            
             // Visibility change for offline mining
             document.addEventListener('visibilitychange', () => {
                 if (document.hidden) {
                     gameState.lastUpdate = Date.now();
                 } else {
-                    checkOfflineEarnings();
+                    const now = Date.now();
+                    const offlineTime = (now - gameState.lastUpdate) / 1000;
+                    gameState.lastUpdate = now;
+                    
+                    if (offlineTime > 1) {
+                        const earned = gameState.earnRate * offlineTime;
+                        gameState.balance += earned;
+                        gameState.totalMined += earned;
+                        gameState.playTime += offlineTime;
+                        
+                        showNotification(`Offline mining: +${formatNumber(earned.toFixed(7))} SHDQ`);
+                        updateUI();
+                        saveGame();
+                    }
                 }
             });
         }
 
         // Handle mining click
         function handleMiningClick() {
-            // Manual mining gives a bonus
-            const manualBonus = 1 + Math.random() * 0.5; // 1.0 - 1.5x bonus
-            const earned = Math.floor(gameState.hashrate * manualBonus);
+            const manualBonus = 1 + Math.random() * 0.5;
+            const earned = gameState.hashrate * manualBonus;
             
             gameState.balance += earned;
-            gameState.totalEarned += earned;
+            gameState.totalMined += earned;
             gameState.totalClicks++;
-            
-            // Animate button
-            miningBtn.style.transform = 'scale(0.95)';
-            setTimeout(() => {
-                miningBtn.style.transform = 'scale(1)';
-            }, 100);
-            
-            // Check achievements
-            checkAchievement('first-click', 1);
-            checkAchievement('hundred-clicks', gameState.totalClicks);
-            checkAchievement('thousand-clicks', gameState.totalClicks);
             
             updateUI();
             saveGame();
-        }
-
-        // Create hash particles animation
-        function createHashParticles(x, y) {
-            const particleCount = 3 + Math.floor(Math.random() * 3);
-            
-            for (let i = 0; i < particleCount; i++) {
-                const size = 2 + Math.random() * 3;
-                const particle = document.createElement('div');
-                particle.className = 'hash-particle';
-                particle.style.width = `${size}px`;
-                particle.style.height = `${size}px`;
-                particle.style.left = `${x}px`;
-                particle.style.top = `${y}px`;
-                particle.style.setProperty('--tx', `${-50 + (Math.random() * 40 - 20)}%`);
-                particle.style.setProperty('--ty', `${-150 + (Math.random() * 40 - 20)}%`);
-                particle.style.animationDuration = `${0.5 + Math.random()}s`;
-                document.body.appendChild(particle);
-                
-                setTimeout(() => {
-                    particle.remove();
-                }, 1000);
-            }
         }
 
         // Switch between tabs
@@ -1046,30 +676,28 @@
             
             items.forEach(item => {
                 const canBuy = item.owned < item.max && gameState.balance >= item.price;
-                const isGPU = item.category === 'gpu';
-                const isRig = item.category === 'rig';
                 
                 const itemElement = document.createElement('div');
                 itemElement.className = 'shop-item';
                 itemElement.innerHTML = `
-                    <div class="item-icon ${item.category}">
-                        <i class="fas ${item.icon}"></i>
-                    </div>
                     <div class="item-info">
-                        <div class="item-name">${item.name}</div>
-                        <div class="item-stats">
-                            ${isGPU ? `<i class="fas fa-tachometer-alt"></i> +${item.hashrate} H/s` : ''}
-                            ${isGPU ? `<i class="fas fa-bolt"></i> ${item.power}W` : ''}
-                            ${isRig ? `<i class="fas fa-microchip"></i> До ${item.gpuSlots} видеокарт` : ''}
-                            ${item.category === 'cooling' ? `<i class="fas fa-snowflake"></i> -${item.cooling}°C` : ''}
-                            ${item.category === 'power' ? `<i class="fas fa-plug"></i> До ${item.maxPower}W` : ''}
+                        <div class="item-icon">
+                            <i class="fas ${item.icon}"></i>
                         </div>
-                        <div class="item-price">${formatNumber(item.price)} SAT</div>
+                        <div>
+                            <div class="item-name">${item.name}</div>
+                            ${item.hashrate > 0 ? `<div class="item-stats">Hashrate: +${formatNumber(item.hashrate)} H/s</div>` : ''}
+                            ${item.power > 0 ? `<div class="item-stats">Power: ${item.power}W</div>` : ''}
+                            ${item.gpuSlots ? `<div class="item-stats">GPU Slots: ${item.gpuSlots}</div>` : ''}
+                            ${item.cooling ? `<div class="item-stats">Cooling: -${item.cooling}°C</div>` : ''}
+                            ${item.maxPower ? `<div class="item-stats">Max Power: ${item.maxPower}W</div>` : ''}
+                            <div class="item-price">${formatNumber(item.price)} SHDQ</div>
+                        </div>
                     </div>
                     <button class="buy-btn" 
                             data-id="${item.id}" 
                             ${!canBuy ? 'disabled' : ''}>
-                        ${item.owned >= item.max ? 'Макс' : 'Купить'}
+                        ${item.owned >= item.max ? 'OWNED' : 'BUY'}
                     </button>
                 `;
                 
@@ -1097,19 +725,10 @@
             // Apply item effects
             if (item.category === 'gpu') {
                 gameState.gpus.push(item);
-                gameState.installedGPUs++;
-                
-                // Check achievements
-                checkAchievement('first-gpu', 1);
-                checkAchievement('full-rig', gameState.installedGPUs);
-                
-                const uniqueGPUs = new Set(gameState.gpus.map(g => g.id)).size;
-                checkAchievement('all-gpus', uniqueGPUs);
+                gameState.gpusInstalled++;
             } 
             else if (item.category === 'rig') {
                 gameState.maxGPUSlots = item.gpuSlots;
-                // Update UI for new slots
-                updateGPUSlots();
             }
             else if (item.category === 'cooling') {
                 gameState.cooling += item.cooling;
@@ -1121,9 +740,10 @@
             calculateStats();
             updateUI();
             renderShopItems(item.category);
+            updateGPUSlots();
             saveGame();
             
-            showNotification(`${item.name} куплен(а)!`, 'success');
+            showNotification(`${item.name} purchased`);
         }
 
         // Calculate all stats
@@ -1138,17 +758,14 @@
                 gameState.power += gpu.power;
             });
             
-            // Calculate earn rate (1 H/s = 0.1 SAT/sec)
+            // Calculate earn rate (1 H/s = 0.1 SHDQ/sec)
             gameState.earnRate = gameState.hashrate * 0.1;
             
-            // Calculate temperature (base 60°C + 2°C per 100W - cooling)
-            gameState.temperature = 60 + (gameState.power / 50) - gameState.cooling;
-            if (gameState.temperature < 30) gameState.temperature = 30;
-            
-            // Check achievements
-            checkAchievement('max-hashrate', gameState.hashrate);
-            checkAchievement('cool-rig', gameState.temperature < 50 ? 1 : 0);
-            checkAchievement('power-user', gameState.power);
+            // Check power limit
+            if (gameState.power > gameState.maxPower) {
+                gameState.hashrate = gameState.hashrate * (gameState.maxPower / gameState.power);
+                gameState.power = gameState.maxPower;
+            }
         }
 
         // Update GPU slots UI
@@ -1156,8 +773,12 @@
             // Reset all slots
             gpuSlots.forEach((slot, index) => {
                 if (index < gameState.maxGPUSlots) {
-                    slot.style.display = 'flex';
-                    slot.innerHTML = '<i class="fas fa-microchip"></i> Свободный слот';
+                    slot.style.display = 'block';
+                    slot.innerHTML = `
+                        <i class="fas fa-microchip"></i>
+                        <div class="gpu-name">GPU SLOT #${index + 1}</div>
+                        <div class="gpu-stats">EMPTY</div>
+                    `;
                     slot.className = 'gpu-slot';
                 } else {
                     slot.style.display = 'none';
@@ -1167,105 +788,37 @@
             // Fill with installed GPUs
             gameState.gpus.forEach((gpu, index) => {
                 if (index < gameState.maxGPUSlots) {
-                    gpuSlots[index].innerHTML = `<i class="fas fa-microchip"></i> ${gpu.name}`;
+                    gpuSlots[index].innerHTML = `
+                        <i class="fas fa-microchip"></i>
+                        <div class="gpu-name">${gpu.name}</div>
+                        <div class="gpu-stats">${formatNumber(gpu.hashrate)} H/s</div>
+                    `;
                     gpuSlots[index].className = 'gpu-slot filled';
                 }
             });
         }
 
-        // Render achievements
-        function renderAchievements() {
-            achievementsContainer.innerHTML = '';
-            
-            gameState.achievements.forEach(ach => {
-                const progress = Math.min(ach.progress / ach.required * 100, 100);
-                const isUnlocked = ach.unlocked;
-                
-                const achievementElement = document.createElement('div');
-                achievementElement.className = `achievement-card ${isUnlocked ? '' : 'achievement-locked'}`;
-                achievementElement.innerHTML = `
-                    <div class="achievement-icon">
-                        <i class="fas ${ach.icon}"></i>
-                    </div>
-                    <div class="achievement-info">
-                        <div class="achievement-name">${ach.name}</div>
-                        <div class="achievement-desc">${ach.description}</div>
-                        ${!isUnlocked ? `
-                        <div class="achievement-progress">
-                            <div class="progress-bar" style="width: ${progress}%"></div>
-                        </div>
-                        ` : ''}
-                    </div>
-                    ${isUnlocked ? '<i class="fas fa-check-circle achievement-badge"></i>' : ''}
-                `;
-                
-                achievementsContainer.appendChild(achievementElement);
-            });
-            
-            // Update achievements count
-            const unlockedCount = gameState.achievements.filter(a => a.unlocked).length;
-            achievementsCountElement.textContent = `${unlockedCount}/${gameState.achievements.length}`;
-            
-            // Check if all achievements are unlocked
-            if (unlockedCount === gameState.achievements.length - 1) {
-                checkAchievement('all-achievements', unlockedCount);
-            }
-        }
-
-        // Check achievements progress
-        function checkAchievement(id, value) {
-            const achievement = gameState.achievements.find(a => a.id === id);
-            if (!achievement || achievement.unlocked) return;
-            
-            achievement.progress = value;
-            
-            if (achievement.progress >= achievement.required && !achievement.unlocked) {
-                achievement.unlocked = true;
-                gameState.balance += achievement.reward;
-                
-                showNotification(`Достижение: ${achievement.name} +${achievement.reward} SAT`, 'success');
-                
-                renderAchievements();
-                updateUI();
-                saveGame();
-            }
-        }
-
         // Update all UI elements
         function updateUI() {
-            balanceElement.textContent = formatNumber(Math.floor(gameState.balance));
-            hashrateElement.textContent = `${formatNumber(gameState.hashrate.toFixed(1))} H/s`;
-            earnRateElement.textContent = `${formatNumber(gameState.earnRate.toFixed(4))} SAT/сек`;
-            powerElement.textContent = `${formatNumber(gameState.power)} W`;
-            temperatureElement.textContent = `${gameState.temperature.toFixed(1)}°C`;
-            totalClicksElement.textContent = formatNumber(gameState.totalClicks);
-            totalEarnedElement.textContent = `${formatNumber(Math.floor(gameState.totalEarned))} SAT`;
-            playTimeElement.textContent = `${formatNumber(gameState.playTime)} сек`;
+            balanceElement.textContent = formatNumber(gameState.balance.toFixed(7));
+            hashrateElement.textContent = `${formatNumber(gameState.hashrate.toFixed(7))} H/s`;
+            earnRateElement.textContent = `${formatNumber(gameState.earnRate.toFixed(7))} SHDQ/s`;
+            powerElement.textContent = `${gameState.power} W`;
+            totalMinedElement.textContent = formatNumber(gameState.totalMined.toFixed(7));
+            totalClicksElement.textContent = gameState.totalClicks;
+            playTimeElement.textContent = `${Math.floor(gameState.playTime)}s`;
+            gpusInstalledElement.textContent = gameState.gpusInstalled;
             
-            // Update username and level
-            usernameElement.textContent = gameState.username;
-            gameState.level = Math.floor(Math.log10(gameState.totalEarned + 1)) + 1;
-            userLevelElement.textContent = gameState.level;
-            
-            // Update avatar based on level
-            updateAvatar();
-            
-            // Check other achievements
-            checkAchievement('thousand-sat', gameState.totalEarned);
-            checkAchievement('million-sat', gameState.totalEarned);
-        }
-
-        // Update user avatar based on level
-        function updateAvatar() {
-            const level = gameState.level;
-            let icon = 'fa-user';
-            
-            if (level >= 10) icon = 'fa-crown';
-            else if (level >= 7) icon = 'fa-user-tie';
-            else if (level >= 5) icon = 'fa-user-astronaut';
-            else if (level >= 3) icon = 'fa-user-ninja';
-            
-            userAvatar.innerHTML = `<i class="fas ${icon}"></i>`;
+            // Update shop buttons
+            document.querySelectorAll('.buy-btn').forEach(btn => {
+                const itemId = btn.getAttribute('data-id');
+                const item = gameState.shopItems.find(i => i.id === itemId);
+                
+                if (item) {
+                    const canBuy = item.owned < item.max && gameState.balance >= item.price;
+                    btn.disabled = !canBuy;
+                }
+            });
         }
 
         // Format numbers with commas
@@ -1274,79 +827,30 @@
         }
 
         // Show notification
-        function showNotification(message, type = '') {
+        function showNotification(message) {
             notification.textContent = message;
-            notification.className = 'notification';
-            if (type) notification.classList.add(type);
-            notification.classList.add('show');
+            notification.className = 'notification show';
             
             setTimeout(() => {
-                notification.classList.remove('show');
+                notification.className = 'notification';
             }, 3000);
         }
 
         // Game loop for passive income
         function startGameLoop() {
             setInterval(() => {
-                // Calculate time passed (in seconds)
                 const now = Date.now();
                 const deltaTime = (now - gameState.lastUpdate) / 1000;
                 gameState.lastUpdate = now;
                 
-                // Earn based on earn rate
                 const earned = gameState.earnRate * deltaTime;
                 gameState.balance += earned;
-                gameState.totalEarned += earned;
+                gameState.totalMined += earned;
                 gameState.playTime += deltaTime;
                 
                 updateUI();
                 saveGame();
             }, 1000);
-        }
-
-        // Check for offline earnings
-        function checkOfflineEarnings() {
-            if (!gameState.lastUpdate) return;
-            
-            const now = Date.now();
-            const offlineTime = (now - gameState.lastUpdate) / 1000; // in seconds
-            gameState.lastUpdate = now;
-            
-            // Max offline time - 24 hours
-            const maxOfflineTime = 24 * 60 * 60;
-            const actualOfflineTime = Math.min(offlineTime, maxOfflineTime);
-            
-            if (actualOfflineTime > 60) { // Only show if offline for more than 1 minute
-                const offlineEarned = gameState.earnRate * actualOfflineTime;
-                gameState.offlineEarnings = offlineEarned;
-                gameState.balance += offlineEarned;
-                gameState.totalEarned += offlineEarned;
-                gameState.playTime += actualOfflineTime;
-                
-                offlineMiningElement.style.display = 'block';
-                offlineMiningElement.textContent = 
-                    `Майнинг в оффлайне: ${formatTime(actualOfflineTime)} | +${formatNumber(offlineEarned.toFixed(2))} SAT`;
-                
-                setTimeout(() => {
-                    offlineMiningElement.style.display = 'none';
-                }, 5000);
-                
-                updateUI();
-                saveGame();
-            }
-        }
-
-        // Format time (seconds to HH:MM:SS)
-        function formatTime(seconds) {
-            const hours = Math.floor(seconds / 3600);
-            const minutes = Math.floor((seconds % 3600) / 60);
-            const secs = Math.floor(seconds % 60);
-            
-            return [
-                hours.toString().padStart(2, '0'),
-                minutes.toString().padStart(2, '0'),
-                secs.toString().padStart(2, '0')
-            ].join(':');
         }
 
         // Save game state to localStorage
@@ -1356,29 +860,24 @@
                 hashrate: gameState.hashrate,
                 earnRate: gameState.earnRate,
                 power: gameState.power,
-                temperature: gameState.temperature,
+                totalMined: gameState.totalMined,
                 totalClicks: gameState.totalClicks,
-                totalEarned: gameState.totalEarned,
                 playTime: gameState.playTime,
+                gpusInstalled: gameState.gpusInstalled,
                 lastUpdate: gameState.lastUpdate,
                 gpus: gameState.gpus,
-                installedGPUs: gameState.installedGPUs,
-                username: gameState.username,
-                level: gameState.level,
-                achievements: gameState.achievements,
                 shopItems: gameState.shopItems,
                 maxGPUSlots: gameState.maxGPUSlots,
-                cooling: gameState.cooling,
                 maxPower: gameState.maxPower,
-                offlineEarnings: gameState.offlineEarnings
+                cooling: gameState.cooling
             };
             
-            localStorage.setItem('cryptoMinerSave', JSON.stringify(saveData));
+            localStorage.setItem('shdqMinerSave', JSON.stringify(saveData));
         }
 
         // Load game state from localStorage
         function loadGame() {
-            const saveData = localStorage.getItem('cryptoMinerSave');
+            const saveData = localStorage.getItem('shdqMinerSave');
             if (!saveData) return;
             
             const loadedData = JSON.parse(saveData);
@@ -1388,24 +887,16 @@
             gameState.hashrate = loadedData.hashrate || 0;
             gameState.earnRate = loadedData.earnRate || 0;
             gameState.power = loadedData.power || 0;
-            gameState.temperature = loadedData.temperature || 0;
+            gameState.totalMined = loadedData.totalMined || 0;
             gameState.totalClicks = loadedData.totalClicks || 0;
-            gameState.totalEarned = loadedData.totalEarned || 0;
             gameState.playTime = loadedData.playTime || 0;
+            gameState.gpusInstalled = loadedData.gpusInstalled || 0;
             gameState.lastUpdate = loadedData.lastUpdate || Date.now();
             gameState.gpus = loadedData.gpus || [];
-            gameState.installedGPUs = loadedData.installedGPUs || 0;
-            gameState.username = loadedData.username || 'Майнер';
-            gameState.level = loadedData.level || 1;
-            gameState.achievements = loadedData.achievements || gameState.achievements;
             gameState.shopItems = loadedData.shopItems || gameState.shopItems;
             gameState.maxGPUSlots = loadedData.maxGPUSlots || 4;
+            gameState.maxPower = loadedData.maxPower || 500;
             gameState.cooling = loadedData.cooling || 0;
-            gameState.maxPower = loadedData.maxPower || 0;
-            gameState.offlineEarnings = loadedData.offlineEarnings || 0;
-            
-            // Calculate level based on total earned
-            gameState.level = Math.floor(Math.log10(gameState.totalEarned + 1)) + 1;
         }
 
         // Initialize the game when DOM is loaded
