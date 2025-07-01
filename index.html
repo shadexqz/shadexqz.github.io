@@ -3,487 +3,1541 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Timed-Mail.com - Анонимная временная почта</title>
+    <title>Epic Clicker Game</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
-            --primary: #4285f4;
-            --danger: #ea4335;
-            --background: #f5f5f5;
-            --card-bg: #ffffff;
+            --primary: #4a6fa5;
+            --secondary: #166088;
+            --accent: #4fc3f7;
+            --background: #f5f7fa;
+            --card: #ffffff;
             --text: #333333;
-            --text-light: #666666;
+            --success: #4caf50;
+            --warning: #ff9800;
+            --danger: #f44336;
         }
-        
+
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--background);
+            color: var(--text);
             margin: 0;
             padding: 0;
-            background: var(--background);
-            color: var(--text);
+            line-height: 1.6;
         }
-        
+
         .container {
             max-width: 1200px;
             margin: 0 auto;
             padding: 20px;
         }
-        
+
         header {
-            background: var(--primary);
+            background-color: var(--primary);
             color: white;
             padding: 15px 0;
+            border-radius: 8px 8px 0 0;
             margin-bottom: 20px;
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
-        
+
         .header-content {
             display: flex;
             justify-content: space-between;
             align-items: center;
+            padding: 0 20px;
         }
-        
-        .mailbox-card {
-            background: var(--card-bg);
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            padding: 20px;
-            margin-bottom: 20px;
-        }
-        
-        .email-list {
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            overflow: hidden;
-            max-height: 400px;
-            overflow-y: auto;
-        }
-        
-        .email-item {
-            padding: 12px 15px;
-            border-bottom: 1px solid #eee;
-            cursor: pointer;
+
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
             display: flex;
-            justify-content: space-between;
+            align-items: center;
         }
-        
-        .email-item:hover {
-            background: #f9f9f9;
+
+        .logo i {
+            margin-right: 10px;
+            color: var(--accent);
         }
-        
-        .email-item.unread {
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .avatar {
+            width: 40px;
+            height: 40px;
+            background-color: var(--accent);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
             font-weight: bold;
         }
-        
-        .email-content {
-            display: none;
-            padding: 20px;
-            background: white;
-            border-radius: 4px;
-            margin-top: 10px;
-            white-space: pre-wrap;
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 300px;
+            gap: 20px;
         }
-        
-        button {
-            background: var(--primary);
+
+        .clicker-section {
+            background-color: var(--card);
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+
+        .clicker-title {
+            font-size: 20px;
+            margin-bottom: 20px;
+            color: var(--primary);
+        }
+
+        .click-button {
+            background-color: var(--accent);
             color: white;
             border: none;
-            padding: 10px 15px;
-            border-radius: 4px;
+            border-radius: 50%;
+            width: 150px;
+            height: 150px;
+            font-size: 24px;
             cursor: pointer;
-            font-size: 16px;
-            transition: background 0.3s;
+            transition: transform 0.1s, box-shadow 0.1s;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
         }
-        
-        button:hover {
-            background: #3367d6;
+
+        .click-button:hover {
+            background-color: #3fb0e6;
         }
-        
-        button.danger {
-            background: var(--danger);
+
+        .click-button:active {
+            transform: scale(0.95);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
         }
-        
-        button.danger:hover {
-            background: #c23321;
+
+        .click-button i {
+            font-size: 50px;
         }
-        
-        .timer {
-            color: var(--text-light);
+
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 20px;
+        }
+
+        .stat {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: var(--primary);
+        }
+
+        .stat-label {
             font-size: 14px;
-            margin-top: 5px;
+            color: #666;
         }
-        
-        input, textarea {
-            width: 100%;
+
+        .sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .card {
+            background-color: var(--card);
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .card-title {
+            font-size: 18px;
+            margin-bottom: 15px;
+            color: var(--primary);
+            border-bottom: 2px solid var(--accent);
+            padding-bottom: 5px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .card-title i {
+            color: var(--accent);
+        }
+
+        .upgrade {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .upgrade:last-child {
+            border-bottom: none;
+        }
+
+        .upgrade-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .upgrade-icon {
+            width: 40px;
+            height: 40px;
+            background-color: var(--accent);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+        }
+
+        .upgrade-name {
+            font-weight: bold;
+        }
+
+        .upgrade-description {
+            font-size: 12px;
+            color: #666;
+        }
+
+        .upgrade-cost {
+            font-weight: bold;
+            color: var(--success);
+        }
+
+        .upgrade-button {
+            background-color: var(--success);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 5px 10px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .upgrade-button:hover {
+            background-color: #43a047;
+        }
+
+        .upgrade-button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+
+        .achievement {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .achievement:last-child {
+            border-bottom: none;
+        }
+
+        .achievement-icon {
+            width: 40px;
+            height: 40px;
+            background-color: var(--warning);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+        }
+
+        .achievement-locked {
+            background-color: #cccccc;
+        }
+
+        .achievement-info {
+            flex-grow: 1;
+        }
+
+        .achievement-name {
+            font-weight: bold;
+        }
+
+        .achievement-description {
+            font-size: 12px;
+            color: #666;
+        }
+
+        .achievement-reward {
+            font-size: 12px;
+            color: var(--success);
+            font-weight: bold;
+        }
+
+        .clan-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .clan {
+            display: flex;
+            align-items: center;
             padding: 10px;
-            margin-bottom: 10px;
+            background-color: #f9f9f9;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .clan:hover {
+            background-color: #eee;
+        }
+
+        .clan-avatar {
+            width: 40px;
+            height: 40px;
+            background-color: var(--primary);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+
+        .clan-info {
+            flex-grow: 1;
+        }
+
+        .clan-name {
+            font-weight: bold;
+        }
+
+        .clan-members {
+            font-size: 12px;
+            color: #666;
+        }
+
+        .join-button {
+            background-color: var(--success);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 5px 10px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .join-button:hover {
+            background-color: #43a047;
+        }
+
+        .join-button.joined {
+            background-color: var(--danger);
+        }
+
+        .join-button.joined:hover {
+            background-color: #e53935;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            width: 400px;
+            max-width: 90%;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+        }
+
+        .modal-title {
+            font-size: 20px;
+            margin-bottom: 20px;
+            color: var(--primary);
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 8px;
             border: 1px solid #ddd;
             border-radius: 4px;
-            font-family: inherit;
+            box-sizing: border-box;
         }
-        
-        textarea {
-            min-height: 100px;
-            resize: vertical;
+
+        .modal-buttons {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 20px;
         }
-        
-        .badge {
+
+        .modal-button {
+            padding: 8px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .modal-button.primary {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        .modal-button.primary:hover {
+            background-color: #3a5a8f;
+        }
+
+        .modal-button.secondary {
+            background-color: #ddd;
+            color: #333;
+        }
+
+        .modal-button.secondary:hover {
+            background-color: #ccc;
+        }
+
+        .title-badge {
             display: inline-block;
-            padding: 3px 6px;
-            border-radius: 3px;
+            background-color: var(--warning);
+            color: white;
+            padding: 2px 8px;
+            border-radius: 12px;
             font-size: 12px;
-            background: #e0e0e0;
-            color: var(--text);
+            margin-left: 5px;
         }
-        
-        .tab-content {
-            display: none;
+
+        .rank-badge {
+            display: inline-block;
+            background-color: var(--primary);
+            color: white;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            margin-left: 5px;
         }
-        
-        .tab-content.active {
-            display: block;
+
+        .leaderboard {
+            width: 100%;
+            border-collapse: collapse;
         }
-        
+
+        .leaderboard th, .leaderboard td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+
+        .leaderboard th {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        .leaderboard tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+        .leaderboard tr:hover {
+            background-color: #f1f1f1;
+        }
+
+        .leaderboard-position {
+            width: 30px;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .leaderboard-avatar {
+            width: 30px;
+            height: 30px;
+            background-color: var(--accent);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 12px;
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+            
+            .header-content {
+                flex-direction: column;
+                gap: 10px;
+            }
+        }
+
+        .tab-container {
+            margin-top: 20px;
+        }
+
         .tabs {
             display: flex;
             border-bottom: 1px solid #ddd;
             margin-bottom: 15px;
         }
-        
+
         .tab {
             padding: 10px 15px;
             cursor: pointer;
-            border-bottom: 2px solid transparent;
+            border-bottom: 3px solid transparent;
+            transition: all 0.2s;
         }
-        
+
         .tab.active {
-            border-bottom: 2px solid var(--primary);
+            border-bottom-color: var(--primary);
+            color: var(--primary);
             font-weight: bold;
         }
-        
-        .empty-state {
-            text-align: center;
-            padding: 30px;
-            color: var(--text-light);
+
+        .tab-content {
+            display: none;
         }
-        
-        @media (max-width: 768px) {
-            .container {
-                padding: 10px;
-            }
-            
-            .header-content {
-                flex-direction: column;
-                text-align: center;
-            }
+
+        .tab-content.active {
+            display: block;
         }
     </style>
 </head>
 <body>
-    <header>
-        <div class="container header-content">
-            <div>
-                <h1>Timed-Mail.com</h1>
-                <p>Анонимная временная почта</p>
-            </div>
-            <div id="currentMailboxInfo" style="display: none;">
-                <div style="background: rgba(255,255,255,0.2); padding: 5px 10px; border-radius: 4px;">
-                    <strong id="currentMailbox"></strong>
-                    <div class="timer">Удаление через: <span id="expiryTimer">24:00:00</span></div>
-                </div>
-            </div>
-        </div>
-    </header>
-
     <div class="container">
-        <div id="createMailboxSection" class="mailbox-card">
-            <h2>Создать новый почтовый ящик</h2>
-            <button id="createMailboxBtn">Создать @timed-mail.com</button>
-        </div>
+        <header>
+            <div class="header-content">
+                <div class="logo">
+                    <i class="fas fa-mouse-pointer"></i>
+                    Epic Clicker
+                </div>
+                <div class="user-info">
+                    <div class="avatar" id="user-avatar">U</div>
+                    <div>
+                        <div id="username-display">Гость</div>
+                        <div>
+                            <span id="rank-display" class="rank-badge">Новичок</span>
+                            <span id="title-display" class="title-badge">Неизвестный</span>
+                        </div>
+                    </div>
+                    <button id="edit-profile-btn" style="background: none; border: none; color: white; cursor: pointer;">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                </div>
+            </div>
+        </header>
 
-        <div id="mailboxSection" class="mailbox-card" style="display: none;">
-            <div class="tabs">
-                <div class="tab active" data-tab="inbox">Входящие</div>
-                <div class="tab" data-tab="compose">Написать</div>
-                <div class="tab" data-tab="settings">Настройки</div>
-            </div>
-            
-            <div id="inboxTab" class="tab-content active">
-                <div class="email-list" id="inbox">
-                    <div class="empty-state">Почтовый ящик пуст</div>
+        <div class="main-content">
+            <div class="clicker-section">
+                <h2 class="clicker-title">Кликай, чтобы зарабатывать очки!</h2>
+                <button class="click-button" id="click-button">
+                    <i class="fas fa-hand-pointer"></i>
+                </button>
+                
+                <div class="stats">
+                    <div class="stat">
+                        <div class="stat-value" id="points-counter">0</div>
+                        <div class="stat-label">Очков</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-value" id="points-per-second">0</div>
+                        <div class="stat-label">В секунду</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-value" id="points-per-click">1</div>
+                        <div class="stat-label">За клик</div>
+                    </div>
+                </div>
+
+                <div class="tab-container">
+                    <div class="tabs">
+                        <div class="tab active" data-tab="upgrades">Улучшения</div>
+                        <div class="tab" data-tab="achievements">Достижения</div>
+                        <div class="tab" data-tab="leaderboard">Таблица лидеров</div>
+                    </div>
+                    
+                    <div class="tab-content active" id="upgrades-tab">
+                        <div class="upgrades-list" id="upgrades-list">
+                            <!-- Улучшения будут добавлены через JS -->
+                        </div>
+                    </div>
+                    
+                    <div class="tab-content" id="achievements-tab">
+                        <div class="achievements-list" id="achievements-list">
+                            <!-- Достижения будут добавлены через JS -->
+                        </div>
+                    </div>
+                    
+                    <div class="tab-content" id="leaderboard-tab">
+                        <table class="leaderboard">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Игрок</th>
+                                    <th>Очки</th>
+                                    <th>Звание</th>
+                                </tr>
+                            </thead>
+                            <tbody id="leaderboard-body">
+                                <!-- Таблица лидеров будет заполнена через JS -->
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
-            
-            <div id="composeTab" class="tab-content">
-                <form id="sendEmailForm">
-                    <div>
-                        <label>От:</label>
-                        <input type="email" id="fromEmail" readonly>
+
+            <div class="sidebar">
+                <div class="card">
+                    <h3 class="card-title"><i class="fas fa-users"></i> Кланы</h3>
+                    <div class="clan-list" id="clan-list">
+                        <!-- Список кланов будет добавлен через JS -->
                     </div>
-                    <div>
-                        <label>Кому:</label>
-                        <input type="email" id="toEmail" required>
-                    </div>
-                    <div>
-                        <label>Тема:</label>
-                        <input type="text" id="emailSubject">
-                    </div>
-                    <div>
-                        <label>Сообщение:</label>
-                        <textarea id="emailBody"></textarea>
-                    </div>
-                    <button type="submit">Отправить письмо</button>
-                </form>
-            </div>
-            
-            <div id="settingsTab" class="tab-content">
-                <h3>Настройки почтового ящика</h3>
-                <div style="margin-bottom: 15px;">
-                    <label>Срок действия:</label>
-                    <select id="expirySelect">
-                        <option value="1">1 час</option>
-                        <option value="6">6 часов</option>
-                        <option value="24" selected>24 часа</option>
-                        <option value="72">3 дня</option>
-                        <option value="168">7 дней</option>
-                    </select>
+                    <button id="create-clan-btn" style="width: 100%; margin-top: 10px; background-color: var(--primary); color: white; border: none; padding: 8px; border-radius: 4px; cursor: pointer;">
+                        <i class="fas fa-plus"></i> Создать клан
+                    </button>
                 </div>
-                <button id="deleteMailboxBtn" class="danger">Удалить почтовый ящик</button>
+
+                <div class="card">
+                    <h3 class="card-title"><i class="fas fa-trophy"></i> Прогресс</h3>
+                    <div class="progress-info">
+                        <div>Всего кликов: <span id="total-clicks">0</span></div>
+                        <div>Время игры: <span id="play-time">0:00</span></div>
+                        <div>Улучшений куплено: <span id="upgrades-bought">0</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Модальное окно редактирования профиля -->
+    <div class="modal" id="profile-modal">
+        <div class="modal-content">
+            <h3 class="modal-title"><i class="fas fa-user-edit"></i> Редактирование профиля</h3>
+            <div class="form-group">
+                <label for="username-input">Имя игрока</label>
+                <input type="text" id="username-input" placeholder="Введите ваше имя">
+            </div>
+            <div class="form-group">
+                <label for="title-select">Титул</label>
+                <select id="title-select">
+                    <!-- Титулы будут добавлены через JS -->
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="avatar-color">Цвет аватара</label>
+                <input type="color" id="avatar-color" value="#4fc3f7">
+            </div>
+            <div class="modal-buttons">
+                <button class="modal-button secondary" id="cancel-profile-btn">Отмена</button>
+                <button class="modal-button primary" id="save-profile-btn">Сохранить</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Модальное окно создания клана -->
+    <div class="modal" id="clan-modal">
+        <div class="modal-content">
+            <h3 class="modal-title"><i class="fas fa-users"></i> Создать клан</h3>
+            <div class="form-group">
+                <label for="clan-name-input">Название клана</label>
+                <input type="text" id="clan-name-input" placeholder="Введите название клана">
+            </div>
+            <div class="form-group">
+                <label for="clan-tag-input">Тег клана (2-4 символа)</label>
+                <input type="text" id="clan-tag-input" placeholder="Например: EPIC" maxlength="4">
+            </div>
+            <div class="modal-buttons">
+                <button class="modal-button secondary" id="cancel-clan-btn">Отмена</button>
+                <button class="modal-button primary" id="create-clan-confirm-btn">Создать</button>
             </div>
         </div>
     </div>
 
     <script>
-        // Хранилище данных
-        let mailboxes = JSON.parse(localStorage.getItem('timedMailboxes')) || {};
-        let currentMailbox = localStorage.getItem('currentMailbox');
-        
+        // Игровые данные
+        const gameState = {
+            points: 0,
+            pointsPerClick: 1,
+            pointsPerSecond: 0,
+            totalClicks: 0,
+            playTime: 0,
+            upgradesBought: 0,
+            username: 'Гость',
+            avatarColor: '#4fc3f7',
+            title: 'Неизвестный',
+            rank: 'Новичок',
+            clan: null,
+            lastUpdate: Date.now()
+        };
+
+        // Улучшения
+        const upgrades = [
+            {
+                id: 'click-power-1',
+                name: 'Улучшенный курсор',
+                description: 'Увеличивает силу клика на 1',
+                icon: 'fa-mouse',
+                baseCost: 10,
+                costIncrease: 1.5,
+                owned: 0,
+                max: 20,
+                effect: () => { gameState.pointsPerClick += 1; }
+            },
+            {
+                id: 'auto-click-1',
+                name: 'Автокликер',
+                description: 'Автоматически кликает 1 раз в секунду',
+                icon: 'fa-robot',
+                baseCost: 50,
+                costIncrease: 1.8,
+                owned: 0,
+                max: 10,
+                effect: () => { gameState.pointsPerSecond += 1; }
+            },
+            {
+                id: 'click-power-2',
+                name: 'Профессиональный кликер',
+                description: 'Увеличивает силу клика на 5',
+                icon: 'fa-mouse-pointer',
+                baseCost: 200,
+                costIncrease: 1.7,
+                owned: 0,
+                max: 10,
+                effect: () => { gameState.pointsPerClick += 5; },
+                requirement: () => gameState.upgradesBought >= 5
+            },
+            {
+                id: 'auto-click-2',
+                name: 'Продвинутый автокликер',
+                description: 'Автоматически кликает 5 раз в секунду',
+                icon: 'fa-cogs',
+                baseCost: 1000,
+                costIncrease: 1.9,
+                owned: 0,
+                max: 5,
+                effect: () => { gameState.pointsPerSecond += 5; },
+                requirement: () => gameState.upgradesBought >= 10
+            },
+            {
+                id: 'click-power-3',
+                name: 'Мастер кликов',
+                description: 'Увеличивает силу клика на 10',
+                icon: 'fa-hand-pointer',
+                baseCost: 5000,
+                costIncrease: 2,
+                owned: 0,
+                max: 5,
+                effect: () => { gameState.pointsPerClick += 10; },
+                requirement: () => gameState.upgradesBought >= 20
+            },
+            {
+                id: 'auto-click-3',
+                name: 'Квантовый кликер',
+                description: 'Автоматически кликает 20 раз в секунду',
+                icon: 'fa-atom',
+                baseCost: 20000,
+                costIncrease: 2.2,
+                owned: 0,
+                max: 3,
+                effect: () => { gameState.pointsPerSecond += 20; },
+                requirement: () => gameState.upgradesBought >= 30
+            }
+        ];
+
+        // Достижения
+        const achievements = [
+            {
+                id: 'first-click',
+                name: 'Первый клик',
+                description: 'Совершите ваш первый клик',
+                icon: 'fa-hand-pointer',
+                reward: 10,
+                achieved: false,
+                check: () => gameState.totalClicks >= 1
+            },
+            {
+                id: '100-clicks',
+                name: '100 кликов',
+                description: 'Совершите 100 кликов',
+                icon: 'fa-mouse',
+                reward: 50,
+                achieved: false,
+                check: () => gameState.totalClicks >= 100
+            },
+            {
+                id: '1000-clicks',
+                name: '1000 кликов',
+                description: 'Совершите 1000 кликов',
+                icon: 'fa-mouse-pointer',
+                reward: 200,
+                achieved: false,
+                check: () => gameState.totalClicks >= 1000
+            },
+            {
+                id: 'first-upgrade',
+                name: 'Первое улучшение',
+                description: 'Купите первое улучшение',
+                icon: 'fa-arrow-up',
+                reward: 20,
+                achieved: false,
+                check: () => gameState.upgradesBought >= 1
+            },
+            {
+                id: '10-upgrades',
+                name: '10 улучшений',
+                description: 'Купите 10 улучшений',
+                icon: 'fa-layer-group',
+                reward: 100,
+                achieved: false,
+                check: () => gameState.upgradesBought >= 10
+            },
+            {
+                id: '100-points',
+                name: '100 очков',
+                description: 'Заработайте 100 очков',
+                icon: 'fa-coins',
+                reward: 10,
+                achieved: false,
+                check: () => gameState.points >= 100
+            },
+            {
+                id: '1000-points',
+                name: '1000 очков',
+                description: 'Заработайте 1000 очков',
+                icon: 'fa-money-bill-wave',
+                reward: 50,
+                achieved: false,
+                check: () => gameState.points >= 1000
+            },
+            {
+                id: '10000-points',
+                name: '10 000 очков',
+                description: 'Заработайте 10 000 очков',
+                icon: 'fa-gem',
+                reward: 200,
+                achieved: false,
+                check: () => gameState.points >= 10000
+            },
+            {
+                id: 'join-clan',
+                name: 'В команде',
+                description: 'Вступите в клан',
+                icon: 'fa-users',
+                reward: 100,
+                achieved: false,
+                check: () => gameState.clan !== null
+            },
+            {
+                id: 'create-clan',
+                name: 'Основатель',
+                description: 'Создайте свой клан',
+                icon: 'fa-crown',
+                reward: 200,
+                achieved: false,
+                check: () => clans.some(clan => clan.leader === gameState.username)
+            }
+        ];
+
+        // Титулы
+        const titles = [
+            { id: 'unknown', name: 'Неизвестный', requirement: () => true },
+            { id: 'beginner', name: 'Новичок', requirement: () => gameState.points >= 100 },
+            { id: 'clicker', name: 'Кликер', requirement: () => gameState.totalClicks >= 100 },
+            { id: 'pro', name: 'Профессионал', requirement: () => gameState.points >= 1000 },
+            { id: 'expert', name: 'Эксперт', requirement: () => gameState.points >= 5000 },
+            { id: 'master', name: 'Мастер', requirement: () => gameState.points >= 10000 && gameState.totalClicks >= 1000 },
+            { id: 'legend', name: 'Легенда', requirement: () => gameState.points >= 50000 && gameState.totalClicks >= 5000 },
+            { id: 'god', name: 'Бог кликов', requirement: () => gameState.points >= 100000 && gameState.totalClicks >= 10000 }
+        ];
+
+        // Звания (ранги)
+        const ranks = [
+            { name: 'Новичок', minPoints: 0 },
+            { name: 'Ученик', minPoints: 100 },
+            { name: 'Испытатель', minPoints: 500 },
+            { name: 'Странник', minPoints: 1000 },
+            { name: 'Искатель', minPoints: 2500 },
+            { name: 'Мастер', minPoints: 5000 },
+            { name: 'Герой', minPoints: 10000 },
+            { name: 'Легенда', minPoints: 25000 },
+            { name: 'Миф', minPoints: 50000 },
+            { name: 'Божество', minPoints: 100000 }
+        ];
+
+        // Кланы
+        let clans = [
+            { id: 1, name: 'Эпичные кликеры', tag: 'EPIC', members: ['Гость', 'Игрок1'], leader: 'Игрок1', points: 15000 },
+            { id: 2, name: 'Быстрые пальцы', tag: 'FAST', members: ['Игрок2', 'Игрок3'], leader: 'Игрок2', points: 8000 },
+            { id: 3, name: 'Короли клика', tag: 'KING', members: ['Игрок4'], leader: 'Игрок4', points: 5000 }
+        ];
+
+        // Игроки (для таблицы лидеров)
+        let players = [
+            { username: 'Игрок1', points: 15000, rank: 'Легенда', avatarColor: '#ff5722' },
+            { username: 'Игрок2', points: 12000, rank: 'Герой', avatarColor: '#9c27b0' },
+            { username: 'Игрок3', points: 8000, rank: 'Мастер', avatarColor: '#3f51b5' },
+            { username: 'Игрок4', points: 5000, rank: 'Искатель', avatarColor: '#4caf50' },
+            { username: 'Гость', points: 0, rank: 'Новичок', avatarColor: '#4fc3f7' }
+        ];
+
         // DOM элементы
-        const createMailboxBtn = document.getElementById('createMailboxBtn');
-        const createMailboxSection = document.getElementById('createMailboxSection');
-        const mailboxSection = document.getElementById('mailboxSection');
-        const currentMailboxInfo = document.getElementById('currentMailboxInfo');
-        const currentMailboxDisplay = document.getElementById('currentMailbox');
-        const expiryTimer = document.getElementById('expiryTimer');
-        const inbox = document.getElementById('inbox');
-        const fromEmail = document.getElementById('fromEmail');
-        const toEmail = document.getElementById('toEmail');
-        const emailSubject = document.getElementById('emailSubject');
-        const emailBody = document.getElementById('emailBody');
-        const sendEmailForm = document.getElementById('sendEmailForm');
-        const expirySelect = document.getElementById('expirySelect');
-        const deleteMailboxBtn = document.getElementById('deleteMailboxBtn');
+        const pointsCounter = document.getElementById('points-counter');
+        const pointsPerSecond = document.getElementById('points-per-second');
+        const pointsPerClick = document.getElementById('points-per-click');
+        const clickButton = document.getElementById('click-button');
+        const upgradesList = document.getElementById('upgrades-list');
+        const achievementsList = document.getElementById('achievements-list');
+        const leaderboardBody = document.getElementById('leaderboard-body');
+        const clanList = document.getElementById('clan-list');
+        const usernameDisplay = document.getElementById('username-display');
+        const rankDisplay = document.getElementById('rank-display');
+        const titleDisplay = document.getElementById('title-display');
+        const userAvatar = document.getElementById('user-avatar');
+        const totalClicks = document.getElementById('total-clicks');
+        const playTime = document.getElementById('play-time');
+        const upgradesBought = document.getElementById('upgrades-bought');
+        const profileModal = document.getElementById('profile-modal');
+        const clanModal = document.getElementById('clan-modal');
+        const usernameInput = document.getElementById('username-input');
+        const titleSelect = document.getElementById('title-select');
+        const avatarColor = document.getElementById('avatar-color');
+        const saveProfileBtn = document.getElementById('save-profile-btn');
+        const cancelProfileBtn = document.getElementById('cancel-profile-btn');
+        const editProfileBtn = document.getElementById('edit-profile-btn');
+        const createClanBtn = document.getElementById('create-clan-btn');
+        const clanNameInput = document.getElementById('clan-name-input');
+        const clanTagInput = document.getElementById('clan-tag-input');
+        const createClanConfirmBtn = document.getElementById('create-clan-confirm-btn');
+        const cancelClanBtn = document.getElementById('cancel-clan-btn');
         const tabs = document.querySelectorAll('.tab');
         const tabContents = document.querySelectorAll('.tab-content');
-        
-        // Инициализация
-        document.addEventListener('DOMContentLoaded', () => {
-            if (currentMailbox && mailboxes[currentMailbox]) {
-                showMailbox(currentMailbox);
-            }
-            
-            // Обновляем таймер каждую секунду
-            setInterval(updateTimers, 1000);
-            
-            // Проверяем почту каждые 30 секунд
-            setInterval(checkInbox, 30000);
-        });
-        
-        // Создание почтового ящика
-        createMailboxBtn.addEventListener('click', () => {
-            const id = generateId();
-            const address = `${id}@timed-mail.com`;
-            const expiresAt = Date.now() + 24 * 60 * 60 * 1000; // 24 часа по умолчанию
-            
-            mailboxes[address] = {
-                id,
-                address,
-                createdAt: Date.now(),
-                expiresAt,
-                emails: [],
-                expiryHours: 24
-            };
-            
-            saveMailboxes();
-            showMailbox(address);
-        });
-        
-        // Отправка письма
-        sendEmailForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            
-            const from = fromEmail.value;
-            const to = toEmail.value;
-            const subject = emailSubject.value;
-            const text = emailBody.value;
-            
-            try {
-                // Используем Mailtrap API для тестовой отправки
-                const response = await fetch('https://send.api.mailtrap.io/api/send', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': 'Bearer YOUR_MAILTRAP_API_KEY'
-                    },
-                    body: JSON.stringify({
-                        from: { email: from },
-                        to: [{ email: to }],
-                        subject,
-                        text
-                    })
-                });
-                
-                if (!response.ok) throw new Error('Ошибка отправки');
-                
-                alert('Письмо отправлено!');
-                emailSubject.value = '';
-                emailBody.value = '';
-            } catch (error) {
-                alert('Ошибка при отправке: ' + error.message);
-            }
-        });
-        
-        // Удаление почтового ящика
-        deleteMailboxBtn.addEventListener('click', () => {
-            if (confirm('Вы уверены, что хотите удалить этот почтовый ящик? Все письма будут потеряны.')) {
-                delete mailboxes[currentMailbox];
-                saveMailboxes();
-                currentMailbox = null;
-                localStorage.removeItem('currentMailbox');
-                
-                createMailboxSection.style.display = 'block';
-                mailboxSection.style.display = 'none';
-                currentMailboxInfo.style.display = 'none';
-            }
-        });
-        
-        // Изменение срока действия
-        expirySelect.addEventListener('change', () => {
-            if (!currentMailbox) return;
-            
-            const hours = parseInt(expirySelect.value);
-            mailboxes[currentMailbox].expiresAt = Date.now() + hours * 60 * 60 * 1000;
-            mailboxes[currentMailbox].expiryHours = hours;
-            saveMailboxes();
-        });
-        
-        // Переключение вкладок
-        tabs.forEach(tab => {
-            tab.addEventListener('click', () => {
-                tabs.forEach(t => t.classList.remove('active'));
-                tabContents.forEach(c => c.classList.remove('active'));
-                
-                tab.classList.add('active');
-                document.getElementById(`${tab.dataset.tab}Tab`).classList.add('active');
-            });
-        });
-        
-        // Функции
-        function showMailbox(address) {
-            currentMailbox = address;
-            localStorage.setItem('currentMailbox', address);
-            
-            createMailboxSection.style.display = 'none';
-            mailboxSection.style.display = 'block';
-            currentMailboxInfo.style.display = 'block';
-            
-            currentMailboxDisplay.textContent = address;
-            fromEmail.value = address;
-            
-            // Установка выбранного срока действия
-            expirySelect.value = mailboxes[address].expiryHours;
-            
-            // Показываем письма
-            renderInbox();
+
+        // Инициализация игры
+        function initGame() {
+            loadGame();
+            updateUI();
+            renderUpgrades();
+            renderAchievements();
+            renderClans();
+            renderLeaderboard();
+            renderTitles();
+            startGameLoop();
+            setupEventListeners();
         }
-        
-        function renderInbox() {
-            if (!currentMailbox || !mailboxes[currentMailbox]) return;
-            
-            const mailbox = mailboxes[currentMailbox];
-            
-            if (mailbox.emails.length === 0) {
-                inbox.innerHTML = '<div class="empty-state">Почтовый ящик пуст</div>';
-                return;
+
+        // Загрузка игры
+        function loadGame() {
+            const savedGame = localStorage.getItem('epicClickerSave');
+            if (savedGame) {
+                const parsed = JSON.parse(savedGame);
+                Object.assign(gameState, parsed);
+                
+                // Обновляем UI после загрузки
+                updatePlayerInfo();
+                updateStats();
             }
+        }
+
+        // Сохранение игры
+        function saveGame() {
+            localStorage.setItem('epicClickerSave', JSON.stringify(gameState));
+        }
+
+        // Игровой цикл
+        function startGameLoop() {
+            setInterval(() => {
+                const now = Date.now();
+                const deltaTime = (now - gameState.lastUpdate) / 1000;
+                gameState.lastUpdate = now;
+                
+                // Добавляем очки за автокликеры
+                if (gameState.pointsPerSecond > 0) {
+                    gameState.points += gameState.pointsPerSecond * deltaTime;
+                    updatePoints();
+                }
+                
+                // Обновляем время игры
+                gameState.playTime += deltaTime;
+                updateStats();
+                
+                // Проверяем достижения
+                checkAchievements();
+                
+                // Обновляем ранг
+                updateRank();
+                
+                // Сохраняем игру каждые 5 секунд
+                if (Math.floor(gameState.playTime) % 5 === 0) {
+                    saveGame();
+                }
+            }, 1000);
+        }
+
+        // Обновление UI
+        function updateUI() {
+            updatePoints();
+            updateStats();
+            updatePlayerInfo();
+            updateUpgrades();
+        }
+
+        // Обновление очков
+        function updatePoints() {
+            pointsCounter.textContent = Math.floor(gameState.points);
+            pointsPerSecond.textContent = gameState.pointsPerSecond;
+            pointsPerClick.textContent = gameState.pointsPerClick;
+        }
+
+        // Обновление статистики
+        function updateStats() {
+            totalClicks.textContent = gameState.totalClicks;
             
-            inbox.innerHTML = '';
-            mailbox.emails.forEach(email => {
-                const emailEl = document.createElement('div');
-                emailEl.className = `email-item ${email.read ? '' : 'unread'}`;
-                emailEl.innerHTML = `
-                    <div>
-                        <strong>${email.from}</strong>
-                        <div>${email.subject || '(без темы)'}</div>
+            const minutes = Math.floor(gameState.playTime / 60);
+            const seconds = Math.floor(gameState.playTime % 60);
+            playTime.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+            
+            upgradesBought.textContent = gameState.upgradesBought;
+        }
+
+        // Обновление информации об игроке
+        function updatePlayerInfo() {
+            usernameDisplay.textContent = gameState.username;
+            rankDisplay.textContent = gameState.rank;
+            titleDisplay.textContent = gameState.title;
+            userAvatar.style.backgroundColor = gameState.avatarColor;
+            userAvatar.textContent = gameState.username.charAt(0).toUpperCase();
+        }
+
+        // Обновление ранга
+        function updateRank() {
+            for (let i = ranks.length - 1; i >= 0; i--) {
+                if (gameState.points >= ranks[i].minPoints) {
+                    gameState.rank = ranks[i].name;
+                    rankDisplay.textContent = gameState.rank;
+                    
+                    // Добавляем игрока в таблицу лидеров, если его там нет
+                    if (!players.some(p => p.username === gameState.username)) {
+                        players.push({
+                            username: gameState.username,
+                            points: gameState.points,
+                            rank: gameState.rank,
+                            avatarColor: gameState.avatarColor
+                        });
+                        renderLeaderboard();
+                    } else {
+                        // Обновляем очки и ранг игрока в таблице лидеров
+                        const playerIndex = players.findIndex(p => p.username === gameState.username);
+                        if (playerIndex !== -1) {
+                            players[playerIndex].points = Math.floor(gameState.points);
+                            players[playerIndex].rank = gameState.rank;
+                            renderLeaderboard();
+                        }
+                    }
+                    
+                    break;
+                }
+            }
+        }
+
+        // Рендер улучшений
+        function renderUpgrades() {
+            upgradesList.innerHTML = '';
+            
+            upgrades.forEach(upgrade => {
+                const canSee = !upgrade.requirement || upgrade.requirement();
+                if (!canSee) return;
+                
+                const cost = Math.floor(upgrade.baseCost * Math.pow(upgrade.costIncrease, upgrade.owned));
+                const canAfford = gameState.points >= cost;
+                const isMaxed = upgrade.owned >= upgrade.max;
+                
+                const upgradeElement = document.createElement('div');
+                upgradeElement.className = 'upgrade';
+                upgradeElement.innerHTML = `
+                    <div class="upgrade-info">
+                        <div class="upgrade-icon">
+                            <i class="fas ${upgrade.icon}"></i>
+                        </div>
+                        <div>
+                            <div class="upgrade-name">${upgrade.name} (${upgrade.owned}/${upgrade.max})</div>
+                            <div class="upgrade-description">${upgrade.description}</div>
+                        </div>
                     </div>
                     <div>
-                        <small>${formatDate(email.receivedAt)}</small>
+                        <div class="upgrade-cost">${cost} очков</div>
+                        <button class="upgrade-button" data-id="${upgrade.id}" ${!canAfford || isMaxed ? 'disabled' : ''}>
+                            ${isMaxed ? 'MAX' : 'Купить'}
+                        </button>
                     </div>
                 `;
                 
-                emailEl.addEventListener('click', () => {
-                    // Помечаем как прочитанное
-                    if (!email.read) {
-                        email.read = true;
-                        saveMailboxes();
-                        emailEl.classList.remove('unread');
-                    }
-                    
-                    // Показываем содержимое письма
-                    alert(`От: ${email.from}\nТема: ${email.subject}\nДата: ${formatDate(email.receivedAt)}\n\n${email.text}`);
+                upgradesList.appendChild(upgradeElement);
+            });
+            
+            // Добавляем обработчики событий для кнопок улучшений
+            document.querySelectorAll('.upgrade-button').forEach(button => {
+                button.addEventListener('click', function() {
+                    const upgradeId = this.getAttribute('data-id');
+                    buyUpgrade(upgradeId);
                 });
-                
-                inbox.appendChild(emailEl);
             });
         }
-        
-        function checkInbox() {
-            // В реальной реализации здесь бы был запрос к серверу
-            // Для демонстрации просто обновляем интерфейс
-            if (currentMailbox) {
-                renderInbox();
-                updateTimers();
+
+        // Покупка улучшения
+        function buyUpgrade(upgradeId) {
+            const upgrade = upgrades.find(u => u.id === upgradeId);
+            if (!upgrade) return;
+            
+            const cost = Math.floor(upgrade.baseCost * Math.pow(upgrade.costIncrease, upgrade.owned));
+            
+            if (gameState.points >= cost && upgrade.owned < upgrade.max) {
+                gameState.points -= cost;
+                upgrade.owned++;
+                gameState.upgradesBought++;
+                
+                // Применяем эффект улучшения
+                upgrade.effect();
+                
+                // Обновляем UI
+                updatePoints();
+                renderUpgrades();
+                checkAchievements();
+                
+                // Сохраняем игру
+                saveGame();
             }
         }
-        
-        function updateTimers() {
-            if (!currentMailbox || !mailboxes[currentMailbox]) return;
-            
-            const mailbox = mailboxes[currentMailbox];
-            const now = Date.now();
-            const distance = mailbox.expiresAt - now;
-            
-            if (distance < 0) {
-                expiryTimer.textContent = '00:00:00';
-                delete mailboxes[currentMailbox];
-                saveMailboxes();
+
+        // Обновление доступности улучшений
+        function updateUpgrades() {
+            document.querySelectorAll('.upgrade-button').forEach(button => {
+                const upgradeId = button.getAttribute('data-id');
+                const upgrade = upgrades.find(u => u.id === upgradeId);
+                if (!upgrade) return;
                 
-                createMailboxSection.style.display = 'block';
-                mailboxSection.style.display = 'none';
-                currentMailboxInfo.style.display = 'none';
+                const cost = Math.floor(upgrade.baseCost * Math.pow(upgrade.costIncrease, upgrade.owned));
+                const canAfford = gameState.points >= cost;
+                const isMaxed = upgrade.owned >= upgrade.max;
                 
-                return;
+                button.disabled = !canAfford || isMaxed;
+                button.textContent = isMaxed ? 'MAX' : 'Купить';
+                
+                const costElement = button.parentElement.querySelector('.upgrade-cost');
+                if (costElement) {
+                    costElement.textContent = `${cost} очков`;
+                }
+            });
+        }
+
+        // Рендер достижений
+        function renderAchievements() {
+            achievementsList.innerHTML = '';
+            
+            achievements.forEach(achievement => {
+                const achieved = achievement.achieved || achievement.check();
+                if (achieved && !achievement.achieved) {
+                    achievement.achieved = true;
+                    gameState.points += achievement.reward;
+                    updatePoints();
+                }
+                
+                const achievementElement = document.createElement('div');
+                achievementElement.className = 'achievement';
+                achievementElement.innerHTML = `
+                    <div class="achievement-icon ${achieved ? '' : 'achievement-locked'}">
+                        <i class="fas ${achieved ? achievement.icon : 'fa-lock'}"></i>
+                    </div>
+                    <div class="achievement-info">
+                        <div class="achievement-name">${achievement.name}</div>
+                        <div class="achievement-description">${achievement.description}</div>
+                    </div>
+                    <div class="achievement-reward">+${achievement.reward} очков</div>
+                `;
+                
+                achievementsList.appendChild(achievementElement);
+            });
+        }
+
+        // Проверка достижений
+        function checkAchievements() {
+            let needsUpdate = false;
+            
+            achievements.forEach(achievement => {
+                if (!achievement.achieved && achievement.check()) {
+                    achievement.achieved = true;
+                    gameState.points += achievement.reward;
+                    needsUpdate = true;
+                    
+                    // Показываем уведомление о достижении
+                    showAchievementNotification(achievement);
+                }
+            });
+            
+            if (needsUpdate) {
+                updatePoints();
+                renderAchievements();
+                saveGame();
+            }
+        }
+
+        // Показ уведомления о достижении
+        function showAchievementNotification(achievement) {
+            const notification = document.createElement('div');
+            notification.className = 'achievement-notification';
+            notification.style.position = 'fixed';
+            notification.style.bottom = '20px';
+            notification.style.right = '20px';
+            notification.style.backgroundColor = '#4CAF50';
+            notification.style.color = 'white';
+            notification.style.padding = '15px';
+            notification.style.borderRadius = '5px';
+            notification.style.boxShadow = '0 4px 8px rgba(0,0,0,0.2)';
+            notification.style.zIndex = '1000';
+            notification.style.display = 'flex';
+            notification.style.alignItems = 'center';
+            notification.style.gap = '10px';
+            notification.style.animation = 'slideIn 0.5s forwards';
+            
+            notification.innerHTML = `
+                <div style="font-size: 24px;">
+                    <i class="fas ${achievement.icon}"></i>
+                </div>
+                <div>
+                    <div style="font-weight: bold;">Достижение разблокировано!</div>
+                    <div>${achievement.name}</div>
+                    <div style="font-size: 12px;">+${achievement.reward} очков</div>
+                </div>
+            `;
+            
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.style.animation = 'slideOut 0.5s forwards';
+                setTimeout(() => {
+                    notification.remove();
+                }, 500);
+            }, 3000);
+            
+            // Добавляем стили для анимации
+            const style = document.createElement('style');
+            style.textContent = `
+                @keyframes slideIn {
+                    from { transform: translateX(100%); opacity: 0; }
+                    to { transform: translateX(0); opacity: 1; }
+                }
+                @keyframes slideOut {
+                    from { transform: translateX(0); opacity: 1; }
+                    to { transform: translateX(100%); opacity: 0; }
+                }
+            `;
+            document.head.appendChild(style);
+        }
+
+        // Рендер кланов
+        function renderClans() {
+            clanList.innerHTML = '';
+            
+            clans.forEach(clan => {
+                const isMember = clan.members.includes(gameState.username);
+                const isLeader = clan.leader === gameState.username;
+                
+                const clanElement = document.createElement('div');
+                clanElement.className = 'clan';
+                clanElement.innerHTML = `
+                    <div class="clan-avatar">${clan.tag}</div>
+                    <div class="clan-info">
+                        <div class="clan-name">${clan.name} [${clan.tag}]</div>
+                        <div class="clan-members">${clan.members.length} участников</div>
+                    </div>
+                    <button class="join-button ${isMember ? 'joined' : ''}" data-id="${clan.id}">
+                        ${isMember ? (isLeader ? 'Лидер' : 'Выйти') : 'Вступить'}
+                    </button>
+                `;
+                
+                clanList.appendChild(clanElement);
+            });
+            
+            // Добавляем обработчики событий для кнопок вступления в клан
+            document.querySelectorAll('.join-button').forEach(button => {
+                button.addEventListener('click', function() {
+                    const clanId = parseInt(this.getAttribute('data-id'));
+                    toggleClanMembership(clanId);
+                });
+            });
+        }
+
+        // Вступление/выход из клана
+        function toggleClanMembership(clanId) {
+            const clan = clans.find(c => c.id === clanId);
+            if (!clan) return;
+            
+            const isMember = clan.members.includes(gameState.username);
+            const isLeader = clan.leader === gameState.username;
+            
+            if (isMember) {
+                // Выход из клана
+                if (isLeader) {
+                    // Лидер не может выйти из клана (должен распустить его)
+                    alert('Вы лидер клана! Сначала передайте лидерство или распустите клан.');
+                    return;
+                }
+                
+                clan.members = clan.members.filter(m => m !== gameState.username);
+                gameState.clan = null;
+            } else {
+                // Вступление в клан
+                // Сначала выходим из текущего клана, если есть
+                if (gameState.clan) {
+                    const currentClan = clans.find(c => c.id === gameState.clan.id);
+                    if (currentClan) {
+                        currentClan.members = currentClan.members.filter(m => m !== gameState.username);
+                    }
+                }
+                
+                clan.members.push(gameState.username);
+                gameState.clan = { id: clan.id, name: clan.name, tag: clan.tag };
             }
             
-            const hours = Math.floor(distance / (1000 * 60 * 60));
-            const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-            const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+            // Обновляем UI
+            renderClans();
+            checkAchievements();
+            saveGame();
+        }
+
+        // Рендер таблицы лидеров
+        function renderLeaderboard() {
+            // Сортируем игроков по очкам
+            const sortedPlayers = [...players].sort((a, b) => b.points - a.points);
             
-            expiryTimer.textContent = 
-                `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            leaderboardBody.innerHTML = '';
+            
+            sortedPlayers.forEach((player, index) => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td class="leaderboard-position">${index + 1}</td>
+                    <td>
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <div class="leaderboard-avatar" style="background-color: ${player.avatarColor}">${player.username.charAt(0).toUpperCase()}</div>
+                            ${player.username}
+                        </div>
+                    </td>
+                    <td>${player.points}</td>
+                    <td>${player.rank}</td>
+                `;
+                
+                leaderboardBody.appendChild(row);
+            });
         }
-        
-        function saveMailboxes() {
-            localStorage.setItem('timedMailboxes', JSON.stringify(mailboxes));
+
+        // Рендер титулов
+        function renderTitles() {
+            titleSelect.innerHTML = '';
+            
+            titles.forEach(title => {
+                const unlocked = title.requirement();
+                const option = document.createElement('option');
+                option.value = title.id;
+                option.textContent = title.name;
+                option.disabled = !unlocked;
+                if (gameState.title === title.name) {
+                    option.selected = true;
+                }
+                titleSelect.appendChild(option);
+            });
         }
-        
-        function generateId() {
-            return Math.random().toString(36).substring(2, 10) + Math.random().toString(36).substring(2, 6);
+
+        // Настройка обработчиков событий
+        function setupEventListeners() {
+            // Клик по основной кнопке
+            clickButton.addEventListener('click', () => {
+                gameState.points += gameState.pointsPerClick;
+                gameState.totalClicks++;
+                updatePoints();
+                updateStats();
+                checkAchievements();
+                
+                // Анимация клика
+                clickButton.style.transform = 'scale(0.95)';
+                setTimeout(() => {
+                    clickButton.style.transform = 'scale(1)';
+                }, 100);
+            });
+            
+            // Редактирование профиля
+            editProfileBtn.addEventListener('click', () => {
+                usernameInput.value = gameState.username;
+                avatarColor.value = gameState.avatarColor;
+                renderTitles();
+                profileModal.style.display = 'flex';
+            });
+            
+            // Сохранение профиля
+            saveProfileBtn.addEventListener('click', () => {
+                const newUsername = usernameInput.value.trim() || 'Гость';
+                const newTitle = titleSelect.options[titleSelect.selectedIndex].text;
+                const newColor = avatarColor.value;
+                
+                // Обновляем имя игрока во всех местах, если оно изменилось
+                if (gameState.username !== newUsername) {
+                    // Обновляем в кланах
+                    clans.forEach(clan => {
+                        const memberIndex = clan.members.indexOf(gameState.username);
+                        if (memberIndex !== -1) {
+                            clan.members[memberIndex] = newUsername;
+                        }
+                        if (clan.leader === gameState.username) {
+                            clan.leader = newUsername;
+                        }
+                    });
+                    
+                    // Обновляем в таблице лидеров
+                    const playerIndex = players.findIndex(p => p.username === gameState.username);
+                    if (playerIndex !== -1) {
+                        players[playerIndex].username = newUsername;
+                        renderLeaderboard();
+                    }
+                    
+                    gameState.username = newUsername;
+                }
+                
+                gameState.title = newTitle;
+                gameState.avatarColor = newColor;
+                
+                updatePlayerInfo();
+                renderClans();
+                profileModal.style.display = 'none';
+                saveGame();
+            });
+            
+            // Отмена редактирования профиля
+            cancelProfileBtn.addEventListener('click', () => {
+                profileModal.style.display = 'none';
+            });
+            
+            // Создание клана
+            createClanBtn.addEventListener('click', () => {
+                // Проверяем, не состоит ли игрок уже в клане
+                if (gameState.clan) {
+                    alert('Вы уже состоите в клане! Пожалуйста, выйдите из текущего клана перед созданием нового.');
+                    return;
+                }
+                
+                clanNameInput.value = '';
+                clanTagInput.value = '';
+                clanModal.style.display = 'flex';
+            });
+            
+            // Подтверждение создания клана
+            createClanConfirmBtn.addEventListener('click', () => {
+                const clanName = clanNameInput.value.trim();
+                const clanTag = clanTagInput.value.trim().toUpperCase();
+                
+                if (!clanName || clanName.length < 3) {
+                    alert('Название клана должно содержать не менее 3 символов');
+                    return;
+                }
+                
+                if (!clanTag || clanTag.length < 2 || clanTag.length > 4) {
+                    alert('Тег клана должен содержать от 2 до 4 символов');
+                    return;
+                }
+                
+                // Проверяем, нет ли уже клана с таким тегом
+                if (clans.some(c => c.tag === clanTag)) {
+                    alert('Клан с таким тегом уже существует!');
+                    return;
+                }
+                
+                // Создаем новый клан
+                const newClan = {
+                    id: clans.length > 0 ? Math.max(...clans.map(c => c.id)) + 1 : 1,
+                    name: clanName,
+                    tag: clanTag,
+                    members: [gameState.username],
+                    leader: gameState.username,
+                    points: Math.floor(gameState.points)
+                };
+                
+                clans.push(newClan);
+                gameState.clan = { id: newClan.id, name: newClan.name, tag: newClan.tag };
+                
+                // Добавляем игрока в таблицу лидеров, если его там нет
+                if (!players.some(p => p.username === gameState.username)) {
+                    players.push({
+                        username: gameState.username,
+                        points: Math.floor(gameState.points),
+                        rank: gameState.rank,
+                        avatarColor: gameState.avatarColor
+                    });
+                }
+                
+                // Обновляем UI
+                renderClans();
+                renderLeaderboard();
+                checkAchievements();
+                clanModal.style.display = 'none';
+                saveGame();
+            });
+            
+            // Отмена создания клана
+            cancelClanBtn.addEventListener('click', () => {
+                clanModal.style.display = 'none';
+            });
+            
+            // Переключение вкладок
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    const tabId = tab.getAttribute('data-tab');
+                    
+                    // Убираем активный класс у всех вкладок и контента
+                    tabs.forEach(t => t.classList.remove('active'));
+                    tabContents.forEach(c => c.classList.remove('active'));
+                    
+                    // Добавляем активный класс текущей вкладке и контенту
+                    tab.classList.add('active');
+                    document.getElementById(`${tabId}-tab`).classList.add('active');
+                });
+            });
+            
+            // Сохранение при закрытии вкладки
+            window.addEventListener('beforeunload', saveGame);
         }
-        
-        function formatDate(timestamp) {
-            const date = new Date(timestamp);
-            return date.toLocaleString();
-        }
+
+        // Запуск игры
+        initGame();
     </script>
 </body>
 </html>
