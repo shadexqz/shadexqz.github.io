@@ -7,24 +7,30 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
-            --primary: #4a6fa5;
-            --secondary: #166088;
-            --accent: #4fc3f7;
-            --background: #f5f7fa;
+            --primary: #6a5acd;
+            --secondary: #483d8b;
+            --accent: #9370db;
+            --background: #f8f9fa;
             --card: #ffffff;
-            --text: #333333;
-            --success: #4caf50;
-            --warning: #ff9800;
-            --danger: #f44336;
+            --text: #2c3e50;
+            --success: #28a745;
+            --warning: #ffc107;
+            --danger: #dc3545;
+            --info: #17a2b8;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
         }
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background-color: var(--background);
             color: var(--text);
-            margin: 0;
-            padding: 0;
             line-height: 1.6;
+            background-image: radial-gradient(circle at 50% 50%, #f0f2f5 0%, #e5e8eb 100%);
         }
 
         .container {
@@ -34,12 +40,25 @@
         }
 
         header {
-            background-color: var(--primary);
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
             color: white;
             padding: 15px 0;
-            border-radius: 8px 8px 0 0;
+            border-radius: 10px 10px 0 0;
             margin-bottom: 20px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            transform: rotate(30deg);
         }
 
         .header-content {
@@ -47,6 +66,8 @@
             justify-content: space-between;
             align-items: center;
             padding: 0 20px;
+            position: relative;
+            z-index: 1;
         }
 
         .logo {
@@ -54,17 +75,23 @@
             font-weight: bold;
             display: flex;
             align-items: center;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.2);
         }
 
         .logo i {
             margin-right: 10px;
             color: var(--accent);
+            text-shadow: 0 0 10px rgba(255,255,255,0.5);
         }
 
         .user-info {
             display: flex;
             align-items: center;
             gap: 15px;
+            background: rgba(0,0,0,0.1);
+            padding: 8px 15px;
+            border-radius: 50px;
+            backdrop-filter: blur(5px);
         }
 
         .avatar {
@@ -77,6 +104,12 @@
             justify-content: center;
             color: white;
             font-weight: bold;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            transition: transform 0.3s;
+        }
+
+        .avatar:hover {
+            transform: scale(1.1);
         }
 
         .main-content {
@@ -87,64 +120,133 @@
 
         .clicker-section {
             background-color: var(--card);
-            border-radius: 8px;
-            padding: 20px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            border-radius: 10px;
+            padding: 25px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
             text-align: center;
+            position: relative;
+            overflow: hidden;
+            border: 1px solid rgba(0,0,0,0.05);
+        }
+
+        .clicker-section::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 5px;
+            background: linear-gradient(90deg, var(--primary), var(--accent));
         }
 
         .clicker-title {
-            font-size: 20px;
-            margin-bottom: 20px;
+            font-size: 22px;
+            margin-bottom: 25px;
             color: var(--primary);
+            position: relative;
+            display: inline-block;
+        }
+
+        .clicker-title::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 50px;
+            height: 3px;
+            background: var(--accent);
+            border-radius: 3px;
         }
 
         .click-button {
-            background-color: var(--accent);
+            background: linear-gradient(135deg, var(--primary), var(--accent));
             color: white;
             border: none;
             border-radius: 50%;
-            width: 150px;
-            height: 150px;
+            width: 160px;
+            height: 160px;
             font-size: 24px;
             cursor: pointer;
-            transition: transform 0.1s, box-shadow 0.1s;
-            margin-bottom: 20px;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            transition: transform 0.1s, box-shadow 0.3s;
+            margin-bottom: 25px;
+            box-shadow: 0 8px 20px rgba(106, 90, 205, 0.4);
+            position: relative;
+            overflow: hidden;
         }
 
         .click-button:hover {
-            background-color: #3fb0e6;
+            box-shadow: 0 10px 25px rgba(106, 90, 205, 0.6);
         }
 
         .click-button:active {
             transform: scale(0.95);
-            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            box-shadow: 0 5px 15px rgba(106, 90, 205, 0.3);
         }
 
         .click-button i {
-            font-size: 50px;
+            font-size: 60px;
+            transition: transform 0.2s;
+        }
+
+        .click-button:active i {
+            transform: scale(0.9);
+        }
+
+        .click-button::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.3) 0%, transparent 70%);
+            transform: scale(0);
+            opacity: 0;
+            transition: transform 0.5s, opacity 0.5s;
+        }
+
+        .click-button:active::after {
+            transform: scale(1);
+            opacity: 1;
+            transition: transform 0s, opacity 0s;
         }
 
         .stats {
             display: flex;
             justify-content: space-around;
-            margin-top: 20px;
+            margin: 25px 0;
+            flex-wrap: wrap;
+            gap: 15px;
         }
 
         .stat {
             text-align: center;
+            background: rgba(106, 90, 205, 0.1);
+            padding: 15px;
+            border-radius: 10px;
+            flex: 1;
+            min-width: 120px;
+            transition: transform 0.3s;
+        }
+
+        .stat:hover {
+            transform: translateY(-5px);
+            background: rgba(106, 90, 205, 0.15);
         }
 
         .stat-value {
-            font-size: 24px;
+            font-size: 28px;
             font-weight: bold;
             color: var(--primary);
+            margin-bottom: 5px;
         }
 
         .stat-label {
             font-size: 14px;
             color: #666;
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
 
         .sidebar {
@@ -155,20 +257,33 @@
 
         .card {
             background-color: var(--card);
-            border-radius: 8px;
+            border-radius: 10px;
             padding: 20px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            position: relative;
+            overflow: hidden;
+            border: 1px solid rgba(0,0,0,0.05);
+        }
+
+        .card::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 5px;
+            background: linear-gradient(90deg, var(--primary), var(--accent));
         }
 
         .card-title {
             font-size: 18px;
-            margin-bottom: 15px;
+            margin-bottom: 20px;
             color: var(--primary);
-            border-bottom: 2px solid var(--accent);
-            padding-bottom: 5px;
             display: flex;
             align-items: center;
             gap: 10px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid rgba(0,0,0,0.1);
         }
 
         .card-title i {
@@ -179,8 +294,15 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 10px 0;
-            border-bottom: 1px solid #eee;
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+            transition: background-color 0.3s;
+            border-radius: 5px;
+            padding: 12px;
+        }
+
+        .upgrade:hover {
+            background-color: rgba(106, 90, 205, 0.05);
         }
 
         .upgrade:last-child {
@@ -190,59 +312,83 @@
         .upgrade-info {
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 12px;
         }
 
         .upgrade-icon {
             width: 40px;
             height: 40px;
-            background-color: var(--accent);
+            background: linear-gradient(135deg, var(--primary), var(--accent));
             border-radius: 8px;
             display: flex;
             align-items: center;
             justify-content: center;
             color: white;
+            flex-shrink: 0;
         }
 
         .upgrade-name {
             font-weight: bold;
+            margin-bottom: 3px;
         }
 
         .upgrade-description {
             font-size: 12px;
             color: #666;
+            line-height: 1.4;
         }
 
         .upgrade-cost {
             font-weight: bold;
             color: var(--success);
+            text-align: right;
+            margin-bottom: 5px;
         }
 
         .upgrade-button {
-            background-color: var(--success);
+            background: linear-gradient(135deg, var(--success), #1e7e34);
             color: white;
             border: none;
-            border-radius: 4px;
-            padding: 5px 10px;
+            border-radius: 5px;
+            padding: 6px 12px;
             cursor: pointer;
-            transition: background-color 0.2s;
+            transition: all 0.3s;
+            font-weight: bold;
+            text-transform: uppercase;
+            font-size: 12px;
+            letter-spacing: 0.5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
 
         .upgrade-button:hover {
-            background-color: #43a047;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+
+        .upgrade-button:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 3px rgba(0,0,0,0.1);
         }
 
         .upgrade-button:disabled {
-            background-color: #cccccc;
+            background: #cccccc;
             cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
         }
 
         .achievement {
             display: flex;
             align-items: center;
-            gap: 10px;
-            padding: 10px 0;
-            border-bottom: 1px solid #eee;
+            gap: 12px;
+            padding: 12px;
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+            transition: background-color 0.3s;
+            border-radius: 5px;
+        }
+
+        .achievement:hover {
+            background-color: rgba(106, 90, 205, 0.05);
         }
 
         .achievement:last-child {
@@ -252,16 +398,17 @@
         .achievement-icon {
             width: 40px;
             height: 40px;
-            background-color: var(--warning);
+            background: linear-gradient(135deg, var(--warning), #e0a800);
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
             color: white;
+            flex-shrink: 0;
         }
 
         .achievement-locked {
-            background-color: #cccccc;
+            background: linear-gradient(135deg, #cccccc, #999999);
         }
 
         .achievement-info {
@@ -270,17 +417,20 @@
 
         .achievement-name {
             font-weight: bold;
+            margin-bottom: 3px;
         }
 
         .achievement-description {
             font-size: 12px;
             color: #666;
+            line-height: 1.4;
         }
 
         .achievement-reward {
             font-size: 12px;
             color: var(--success);
             font-weight: bold;
+            white-space: nowrap;
         }
 
         .clan-list {
@@ -292,28 +442,32 @@
         .clan {
             display: flex;
             align-items: center;
-            padding: 10px;
+            padding: 12px;
             background-color: #f9f9f9;
-            border-radius: 5px;
+            border-radius: 8px;
             cursor: pointer;
-            transition: background-color 0.2s;
+            transition: all 0.3s;
+            border: 1px solid rgba(0,0,0,0.05);
         }
 
         .clan:hover {
-            background-color: #eee;
+            transform: translateY(-3px);
+            box-shadow: 0 5px 10px rgba(0,0,0,0.1);
+            background-color: white;
         }
 
         .clan-avatar {
             width: 40px;
             height: 40px;
-            background-color: var(--primary);
+            background: linear-gradient(135deg, var(--primary), var(--accent));
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
             color: white;
             font-weight: bold;
-            margin-right: 10px;
+            margin-right: 12px;
+            flex-shrink: 0;
         }
 
         .clan-info {
@@ -322,6 +476,7 @@
 
         .clan-name {
             font-weight: bold;
+            margin-bottom: 3px;
         }
 
         .clan-members {
@@ -330,25 +485,32 @@
         }
 
         .join-button {
-            background-color: var(--success);
+            background: linear-gradient(135deg, var(--success), #1e7e34);
             color: white;
             border: none;
-            border-radius: 4px;
-            padding: 5px 10px;
+            border-radius: 5px;
+            padding: 6px 12px;
             cursor: pointer;
-            transition: background-color 0.2s;
+            transition: all 0.3s;
+            font-weight: bold;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            flex-shrink: 0;
         }
 
         .join-button:hover {
-            background-color: #43a047;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
         }
 
         .join-button.joined {
-            background-color: var(--danger);
+            background: linear-gradient(135deg, var(--danger), #c82333);
         }
 
         .join-button.joined:hover {
-            background-color: #e53935;
+            background: linear-gradient(135deg, #dc3545, #bd2130);
         }
 
         .modal {
@@ -362,108 +524,158 @@
             z-index: 1000;
             justify-content: center;
             align-items: center;
+            backdrop-filter: blur(5px);
+            animation: fadeIn 0.3s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
         }
 
         .modal-content {
             background-color: white;
-            padding: 20px;
-            border-radius: 8px;
+            padding: 25px;
+            border-radius: 10px;
             width: 400px;
             max-width: 90%;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            position: relative;
+            transform: translateY(-20px);
+            opacity: 0;
+            animation: modalOpen 0.3s forwards;
+        }
+
+        @keyframes modalOpen {
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
         }
 
         .modal-title {
             font-size: 20px;
             margin-bottom: 20px;
             color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
 
         .form-group {
-            margin-bottom: 15px;
+            margin-bottom: 20px;
         }
 
         .form-group label {
             display: block;
-            margin-bottom: 5px;
+            margin-bottom: 8px;
             font-weight: bold;
+            color: #555;
         }
 
         .form-group input, .form-group select {
             width: 100%;
-            padding: 8px;
+            padding: 10px;
             border: 1px solid #ddd;
-            border-radius: 4px;
+            border-radius: 5px;
             box-sizing: border-box;
+            font-family: inherit;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus, .form-group select:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(106, 90, 205, 0.2);
         }
 
         .modal-buttons {
             display: flex;
             justify-content: flex-end;
             gap: 10px;
-            margin-top: 20px;
+            margin-top: 25px;
         }
 
         .modal-button {
             padding: 8px 15px;
             border: none;
-            border-radius: 4px;
+            border-radius: 5px;
             cursor: pointer;
-            transition: background-color 0.2s;
+            transition: all 0.3s;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-size: 13px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
 
         .modal-button.primary {
-            background-color: var(--primary);
+            background: linear-gradient(135deg, var(--primary), var(--accent));
             color: white;
         }
 
         .modal-button.primary:hover {
-            background-color: #3a5a8f;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(106, 90, 205, 0.3);
         }
 
         .modal-button.secondary {
-            background-color: #ddd;
+            background: #f1f1f1;
             color: #333;
         }
 
         .modal-button.secondary:hover {
-            background-color: #ccc;
+            background: #e0e0e0;
         }
 
         .title-badge {
             display: inline-block;
-            background-color: var(--warning);
+            background: linear-gradient(135deg, var(--warning), #e0a800);
             color: white;
-            padding: 2px 8px;
-            border-radius: 12px;
+            padding: 3px 10px;
+            border-radius: 15px;
             font-size: 12px;
-            margin-left: 5px;
+            margin-left: 8px;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
         .rank-badge {
             display: inline-block;
-            background-color: var(--primary);
+            background: linear-gradient(135deg, var(--primary), var(--accent));
             color: white;
-            padding: 2px 8px;
-            border-radius: 12px;
+            padding: 3px 10px;
+            border-radius: 15px;
             font-size: 12px;
-            margin-left: 5px;
+            margin-left: 8px;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
         .leaderboard {
             width: 100%;
-            border-collapse: collapse;
+            border-collapse: separate;
+            border-spacing: 0;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
         }
 
         .leaderboard th, .leaderboard td {
-            padding: 10px;
+            padding: 12px 15px;
             text-align: left;
             border-bottom: 1px solid #eee;
         }
 
         .leaderboard th {
-            background-color: var(--primary);
+            background: linear-gradient(135deg, var(--primary), var(--accent));
             color: white;
+            font-weight: bold;
+            text-transform: uppercase;
+            font-size: 13px;
+            letter-spacing: 0.5px;
         }
 
         .leaderboard tr:nth-child(even) {
@@ -475,22 +687,176 @@
         }
 
         .leaderboard-position {
-            width: 30px;
+            width: 40px;
             text-align: center;
             font-weight: bold;
+            color: var(--primary);
         }
 
         .leaderboard-avatar {
             width: 30px;
             height: 30px;
-            background-color: var(--accent);
+            background: linear-gradient(135deg, var(--primary), var(--accent));
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
             color: white;
             font-weight: bold;
-            font-size: 12px;
+            margin-right: 10px;
+        }
+
+        .progress-info {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .progress-info div {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+        }
+
+        .progress-info div:last-child {
+            border-bottom: none;
+        }
+
+        .tab-container {
+            margin-top: 25px;
+        }
+
+        .tabs {
+            display: flex;
+            border-bottom: 1px solid #ddd;
+            margin-bottom: 20px;
+        }
+
+        .tab {
+            padding: 10px 20px;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s;
+            font-weight: 500;
+            color: #666;
+            position: relative;
+        }
+
+        .tab:hover {
+            color: var(--primary);
+        }
+
+        .tab.active {
+            border-bottom-color: var(--primary);
+            color: var(--primary);
+            font-weight: bold;
+        }
+
+        .tab.active::after {
+            content: '';
+            position: absolute;
+            bottom: -1px;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: white;
+        }
+
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.3s;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .notification {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: linear-gradient(135deg, var(--success), #1e7e34);
+            color: white;
+            padding: 15px 20px;
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            z-index: 1000;
+            transform: translateX(120%);
+            transition: transform 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+
+        .notification.show {
+            transform: translateX(0);
+        }
+
+        .notification-icon {
+            font-size: 24px;
+        }
+
+        .notification-content {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .notification-title {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .notification-message {
+            font-size: 14px;
+        }
+
+        .prestige-button {
+            background: linear-gradient(135deg, var(--warning), #e0a800);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 10px 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 20px;
+            box-shadow: 0 4px 10px rgba(255, 193, 7, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .prestige-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 15px rgba(255, 193, 7, 0.4);
+        }
+
+        .prestige-button:active {
+            transform: translateY(0);
+        }
+
+        .prestige-info {
+            margin-top: 15px;
+            padding: 15px;
+            background: rgba(255, 193, 7, 0.1);
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .prestige-level {
+            font-weight: bold;
+            color: var(--warning);
+            font-size: 18px;
+        }
+
+        .prestige-bonus {
+            font-size: 14px;
+            color: #666;
+            margin-top: 5px;
         }
 
         @media (max-width: 768px) {
@@ -500,39 +866,84 @@
             
             .header-content {
                 flex-direction: column;
+                gap: 15px;
+                text-align: center;
+            }
+            
+            .user-info {
+                width: 100%;
+                justify-content: center;
+            }
+            
+            .stats {
+                flex-direction: column;
                 gap: 10px;
+            }
+            
+            .stat {
+                min-width: auto;
             }
         }
 
-        .tab-container {
-            margin-top: 20px;
+        /* Анимации */
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
         }
 
-        .tabs {
-            display: flex;
-            border-bottom: 1px solid #ddd;
-            margin-bottom: 15px;
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-5px); }
+            100% { transform: translateY(0px); }
         }
 
-        .tab {
-            padding: 10px 15px;
-            cursor: pointer;
-            border-bottom: 3px solid transparent;
-            transition: all 0.2s;
+        .pulse {
+            animation: pulse 2s infinite;
         }
 
-        .tab.active {
-            border-bottom-color: var(--primary);
-            color: var(--primary);
-            font-weight: bold;
+        .float {
+            animation: float 3s ease-in-out infinite;
         }
 
-        .tab-content {
-            display: none;
+        /* Эффект частиц */
+        .particles {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
         }
 
-        .tab-content.active {
-            display: block;
+        .particle {
+            position: absolute;
+            background-color: var(--accent);
+            border-radius: 50%;
+            opacity: 0.6;
+        }
+
+        /* Конфетти эффект */
+        .confetti {
+            position: fixed;
+            width: 10px;
+            height: 10px;
+            background-color: #f00;
+            opacity: 0;
+            z-index: 9999;
+            animation: confettiFall 5s linear forwards;
+        }
+
+        @keyframes confettiFall {
+            0% {
+                transform: translateY(-100vh) rotate(0deg);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(100vh) rotate(360deg);
+                opacity: 0;
+            }
         }
     </style>
 </head>
@@ -586,7 +997,8 @@
                     <div class="tabs">
                         <div class="tab active" data-tab="upgrades">Улучшения</div>
                         <div class="tab" data-tab="achievements">Достижения</div>
-                        <div class="tab" data-tab="leaderboard">Таблица лидеров</div>
+                        <div class="tab" data-tab="leaderboard">Лидеры</div>
+                        <div class="tab" data-tab="prestige">Престиж</div>
                     </div>
                     
                     <div class="tab-content active" id="upgrades-tab">
@@ -616,6 +1028,19 @@
                             </tbody>
                         </table>
                     </div>
+                    
+                    <div class="tab-content" id="prestige-tab">
+                        <div class="prestige-info">
+                            <div class="prestige-level">Уровень престижа: <span id="prestige-level">0</span></div>
+                            <div class="prestige-bonus">Текущий бонус: <span id="prestige-bonus">+0%</span> к доходу</div>
+                        </div>
+                        <button class="prestige-button" id="prestige-button" disabled>
+                            <i class="fas fa-star"></i> Престиж
+                        </button>
+                        <div id="prestige-requirements" style="margin-top: 15px; color: #666; font-size: 14px; text-align: center;">
+                            Для престижа нужно 25,000 очков
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -625,7 +1050,7 @@
                     <div class="clan-list" id="clan-list">
                         <!-- Список кланов будет добавлен через JS -->
                     </div>
-                    <button id="create-clan-btn" style="width: 100%; margin-top: 10px; background-color: var(--primary); color: white; border: none; padding: 8px; border-radius: 4px; cursor: pointer;">
+                    <button id="create-clan-btn" style="width: 100%; margin-top: 10px; background: linear-gradient(135deg, var(--primary), var(--accent)); color: white; border: none; padding: 10px; border-radius: 5px; cursor: pointer; font-weight: bold;">
                         <i class="fas fa-plus"></i> Создать клан
                     </button>
                 </div>
@@ -635,7 +1060,17 @@
                     <div class="progress-info">
                         <div>Всего кликов: <span id="total-clicks">0</span></div>
                         <div>Время игры: <span id="play-time">0:00</span></div>
-                        <div>Улучшений куплено: <span id="upgrades-bought">0</span></div>
+                        <div>Улучшений: <span id="upgrades-bought">0</span></div>
+                        <div>Достижений: <span id="achievements-unlocked">0</span>/<span id="achievements-total">0</span></div>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <h3 class="card-title"><i class="fas fa-chart-line"></i> Статистика</h3>
+                    <div class="progress-info">
+                        <div>Кликов в сек: <span id="clicks-per-second">0</span></div>
+                        <div>Очков в сек: <span id="points-per-second-stat">0</span></div>
+                        <div>Эффективность: <span id="click-efficiency">0%</span></div>
                     </div>
                 </div>
             </div>
@@ -648,7 +1083,7 @@
             <h3 class="modal-title"><i class="fas fa-user-edit"></i> Редактирование профиля</h3>
             <div class="form-group">
                 <label for="username-input">Имя игрока</label>
-                <input type="text" id="username-input" placeholder="Введите ваше имя">
+                <input type="text" id="username-input" placeholder="Введите ваше имя" maxlength="15">
             </div>
             <div class="form-group">
                 <label for="title-select">Титул</label>
@@ -673,7 +1108,7 @@
             <h3 class="modal-title"><i class="fas fa-users"></i> Создать клан</h3>
             <div class="form-group">
                 <label for="clan-name-input">Название клана</label>
-                <input type="text" id="clan-name-input" placeholder="Введите название клана">
+                <input type="text" id="clan-name-input" placeholder="Введите название клана" maxlength="20">
             </div>
             <div class="form-group">
                 <label for="clan-tag-input">Тег клана (2-4 символа)</label>
@@ -683,6 +1118,17 @@
                 <button class="modal-button secondary" id="cancel-clan-btn">Отмена</button>
                 <button class="modal-button primary" id="create-clan-confirm-btn">Создать</button>
             </div>
+        </div>
+    </div>
+
+    <!-- Уведомления -->
+    <div id="notification" class="notification">
+        <div class="notification-icon">
+            <i class="fas fa-trophy"></i>
+        </div>
+        <div class="notification-content">
+            <div class="notification-title">Достижение разблокировано!</div>
+            <div class="notification-message"></div>
         </div>
     </div>
 
@@ -696,11 +1142,17 @@
             playTime: 0,
             upgradesBought: 0,
             username: 'Гость',
-            avatarColor: '#4fc3f7',
+            avatarColor: '#6a5acd',
             title: 'Неизвестный',
             rank: 'Новичок',
             clan: null,
-            lastUpdate: Date.now()
+            lastUpdate: Date.now(),
+            lastClickTime: 0,
+            clicksInSecond: 0,
+            prestigeLevel: 0,
+            prestigeBonus: 1,
+            sessionStart: Date.now(),
+            achievementsUnlocked: 0
         };
 
         // Улучшения
@@ -714,7 +1166,7 @@
                 costIncrease: 1.5,
                 owned: 0,
                 max: 20,
-                effect: () => { gameState.pointsPerClick += 1; }
+                effect: () => { gameState.pointsPerClick += 1 * gameState.prestigeBonus; }
             },
             {
                 id: 'auto-click-1',
@@ -725,7 +1177,7 @@
                 costIncrease: 1.8,
                 owned: 0,
                 max: 10,
-                effect: () => { gameState.pointsPerSecond += 1; }
+                effect: () => { gameState.pointsPerSecond += 1 * gameState.prestigeBonus; }
             },
             {
                 id: 'click-power-2',
@@ -736,7 +1188,7 @@
                 costIncrease: 1.7,
                 owned: 0,
                 max: 10,
-                effect: () => { gameState.pointsPerClick += 5; },
+                effect: () => { gameState.pointsPerClick += 5 * gameState.prestigeBonus; },
                 requirement: () => gameState.upgradesBought >= 5
             },
             {
@@ -748,7 +1200,7 @@
                 costIncrease: 1.9,
                 owned: 0,
                 max: 5,
-                effect: () => { gameState.pointsPerSecond += 5; },
+                effect: () => { gameState.pointsPerSecond += 5 * gameState.prestigeBonus; },
                 requirement: () => gameState.upgradesBought >= 10
             },
             {
@@ -760,7 +1212,7 @@
                 costIncrease: 2,
                 owned: 0,
                 max: 5,
-                effect: () => { gameState.pointsPerClick += 10; },
+                effect: () => { gameState.pointsPerClick += 10 * gameState.prestigeBonus; },
                 requirement: () => gameState.upgradesBought >= 20
             },
             {
@@ -772,7 +1224,7 @@
                 costIncrease: 2.2,
                 owned: 0,
                 max: 3,
-                effect: () => { gameState.pointsPerSecond += 20; },
+                effect: () => { gameState.pointsPerSecond += 20 * gameState.prestigeBonus; },
                 requirement: () => gameState.upgradesBought >= 30
             }
         ];
@@ -807,6 +1259,15 @@
                 check: () => gameState.totalClicks >= 1000
             },
             {
+                id: '10000-clicks',
+                name: '10 000 кликов',
+                description: 'Совершите 10 000 кликов',
+                icon: 'fa-hand-paper',
+                reward: 1000,
+                achieved: false,
+                check: () => gameState.totalClicks >= 10000
+            },
+            {
                 id: 'first-upgrade',
                 name: 'Первое улучшение',
                 description: 'Купите первое улучшение',
@@ -823,6 +1284,15 @@
                 reward: 100,
                 achieved: false,
                 check: () => gameState.upgradesBought >= 10
+            },
+            {
+                id: 'all-upgrades',
+                name: 'Максимальный уровень',
+                description: 'Купите все улучшения',
+                icon: 'fa-trophy',
+                reward: 1000,
+                achieved: false,
+                check: () => upgrades.every(u => u.owned >= u.max)
             },
             {
                 id: '100-points',
@@ -852,6 +1322,15 @@
                 check: () => gameState.points >= 10000
             },
             {
+                id: '25000-points',
+                name: '25 000 очков',
+                description: 'Заработайте 25 000 очков',
+                icon: 'fa-crown',
+                reward: 500,
+                achieved: false,
+                check: () => gameState.points >= 25000
+            },
+            {
                 id: 'join-clan',
                 name: 'В команде',
                 description: 'Вступите в клан',
@@ -868,6 +1347,15 @@
                 reward: 200,
                 achieved: false,
                 check: () => clans.some(clan => clan.leader === gameState.username)
+            },
+            {
+                id: 'prestige-1',
+                name: 'Первый престиж',
+                description: 'Выполните первый престиж',
+                icon: 'fa-star',
+                reward: 1000,
+                achieved: false,
+                check: () => gameState.prestigeLevel >= 1
             }
         ];
 
@@ -899,18 +1387,12 @@
 
         // Кланы
         let clans = [
-            { id: 1, name: 'Эпичные кликеры', tag: 'EPIC', members: ['Гость', 'Игрок1'], leader: 'Игрок1', points: 15000 },
-            { id: 2, name: 'Быстрые пальцы', tag: 'FAST', members: ['Игрок2', 'Игрок3'], leader: 'Игрок2', points: 8000 },
-            { id: 3, name: 'Короли клика', tag: 'KING', members: ['Игрок4'], leader: 'Игрок4', points: 5000 }
+            { id: 1, name: 'Эпичные кликеры', tag: 'EPIC', members: ['Гость'], leader: 'Гость', points: 0 }
         ];
 
         // Игроки (для таблицы лидеров)
         let players = [
-            { username: 'Игрок1', points: 15000, rank: 'Легенда', avatarColor: '#ff5722' },
-            { username: 'Игрок2', points: 12000, rank: 'Герой', avatarColor: '#9c27b0' },
-            { username: 'Игрок3', points: 8000, rank: 'Мастер', avatarColor: '#3f51b5' },
-            { username: 'Игрок4', points: 5000, rank: 'Искатель', avatarColor: '#4caf50' },
-            { username: 'Гость', points: 0, rank: 'Новичок', avatarColor: '#4fc3f7' }
+            { username: 'Гость', points: 0, rank: 'Новичок', avatarColor: '#6a5acd' }
         ];
 
         // DOM элементы
@@ -944,6 +1426,17 @@
         const cancelClanBtn = document.getElementById('cancel-clan-btn');
         const tabs = document.querySelectorAll('.tab');
         const tabContents = document.querySelectorAll('.tab-content');
+        const notification = document.getElementById('notification');
+        const notificationMessage = document.querySelector('.notification-message');
+        const prestigeButton = document.getElementById('prestige-button');
+        const prestigeLevel = document.getElementById('prestige-level');
+        const prestigeBonus = document.getElementById('prestige-bonus');
+        const prestigeRequirements = document.getElementById('prestige-requirements');
+        const achievementsUnlocked = document.getElementById('achievements-unlocked');
+        const achievementsTotal = document.getElementById('achievements-total');
+        const clicksPerSecond = document.getElementById('clicks-per-second');
+        const pointsPerSecondStat = document.getElementById('points-per-second-stat');
+        const clickEfficiency = document.getElementById('click-efficiency');
 
         // Инициализация игры
         function initGame() {
@@ -956,28 +1449,77 @@
             renderTitles();
             startGameLoop();
             setupEventListeners();
+            
+            // Обновляем общее количество достижений
+            achievementsTotal.textContent = achievements.length;
+            
+            // Проверяем достижения при загрузке
+            checkAchievements();
         }
 
         // Загрузка игры
         function loadGame() {
             const savedGame = localStorage.getItem('epicClickerSave');
             if (savedGame) {
-                const parsed = JSON.parse(savedGame);
-                Object.assign(gameState, parsed);
-                
-                // Обновляем UI после загрузки
-                updatePlayerInfo();
-                updateStats();
+                try {
+                    const parsed = JSON.parse(savedGame);
+                    
+                    // Проверяем, не пытается ли игрок изменить сохранение
+                    if (parsed._signature !== generateSignature(parsed)) {
+                        throw new Error("Invalid save data");
+                    }
+                    
+                    // Удаляем служебное поле
+                    delete parsed._signature;
+                    
+                    // Восстанавливаем состояние игры
+                    Object.assign(gameState, parsed);
+                    
+                    // Восстанавливаем время сессии
+                    gameState.sessionStart = Date.now() - (gameState.playTime * 1000);
+                    
+                    // Обновляем UI после загрузки
+                    updatePlayerInfo();
+                    updateStats();
+                    updatePrestigeInfo();
+                    
+                    // Обновляем таблицу лидеров для текущего игрока
+                    updatePlayerInLeaderboard();
+                } catch (e) {
+                    console.error("Ошибка загрузки сохранения:", e);
+                    resetGame();
+                }
             }
+        }
+
+        // Генерация подписи для сохранения
+        function generateSignature(data) {
+            // Простая проверка для демонстрации
+            let str = '';
+            for (const key in data) {
+                if (key !== '_signature') {
+                    str += data[key];
+                }
+            }
+            return str.length.toString(16);
+        }
+
+        // Сброс игры при обнаружении невалидных данных
+        function resetGame() {
+            localStorage.removeItem('epicClickerSave');
+            window.location.reload();
         }
 
         // Сохранение игры
         function saveGame() {
+            // Добавляем подпись для проверки целостности
+            gameState._signature = generateSignature(gameState);
             localStorage.setItem('epicClickerSave', JSON.stringify(gameState));
         }
 
         // Игровой цикл
         function startGameLoop() {
+            // Основной цикл (1 раз в секунду)
             setInterval(() => {
                 const now = Date.now();
                 const deltaTime = (now - gameState.lastUpdate) / 1000;
@@ -990,7 +1532,7 @@
                 }
                 
                 // Обновляем время игры
-                gameState.playTime += deltaTime;
+                gameState.playTime = (now - gameState.sessionStart) / 1000;
                 updateStats();
                 
                 // Проверяем достижения
@@ -999,11 +1541,22 @@
                 // Обновляем ранг
                 updateRank();
                 
+                // Обновляем статистику кликов в секунду
+                updateClickStats();
+                
+                // Обновляем доступность престижа
+                updatePrestigeButton();
+                
                 // Сохраняем игру каждые 5 секунд
                 if (Math.floor(gameState.playTime) % 5 === 0) {
                     saveGame();
                 }
             }, 1000);
+            
+            // Вторичный цикл для более плавного обновления UI (10 раз в секунду)
+            setInterval(() => {
+                updateUpgrades();
+            }, 100);
         }
 
         // Обновление UI
@@ -1012,24 +1565,42 @@
             updateStats();
             updatePlayerInfo();
             updateUpgrades();
+            updatePrestigeInfo();
         }
 
         // Обновление очков
         function updatePoints() {
-            pointsCounter.textContent = Math.floor(gameState.points);
-            pointsPerSecond.textContent = gameState.pointsPerSecond;
-            pointsPerClick.textContent = gameState.pointsPerClick;
+            pointsCounter.textContent = Math.floor(gameState.points).toLocaleString();
+            pointsPerSecond.textContent = (gameState.pointsPerSecond * gameState.prestigeBonus).toFixed(1);
+            pointsPerClick.textContent = (gameState.pointsPerClick * gameState.prestigeBonus).toFixed(1);
+            pointsPerSecondStat.textContent = (gameState.pointsPerSecond * gameState.prestigeBonus).toFixed(1);
         }
 
         // Обновление статистики
         function updateStats() {
-            totalClicks.textContent = gameState.totalClicks;
+            totalClicks.textContent = gameState.totalClicks.toLocaleString();
             
             const minutes = Math.floor(gameState.playTime / 60);
             const seconds = Math.floor(gameState.playTime % 60);
             playTime.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
             
             upgradesBought.textContent = gameState.upgradesBought;
+            achievementsUnlocked.textContent = gameState.achievementsUnlocked;
+            
+            // Обновляем эффективность кликов
+            if (gameState.totalClicks > 0) {
+                const efficiency = (gameState.points / gameState.totalClicks).toFixed(2);
+                clickEfficiency.textContent = `${efficiency}%`;
+            }
+        }
+
+        // Обновление статистики кликов
+        function updateClickStats() {
+            const now = Date.now();
+            if (now - gameState.lastClickTime > 1000) {
+                gameState.clicksInSecond = 0;
+            }
+            clicksPerSecond.textContent = gameState.clicksInSecond;
         }
 
         // Обновление информации об игроке
@@ -1045,30 +1616,24 @@
         function updateRank() {
             for (let i = ranks.length - 1; i >= 0; i--) {
                 if (gameState.points >= ranks[i].minPoints) {
-                    gameState.rank = ranks[i].name;
-                    rankDisplay.textContent = gameState.rank;
-                    
-                    // Добавляем игрока в таблицу лидеров, если его там нет
-                    if (!players.some(p => p.username === gameState.username)) {
-                        players.push({
-                            username: gameState.username,
-                            points: gameState.points,
-                            rank: gameState.rank,
-                            avatarColor: gameState.avatarColor
-                        });
-                        renderLeaderboard();
-                    } else {
-                        // Обновляем очки и ранг игрока в таблице лидеров
-                        const playerIndex = players.findIndex(p => p.username === gameState.username);
-                        if (playerIndex !== -1) {
-                            players[playerIndex].points = Math.floor(gameState.points);
-                            players[playerIndex].rank = gameState.rank;
-                            renderLeaderboard();
-                        }
+                    if (gameState.rank !== ranks[i].name) {
+                        gameState.rank = ranks[i].name;
+                        rankDisplay.textContent = gameState.rank;
+                        updatePlayerInLeaderboard();
                     }
-                    
                     break;
                 }
+            }
+        }
+
+        // Обновление игрока в таблице лидеров
+        function updatePlayerInLeaderboard() {
+            const playerIndex = players.findIndex(p => p.username === gameState.username);
+            if (playerIndex !== -1) {
+                players[playerIndex].points = Math.floor(gameState.points);
+                players[playerIndex].rank = gameState.rank;
+                players[playerIndex].avatarColor = gameState.avatarColor;
+                renderLeaderboard();
             }
         }
 
@@ -1097,7 +1662,7 @@
                         </div>
                     </div>
                     <div>
-                        <div class="upgrade-cost">${cost} очков</div>
+                        <div class="upgrade-cost">${cost.toLocaleString()} очков</div>
                         <button class="upgrade-button" data-id="${upgrade.id}" ${!canAfford || isMaxed ? 'disabled' : ''}>
                             ${isMaxed ? 'MAX' : 'Купить'}
                         </button>
@@ -1138,6 +1703,9 @@
                 
                 // Сохраняем игру
                 saveGame();
+                
+                // Эффект покупки
+                createParticles(clickButton, 10, upgrade.icon);
             }
         }
 
@@ -1157,7 +1725,7 @@
                 
                 const costElement = button.parentElement.querySelector('.upgrade-cost');
                 if (costElement) {
-                    costElement.textContent = `${cost} очков`;
+                    costElement.textContent = `${cost.toLocaleString()} очков`;
                 }
             });
         }
@@ -1171,6 +1739,7 @@
                 if (achieved && !achievement.achieved) {
                     achievement.achieved = true;
                     gameState.points += achievement.reward;
+                    gameState.achievementsUnlocked++;
                     updatePoints();
                 }
                 
@@ -1184,7 +1753,7 @@
                         <div class="achievement-name">${achievement.name}</div>
                         <div class="achievement-description">${achievement.description}</div>
                     </div>
-                    <div class="achievement-reward">+${achievement.reward} очков</div>
+                    <div class="achievement-reward">+${achievement.reward.toLocaleString()} очков</div>
                 `;
                 
                 achievementsList.appendChild(achievementElement);
@@ -1199,6 +1768,7 @@
                 if (!achievement.achieved && achievement.check()) {
                     achievement.achieved = true;
                     gameState.points += achievement.reward;
+                    gameState.achievementsUnlocked++;
                     needsUpdate = true;
                     
                     // Показываем уведомление о достижении
@@ -1215,55 +1785,86 @@
 
         // Показ уведомления о достижении
         function showAchievementNotification(achievement) {
-            const notification = document.createElement('div');
-            notification.className = 'achievement-notification';
-            notification.style.position = 'fixed';
-            notification.style.bottom = '20px';
-            notification.style.right = '20px';
-            notification.style.backgroundColor = '#4CAF50';
-            notification.style.color = 'white';
-            notification.style.padding = '15px';
-            notification.style.borderRadius = '5px';
-            notification.style.boxShadow = '0 4px 8px rgba(0,0,0,0.2)';
-            notification.style.zIndex = '1000';
-            notification.style.display = 'flex';
-            notification.style.alignItems = 'center';
-            notification.style.gap = '10px';
-            notification.style.animation = 'slideIn 0.5s forwards';
+            notificationMessage.textContent = `${achievement.name}: ${achievement.description}`;
+            notification.classList.add('show');
             
-            notification.innerHTML = `
-                <div style="font-size: 24px;">
-                    <i class="fas ${achievement.icon}"></i>
-                </div>
-                <div>
-                    <div style="font-weight: bold;">Достижение разблокировано!</div>
-                    <div>${achievement.name}</div>
-                    <div style="font-size: 12px;">+${achievement.reward} очков</div>
-                </div>
-            `;
-            
-            document.body.appendChild(notification);
+            // Эффект конфетти
+            createConfetti(20);
             
             setTimeout(() => {
-                notification.style.animation = 'slideOut 0.5s forwards';
-                setTimeout(() => {
-                    notification.remove();
-                }, 500);
+                notification.classList.remove('show');
             }, 3000);
+        }
+
+        // Создание эффекта частиц
+        function createParticles(element, count, icon) {
+            const rect = element.getBoundingClientRect();
+            const centerX = rect.left + rect.width / 2;
+            const centerY = rect.top + rect.height / 2;
             
-            // Добавляем стили для анимации
-            const style = document.createElement('style');
-            style.textContent = `
-                @keyframes slideIn {
-                    from { transform: translateX(100%); opacity: 0; }
-                    to { transform: translateX(0); opacity: 1; }
-                }
-                @keyframes slideOut {
-                    from { transform: translateX(0); opacity: 1; }
-                    to { transform: translateX(100%); opacity: 0; }
-                }
-            `;
-            document.head.appendChild(style);
+            for (let i = 0; i < count; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.width = '20px';
+                particle.style.height = '20px';
+                particle.style.position = 'fixed';
+                particle.style.left = `${centerX}px`;
+                particle.style.top = `${centerY}px`;
+                particle.style.borderRadius = '50%';
+                particle.style.display = 'flex';
+                particle.style.alignItems = 'center';
+                particle.style.justifyContent = 'center';
+                particle.style.color = 'white';
+                particle.style.fontSize = '12px';
+                particle.innerHTML = `<i class="fas ${icon}"></i>`;
+                particle.style.zIndex = '1000';
+                particle.style.pointerEvents = 'none';
+                
+                document.body.appendChild(particle);
+                
+                const angle = Math.random() * Math.PI * 2;
+                const distance = 50 + Math.random() * 50;
+                const duration = 1 + Math.random() * 1;
+                
+                const animation = particle.animate([
+                    { 
+                        transform: 'translate(0, 0) scale(1)',
+                        opacity: 1 
+                    },
+                    { 
+                        transform: `translate(${Math.cos(angle) * distance}px, ${Math.sin(angle) * distance}px) scale(0)`,
+                        opacity: 0 
+                    }
+                ], {
+                    duration: duration * 1000,
+                    easing: 'cubic-bezier(0.4, 0, 0.2, 1)'
+                });
+                
+                animation.onfinish = () => {
+                    particle.remove();
+                };
+            }
+        }
+
+        // Создание эффекта конфетти
+        function createConfetti(count) {
+            const colors = ['#f44336', '#e91e63', '#9c27b0', '#673ab7', '#3f51b5', '#2196f3', '#03a9f4', '#00bcd4', '#009688', '#4CAF50', '#8BC34A', '#CDDC39', '#FFEB3B', '#FFC107', '#FF9800', '#FF5722'];
+            
+            for (let i = 0; i < count; i++) {
+                const confetti = document.createElement('div');
+                confetti.className = 'confetti';
+                confetti.style.left = `${Math.random() * 100}vw`;
+                confetti.style.width = `${10 + Math.random() * 10}px`;
+                confetti.style.height = `${10 + Math.random() * 10}px`;
+                confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                confetti.style.transform = `rotate(${Math.random() * 360}deg)`;
+                
+                document.body.appendChild(confetti);
+                
+                setTimeout(() => {
+                    confetti.remove();
+                }, 5000);
+            }
         }
 
         // Рендер кланов
@@ -1311,12 +1912,13 @@
                 // Выход из клана
                 if (isLeader) {
                     // Лидер не может выйти из клана (должен распустить его)
-                    alert('Вы лидер клана! Сначала передайте лидерство или распустите клан.');
+                    showNotification('Ошибка', 'Вы лидер клана! Сначала передайте лидерство или распустите клан.', 'fa-exclamation-circle', 'danger');
                     return;
                 }
                 
                 clan.members = clan.members.filter(m => m !== gameState.username);
                 gameState.clan = null;
+                showNotification('Клан', `Вы вышли из клана ${clan.name}`, 'fa-sign-out-alt', 'info');
             } else {
                 // Вступление в клан
                 // Сначала выходим из текущего клана, если есть
@@ -1329,12 +1931,33 @@
                 
                 clan.members.push(gameState.username);
                 gameState.clan = { id: clan.id, name: clan.name, tag: clan.tag };
+                showNotification('Клан', `Вы вступили в клан ${clan.name}`, 'fa-sign-in-alt', 'success');
             }
             
             // Обновляем UI
             renderClans();
             checkAchievements();
             saveGame();
+        }
+
+        // Показать уведомление
+        function showNotification(title, message, icon, type) {
+            const colors = {
+                success: '#28a745',
+                danger: '#dc3545',
+                info: '#17a2b8',
+                warning: '#ffc107'
+            };
+            
+            notificationMessage.textContent = message;
+            notification.querySelector('.notification-title').textContent = title;
+            notification.querySelector('.notification-icon i').className = `fas ${icon}`;
+            notification.style.background = `linear-gradient(135deg, ${colors[type] || '#6a5acd'}, ${colors[type] || '#483d8b'})`;
+            notification.classList.add('show');
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
         }
 
         // Рендер таблицы лидеров
@@ -1354,9 +1977,15 @@
                             ${player.username}
                         </div>
                     </td>
-                    <td>${player.points}</td>
+                    <td>${player.points.toLocaleString()}</td>
                     <td>${player.rank}</td>
                 `;
+                
+                // Подсветка текущего игрока
+                if (player.username === gameState.username) {
+                    row.style.backgroundColor = 'rgba(106, 90, 205, 0.1)';
+                    row.style.fontWeight = 'bold';
+                }
                 
                 leaderboardBody.appendChild(row);
             });
@@ -1379,12 +2008,86 @@
             });
         }
 
+        // Обновление информации о престиже
+        function updatePrestigeInfo() {
+            prestigeLevel.textContent = gameState.prestigeLevel;
+            prestigeBonus.textContent = `+${Math.round((gameState.prestigeBonus - 1) * 100)}%`;
+        }
+
+        // Обновление кнопки престижа
+        function updatePrestigeButton() {
+            const requiredPoints = 25000 * Math.pow(2, gameState.prestigeLevel);
+            prestigeRequirements.textContent = `Для престижа нужно ${requiredPoints.toLocaleString()} очков`;
+            
+            if (gameState.points >= requiredPoints) {
+                prestigeButton.disabled = false;
+                prestigeButton.innerHTML = `<i class="fas fa-star"></i> Престиж (${gameState.prestigeLevel + 1})`;
+            } else {
+                prestigeButton.disabled = true;
+            }
+        }
+
+        // Выполнить престиж
+        function performPrestige() {
+            const requiredPoints = 25000 * Math.pow(2, gameState.prestigeLevel);
+            
+            if (gameState.points >= requiredPoints) {
+                // Увеличиваем уровень престижа
+                gameState.prestigeLevel++;
+                
+                // Увеличиваем бонус престижа (10% за уровень)
+                gameState.prestigeBonus = 1 + gameState.prestigeLevel * 0.1;
+                
+                // Сбрасываем прогресс (но сохраняем престиж и некоторые улучшения)
+                gameState.points = 0;
+                gameState.pointsPerClick = 1;
+                gameState.pointsPerSecond = 0;
+                gameState.totalClicks = 0;
+                gameState.upgradesBought = 0;
+                gameState.playTime = 0;
+                gameState.sessionStart = Date.now();
+                
+                // Сбрасываем улучшения (но оставляем престижные)
+                upgrades.forEach(upgrade => {
+                    upgrade.owned = 0;
+                });
+                
+                // Обновляем UI
+                updateUI();
+                renderUpgrades();
+                checkAchievements();
+                
+                // Показываем уведомление
+                showNotification('Престиж', `Вы достигли ${gameState.prestigeLevel} уровня престижа!`, 'fa-star', 'warning');
+                
+                // Эффект конфетти
+                createConfetti(50);
+                
+                // Сохраняем игру
+                saveGame();
+            }
+        }
+
         // Настройка обработчиков событий
         function setupEventListeners() {
             // Клик по основной кнопке
             clickButton.addEventListener('click', () => {
-                gameState.points += gameState.pointsPerClick;
+                const now = Date.now();
+                
+                // Защита от автоматических кликов
+                if (now - gameState.lastClickTime < 50) return; // Не более 20 кликов в секунду
+                
+                gameState.points += gameState.pointsPerClick * gameState.prestigeBonus;
                 gameState.totalClicks++;
+                gameState.lastClickTime = now;
+                
+                // Обновляем счетчик кликов в секунду
+                if (now - gameState.lastClickTime < 1000) {
+                    gameState.clicksInSecond++;
+                } else {
+                    gameState.clicksInSecond = 1;
+                }
+                
                 updatePoints();
                 updateStats();
                 checkAchievements();
@@ -1394,6 +2097,9 @@
                 setTimeout(() => {
                     clickButton.style.transform = 'scale(1)';
                 }, 100);
+                
+                // Создаем эффект частиц
+                createParticles(clickButton, 3, 'fa-hand-pointer');
             });
             
             // Редактирование профиля
@@ -1451,7 +2157,7 @@
             createClanBtn.addEventListener('click', () => {
                 // Проверяем, не состоит ли игрок уже в клане
                 if (gameState.clan) {
-                    alert('Вы уже состоите в клане! Пожалуйста, выйдите из текущего клана перед созданием нового.');
+                    showNotification('Ошибка', 'Вы уже состоите в клане! Пожалуйста, выйдите из текущего клана перед созданием нового.', 'fa-exclamation-circle', 'danger');
                     return;
                 }
                 
@@ -1466,18 +2172,18 @@
                 const clanTag = clanTagInput.value.trim().toUpperCase();
                 
                 if (!clanName || clanName.length < 3) {
-                    alert('Название клана должно содержать не менее 3 символов');
+                    showNotification('Ошибка', 'Название клана должно содержать не менее 3 символов', 'fa-exclamation-circle', 'danger');
                     return;
                 }
                 
                 if (!clanTag || clanTag.length < 2 || clanTag.length > 4) {
-                    alert('Тег клана должен содержать от 2 до 4 символов');
+                    showNotification('Ошибка', 'Тег клана должен содержать от 2 до 4 символов', 'fa-exclamation-circle', 'danger');
                     return;
                 }
                 
                 // Проверяем, нет ли уже клана с таким тегом
                 if (clans.some(c => c.tag === clanTag)) {
-                    alert('Клан с таким тегом уже существует!');
+                    showNotification('Ошибка', 'Клан с таким тегом уже существует!', 'fa-exclamation-circle', 'danger');
                     return;
                 }
                 
@@ -1510,6 +2216,8 @@
                 checkAchievements();
                 clanModal.style.display = 'none';
                 saveGame();
+                
+                showNotification('Клан', `Вы создали клан ${clanName} [${clanTag}]`, 'fa-users', 'success');
             });
             
             // Отмена создания клана
@@ -1532,8 +2240,21 @@
                 });
             });
             
+            // Кнопка престижа
+            prestigeButton.addEventListener('click', performPrestige);
+            
             // Сохранение при закрытии вкладки
             window.addEventListener('beforeunload', saveGame);
+            
+            // Защита от двойного нажатия
+            document.addEventListener('dblclick', (e) => {
+                e.preventDefault();
+            }, { passive: false });
+            
+            // Защита от открытия контекстного меню
+            document.addEventListener('contextmenu', (e) => {
+                e.preventDefault();
+            });
         }
 
         // Запуск игры
