@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Timed-Mail.com - Анонимная временная почта</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0;
+      padding: 0;
+      background: #f5f5f5;
+    }
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    header {
+      background: #4285f4;
+      color: white;
+      padding: 15px 0;
+      margin-bottom: 20px;
+    }
+    .mailbox {
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+    .email-list {
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      overflow: hidden;
+    }
+    .email-item {
+      padding: 12px 15px;
+      border-bottom: 1px solid #eee;
+      cursor: pointer;
+    }
+    .email-item:hover {
+      background: #f9f9f9;
+    }
+    .email-content {
+      display: none;
+      padding: 20px;
+      background: white;
+      border-radius: 4px;
+      margin-top: 10px;
+    }
+    button {
+      background: #4285f4;
+      color: white;
+      border: none;
+      padding: 10px 15px;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    .timer {
+      color: #666;
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container">
+      <h1>Timed-Mail.com</h1>
+      <p>Анонимная временная почта</p>
+    </div>
+  </header>
+
+  <div class="container">
+    <div class="mailbox">
+      <h2>Создать новый почтовый ящик</h2>
+      <button id="createMailbox">Создать @timed-mail.com</button>
+      <div id="mailboxInfo" style="display: none; margin-top: 15px;">
+        <p>Ваш адрес: <strong id="mailboxAddress"></strong></p>
+        <p class="timer">Удаление через: <span id="expiryTimer">24:00:00</span></p>
+      </div>
+    </div>
+
+    <div class="mailbox">
+      <h2>Входящие</h2>
+      <div class="email-list" id="inbox">
+        <div class="email-item empty">Почтовый ящик пуст</div>
+      </div>
+    </div>
+
+    <div class="mailbox">
+      <h2>Отправить письмо</h2>
+      <form id="sendEmailForm">
+        <div style="margin-bottom: 10px;">
+          <label>Кому:</label>
+          <input type="email" name="to" required style="width: 100%; padding: 8px;">
+        </div>
+        <div style="margin-bottom: 10px;">
+          <label>Тема:</label>
+          <input type="text" name="subject" style="width: 100%; padding: 8px;">
+        </div>
+        <div style="margin-bottom: 10px;">
+          <label>Сообщение:</label>
+          <textarea name="text" rows="5" style="width: 100%; padding: 8px;"></textarea>
+        </div>
+        <button type="submit">Отправить</button>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    let currentMailbox = null;
+    let expiryInterval = null;
+
+    document.getElementById('createMailbox').addEventListener('click', async () => {
+      const response = await fetch('/create', { method: 'POST' });
+      const data = await response.json();
+      
+      currentMailbox = data.address;
+      document.getElementById('mailboxAddress').textContent = currentMailbox;
+      document.getElementById('mailboxInfo').style.display = 'block';
+      
+      startTimer(data.expiresAt);
+      checkInbox();
+    });
+
+    document.getElementById('sendEmailForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const formData = new FormData(e.target);
+      
+      await fetch('/send', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          from: currentMailbox,
+          to: formData.get('to'),
+          subject: formData.get('subject'),
+          text: formData.get('text')
+        })
+      });
+      
+      alert('Письмо отправлено!');
+      e.target.reset();
+    });
+
+    function startTimer(expiresAt) {
+      if (expiryInterval) clearInterval(expiryInterval);
+      
+      function updateTimer() {
+        const now = new Date().getTime();
+        const distance = expiresAt - now;
+        
+        if (distance < 0) {
+          document.getElementById('expiryTimer').textContent = '00:00:00';
+          clearInterval(expiryInterval);
+          return;
+        }
+        
+        const hours = Math.floor(distance / (1000 * 60 * 60));
+        const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+        
+        document.getElementById('expiryTimer').textContent = 
+          `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+      }
+      
+      updateTimer();
+      expiryInterval = setInterval(updateTimer, 1000);
+    }
+
+    async function checkInbox() {
+      if (!currentMailbox) return;
+      
+      const response = await fetch(`/inbox/${currentMailbox}`);
+      const data = await response.json();
+      
+      const inboxEl = document.getElementById('inbox');
+      inboxEl.innerHTML = '';
+      
+      if (data.emails.length === 0) {
+        inboxEl.innerHTML = '<div class="email-item empty">Почтовый ящик пуст</div>';
+        return;
+      }
+      
+      data.emails.forEach(email => {
+        const emailEl = document.createElement('div');
+        emailEl.className = 'email-item';
+        emailEl.innerHTML = `
+          <strong>${email.from}</strong>
+          <span>${email.subject}</span>
+          <small>${new Date(email.receivedAt).toLocaleString()}</small>
+        `;
+        
+        emailEl.addEventListener('click', () => {
+          alert(`От: ${email.from}\nТема: ${email.subject}\n\n${email.text}`);
+        });
+        
+        inboxEl.appendChild(emailEl);
+      });
+    }
+    
+    // Проверяем почту каждые 30 секунд
+    if (currentMailbox) {
+      setInterval(checkInbox, 30000);
+    }
+  </script>
+</body>
+</html>
