@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Потужнометр</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #333;
+            color: #fff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            text-align: center;
+            max-width: 500px;
+            width: 100%;
+        }
+        h1 {
+            margin-bottom: 30px;
+            color: #f0f0f0;
+        }
+        .power-icon {
+            font-size: 60px;
+            margin-bottom: 20px;
+            color: #4CAF50;
+        }
+        .meter {
+            width: 100%;
+            height: 30px;
+            background-color: #555;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            overflow: hidden;
+        }
+        .progress {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(to right, #ff0000, #ffcc00, #4CAF50);
+            transition: width 1s ease-in-out;
+        }
+        .btn {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            font-size: 18px;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+        .btn:hover {
+            background-color: #45a049;
+        }
+        .result {
+            margin-top: 20px;
+            font-size: 24px;
+            font-weight: bold;
+            min-height: 36px;
+        }
+        .levels {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            margin-top: 10px;
+        }
+        .level {
+            font-size: 12px;
+            color: #aaa;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="power-icon">
+            <i class="fas fa-bolt"></i>
+        </div>
+        <h1>Потужнометр</h1>
+        <div class="meter">
+            <div class="progress" id="powerMeter"></div>
+        </div>
+        <div class="levels">
+            <span class="level">Слабко</span>
+            <span class="level">Середнє</span>
+            <span class="level">Сильно</span>
+            <span class="level">Макс</span>
+        </div>
+        <button class="btn" id="measureBtn">
+            <i class="fas fa-play"></i> Вимірювати
+        </button>
+        <div class="result" id="result"></div>
+    </div>
+
+    <script>
+        document.getElementById('measureBtn').addEventListener('click', function() {
+            const meter = document.getElementById('powerMeter');
+            const result = document.getElementById('result');
+            const btn = this;
+            
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-sync-alt fa-spin"></i> Вимірювання...';
+            meter.style.width = '0%';
+            result.textContent = '';
+            
+            setTimeout(() => {
+                const power = Math.floor(Math.random() * 100) + 1;
+                meter.style.width = power + '%';
+                
+                let powerText = '';
+                if (power < 30) {
+                    powerText = 'Слабка потужність (' + power + '%)';
+                } else if (power < 70) {
+                    powerText = 'Середня потужність (' + power + '%)';
+                } else {
+                    powerText = 'Висока потужність (' + power + '%)';
+                }
+                
+                result.textContent = powerText;
+                btn.innerHTML = '<i class="fas fa-redo"></i> Спробувати ще';
+                btn.disabled = false;
+            }, 2000);
+        });
+    </script>
+</body>
+</html>
