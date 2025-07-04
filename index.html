@@ -19,6 +19,7 @@
             height: 100vh;
             margin: 0;
             overflow: hidden;
+            position: relative;
         }
         
         .device-housing {
@@ -32,6 +33,8 @@
                 inset 0 0 30px rgba(0, 0, 0, 0.8);
             position: relative;
             overflow: hidden;
+            z-index: 10;
+            transition: all 0.3s;
         }
         
         .header {
@@ -266,6 +269,51 @@
                 opacity: 0;
             }
         }
+        
+        .fullscreen-alarm {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background-color: #f00;
+            z-index: 100;
+            opacity: 0;
+            pointer-events: none;
+            animation: fullscreenAlarm 0.1s infinite alternate;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 72px;
+            font-weight: bold;
+            color: #000;
+            text-transform: uppercase;
+            text-align: center;
+        }
+        
+        @keyframes fullscreenAlarm {
+            from { 
+                opacity: 0.9;
+                background-color: #f00;
+            }
+            to { 
+                opacity: 1;
+                background-color: #000;
+            }
+        }
+        
+        .blackout {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background-color: #000;
+            z-index: 99;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.5s;
+        }
     </style>
 </head>
 <body>
@@ -295,11 +343,34 @@
         </div>
     </div>
 
-    <audio id="warningSound" src="https://assets.mixkit.co/sfx/preview/mixkit-industrial-alarm-908.mp3" loop></audio>
-    <audio id="dangerSound" src="https://assets.mixkit.co/sfx/preview/mixkit-urgent-siren-tone-2768.mp3" loop></audio>
-    <audio id="explosionSound" src="https://assets.mixkit.co/sfx/preview/mixkit-explosion-impact-1684.mp3"></audio>
+    <div class="fullscreen-alarm" id="fullscreenAlarm">УВАГА! КРИТИЧНА ПОТУЖНІСТЬ!</div>
+    <div class="blackout" id="blackout"></div>
+
+    <audio id="warningSound" preload="auto">
+        <source src="https://assets.mixkit.co/sfx/preview/mixkit-industrial-alarm-908.mp3" type="audio/mpeg">
+    </audio>
+    <audio id="dangerSound" preload="auto">
+        <source src="https://assets.mixkit.co/sfx/preview/mixkit-urgent-siren-tone-2768.mp3" type="audio/mpeg">
+    </audio>
+    <audio id="explosionSound" preload="auto">
+        <source src="https://assets.mixkit.co/sfx/preview/mixkit-explosion-impact-1684.mp3" type="audio/mpeg">
+    </audio>
 
     <script>
+        // Завантаження звуків перед використанням
+        function loadSounds() {
+            const sounds = [
+                document.getElementById('warningSound'),
+                document.getElementById('dangerSound'),
+                document.getElementById('explosionSound')
+            ];
+            
+            sounds.forEach(sound => {
+                sound.load();
+                sound.volume = 1.0;
+            });
+        }
+        
         function createSparks(count) {
             const sparksContainer = document.getElementById('sparks');
             sparksContainer.innerHTML = '';
@@ -322,13 +393,37 @@
         
         function getRandomPower() {
             const rand = Math.random();
-            if (rand < 0.8) { // 30% шанс на 95-100%
+            if (rand < 0.8) { // 40% шанс на 95-100%
                 return Math.floor(Math.random() * 6) + 95;
-            } else if (rand < 0.6) { // 30% шанс на 80-94
+            } else if (rand < 0.7) { // 30% шанс на 80-94
                 return Math.floor(Math.random() * 15) + 80;
-            } else { // 40% шанс на 0-79
+            } else { // 30% шанс на 0-79
                 return Math.floor(Math.random() * 80);
             }
+        }
+        
+        function triggerFullscreenAlarm(text) {
+            const alarm = document.getElementById('fullscreenAlarm');
+            const blackout = document.getElementById('blackout');
+            
+            alarm.textContent = text;
+            alarm.style.opacity = '1';
+            blackout.style.opacity = '0.7';
+            
+            let blinkState = true;
+            const blinkInterval = setInterval(() => {
+                blinkState = !blinkState;
+                alarm.style.opacity = blinkState ? '1' : '0.8';
+                blackout.style.opacity = blinkState ? '0.7' : '0.9';
+            }, 100);
+            
+            return blinkInterval;
+        }
+        
+        function stopFullscreenAlarm(interval) {
+            clearInterval(interval);
+            document.getElementById('fullscreenAlarm').style.opacity = '0';
+            document.getElementById('blackout').style.opacity = '0';
         }
         
         function measurePower() {
@@ -369,6 +464,8 @@
                         digitalReadout.textContent = power.toString().padStart(3, '0');
                         
                         let statusText = '';
+                        let alarmInterval = null;
+                        
                         if (power < 20) {
                             statusText = 'МІНІМАЛЬНА ПОТУЖНІСТЬ';
                         } else if (power < 40) {
@@ -386,7 +483,8 @@
                             alarmText.style.opacity = '1';
                             warningSound.currentTime = 0;
                             warningSound.play();
-                            createSparks(10);
+                            createSparks(15);
+                            alarmInterval = triggerFullscreenAlarm('УВАГА! КРИТИЧНИЙ РІВЕНЬ!');
                         } else {
                             statusText = 'ЗАВАЛЕННЯ ШКАЛИ! НЕБЕЗПЕКА!';
                             deviceHousing.classList.add('danger');
@@ -397,6 +495,7 @@
                             explosionSound.currentTime = 0;
                             explosionSound.play();
                             createSparks(30);
+                            alarmInterval = triggerFullscreenAlarm('НЕБЕЗПЕКА! ЗАВАЛЕННЯ ШКАЛИ!');
                             
                             setTimeout(() => {
                                 const explosion = document.createElement('div');
@@ -428,12 +527,19 @@
                         statusDisplay.textContent = statusText;
                         btn.innerHTML = '<i class="fas fa-redo"></i> ПОВТОРИТИ';
                         btn.disabled = false;
+                        
+                        if (alarmInterval) {
+                            setTimeout(() => {
+                                stopFullscreenAlarm(alarmInterval);
+                            }, 3000);
+                        }
                     }, 1500);
                 }, 1000);
             }, 500);
         }
         
         document.addEventListener('DOMContentLoaded', () => {
+            loadSounds();
             document.getElementById('measureBtn').addEventListener('click', measurePower);
         });
     </script>
