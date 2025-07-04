@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ДЕРЖПОТУЖНОМЕТР</title>
+    <title>ДЕРЖАВНИЙ ПОТУЖНОМЕТР</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
@@ -23,241 +23,248 @@
         
         .device-housing {
             background: linear-gradient(135deg, #2a2a2a 0%, #1a1a1a 100%);
-            border: 12px solid #333;
-            border-radius: 20px;
-            padding: 25px;
-            width: 380px;
+            border: 15px solid #444;
+            border-radius: 25px;
+            padding: 30px;
+            width: 400px;
             box-shadow: 
-                0 0 30px rgba(0, 150, 0, 0.3),
-                inset 0 0 20px rgba(0, 0, 0, 0.7);
+                0 0 50px rgba(255, 0, 0, 0.2),
+                inset 0 0 30px rgba(0, 0, 0, 0.8);
             position: relative;
             overflow: hidden;
-        }
-        
-        .device-housing::before {
-            content: "";
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 3px;
-            background: linear-gradient(90deg, 
-                rgba(255,0,0,0) 0%, 
-                rgba(255,0,0,1) 20%, 
-                rgba(255,255,0,1) 40%, 
-                rgba(0,255,0,1) 60%, 
-                rgba(0,255,255,1) 80%, 
-                rgba(0,0,255,0) 100%);
-            z-index: 10;
         }
         
         .header {
             display: flex;
             align-items: center;
             justify-content: center;
-            margin-bottom: 20px;
-            border-bottom: 2px solid #333;
-            padding-bottom: 10px;
+            margin-bottom: 25px;
+            border-bottom: 3px solid #444;
+            padding-bottom: 15px;
         }
         
         .logo {
-            width: 40px;
-            height: 40px;
-            margin-right: 15px;
+            width: 50px;
+            height: 50px;
+            margin-right: 20px;
+            filter: drop-shadow(0 0 5px #ff0);
         }
         
         .title {
-            font-size: 22px;
+            font-size: 26px;
             text-transform: uppercase;
-            letter-spacing: 2px;
+            letter-spacing: 3px;
             color: #ff0;
-            text-shadow: 0 0 5px #ff0;
+            text-shadow: 0 0 10px #ff0;
         }
         
         .display-panel {
             background-color: #111;
-            border: 3px solid #333;
-            border-radius: 8px;
-            padding: 15px;
-            margin-bottom: 20px;
+            border: 4px solid #444;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 25px;
             position: relative;
         }
         
-        .analog-display {
+        .circular-meter {
             position: relative;
-            height: 200px;
-            margin-bottom: 20px;
+            width: 250px;
+            height: 250px;
+            margin: 0 auto 20px;
         }
         
-        .meter-face {
+        .meter-bg {
             position: absolute;
             width: 100%;
             height: 100%;
-            background: radial-gradient(circle at center, #111 0%, #000 70%);
             border-radius: 50%;
-            border: 3px solid #333;
+            background: conic-gradient(
+                #00ff00 0%,
+                #aaff00 20%,
+                #ffff00 40%,
+                #ffaa00 60%,
+                #ff0000 80%,
+                #ff0000 100%
+            );
+            mask: radial-gradient(transparent 50%, #000 51%);
         }
         
-        .meter-scale {
+        .meter-fill {
             position: absolute;
-            width: 90%;
-            height: 90%;
-            top: 5%;
-            left: 5%;
-        }
-        
-        .needle {
-            position: absolute;
-            width: 2px;
-            height: 90px;
-            background: #f00;
-            top: 50%;
-            left: 50%;
-            transform-origin: bottom center;
-            transform: translate(-50%, -100%) rotate(-45deg);
-            z-index: 5;
-            box-shadow: 0 0 10px #f00;
-            transition: transform 1.5s cubic-bezier(0.18, 0.89, 0.32, 1.28);
-        }
-        
-        .needle::after {
-            content: "";
-            position: absolute;
-            width: 12px;
-            height: 12px;
-            background: #f00;
+            width: 100%;
+            height: 100%;
             border-radius: 50%;
-            bottom: -6px;
-            left: -5px;
-            box-shadow: 0 0 10px #f00;
+            background: #111;
+            clip-path: polygon(50% 50%, 50% 0%, 0% 0%, 0% 100%, 100% 100%, 100% 0%, 50% 0%);
+            transform: rotate(-90deg);
+            transition: transform 2s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+        }
+        
+        .meter-center {
+            position: absolute;
+            width: 70%;
+            height: 70%;
+            top: 15%;
+            left: 15%;
+            background: #000;
+            border-radius: 50%;
+            border: 3px solid #444;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 36px;
+            font-weight: bold;
+            color: #0f0;
+            text-shadow: 0 0 10px #0f0;
         }
         
         .digital-readout {
             background-color: #000;
-            border: 2px solid #333;
-            border-radius: 5px;
-            padding: 10px;
+            border: 3px solid #444;
+            border-radius: 8px;
+            padding: 15px;
             text-align: center;
-            font-size: 28px;
-            letter-spacing: 2px;
-            margin-bottom: 10px;
+            font-size: 32px;
+            letter-spacing: 3px;
+            margin-bottom: 15px;
             color: #0f0;
-            text-shadow: 0 0 5px #0f0;
+            text-shadow: 0 0 10px #0f0;
         }
         
         .status-display {
             background-color: #000;
-            border: 2px solid #333;
-            border-radius: 5px;
-            padding: 8px;
+            border: 3px solid #444;
+            border-radius: 8px;
+            padding: 12px;
             text-align: center;
-            font-size: 16px;
-            min-height: 24px;
+            font-size: 18px;
+            min-height: 27px;
+            text-transform: uppercase;
         }
         
         .control-panel {
             display: flex;
             flex-direction: column;
-            gap: 10px;
+            gap: 15px;
         }
         
         .btn {
-            background: linear-gradient(to bottom, #333 0%, #222 100%);
+            background: linear-gradient(to bottom, #444 0%, #222 100%);
             color: #0f0;
-            border: 2px solid #333;
-            padding: 12px 0;
-            font-size: 18px;
+            border: 3px solid #444;
+            padding: 15px 0;
+            font-size: 20px;
             cursor: pointer;
-            border-radius: 5px;
+            border-radius: 8px;
             font-family: 'Share Tech Mono', monospace;
             text-transform: uppercase;
-            letter-spacing: 1px;
+            letter-spacing: 2px;
             transition: all 0.3s;
             position: relative;
             overflow: hidden;
+            box-shadow: 0 0 15px rgba(0, 255, 0, 0.2);
         }
         
         .btn:hover {
-            background: linear-gradient(to bottom, #444 0%, #333 100%);
-            box-shadow: 0 0 10px rgba(0, 255, 0, 0.3);
+            background: linear-gradient(to bottom, #555 0%, #333 100%);
+            box-shadow: 0 0 20px rgba(0, 255, 0, 0.4);
         }
         
         .btn:active {
-            transform: translateY(1px);
+            transform: translateY(2px);
         }
         
         .btn i {
-            margin-right: 8px;
+            margin-right: 10px;
         }
         
         .warning {
-            animation: warningBlink 0.2s infinite alternate;
+            animation: warningBlink 0.15s infinite alternate;
         }
         
         .danger {
-            animation: dangerBlink 0.1s infinite, shake 0.2s infinite;
+            animation: dangerBlink 0.05s infinite, shake 0.15s infinite;
         }
         
         @keyframes warningBlink {
-            from { background-color: #440000; }
-            to { background-color: #880000; }
+            from { 
+                background-color: #440000;
+                box-shadow: 0 0 50px rgba(255, 0, 0, 0.5);
+            }
+            to { 
+                background-color: #880000;
+                box-shadow: 0 0 70px rgba(255, 0, 0, 0.8);
+            }
         }
         
         @keyframes dangerBlink {
             from { 
-                background-color: #ff0000; 
-                box-shadow: 0 0 30px #ff0000;
+                background-color: #ff0000;
+                box-shadow: 0 0 100px #ff0000;
+                border-color: #ff0000;
             }
             to { 
-                background-color: #880000; 
-                box-shadow: 0 0 50px #ff0000;
+                background-color: #880000;
+                box-shadow: 0 0 150px #ff0000;
+                border-color: #ff5555;
             }
         }
         
         @keyframes shake {
-            0% { transform: translateX(0); }
-            25% { transform: translateX(-5px); }
-            50% { transform: translateX(5px); }
-            75% { transform: translateX(-5px); }
-            100% { transform: translateX(5px); }
+            0% { transform: translate(0, 0) rotate(0deg); }
+            20% { transform: translate(-10px, 5px) rotate(-2deg); }
+            40% { transform: translate(10px, -5px) rotate(2deg); }
+            60% { transform: translate(-10px, 5px) rotate(-2deg); }
+            80% { transform: translate(10px, -5px) rotate(2deg); }
+            100% { transform: translate(0, 0) rotate(0deg); }
         }
         
-        .scale-mark {
-            position: absolute;
-            color: #0f0;
-            font-size: 12px;
-            transform-origin: center;
-        }
-        
-        .critical-zone {
-            position: absolute;
-            width: 30%;
-            height: 30%;
-            top: 35%;
-            left: 35%;
-            background: radial-gradient(circle, rgba(255,0,0,0.3) 0%, rgba(255,0,0,0) 70%);
-            border-radius: 50%;
-            opacity: 0;
-            transition: opacity 0.5s;
-        }
-        
-        .danger-text {
+        .alarm-text {
             position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
             color: #f00;
-            font-size: 24px;
+            font-size: 28px;
             font-weight: bold;
-            text-shadow: 0 0 10px #f00;
+            text-shadow: 0 0 15px #f00;
             opacity: 0;
             z-index: 20;
-            animation: textPulse 0.5s infinite alternate;
+            animation: textPulse 0.3s infinite alternate;
+            text-transform: uppercase;
         }
         
         @keyframes textPulse {
-            from { transform: translate(-50%, -50%) scale(1); }
-            to { transform: translate(-50%, -50%) scale(1.1); }
+            from { transform: translate(-50%, -50%) scale(1); opacity: 0.7; }
+            to { transform: translate(-50%, -50%) scale(1.2); opacity: 1; }
+        }
+        
+        .sparks {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            pointer-events: none;
+            z-index: 30;
+            opacity: 0;
+        }
+        
+        .spark {
+            position: absolute;
+            width: 3px;
+            height: 20px;
+            background: #ff0;
+            transform-origin: bottom center;
+            animation: sparkFall 1s linear forwards;
+        }
+        
+        @keyframes sparkFall {
+            to {
+                transform: translateY(100vh) rotate(360deg);
+                opacity: 0;
+            }
         }
     </style>
 </head>
@@ -265,142 +272,145 @@
     <div class="device-housing">
         <div class="header">
             <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/4/49/Flag_of_Ukraine.svg/1200px-Flag_of_Ukraine.svg.png" alt="Герб України" class="logo">
-            <div class="title">Державний потужнометр</div>
+            <div class="title">ПОТУЖНОМЕТР</div>
         </div>
         
         <div class="display-panel">
-            <div class="analog-display">
-                <div class="meter-face">
-                    <div class="meter-scale" id="meterScale"></div>
-                    <div class="critical-zone" id="criticalZone"></div>
-                    <div class="needle" id="needle"></div>
-                    <div class="danger-text" id="dangerText">НЕБЕЗПЕКА!</div>
-                </div>
+            <div class="circular-meter">
+                <div class="meter-bg"></div>
+                <div class="meter-fill" id="meterFill"></div>
+                <div class="meter-center" id="meterValue">---</div>
+                <div class="alarm-text" id="alarmText">УВАГА!</div>
+                <div class="sparks" id="sparks"></div>
             </div>
             
             <div class="digital-readout" id="digitalReadout">---</div>
-            <div class="status-display" id="statusDisplay">Система готова</div>
+            <div class="status-display" id="statusDisplay">СИСТЕМА ГОТОВА</div>
         </div>
         
         <div class="control-panel">
             <button class="btn" id="measureBtn">
-                <i class="fas fa-bolt"></i> Виміряти потужність
+                <i class="fas fa-bolt"></i> ВИМІРЯТИ
             </button>
         </div>
     </div>
-    
-    <audio id="warningSound" src="https://assets.mixkit.co/sfx/preview/mixkit-alarm-digital-clock-beep-989.mp3"></audio>
-    <audio id="dangerSound" src="https://assets.mixkit.co/sfx/preview/mixkit-sci-fi-alarm-905.mp3"></audio>
+
+    <audio id="warningSound" src="https://assets.mixkit.co/sfx/preview/mixkit-industrial-alarm-908.mp3" loop></audio>
+    <audio id="dangerSound" src="https://assets.mixkit.co/sfx/preview/mixkit-urgent-siren-tone-2768.mp3" loop></audio>
+    <audio id="explosionSound" src="https://assets.mixkit.co/sfx/preview/mixkit-explosion-impact-1684.mp3"></audio>
 
     <script>
-        function createMeterScale() {
-            const scale = document.getElementById('meterScale');
-            for (let i = 0; i <= 100; i += 5) {
-                const angle = -135 + (i * 2.7);
-                const mark = document.createElement('div');
-                mark.className = 'scale-mark';
-                
-                const x = 50 + 45 * Math.cos(angle * Math.PI / 180);
-                const y = 50 + 45 * Math.sin(angle * Math.PI / 180);
-                
-                mark.style.left = `${x}%`;
-                mark.style.top = `${y}%`;
-                mark.style.transform = `translate(-50%, -50%) rotate(${angle + 90}deg)`;
-                
-                if (i % 10 === 0) {
-                    mark.textContent = i;
-                    mark.style.fontSize = '14px';
-                } else {
-                    mark.innerHTML = '|';
-                }
-                
-                scale.appendChild(mark);
+        function createSparks(count) {
+            const sparksContainer = document.getElementById('sparks');
+            sparksContainer.innerHTML = '';
+            sparksContainer.style.opacity = '1';
+            
+            for (let i = 0; i < count; i++) {
+                const spark = document.createElement('div');
+                spark.className = 'spark';
+                spark.style.left = Math.random() * 100 + '%';
+                spark.style.top = -20 + 'px';
+                spark.style.transform = `rotate(${Math.random() * 360}deg)`;
+                spark.style.animationDelay = Math.random() * 0.5 + 's';
+                sparksContainer.appendChild(spark);
             }
+            
+            setTimeout(() => {
+                sparksContainer.style.opacity = '0';
+            }, 1000);
         }
         
         function getRandomPower() {
-            // Збільшуємо шанси на високі значення (95-100% - 20% шанс)
             const rand = Math.random();
-            if (rand < 0.2) {
-                return Math.floor(Math.random() * 6) + 95; // 95-100
-            } else if (rand < 0.5) {
-                return Math.floor(Math.random() * 15) + 80; // 80-94
-            } else {
-                return Math.floor(Math.random() * 80); // 0-79
+            if (rand < 0.8) { // 30% шанс на 95-100%
+                return Math.floor(Math.random() * 6) + 95;
+            } else if (rand < 0.6) { // 30% шанс на 80-94
+                return Math.floor(Math.random() * 15) + 80;
+            } else { // 40% шанс на 0-79
+                return Math.floor(Math.random() * 80);
             }
         }
         
         function measurePower() {
             const btn = document.getElementById('measureBtn');
+            const meterFill = document.getElementById('meterFill');
+            const meterValue = document.getElementById('meterValue');
             const digitalReadout = document.getElementById('digitalReadout');
             const statusDisplay = document.getElementById('statusDisplay');
-            const needle = document.getElementById('needle');
-            const criticalZone = document.getElementById('criticalZone');
-            const dangerText = document.getElementById('dangerText');
+            const alarmText = document.getElementById('alarmText');
             const warningSound = document.getElementById('warningSound');
             const dangerSound = document.getElementById('dangerSound');
+            const explosionSound = document.getElementById('explosionSound');
             const deviceHousing = document.querySelector('.device-housing');
             
             btn.disabled = true;
             btn.innerHTML = '<i class="fas fa-cog fa-spin"></i> ВИМІРЮВАННЯ';
+            meterFill.style.transform = 'rotate(-90deg)';
+            meterValue.textContent = '---';
             digitalReadout.textContent = '---';
-            statusDisplay.textContent = 'Ініціалізація...';
-            needle.style.transform = 'translate(-50%, -100%) rotate(-45deg)';
-            criticalZone.style.opacity = '0';
-            dangerText.style.opacity = '0';
+            statusDisplay.textContent = 'ІНІЦІАЛІЗАЦІЯ...';
+            alarmText.style.opacity = '0';
             deviceHousing.classList.remove('warning', 'danger');
+            warningSound.pause();
+            dangerSound.pause();
             
             setTimeout(() => {
-                statusDisplay.textContent = 'Калібрування датчиків...';
+                statusDisplay.textContent = 'КАЛІБРУВАННЯ...';
                 
                 setTimeout(() => {
-                    statusDisplay.textContent = 'Аналіз потужності...';
+                    statusDisplay.textContent = 'АНАЛІЗ...';
                     
                     setTimeout(() => {
                         const power = getRandomPower();
-                        const angle = -135 + (power * 2.7);
+                        const angle = -90 + (power * 1.8);
                         
+                        meterFill.style.transform = `rotate(${angle}deg)`;
+                        meterValue.textContent = power;
                         digitalReadout.textContent = power.toString().padStart(3, '0');
-                        needle.style.transform = `translate(-50%, -100%) rotate(${angle}deg)`;
                         
                         let statusText = '';
                         if (power < 20) {
-                            statusText = 'Мінімальна потужність';
+                            statusText = 'МІНІМАЛЬНА ПОТУЖНІСТЬ';
                         } else if (power < 40) {
-                            statusText = 'Низька потужність';
+                            statusText = 'НИЗЬКА ПОТУЖНІСТЬ';
                         } else if (power < 60) {
-                            statusText = 'Середня потужність';
+                            statusText = 'СЕРЕДНЯ ПОТУЖНІСТЬ';
                         } else if (power < 80) {
-                            statusText = 'Висока потужність';
+                            statusText = 'ВИСОКА ПОТУЖНІСТЬ';
                         } else if (power < 95) {
-                            statusText = 'Дуже висока потужність';
+                            statusText = 'ДУЖЕ ВИСОКА ПОТУЖНІСТЬ';
                         } else if (power < 100) {
-                            statusText = 'УВАГА! КРИТИЧНА ПОТУЖНІСТЬ!';
+                            statusText = 'КРИТИЧНА ПОТУЖНІСТЬ! УВАГА!';
                             deviceHousing.classList.add('warning');
-                            criticalZone.style.opacity = '1';
-                            dangerText.style.opacity = '1';
-                            dangerText.textContent = 'УВАГА!';
+                            alarmText.textContent = 'УВАГА!';
+                            alarmText.style.opacity = '1';
+                            warningSound.currentTime = 0;
                             warningSound.play();
+                            createSparks(10);
                         } else {
                             statusText = 'ЗАВАЛЕННЯ ШКАЛИ! НЕБЕЗПЕКА!';
                             deviceHousing.classList.add('danger');
-                            criticalZone.style.opacity = '1';
-                            dangerText.style.opacity = '1';
-                            dangerText.textContent = 'НЕБЕЗПЕКА!';
+                            alarmText.textContent = 'НЕБЕЗПЕКА!';
+                            alarmText.style.opacity = '1';
+                            dangerSound.currentTime = 0;
                             dangerSound.play();
+                            explosionSound.currentTime = 0;
+                            explosionSound.play();
+                            createSparks(30);
                             
                             setTimeout(() => {
                                 const explosion = document.createElement('div');
-                                explosion.style.position = 'absolute';
+                                explosion.style.position = 'fixed';
                                 explosion.style.top = '0';
                                 explosion.style.left = '0';
-                                explosion.style.width = '100%';
-                                explosion.style.height = '100%';
-                                explosion.style.background = 'radial-gradient(circle, rgba(255,100,0,0.8) 0%, rgba(255,0,0,0) 70%';
-                                explosion.style.zIndex = '100';
+                                explosion.style.width = '100vw';
+                                explosion.style.height = '100vh';
+                                explosion.style.background = 'radial-gradient(circle, rgba(255,100,0,0.8) 0%, rgba(255,0,0,0) 70%)';
+                                explosion.style.zIndex = '1000';
+                                explosion.style.pointerEvents = 'none';
                                 explosion.style.opacity = '0';
                                 explosion.style.transition = 'opacity 0.5s';
-                                deviceHousing.appendChild(explosion);
+                                document.body.appendChild(explosion);
                                 
                                 setTimeout(() => {
                                     explosion.style.opacity = '1';
@@ -412,11 +422,11 @@
                                         explosion.remove();
                                     }, 500);
                                 }, 1000);
-                            }, 500);
+                            }, 300);
                         }
                         
                         statusDisplay.textContent = statusText;
-                        btn.innerHTML = '<i class="fas fa-redo"></i> Повторити';
+                        btn.innerHTML = '<i class="fas fa-redo"></i> ПОВТОРИТИ';
                         btn.disabled = false;
                     }, 1500);
                 }, 1000);
@@ -424,7 +434,6 @@
         }
         
         document.addEventListener('DOMContentLoaded', () => {
-            createMeterScale();
             document.getElementById('measureBtn').addEventListener('click', measurePower);
         });
     </script>
