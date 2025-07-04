@@ -114,7 +114,7 @@
             top: 50%;
             left: 50%;
             transform-origin: bottom center;
-            transform: translateX(-50%) rotate(-45deg);
+            transform: translate(-50%, -100%) rotate(-45deg);
             z-index: 5;
             box-shadow: 0 0 10px #f00;
             transition: transform 1.5s cubic-bezier(0.18, 0.89, 0.32, 1.28);
@@ -240,6 +240,25 @@
             opacity: 0;
             transition: opacity 0.5s;
         }
+        
+        .danger-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #f00;
+            font-size: 24px;
+            font-weight: bold;
+            text-shadow: 0 0 10px #f00;
+            opacity: 0;
+            z-index: 20;
+            animation: textPulse 0.5s infinite alternate;
+        }
+        
+        @keyframes textPulse {
+            from { transform: translate(-50%, -50%) scale(1); }
+            to { transform: translate(-50%, -50%) scale(1.1); }
+        }
     </style>
 </head>
 <body>
@@ -255,6 +274,7 @@
                     <div class="meter-scale" id="meterScale"></div>
                     <div class="critical-zone" id="criticalZone"></div>
                     <div class="needle" id="needle"></div>
+                    <div class="danger-text" id="dangerText">НЕБЕЗПЕКА!</div>
                 </div>
             </div>
             
@@ -298,12 +318,25 @@
             }
         }
         
+        function getRandomPower() {
+            // Збільшуємо шанси на високі значення (95-100% - 20% шанс)
+            const rand = Math.random();
+            if (rand < 0.2) {
+                return Math.floor(Math.random() * 6) + 95; // 95-100
+            } else if (rand < 0.5) {
+                return Math.floor(Math.random() * 15) + 80; // 80-94
+            } else {
+                return Math.floor(Math.random() * 80); // 0-79
+            }
+        }
+        
         function measurePower() {
             const btn = document.getElementById('measureBtn');
             const digitalReadout = document.getElementById('digitalReadout');
             const statusDisplay = document.getElementById('statusDisplay');
             const needle = document.getElementById('needle');
             const criticalZone = document.getElementById('criticalZone');
+            const dangerText = document.getElementById('dangerText');
             const warningSound = document.getElementById('warningSound');
             const dangerSound = document.getElementById('dangerSound');
             const deviceHousing = document.querySelector('.device-housing');
@@ -312,8 +345,9 @@
             btn.innerHTML = '<i class="fas fa-cog fa-spin"></i> ВИМІРЮВАННЯ';
             digitalReadout.textContent = '---';
             statusDisplay.textContent = 'Ініціалізація...';
-            needle.style.transform = 'translateX(-50%) rotate(-45deg)';
+            needle.style.transform = 'translate(-50%, -100%) rotate(-45deg)';
             criticalZone.style.opacity = '0';
+            dangerText.style.opacity = '0';
             deviceHousing.classList.remove('warning', 'danger');
             
             setTimeout(() => {
@@ -323,11 +357,11 @@
                     statusDisplay.textContent = 'Аналіз потужності...';
                     
                     setTimeout(() => {
-                        const power = Math.floor(Math.random() * 100) + 1;
+                        const power = getRandomPower();
                         const angle = -135 + (power * 2.7);
                         
                         digitalReadout.textContent = power.toString().padStart(3, '0');
-                        needle.style.transform = `translateX(-50%) rotate(${angle}deg)`;
+                        needle.style.transform = `translate(-50%, -100%) rotate(${angle}deg)`;
                         
                         let statusText = '';
                         if (power < 20) {
@@ -344,11 +378,15 @@
                             statusText = 'УВАГА! КРИТИЧНА ПОТУЖНІСТЬ!';
                             deviceHousing.classList.add('warning');
                             criticalZone.style.opacity = '1';
+                            dangerText.style.opacity = '1';
+                            dangerText.textContent = 'УВАГА!';
                             warningSound.play();
                         } else {
                             statusText = 'ЗАВАЛЕННЯ ШКАЛИ! НЕБЕЗПЕКА!';
                             deviceHousing.classList.add('danger');
                             criticalZone.style.opacity = '1';
+                            dangerText.style.opacity = '1';
+                            dangerText.textContent = 'НЕБЕЗПЕКА!';
                             dangerSound.play();
                             
                             setTimeout(() => {
