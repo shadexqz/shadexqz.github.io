@@ -314,6 +314,21 @@
             pointer-events: none;
             transition: opacity 0.5s;
         }
+        
+        .panic-btn {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 1001;
+            padding: 10px;
+            background: #f00;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-family: 'Share Tech Mono', monospace;
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
@@ -345,6 +360,7 @@
 
     <div class="fullscreen-alarm" id="fullscreenAlarm">УВАГА! КРИТИЧНА ПОТУЖНІСТЬ!</div>
     <div class="blackout" id="blackout"></div>
+    <button class="panic-btn" id="panicBtn">ВИМКНУТИ ТРИВОГУ</button>
 
     <audio id="warningSound" preload="auto">
         <source src="sounds/uvaga.mp3" type="audio/mpeg">
@@ -357,7 +373,25 @@
     </audio>
 
     <script>
-        // Завантаження звуків перед використанням
+        // ГЛОБАЛЬНІ ЗМІННІ ДЛЯ КОНТРОЛЮ ТРИВОГИ
+        let activeAlarmInterval = null;
+        let activeAlarmTimeout = null;
+
+        function stopAllAlarms() {
+            if (activeAlarmInterval) clearInterval(activeAlarmInterval);
+            if (activeAlarmTimeout) clearTimeout(activeAlarmTimeout);
+            
+            document.getElementById('fullscreenAlarm').style.opacity = '0';
+            document.getElementById('blackout').style.opacity = '0';
+            document.getElementById('alarmText').style.opacity = '0';
+            
+            document.querySelector('.device-housing').classList.remove('warning', 'danger');
+            
+            // Зупиняємо всі звуки
+            document.getElementById('warningSound').pause();
+            document.getElementById('dangerSound').pause();
+        }
+
         function loadSounds() {
             const sounds = [
                 document.getElementById('warningSound'),
@@ -367,10 +401,10 @@
             
             sounds.forEach(sound => {
                 sound.load();
-                sound.volume = 1.0;
+                sound.volume = 1.0; // МАКСИМАЛЬНА ГУЧНІСТЬ
             });
         }
-        
+
         function createSparks(count) {
             const sparksContainer = document.getElementById('sparks');
             sparksContainer.innerHTML = '';
@@ -390,19 +424,17 @@
                 sparksContainer.style.opacity = '0';
             }, 1000);
         }
-        
+
         function getRandomPower() {
             const rand = Math.random();
-            if (rand < 0.8) { // 40% шанс на 95-100%
-                return Math.floor(Math.random() * 6) + 95;
-            } else if (rand < 0.7) { // 30% шанс на 80-94
-                return Math.floor(Math.random() * 15) + 80;
-            } else { // 30% шанс на 0-79
-                return Math.floor(Math.random() * 80);
-            }
+            if (rand < 0.8) return Math.floor(Math.random() * 6) + 95; // 80% шанс на 95-100%
+            if (rand < 0.9) return Math.floor(Math.random() * 15) + 80; // 10% шанс на 80-94
+            return Math.floor(Math.random() * 80); // 10% шанс на 0-79
         }
-        
-        function triggerFullscreenAlarm(text) {
+
+        function triggerFullscreenAlarm(text, duration) {
+            stopAllAlarms(); // Скидаємо попередні тривоги
+            
             const alarm = document.getElementById('fullscreenAlarm');
             const blackout = document.getElementById('blackout');
             
@@ -411,22 +443,21 @@
             blackout.style.opacity = '0.7';
             
             let blinkState = true;
-            const blinkInterval = setInterval(() => {
+            activeAlarmInterval = setInterval(() => {
                 blinkState = !blinkState;
                 alarm.style.opacity = blinkState ? '1' : '0.8';
                 blackout.style.opacity = blinkState ? '0.7' : '0.9';
             }, 100);
             
-            return blinkInterval;
+            // АВТОМАТИЧНЕ ВИМКНЕННЯ через duration мс
+            activeAlarmTimeout = setTimeout(() => {
+                stopAllAlarms();
+            }, duration);
         }
-        
-        function stopFullscreenAlarm(interval) {
-            clearInterval(interval);
-            document.getElementById('fullscreenAlarm').style.opacity = '0';
-            document.getElementById('blackout').style.opacity = '0';
-        }
-        
+
         function measurePower() {
+            stopAllAlarms(); // Скидаємо всі попередні тривоги
+            
             const btn = document.getElementById('measureBtn');
             const meterFill = document.getElementById('meterFill');
             const meterValue = document.getElementById('meterValue');
@@ -445,10 +476,7 @@
             digitalReadout.textContent = '---';
             statusDisplay.textContent = 'ІНІЦІАЛІЗАЦІЯ...';
             alarmText.style.opacity = '0';
-            deviceHousing.classList.remove('warning', 'danger');
-            warningSound.pause();
-            dangerSound.pause();
-            
+
             setTimeout(() => {
                 statusDisplay.textContent = 'КАЛІБРУВАННЯ...';
                 
@@ -464,7 +492,6 @@
                         digitalReadout.textContent = power.toString().padStart(3, '0');
                         
                         let statusText = '';
-                        let alarmInterval = null;
                         
                         if (power < 20) {
                             statusText = 'МІНІМАЛЬНА ПОТУЖНІСТЬ';
@@ -484,15 +511,7 @@
                             warningSound.currentTime = 0;
                             warningSound.play();
                             createSparks(15);
-                            alarmInterval = triggerFullscreenAlarm('УВАГА! КРИТИЧНИЙ РІВЕНЬ!');
-                            
-                            // Автоматичне вимкнення тривоги через 3 секунди
-                            setTimeout(() => {
-                                stopFullscreenAlarm(alarmInterval);
-                                alarmText.style.opacity = '0';
-                                deviceHousing.classList.remove('warning');
-                                warningSound.pause();
-                            }, 3000);
+                            triggerFullscreenAlarm('УВАГА! КРИТИЧНИЙ РІВЕНЬ!', 3000);
                         } else {
                             statusText = 'ЗАВАЛЕННЯ ШКАЛИ! НЕБЕЗПЕКА!';
                             deviceHousing.classList.add('danger');
@@ -503,7 +522,7 @@
                             explosionSound.currentTime = 0;
                             explosionSound.play();
                             createSparks(30);
-                            alarmInterval = triggerFullscreenAlarm('НЕБЕЗПЕКА! ЗАВАЛЕННЯ ШКАЛИ!');
+                            triggerFullscreenAlarm('НЕБЕЗПЕКА! ЗАВАЛЕННЯ ШКАЛИ!', 5000);
                             
                             setTimeout(() => {
                                 const explosion = document.createElement('div');
@@ -519,25 +538,12 @@
                                 explosion.style.transition = 'opacity 0.5s';
                                 document.body.appendChild(explosion);
                                 
-                                setTimeout(() => {
-                                    explosion.style.opacity = '1';
-                                }, 10);
-                                
+                                setTimeout(() => explosion.style.opacity = '1', 10);
                                 setTimeout(() => {
                                     explosion.style.opacity = '0';
-                                    setTimeout(() => {
-                                        explosion.remove();
-                                    }, 500);
+                                    setTimeout(() => explosion.remove(), 500);
                                 }, 1000);
                             }, 300);
-                            
-                            // Автоматичне вимкнення тривоги через 5 секунд
-                            setTimeout(() => {
-                                stopFullscreenAlarm(alarmInterval);
-                                alarmText.style.opacity = '0';
-                                deviceHousing.classList.remove('danger');
-                                dangerSound.pause();
-                            }, 5000);
                         }
                         
                         statusDisplay.textContent = statusText;
@@ -551,6 +557,7 @@
         document.addEventListener('DOMContentLoaded', () => {
             loadSounds();
             document.getElementById('measureBtn').addEventListener('click', measurePower);
+            document.getElementById('panicBtn').addEventListener('click', stopAllAlarms);
         });
     </script>
 </body>
