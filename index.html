@@ -347,10 +347,10 @@
     <div class="blackout" id="blackout"></div>
 
     <audio id="warningSound" preload="auto">
-        <source src="https://assets.mixkit.co/sfx/preview/mixkit-industrial-alarm-908.mp3" type="audio/mpeg">
+        <source src="sounds/uvaga.mp3" type="audio/mpeg">
     </audio>
     <audio id="dangerSound" preload="auto">
-        <source src="https://assets.mixkit.co/sfx/preview/mixkit-urgent-siren-tone-2768.mp3" type="audio/mpeg">
+        <source src="sounds/uvaga2.mp3" type="audio/mpeg">
     </audio>
     <audio id="explosionSound" preload="auto">
         <source src="https://assets.mixkit.co/sfx/preview/mixkit-explosion-impact-1684.mp3" type="audio/mpeg">
@@ -485,6 +485,14 @@
                             warningSound.play();
                             createSparks(15);
                             alarmInterval = triggerFullscreenAlarm('УВАГА! КРИТИЧНИЙ РІВЕНЬ!');
+                            
+                            // Автоматичне вимкнення тривоги через 3 секунди
+                            setTimeout(() => {
+                                stopFullscreenAlarm(alarmInterval);
+                                alarmText.style.opacity = '0';
+                                deviceHousing.classList.remove('warning');
+                                warningSound.pause();
+                            }, 3000);
                         } else {
                             statusText = 'ЗАВАЛЕННЯ ШКАЛИ! НЕБЕЗПЕКА!';
                             deviceHousing.classList.add('danger');
@@ -522,17 +530,19 @@
                                     }, 500);
                                 }, 1000);
                             }, 300);
+                            
+                            // Автоматичне вимкнення тривоги через 5 секунд
+                            setTimeout(() => {
+                                stopFullscreenAlarm(alarmInterval);
+                                alarmText.style.opacity = '0';
+                                deviceHousing.classList.remove('danger');
+                                dangerSound.pause();
+                            }, 5000);
                         }
                         
                         statusDisplay.textContent = statusText;
                         btn.innerHTML = '<i class="fas fa-redo"></i> ПОВТОРИТИ';
                         btn.disabled = false;
-                        
-                        if (alarmInterval) {
-                            setTimeout(() => {
-                                stopFullscreenAlarm(alarmInterval);
-                            }, 3000);
-                        }
                     }, 1500);
                 }, 1000);
             }, 500);
