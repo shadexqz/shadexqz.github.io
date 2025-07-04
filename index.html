@@ -3,202 +3,391 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Потужнометр</title>
+    <title>ДЕРЖПОТУЖНОМЕТР</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
+        
         body {
-            font-family: 'Arial', sans-serif;
-            background-color: #222;
-            color: #fff;
+            font-family: 'Share Tech Mono', monospace;
+            background-color: #000;
+            color: #0f0;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             height: 100vh;
             margin: 0;
-            padding: 20px;
-        }
-        .header {
-            display: flex;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-        .logo {
-            width: 50px;
-            height: 50px;
-            margin-right: 15px;
-        }
-        .device {
-            background-color: #2a2a2a;
-            border: 3px solid #444;
-            border-radius: 10px;
-            padding: 30px;
-            width: 320px;
-            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
-        }
-        .display {
-            background-color: #111;
-            border: 2px solid #333;
-            border-radius: 5px;
-            padding: 15px;
-            margin-bottom: 20px;
-            text-align: center;
-        }
-        .power-value {
-            font-size: 42px;
-            font-weight: bold;
-            color: #4CAF50;
-            margin: 10px 0;
-        }
-        .meter {
-            height: 30px;
-            background-color: #111;
-            border: 2px solid #333;
-            border-radius: 15px;
-            margin-bottom: 15px;
             overflow: hidden;
+        }
+        
+        .device-housing {
+            background: linear-gradient(135deg, #2a2a2a 0%, #1a1a1a 100%);
+            border: 12px solid #333;
+            border-radius: 20px;
+            padding: 25px;
+            width: 380px;
+            box-shadow: 
+                0 0 30px rgba(0, 150, 0, 0.3),
+                inset 0 0 20px rgba(0, 0, 0, 0.7);
             position: relative;
+            overflow: hidden;
         }
-        .progress {
-            height: 100%;
-            width: 0%;
-            background: linear-gradient(to right, #ff0000, #ffcc00, #4CAF50);
-            transition: width 1.5s ease-out;
-        }
-        .sections {
-            display: flex;
-            height: 100%;
-            width: 100%;
+        
+        .device-housing::before {
+            content: "";
             position: absolute;
             top: 0;
             left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, 
+                rgba(255,0,0,0) 0%, 
+                rgba(255,0,0,1) 20%, 
+                rgba(255,255,0,1) 40%, 
+                rgba(0,255,0,1) 60%, 
+                rgba(0,255,255,1) 80%, 
+                rgba(0,0,255,0) 100%);
+            z-index: 10;
         }
-        .section {
+        
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #333;
+            padding-bottom: 10px;
+        }
+        
+        .logo {
+            width: 40px;
+            height: 40px;
+            margin-right: 15px;
+        }
+        
+        .title {
+            font-size: 22px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: #ff0;
+            text-shadow: 0 0 5px #ff0;
+        }
+        
+        .display-panel {
+            background-color: #111;
+            border: 3px solid #333;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+            position: relative;
+        }
+        
+        .analog-display {
+            position: relative;
+            height: 200px;
+            margin-bottom: 20px;
+        }
+        
+        .meter-face {
+            position: absolute;
+            width: 100%;
             height: 100%;
-            border-right: 1px dashed rgba(255, 255, 255, 0.2);
+            background: radial-gradient(circle at center, #111 0%, #000 70%);
+            border-radius: 50%;
+            border: 3px solid #333;
         }
+        
+        .meter-scale {
+            position: absolute;
+            width: 90%;
+            height: 90%;
+            top: 5%;
+            left: 5%;
+        }
+        
+        .needle {
+            position: absolute;
+            width: 2px;
+            height: 90px;
+            background: #f00;
+            top: 50%;
+            left: 50%;
+            transform-origin: bottom center;
+            transform: translateX(-50%) rotate(-45deg);
+            z-index: 5;
+            box-shadow: 0 0 10px #f00;
+            transition: transform 1.5s cubic-bezier(0.18, 0.89, 0.32, 1.28);
+        }
+        
+        .needle::after {
+            content: "";
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            background: #f00;
+            border-radius: 50%;
+            bottom: -6px;
+            left: -5px;
+            box-shadow: 0 0 10px #f00;
+        }
+        
+        .digital-readout {
+            background-color: #000;
+            border: 2px solid #333;
+            border-radius: 5px;
+            padding: 10px;
+            text-align: center;
+            font-size: 28px;
+            letter-spacing: 2px;
+            margin-bottom: 10px;
+            color: #0f0;
+            text-shadow: 0 0 5px #0f0;
+        }
+        
+        .status-display {
+            background-color: #000;
+            border: 2px solid #333;
+            border-radius: 5px;
+            padding: 8px;
+            text-align: center;
+            font-size: 16px;
+            min-height: 24px;
+        }
+        
+        .control-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
         .btn {
-            background: linear-gradient(to bottom, #4CAF50, #388E3C);
-            color: white;
-            border: none;
+            background: linear-gradient(to bottom, #333 0%, #222 100%);
+            color: #0f0;
+            border: 2px solid #333;
             padding: 12px 0;
             font-size: 18px;
             cursor: pointer;
             border-radius: 5px;
-            width: 100%;
-            transition: all 0.3s;
+            font-family: 'Share Tech Mono', monospace;
             text-transform: uppercase;
-            font-weight: bold;
+            letter-spacing: 1px;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
         }
+        
         .btn:hover {
-            background: linear-gradient(to bottom, #45a049, #2E7D32);
-            box-shadow: 0 0 10px rgba(76, 175, 80, 0.5);
+            background: linear-gradient(to bottom, #444 0%, #333 100%);
+            box-shadow: 0 0 10px rgba(0, 255, 0, 0.3);
         }
+        
         .btn:active {
-            transform: scale(0.98);
+            transform: translateY(1px);
         }
+        
         .btn i {
             margin-right: 8px;
         }
-        .scale {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 5px;
+        
+        .warning {
+            animation: warningBlink 0.2s infinite alternate;
         }
+        
+        .danger {
+            animation: dangerBlink 0.1s infinite, shake 0.2s infinite;
+        }
+        
+        @keyframes warningBlink {
+            from { background-color: #440000; }
+            to { background-color: #880000; }
+        }
+        
+        @keyframes dangerBlink {
+            from { 
+                background-color: #ff0000; 
+                box-shadow: 0 0 30px #ff0000;
+            }
+            to { 
+                background-color: #880000; 
+                box-shadow: 0 0 50px #ff0000;
+            }
+        }
+        
+        @keyframes shake {
+            0% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            50% { transform: translateX(5px); }
+            75% { transform: translateX(-5px); }
+            100% { transform: translateX(5px); }
+        }
+        
         .scale-mark {
+            position: absolute;
+            color: #0f0;
             font-size: 12px;
-            color: #aaa;
+            transform-origin: center;
         }
-        .unit {
-            font-size: 16px;
-            color: #aaa;
-            text-align: center;
-            margin-top: 5px;
-        }
-        .status {
-            font-size: 18px;
-            text-align: center;
-            margin-top: 10px;
-            min-height: 27px;
+        
+        .critical-zone {
+            position: absolute;
+            width: 30%;
+            height: 30%;
+            top: 35%;
+            left: 35%;
+            background: radial-gradient(circle, rgba(255,0,0,0.3) 0%, rgba(255,0,0,0) 70%);
+            border-radius: 50%;
+            opacity: 0;
+            transition: opacity 0.5s;
         }
     </style>
 </head>
 <body>
-    <div class="header">
-        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/4/49/Flag_of_Ukraine.svg/1200px-Flag_of_Ukraine.svg.png" alt="Герб України" class="logo">
-        <h1>ДЕРЖАВНИЙ ПОТУЖНОМЕТР</h1>
-    </div>
-
-    <div class="device">
-        <div class="display">
-            <div class="power-value" id="powerValue">---</div>
-            <div class="unit">Потужність (P.U.)</div>
+    <div class="device-housing">
+        <div class="header">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/4/49/Flag_of_Ukraine.svg/1200px-Flag_of_Ukraine.svg.png" alt="Герб України" class="logo">
+            <div class="title">Державний потужнометр</div>
         </div>
-
-        <div class="scale">
-            <span class="scale-mark">0</span>
-            <span class="scale-mark">25</span>
-            <span class="scale-mark">50</span>
-            <span class="scale-mark">75</span>
-            <span class="scale-mark">100</span>
-        </div>
-
-        <div class="meter">
-            <div class="progress" id="powerMeter"></div>
-            <div class="sections">
-                <div class="section" style="width: 25%"></div>
-                <div class="section" style="width: 25%"></div>
-                <div class="section" style="width: 25%"></div>
-                <div class="section" style="width: 25%"></div>
+        
+        <div class="display-panel">
+            <div class="analog-display">
+                <div class="meter-face">
+                    <div class="meter-scale" id="meterScale"></div>
+                    <div class="critical-zone" id="criticalZone"></div>
+                    <div class="needle" id="needle"></div>
+                </div>
             </div>
+            
+            <div class="digital-readout" id="digitalReadout">---</div>
+            <div class="status-display" id="statusDisplay">Система готова</div>
         </div>
-
-        <div class="status" id="status">Готовий до вимірювання</div>
-
-        <button class="btn" id="measureBtn">
-            <i class="fas fa-play"></i> Виміряти потужність
-        </button>
+        
+        <div class="control-panel">
+            <button class="btn" id="measureBtn">
+                <i class="fas fa-bolt"></i> Виміряти потужність
+            </button>
+        </div>
     </div>
+    
+    <audio id="warningSound" src="https://assets.mixkit.co/sfx/preview/mixkit-alarm-digital-clock-beep-989.mp3"></audio>
+    <audio id="dangerSound" src="https://assets.mixkit.co/sfx/preview/mixkit-sci-fi-alarm-905.mp3"></audio>
 
     <script>
-        document.getElementById('measureBtn').addEventListener('click', function() {
-            const meter = document.getElementById('powerMeter');
-            const powerValue = document.getElementById('powerValue');
-            const status = document.getElementById('status');
-            const btn = this;
+        function createMeterScale() {
+            const scale = document.getElementById('meterScale');
+            for (let i = 0; i <= 100; i += 5) {
+                const angle = -135 + (i * 2.7);
+                const mark = document.createElement('div');
+                mark.className = 'scale-mark';
+                
+                const x = 50 + 45 * Math.cos(angle * Math.PI / 180);
+                const y = 50 + 45 * Math.sin(angle * Math.PI / 180);
+                
+                mark.style.left = `${x}%`;
+                mark.style.top = `${y}%`;
+                mark.style.transform = `translate(-50%, -50%) rotate(${angle + 90}deg)`;
+                
+                if (i % 10 === 0) {
+                    mark.textContent = i;
+                    mark.style.fontSize = '14px';
+                } else {
+                    mark.innerHTML = '|';
+                }
+                
+                scale.appendChild(mark);
+            }
+        }
+        
+        function measurePower() {
+            const btn = document.getElementById('measureBtn');
+            const digitalReadout = document.getElementById('digitalReadout');
+            const statusDisplay = document.getElementById('statusDisplay');
+            const needle = document.getElementById('needle');
+            const criticalZone = document.getElementById('criticalZone');
+            const warningSound = document.getElementById('warningSound');
+            const dangerSound = document.getElementById('dangerSound');
+            const deviceHousing = document.querySelector('.device-housing');
             
             btn.disabled = true;
-            btn.innerHTML = '<i class="fas fa-cog fa-spin"></i> ВИМІРЮЄТЬСЯ...';
-            meter.style.width = '0%';
-            powerValue.textContent = '---';
-            status.textContent = 'Калібрування...';
+            btn.innerHTML = '<i class="fas fa-cog fa-spin"></i> ВИМІРЮВАННЯ';
+            digitalReadout.textContent = '---';
+            statusDisplay.textContent = 'Ініціалізація...';
+            needle.style.transform = 'translateX(-50%) rotate(-45deg)';
+            criticalZone.style.opacity = '0';
+            deviceHousing.classList.remove('warning', 'danger');
             
             setTimeout(() => {
-                status.textContent = 'Визначення потужності...';
+                statusDisplay.textContent = 'Калібрування датчиків...';
                 
                 setTimeout(() => {
-                    const power = Math.floor(Math.random() * 100) + 1;
-                    meter.style.width = power + '%';
-                    powerValue.textContent = power;
+                    statusDisplay.textContent = 'Аналіз потужності...';
                     
-                    let statusText = '';
-                    if (power < 20) {
-                        statusText = 'Дуже слабка потужність';
-                    } else if (power < 40) {
-                        statusText = 'Слабка потужність';
-                    } else if (power < 60) {
-                        statusText = 'Середня потужність';
-                    } else if (power < 80) {
-                        statusText = 'Висока потужність';
-                    } else {
-                        statusText = 'НАДВИСОКА ПОТУЖНІСТЬ!';
-                    }
-                    
-                    status.textContent = statusText;
-                    btn.innerHTML = '<i class="fas fa-redo"></i> Повторити вимір';
-                    btn.disabled = false;
-                }, 1500);
-            }, 1000);
+                    setTimeout(() => {
+                        const power = Math.floor(Math.random() * 100) + 1;
+                        const angle = -135 + (power * 2.7);
+                        
+                        digitalReadout.textContent = power.toString().padStart(3, '0');
+                        needle.style.transform = `translateX(-50%) rotate(${angle}deg)`;
+                        
+                        let statusText = '';
+                        if (power < 20) {
+                            statusText = 'Мінімальна потужність';
+                        } else if (power < 40) {
+                            statusText = 'Низька потужність';
+                        } else if (power < 60) {
+                            statusText = 'Середня потужність';
+                        } else if (power < 80) {
+                            statusText = 'Висока потужність';
+                        } else if (power < 95) {
+                            statusText = 'Дуже висока потужність';
+                        } else if (power < 100) {
+                            statusText = 'УВАГА! КРИТИЧНА ПОТУЖНІСТЬ!';
+                            deviceHousing.classList.add('warning');
+                            criticalZone.style.opacity = '1';
+                            warningSound.play();
+                        } else {
+                            statusText = 'ЗАВАЛЕННЯ ШКАЛИ! НЕБЕЗПЕКА!';
+                            deviceHousing.classList.add('danger');
+                            criticalZone.style.opacity = '1';
+                            dangerSound.play();
+                            
+                            setTimeout(() => {
+                                const explosion = document.createElement('div');
+                                explosion.style.position = 'absolute';
+                                explosion.style.top = '0';
+                                explosion.style.left = '0';
+                                explosion.style.width = '100%';
+                                explosion.style.height = '100%';
+                                explosion.style.background = 'radial-gradient(circle, rgba(255,100,0,0.8) 0%, rgba(255,0,0,0) 70%';
+                                explosion.style.zIndex = '100';
+                                explosion.style.opacity = '0';
+                                explosion.style.transition = 'opacity 0.5s';
+                                deviceHousing.appendChild(explosion);
+                                
+                                setTimeout(() => {
+                                    explosion.style.opacity = '1';
+                                }, 10);
+                                
+                                setTimeout(() => {
+                                    explosion.style.opacity = '0';
+                                    setTimeout(() => {
+                                        explosion.remove();
+                                    }, 500);
+                                }, 1000);
+                            }, 500);
+                        }
+                        
+                        statusDisplay.textContent = statusText;
+                        btn.innerHTML = '<i class="fas fa-redo"></i> Повторити';
+                        btn.disabled = false;
+                    }, 1500);
+                }, 1000);
+            }, 500);
+        }
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            createMeterScale();
+            document.getElementById('measureBtn').addEventListener('click', measurePower);
         });
     </script>
 </body>
