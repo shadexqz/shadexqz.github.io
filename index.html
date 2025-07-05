@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Домашний Майнер</title>
+    <title>GPU Miner PRO</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -29,29 +29,31 @@
             background-color: var(--dark);
             color: var(--light);
             min-height: 100vh;
-            padding: 20px;
+            padding: 15px;
             display: flex;
             flex-direction: column;
         }
 
         .app-container {
             max-width: 100%;
+            width: 100%;
             flex: 1;
             display: flex;
             flex-direction: column;
+            margin: 0 auto;
         }
 
         .header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
             padding-bottom: 10px;
             border-bottom: 1px solid rgba(255,255,255,0.1);
         }
 
         .app-title {
-            font-size: 1.5rem;
+            font-size: 1.4rem;
             font-weight: 700;
             background: linear-gradient(90deg, var(--primary), var(--secondary));
             -webkit-background-clip: text;
@@ -71,13 +73,14 @@
             background: var(--darker);
             border-radius: 16px;
             padding: 20px;
-            margin-bottom: 20px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+            margin-bottom: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            flex: 1;
         }
 
         .balance-container {
             text-align: center;
-            margin-bottom: 25px;
+            margin-bottom: 20px;
         }
 
         .balance-label {
@@ -87,7 +90,7 @@
         }
 
         .balance-amount {
-            font-size: 2.2rem;
+            font-size: 2rem;
             font-weight: 700;
             background: linear-gradient(90deg, var(--primary), var(--secondary));
             -webkit-background-clip: text;
@@ -96,41 +99,9 @@
 
         .gpu-container {
             position: relative;
-            width: 180px;
-            height: 180px;
-            margin: 0 auto 25px;
-        }
-
-        .gpu-fan {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            border-radius: 50%;
-            background: conic-gradient(from 0deg, var(--darker) 0%, var(--dark) 50%, var(--darker) 100%);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            box-shadow: 0 0 20px rgba(110, 69, 226, 0.3);
-        }
-
-        .gpu-fan-inner {
-            width: 30%;
-            height: 30%;
-            background: var(--dark);
-            border-radius: 50%;
-            border: 3px solid rgba(255,255,255,0.1);
-        }
-
-        .gpu-blade {
-            position: absolute;
-            width: 45%;
-            height: 8px;
-            background: linear-gradient(90deg, var(--primary), var(--secondary));
-            border-radius: 4px;
-            transform-origin: 100% 50%;
-            top: 50%;
-            left: 50%;
-            margin-top: -4px;
+            width: 160px;
+            height: 160px;
+            margin: 0 auto 20px;
         }
 
         .gpu-card {
@@ -140,11 +111,11 @@
             background: linear-gradient(135deg, rgba(30,30,40,0.8), rgba(50,50,70,0.9));
             border-radius: 12px;
             transform: perspective(500px) rotateX(15deg);
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.5);
             display: flex;
             justify-content: center;
             align-items: flex-end;
-            padding-bottom: 20px;
+            padding-bottom: 15px;
             overflow: hidden;
         }
 
@@ -155,27 +126,49 @@
             letter-spacing: 2px;
         }
 
+        .cooler {
+            position: absolute;
+            width: 80%;
+            height: 80%;
+            top: 10%;
+            left: 10%;
+            border-radius: 50%;
+            background: conic-gradient(from 0deg, var(--darker) 0%, var(--dark) 50%, var(--darker) 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 0 15px rgba(110, 69, 226, 0.3);
+        }
+
+        .cooler-center {
+            width: 25%;
+            height: 25%;
+            background: var(--dark);
+            border-radius: 50%;
+            border: 2px solid rgba(255,255,255,0.1);
+        }
+
         .status {
             text-align: center;
             font-size: 0.9rem;
             color: rgba(255,255,255,0.7);
-            margin-bottom: 20px;
+            margin-bottom: 15px;
             min-height: 20px;
         }
 
         .action-buttons {
-            display: flex;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
             gap: 10px;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
         }
 
         .btn {
-            flex: 1;
             padding: 12px;
             border: none;
             border-radius: 10px;
             font-weight: 600;
-            font-size: 0.95rem;
+            font-size: 0.9rem;
             cursor: pointer;
             transition: all 0.2s ease;
             display: flex;
@@ -197,7 +190,7 @@
 
         .btn-primary:not(:disabled):hover {
             transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(110, 69, 226, 0.4);
+            box-shadow: 0 5px 12px rgba(110, 69, 226, 0.4);
         }
 
         .btn-secondary {
@@ -215,17 +208,20 @@
             background: var(--darker);
             border-radius: 12px;
             padding: 5px;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
+            overflow-x: auto;
         }
 
         .tab {
             flex: 1;
+            min-width: 80px;
             text-align: center;
             padding: 10px;
             cursor: pointer;
             border-radius: 8px;
             font-weight: 600;
             transition: all 0.2s ease;
+            white-space: nowrap;
         }
 
         .tab.active {
@@ -251,7 +247,7 @@
             display: flex;
             background: var(--darker);
             border-radius: 12px;
-            padding: 15px;
+            padding: 12px;
             margin-bottom: 10px;
             align-items: center;
             transition: all 0.2s ease;
@@ -262,16 +258,16 @@
         }
 
         .upgrade-icon {
-            width: 40px;
-            height: 40px;
+            width: 36px;
+            height: 36px;
             background: rgba(110, 69, 226, 0.1);
-            border-radius: 10px;
+            border-radius: 8px;
             display: flex;
             justify-content: center;
             align-items: center;
-            margin-right: 15px;
+            margin-right: 12px;
             color: var(--primary);
-            font-size: 1.2rem;
+            font-size: 1.1rem;
         }
 
         .upgrade-info {
@@ -281,42 +277,47 @@
         .upgrade-name {
             font-weight: 600;
             margin-bottom: 3px;
+            font-size: 0.95rem;
         }
 
         .upgrade-desc {
-            font-size: 0.8rem;
+            font-size: 0.75rem;
             color: rgba(255,255,255,0.6);
         }
 
         .upgrade-price {
             font-weight: 700;
             color: var(--secondary);
+            font-size: 0.9rem;
+            margin-left: 10px;
         }
 
         .upgrade-owned {
             color: var(--success);
-            font-size: 0.9rem;
+            font-size: 0.85rem;
+            margin-left: 10px;
         }
 
         .top-user {
             display: flex;
             align-items: center;
-            padding: 12px 15px;
+            padding: 10px 12px;
             background: var(--darker);
             border-radius: 12px;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
         }
 
         .user-avatar {
-            width: 40px;
-            height: 40px;
+            width: 36px;
+            height: 36px;
             border-radius: 50%;
-            margin-right: 15px;
+            margin-right: 12px;
             background: rgba(255,255,255,0.1);
             display: flex;
             justify-content: center;
             align-items: center;
             overflow: hidden;
+            flex-shrink: 0;
         }
 
         .user-avatar img {
@@ -327,21 +328,29 @@
 
         .user-info {
             flex: 1;
+            min-width: 0;
         }
 
         .user-name {
             font-weight: 600;
             margin-bottom: 2px;
+            font-size: 0.9rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
         .user-hashrate {
-            font-size: 0.8rem;
+            font-size: 0.75rem;
             color: rgba(255,255,255,0.6);
         }
 
         .user-balance {
             font-weight: 700;
             color: var(--secondary);
+            font-size: 0.9rem;
+            margin-left: 10px;
+            white-space: nowrap;
         }
 
         .modal {
@@ -358,7 +367,7 @@
             opacity: 0;
             pointer-events: none;
             transition: opacity 0.3s ease;
-            padding: 20px;
+            padding: 15px;
         }
 
         .modal.active {
@@ -369,13 +378,13 @@
         .modal-content {
             background: var(--darker);
             border-radius: 16px;
-            padding: 25px;
-            max-width: 100%;
-            width: 350px;
+            padding: 20px;
+            width: 100%;
+            max-width: 320px;
             text-align: center;
             transform: scale(0.9);
             transition: transform 0.3s ease;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+            box-shadow: 0 8px 30px rgba(0,0,0,0.5);
         }
 
         .modal.active .modal-content {
@@ -383,26 +392,43 @@
         }
 
         .modal-icon {
-            font-size: 3.5rem;
+            font-size: 3rem;
             color: rgba(255,255,255,0.1);
-            margin-bottom: 15px;
+            margin-bottom: 12px;
         }
 
         .modal-title {
-            font-size: 1.3rem;
+            font-size: 1.2rem;
             font-weight: 700;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
         }
 
         .modal-text {
             color: rgba(255,255,255,0.7);
             margin-bottom: 20px;
-            font-size: 0.95rem;
-            line-height: 1.5;
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
+
+        .modal-button {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            background: linear-gradient(135deg, var(--primary), #8a63e8);
+            color: white;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .modal-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 12px rgba(110, 69, 226, 0.4);
         }
 
         .settings-item {
-            margin-bottom: 20px;
+            margin-bottom: 15px;
         }
 
         .settings-label {
@@ -410,18 +436,7 @@
             margin-bottom: 8px;
             font-weight: 600;
             color: rgba(255,255,255,0.8);
-        }
-
-        .support-link {
-            display: inline-block;
-            margin-top: 15px;
-            color: var(--primary);
-            text-decoration: none;
-            font-weight: 600;
-        }
-
-        .support-link:hover {
-            text-decoration: underline;
+            font-size: 0.9rem;
         }
 
         /* Анимации */
@@ -430,8 +445,27 @@
             to { transform: rotate(360deg); }
         }
 
-        .mining .gpu-fan {
-            animation: spin 0.8s linear infinite;
+        .mining .cooler {
+            animation: spin 1s linear infinite;
+        }
+
+        /* Адаптация для маленьких экранов */
+        @media (max-width: 350px) {
+            .gpu-container {
+                width: 140px;
+                height: 140px;
+            }
+            
+            .btn {
+                font-size: 0.8rem;
+                padding: 10px;
+            }
+            
+            .tab {
+                min-width: 70px;
+                padding: 8px;
+                font-size: 0.85rem;
+            }
         }
     </style>
 </head>
@@ -448,6 +482,7 @@
 
         <div class="tabs">
             <div class="tab active" data-tab="mining">Майнинг</div>
+            <div class="tab" data-tab="top">Топ</div>
             <div class="tab" data-tab="upgrades">Улучшения</div>
             <div class="tab" data-tab="settings">Настройки</div>
         </div>
@@ -456,19 +491,15 @@
             <div class="mining-container">
                 <div class="balance-container">
                     <div class="balance-label">Ваш баланс</div>
-                    <div class="balance-amount" id="balance">0 RUB</div>
+                    <div class="balance-amount" id="balance">0 ₽</div>
                 </div>
 
-                <div class="gpu-container">
+                <div class="gpu-container" id="gpuContainer">
                     <div class="gpu-card">
                         <div class="gpu-brand">RTX 3060</div>
                     </div>
-                    <div class="gpu-fan" id="gpuFan">
-                        <div class="gpu-fan-inner"></div>
-                        <div class="gpu-blade" style="transform: rotate(0deg) translateX(50%);"></div>
-                        <div class="gpu-blade" style="transform: rotate(90deg) translateX(50%);"></div>
-                        <div class="gpu-blade" style="transform: rotate(180deg) translateX(50%);"></div>
-                        <div class="gpu-blade" style="transform: rotate(270deg) translateX(50%);"></div>
+                    <div class="cooler" id="cooler">
+                        <div class="cooler-center"></div>
                     </div>
                 </div>
 
@@ -483,9 +514,10 @@
                     </button>
                 </div>
             </div>
+        </div>
 
+        <div id="top-tab" class="tab-content">
             <div class="mining-container">
-                <h3 style="margin-bottom: 15px;">Топ майнеров</h3>
                 <div id="topList">
                     <!-- Топ будет заполняться динамически -->
                 </div>
@@ -494,7 +526,6 @@
 
         <div id="upgrades-tab" class="tab-content">
             <div class="mining-container">
-                <h3 style="margin-bottom: 15px;">Улучшения</h3>
                 <div id="upgradesList">
                     <!-- Улучшения будут заполняться динамически -->
                 </div>
@@ -503,8 +534,6 @@
 
         <div id="settings-tab" class="tab-content">
             <div class="mining-container">
-                <h3 style="margin-bottom: 15px;">Настройки</h3>
-                
                 <div class="settings-item">
                     <label class="settings-label">Валюта</label>
                     <select class="currency-selector" id="settingsCurrencySelector">
@@ -514,13 +543,9 @@
                     </select>
                 </div>
 
-                <button class="btn btn-secondary" id="supportButton" style="width: 100%;">
+                <button class="btn btn-secondary" id="supportButton">
                     <i class="fas fa-headset"></i> Поддержка
                 </button>
-
-                <a href="https://t.me/HomeMining_support" class="support-link" target="_blank">
-                    t.me/HomeMining_support
-                </a>
             </div>
         </div>
     </div>
@@ -534,7 +559,7 @@
             <p class="modal-text">
                 На данный момент мы не реализовали данную систему, но всё еще впереди!
             </p>
-            <button class="btn btn-primary" id="closeModalButton">Понятно</button>
+            <button class="modal-button" id="closeModalButton">Понятно</button>
         </div>
     </div>
 
@@ -555,12 +580,12 @@
             upgrades: [
                 { 
                     id: 1, 
-                    name: "Улучшенное охлаждение", 
+                    name: "Улучшенный кулер", 
                     icon: "fas fa-fan",
                     price: 50, 
                     effect: 0.1, 
                     purchased: false,
-                    description: "Увеличивает скорость майнинга на 10%"
+                    description: "+10% к скорости майнинга"
                 },
                 { 
                     id: 2, 
@@ -569,16 +594,25 @@
                     price: 100, 
                     effect: 0.15, 
                     purchased: false,
-                    description: "Увеличивает скорость майнинга на 15%"
+                    description: "+15% к скорости майнинга"
                 },
                 { 
                     id: 3, 
-                    name: "RTX 4090", 
-                    icon: "fas fa-microchip",
-                    price: 200, 
-                    effect: 0.25, 
+                    name: "Доп. вентиляторы", 
+                    icon: "fas fa-wind",
+                    price: 150, 
+                    effect: 0.2, 
                     purchased: false,
-                    description: "Апгрейд до RTX 4090 (+25% скорости)"
+                    description: "+20% к скорости майнинга"
+                },
+                { 
+                    id: 4, 
+                    name: "Апгрейд на RTX 4090", 
+                    icon: "fas fa-microchip",
+                    price: 300, 
+                    effect: 0.5, 
+                    purchased: false,
+                    description: "+50% к скорости майнинга"
                 }
             ],
             topUsers: [
@@ -588,6 +622,27 @@
                     balance: 0, 
                     avatar: "https://i.imgur.com/JqYeX7a.png",
                     hashrate: "0 H/s"
+                },
+                { 
+                    id: 2, 
+                    name: "Крипто-энтузиаст", 
+                    balance: 1250, 
+                    avatar: "https://i.imgur.com/dZ8Q1Dp.png",
+                    hashrate: "185 H/s"
+                },
+                { 
+                    id: 3, 
+                    name: "Майнер PRO", 
+                    balance: 980, 
+                    avatar: "https://i.imgur.com/pXJ3q2W.png",
+                    hashrate: "150 H/s"
+                },
+                { 
+                    id: 4, 
+                    name: "Биткоин-фермер", 
+                    balance: 750, 
+                    avatar: "https://i.imgur.com/LkY5xQk.png",
+                    hashrate: "120 H/s"
                 }
             ]
         };
@@ -598,7 +653,7 @@
             mineButton: document.getElementById('mineButton'),
             withdrawButton: document.getElementById('withdrawButton'),
             status: document.getElementById('status'),
-            gpuFan: document.getElementById('gpuFan'),
+            cooler: document.getElementById('cooler'),
             currencySelector: document.getElementById('currencySelector'),
             settingsCurrencySelector: document.getElementById('settingsCurrencySelector'),
             topList: document.getElementById('topList'),
@@ -694,8 +749,10 @@
             
             state.isMining = true;
             state.sessionStartTime = Date.now();
-            DOM.mineButton.disabled = true;
-            DOM.gpuFan.classList.add('mining');
+            DOM.mineButton.innerHTML = '<i class="fas fa-stop"></i> Стоп';
+            DOM.mineButton.classList.remove('btn-primary');
+            DOM.mineButton.classList.add('btn-secondary');
+            DOM.cooler.classList.add('mining');
             updateStatus('Майнинг...');
             
             // Случайный майнинг с базовой скоростью 0.01 в секунду
@@ -719,8 +776,10 @@
         function stopMining() {
             state.isMining = false;
             clearInterval(state.miningInterval);
-            DOM.mineButton.disabled = false;
-            DOM.gpuFan.classList.remove('mining');
+            DOM.mineButton.innerHTML = '<i class="fas fa-play"></i> Майнить';
+            DOM.mineButton.classList.add('btn-primary');
+            DOM.mineButton.classList.remove('btn-secondary');
+            DOM.cooler.classList.remove('mining');
             updateStatus('Готов к майнингу');
             saveData();
         }
@@ -734,10 +793,9 @@
             DOM.topList.innerHTML = '';
             
             // Сортируем по балансу (кроме первого пользователя - "Вы")
-            const sortedUsers = [...state.topUsers.slice(1)].sort((a, b) => b.balance - a.balance);
-            const usersToShow = [state.topUsers[0], ...sortedUsers.slice(0, 4)];
+            const sortedUsers = [...state.topUsers].sort((a, b) => b.balance - a.balance);
             
-            usersToShow.forEach((user, index) => {
+            sortedUsers.forEach((user, index) => {
                 const userElement = document.createElement('div');
                 userElement.className = 'top-user';
                 userElement.innerHTML = `
