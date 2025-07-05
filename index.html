@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GPU Miner PRO</title>
+    <title>Домашний Майнинг</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -60,13 +60,63 @@
             -webkit-text-fill-color: transparent;
         }
 
-        .currency-selector {
+        .currency-selector-container {
+            position: relative;
+        }
+
+        .currency-selector-btn {
             background: var(--darker);
             color: var(--light);
             border: 1px solid rgba(255,255,255,0.1);
             border-radius: 8px;
-            padding: 5px 10px;
+            padding: 6px 12px;
             font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .currency-selector-btn:hover {
+            background: rgba(255,255,255,0.05);
+        }
+
+        .currency-selector-dropdown {
+            position: absolute;
+            right: 0;
+            top: 100%;
+            margin-top: 5px;
+            background: var(--darker);
+            border-radius: 8px;
+            padding: 8px;
+            min-width: 120px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            z-index: 10;
+            display: none;
+        }
+
+        .currency-selector-dropdown.show {
+            display: block;
+        }
+
+        .currency-option {
+            padding: 8px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: background 0.2s ease;
+        }
+
+        .currency-option:hover {
+            background: rgba(255,255,255,0.05);
+        }
+
+        .currency-option.active {
+            background: rgba(110, 69, 226, 0.2);
+            color: var(--primary);
         }
 
         .mining-container {
@@ -97,47 +147,32 @@
             -webkit-text-fill-color: transparent;
         }
 
-        .gpu-container {
+        .miner-container {
             position: relative;
             width: 160px;
             height: 160px;
             margin: 0 auto 20px;
-        }
-
-        .gpu-card {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(135deg, rgba(30,30,40,0.8), rgba(50,50,70,0.9));
+            background: rgba(30,30,40,0.8);
             border-radius: 12px;
-            transform: perspective(500px) rotateX(15deg);
-            box-shadow: 0 8px 25px rgba(0,0,0,0.5);
             display: flex;
             justify-content: center;
-            align-items: flex-end;
-            padding-bottom: 15px;
-            overflow: hidden;
+            align-items: center;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.5);
         }
 
-        .gpu-brand {
-            font-size: 0.8rem;
-            color: rgba(255,255,255,0.5);
-            text-transform: uppercase;
-            letter-spacing: 2px;
+        .miner-icon {
+            font-size: 3.5rem;
+            color: var(--primary);
         }
 
         .cooler {
             position: absolute;
             width: 80%;
             height: 80%;
-            top: 10%;
-            left: 10%;
             border-radius: 50%;
-            background: conic-gradient(from 0deg, var(--darker) 0%, var(--dark) 50%, var(--darker) 100%);
             display: flex;
             justify-content: center;
             align-items: center;
-            box-shadow: 0 0 15px rgba(110, 69, 226, 0.3);
         }
 
         .cooler-center {
@@ -472,12 +507,24 @@
 <body>
     <div class="app-container">
         <div class="header">
-            <div class="app-title">GPU Miner PRO</div>
-            <select class="currency-selector" id="currencySelector">
-                <option value="RUB">RUB</option>
-                <option value="USD">USD</option>
-                <option value="EUR">EUR</option>
-            </select>
+            <div class="app-title">Домашний Майнинг</div>
+            <div class="currency-selector-container">
+                <button class="currency-selector-btn" id="currencySelectorBtn">
+                    <span id="currentCurrency">RUB</span>
+                    <i class="fas fa-chevron-down"></i>
+                </button>
+                <div class="currency-selector-dropdown" id="currencyDropdown">
+                    <div class="currency-option active" data-currency="RUB">
+                        <i class="fas fa-ruble-sign"></i> RUB
+                    </div>
+                    <div class="currency-option" data-currency="USD">
+                        <i class="fas fa-dollar-sign"></i> USD
+                    </div>
+                    <div class="currency-option" data-currency="EUR">
+                        <i class="fas fa-euro-sign"></i> EUR
+                    </div>
+                </div>
+            </div>
         </div>
 
         <div class="tabs">
@@ -494,10 +541,8 @@
                     <div class="balance-amount" id="balance">0 ₽</div>
                 </div>
 
-                <div class="gpu-container" id="gpuContainer">
-                    <div class="gpu-card">
-                        <div class="gpu-brand">RTX 3060</div>
-                    </div>
+                <div class="miner-container" id="minerContainer">
+                    <i class="miner-icon fas fa-microchip"></i>
                     <div class="cooler" id="cooler">
                         <div class="cooler-center"></div>
                     </div>
@@ -519,7 +564,7 @@
         <div id="top-tab" class="tab-content">
             <div class="mining-container">
                 <div id="topList">
-                    <!-- Топ будет заполняться динамически -->
+                    <!-- Топ будет заполняться только текущим пользователем -->
                 </div>
             </div>
         </div>
@@ -536,11 +581,23 @@
             <div class="mining-container">
                 <div class="settings-item">
                     <label class="settings-label">Валюта</label>
-                    <select class="currency-selector" id="settingsCurrencySelector">
-                        <option value="RUB">RUB</option>
-                        <option value="USD">USD</option>
-                        <option value="EUR">EUR</option>
-                    </select>
+                    <div class="currency-selector-container">
+                        <button class="currency-selector-btn" id="settingsCurrencySelectorBtn">
+                            <span id="settingsCurrentCurrency">RUB</span>
+                            <i class="fas fa-chevron-down"></i>
+                        </button>
+                        <div class="currency-selector-dropdown" id="settingsCurrencyDropdown">
+                            <div class="currency-option active" data-currency="RUB">
+                                <i class="fas fa-ruble-sign"></i> RUB
+                            </div>
+                            <div class="currency-option" data-currency="USD">
+                                <i class="fas fa-dollar-sign"></i> USD
+                            </div>
+                            <div class="currency-option" data-currency="EUR">
+                                <i class="fas fa-euro-sign"></i> EUR
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 <button class="btn btn-secondary" id="supportButton">
@@ -574,8 +631,13 @@
             sessionStartTime: 0,
             exchangeRates: {
                 RUB: 1,
-                USD: 0.011,
-                EUR: 0.010
+                USD: 0.011,  // 1 RUB = 0.011 USD
+                EUR: 0.010   // 1 RUB = 0.010 EUR
+            },
+            miningRates: {
+                RUB: 0.01,   // Базовый майнинг в рублях
+                USD: 0.005,  // Медленнее в долларах
+                EUR: 0.004   // И в евро
             },
             upgrades: [
                 { 
@@ -615,36 +677,7 @@
                     description: "+50% к скорости майнинга"
                 }
             ],
-            topUsers: [
-                { 
-                    id: 1, 
-                    name: "Вы", 
-                    balance: 0, 
-                    avatar: "https://i.imgur.com/JqYeX7a.png",
-                    hashrate: "0 H/s"
-                },
-                { 
-                    id: 2, 
-                    name: "Крипто-энтузиаст", 
-                    balance: 1250, 
-                    avatar: "https://i.imgur.com/dZ8Q1Dp.png",
-                    hashrate: "185 H/s"
-                },
-                { 
-                    id: 3, 
-                    name: "Майнер PRO", 
-                    balance: 980, 
-                    avatar: "https://i.imgur.com/pXJ3q2W.png",
-                    hashrate: "150 H/s"
-                },
-                { 
-                    id: 4, 
-                    name: "Биткоин-фермер", 
-                    balance: 750, 
-                    avatar: "https://i.imgur.com/LkY5xQk.png",
-                    hashrate: "120 H/s"
-                }
-            ]
+            topUsers: []  // Начально пустой массив
         };
 
         // Элементы DOM
@@ -654,8 +687,12 @@
             withdrawButton: document.getElementById('withdrawButton'),
             status: document.getElementById('status'),
             cooler: document.getElementById('cooler'),
-            currencySelector: document.getElementById('currencySelector'),
-            settingsCurrencySelector: document.getElementById('settingsCurrencySelector'),
+            currencySelectorBtn: document.getElementById('currencySelectorBtn'),
+            currencyDropdown: document.getElementById('currencyDropdown'),
+            currentCurrency: document.getElementById('currentCurrency'),
+            settingsCurrencySelectorBtn: document.getElementById('settingsCurrencySelectorBtn'),
+            settingsCurrencyDropdown: document.getElementById('settingsCurrencyDropdown'),
+            settingsCurrentCurrency: document.getElementById('settingsCurrentCurrency'),
             topList: document.getElementById('topList'),
             upgradesList: document.getElementById('upgradesList'),
             withdrawModal: document.getElementById('withdrawModal'),
@@ -675,23 +712,23 @@
             Telegram.WebApp.ready();
             Telegram.WebApp.expand();
             
-            // Добавляем текущего пользователя
+            // Добавляем текущего пользователя в топ
             if (Telegram.WebApp.initDataUnsafe.user) {
                 const user = Telegram.WebApp.initDataUnsafe.user;
-                state.topUsers[0] = {
+                state.topUsers = [{
                     id: user.id,
                     name: `${user.first_name || ''} ${user.last_name || ''}`.trim() || `User${user.id}`,
                     balance: state.balance,
                     avatar: user.photo_url || "https://i.imgur.com/JqYeX7a.png",
                     hashrate: "0 H/s"
-                };
+                }];
                 renderTopList();
             }
         }
 
         // Загрузка данных
         function loadData() {
-            const savedData = localStorage.getItem('gpuMinerData');
+            const savedData = localStorage.getItem('homeMinerData');
             if (savedData) {
                 const data = JSON.parse(savedData);
                 state.balance = data.balance || 0;
@@ -699,8 +736,7 @@
                 state.upgrades = data.upgrades || state.upgrades;
                 state.miningSpeed = calculateMiningSpeed();
                 
-                DOM.currencySelector.value = state.currency;
-                DOM.settingsCurrencySelector.value = state.currency;
+                updateCurrencySelectors();
             }
         }
 
@@ -711,7 +747,21 @@
                 currency: state.currency,
                 upgrades: state.upgrades
             };
-            localStorage.setItem('gpuMinerData', JSON.stringify(data));
+            localStorage.setItem('homeMinerData', JSON.stringify(data));
+        }
+
+        // Обновление селекторов валют
+        function updateCurrencySelectors() {
+            DOM.currentCurrency.textContent = state.currency;
+            DOM.settingsCurrentCurrency.textContent = state.currency;
+            
+            // Обновляем активные валюты в dropdown
+            document.querySelectorAll('.currency-option').forEach(option => {
+                option.classList.remove('active');
+                if (option.getAttribute('data-currency') === state.currency) {
+                    option.classList.add('active');
+                }
+            });
         }
 
         // Расчет скорости майнинга
@@ -755,8 +805,8 @@
             DOM.cooler.classList.add('mining');
             updateStatus('Майнинг...');
             
-            // Случайный майнинг с базовой скоростью 0.01 в секунду
-            const baseRate = 0.01 * state.exchangeRates[state.currency];
+            // Базовый майнинг зависит от валюты
+            const baseRate = state.miningRates[state.currency];
             
             state.miningInterval = setInterval(() => {
                 // Случайное значение (0.5x - 1.5x от базовой скорости)
@@ -788,14 +838,12 @@
             DOM.status.textContent = text;
         }
 
-        // Рендер списка топов
+        // Рендер списка топов (только текущий пользователь)
         function renderTopList() {
             DOM.topList.innerHTML = '';
             
-            // Сортируем по балансу (кроме первого пользователя - "Вы")
-            const sortedUsers = [...state.topUsers].sort((a, b) => b.balance - a.balance);
-            
-            sortedUsers.forEach((user, index) => {
+            if (state.topUsers.length > 0) {
+                const user = state.topUsers[0];
                 const userElement = document.createElement('div');
                 userElement.className = 'top-user';
                 userElement.innerHTML = `
@@ -803,13 +851,13 @@
                         <img src="${user.avatar}" alt="${user.name}">
                     </div>
                     <div class="user-info">
-                        <div class="user-name">${index === 0 ? 'Вы' : user.name}</div>
+                        <div class="user-name">Вы</div>
                         <div class="user-hashrate">${user.hashrate}</div>
                     </div>
                     <div class="user-balance">${user.balance.toFixed(2)} ${state.currency}</div>
                 `;
                 DOM.topList.appendChild(userElement);
-            });
+            }
         }
 
         // Рендер улучшений
@@ -885,6 +933,7 @@
             });
             
             // Обновляем интерфейс
+            updateCurrencySelectors();
             updateUI();
             saveData();
         }
@@ -912,15 +961,33 @@
                 window.open('https://t.me/HomeMining_support', '_blank');
             });
             
-            // Смена валюты
-            DOM.currencySelector.addEventListener('change', (e) => {
-                changeCurrency(e.target.value);
-                DOM.settingsCurrencySelector.value = e.target.value;
+            // Выбор валюты в хедере
+            DOM.currencySelectorBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                DOM.currencyDropdown.classList.toggle('show');
             });
             
-            DOM.settingsCurrencySelector.addEventListener('change', (e) => {
-                changeCurrency(e.target.value);
-                DOM.currencySelector.value = e.target.value;
+            // Выбор валюты в настройках
+            DOM.settingsCurrencySelectorBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                DOM.settingsCurrencyDropdown.classList.toggle('show');
+            });
+            
+            // Обработка выбора валюты
+            document.querySelectorAll('.currency-option').forEach(option => {
+                option.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const currency = option.getAttribute('data-currency');
+                    changeCurrency(currency);
+                    DOM.currencyDropdown.classList.remove('show');
+                    DOM.settingsCurrencyDropdown.classList.remove('show');
+                });
+            });
+            
+            // Закрытие dropdown при клике вне его
+            document.addEventListener('click', () => {
+                DOM.currencyDropdown.classList.remove('show');
+                DOM.settingsCurrencyDropdown.classList.remove('show');
             });
             
             // Переключение вкладок
