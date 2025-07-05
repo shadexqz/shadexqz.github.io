@@ -1,564 +1,665 @@
 <!DOCTYPE html>
-<html lang="uk">
+<html>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ДЕРЖАВНИЙ ПОТУЖНОМЕТР</title>
+    <title>Домашний майнер</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
-        
         body {
-            font-family: 'Share Tech Mono', monospace;
-            background-color: #000;
-            color: #0f0;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
-            margin: 0;
-            overflow: hidden;
-            position: relative;
-        }
-        
-        .device-housing {
-            background: linear-gradient(135deg, #2a2a2a 0%, #1a1a1a 100%);
-            border: 15px solid #444;
-            border-radius: 25px;
-            padding: 30px;
-            width: 400px;
-            box-shadow: 
-                0 0 50px rgba(255, 0, 0, 0.2),
-                inset 0 0 30px rgba(0, 0, 0, 0.8);
-            position: relative;
-            overflow: hidden;
-            z-index: 10;
-            transition: all 0.3s;
-        }
-        
-        .header {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-bottom: 25px;
-            border-bottom: 3px solid #444;
-            padding-bottom: 15px;
-        }
-        
-        .logo {
-            width: 50px;
-            height: 50px;
-            margin-right: 20px;
-            filter: drop-shadow(0 0 5px #ff0);
-        }
-        
-        .title {
-            font-size: 26px;
-            text-transform: uppercase;
-            letter-spacing: 3px;
-            color: #ff0;
-            text-shadow: 0 0 10px #ff0;
-        }
-        
-        .display-panel {
-            background-color: #111;
-            border: 4px solid #444;
-            border-radius: 10px;
+            font-family: 'Segoe UI', Arial, sans-serif;
+            max-width: 100%;
             padding: 20px;
-            margin-bottom: 25px;
-            position: relative;
+            background-color: #f5f5f5;
+            color: #333;
+            margin: 0;
         }
-        
-        .circular-meter {
-            position: relative;
-            width: 250px;
-            height: 250px;
-            margin: 0 auto 20px;
+        .container {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
         }
-        
-        .meter-bg {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            border-radius: 50%;
-            background: conic-gradient(
-                #00ff00 0%,
-                #aaff00 20%,
-                #ffff00 40%,
-                #ffaa00 60%,
-                #ff0000 80%,
-                #ff0000 100%
-            );
-            mask: radial-gradient(transparent 50%, #000 51%);
-        }
-        
-        .meter-fill {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            border-radius: 50%;
-            background: #111;
-            clip-path: polygon(50% 50%, 50% 0%, 0% 0%, 0% 100%, 100% 100%, 100% 0%, 50% 0%);
-            transform: rotate(-90deg);
-            transition: transform 2s cubic-bezier(0.68, -0.55, 0.27, 1.55);
-        }
-        
-        .meter-center {
-            position: absolute;
-            width: 70%;
-            height: 70%;
-            top: 15%;
-            left: 15%;
-            background: #000;
-            border-radius: 50%;
-            border: 3px solid #444;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 36px;
+        .header {
+            font-size: 24px;
             font-weight: bold;
-            color: #0f0;
-            text-shadow: 0 0 10px #0f0;
-        }
-        
-        .digital-readout {
-            background-color: #000;
-            border: 3px solid #444;
-            border-radius: 8px;
-            padding: 15px;
-            text-align: center;
-            font-size: 32px;
-            letter-spacing: 3px;
-            margin-bottom: 15px;
-            color: #0f0;
-            text-shadow: 0 0 10px #0f0;
-        }
-        
-        .status-display {
-            background-color: #000;
-            border: 3px solid #444;
-            border-radius: 8px;
-            padding: 12px;
-            text-align: center;
-            font-size: 18px;
-            min-height: 27px;
-            text-transform: uppercase;
-        }
-        
-        .control-panel {
+            margin-bottom: 20px;
             display: flex;
-            flex-direction: column;
-            gap: 15px;
+            justify-content: space-between;
+            align-items: center;
         }
-        
-        .btn {
-            background: linear-gradient(to bottom, #444 0%, #222 100%);
-            color: #0f0;
-            border: 3px solid #444;
-            padding: 15px 0;
-            font-size: 20px;
-            cursor: pointer;
-            border-radius: 8px;
-            font-family: 'Share Tech Mono', monospace;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            transition: all 0.3s;
+        .currency-selector {
+            font-size: 16px;
+            padding: 5px;
+            border-radius: 6px;
+            border: 1px solid #ddd;
+        }
+        .mining-section {
+            text-align: center;
+            margin: 30px 0;
+        }
+        .propeller {
+            width: 100px;
+            height: 100px;
+            margin: 0 auto 20px;
             position: relative;
-            overflow: hidden;
-            box-shadow: 0 0 15px rgba(0, 255, 0, 0.2);
         }
-        
-        .btn:hover {
-            background: linear-gradient(to bottom, #555 0%, #333 100%);
-            box-shadow: 0 0 20px rgba(0, 255, 0, 0.4);
-        }
-        
-        .btn:active {
-            transform: translateY(2px);
-        }
-        
-        .btn i {
-            margin-right: 10px;
-        }
-        
-        .warning {
-            animation: warningBlink 0.15s infinite alternate;
-        }
-        
-        .danger {
-            animation: dangerBlink 0.05s infinite, shake 0.15s infinite;
-        }
-        
-        @keyframes warningBlink {
-            from { 
-                background-color: #440000;
-                box-shadow: 0 0 50px rgba(255, 0, 0, 0.5);
-            }
-            to { 
-                background-color: #880000;
-                box-shadow: 0 0 70px rgba(255, 0, 0, 0.8);
-            }
-        }
-        
-        @keyframes dangerBlink {
-            from { 
-                background-color: #ff0000;
-                box-shadow: 0 0 100px #ff0000;
-                border-color: #ff0000;
-            }
-            to { 
-                background-color: #880000;
-                box-shadow: 0 0 150px #ff0000;
-                border-color: #ff5555;
-            }
-        }
-        
-        @keyframes shake {
-            0% { transform: translate(0, 0) rotate(0deg); }
-            20% { transform: translate(-10px, 5px) rotate(-2deg); }
-            40% { transform: translate(10px, -5px) rotate(2deg); }
-            60% { transform: translate(-10px, 5px) rotate(-2deg); }
-            80% { transform: translate(10px, -5px) rotate(2deg); }
-            100% { transform: translate(0, 0) rotate(0deg); }
-        }
-        
-        .alarm-text {
+        .propeller-blade {
             position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            color: #f00;
+            width: 40px;
+            height: 10px;
+            background-color: #5b8bf7;
+            border-radius: 5px;
+            top: 45px;
+            left: 30px;
+            transform-origin: left center;
+        }
+        .balance {
             font-size: 28px;
             font-weight: bold;
-            text-shadow: 0 0 15px #f00;
-            opacity: 0;
-            z-index: 20;
-            animation: textPulse 0.3s infinite alternate;
-            text-transform: uppercase;
+            margin: 20px 0;
+            text-align: center;
         }
-        
-        @keyframes textPulse {
-            from { transform: translate(-50%, -50%) scale(1); opacity: 0.7; }
-            to { transform: translate(-50%, -50%) scale(1.2); opacity: 1; }
-        }
-        
-        .sparks {
-            position: absolute;
+        .button {
+            background-color: #5b8bf7;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            margin: 10px 0;
             width: 100%;
-            height: 100%;
-            top: 0;
-            left: 0;
-            pointer-events: none;
-            z-index: 30;
-            opacity: 0;
+            transition: background-color 0.3s;
         }
-        
-        .spark {
-            position: absolute;
-            width: 3px;
-            height: 20px;
-            background: #ff0;
-            transform-origin: bottom center;
-            animation: sparkFall 1s linear forwards;
+        .button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
         }
-        
-        @keyframes sparkFall {
-            to {
-                transform: translateY(100vh) rotate(360deg);
-                opacity: 0;
-            }
+        .button:hover:not(:disabled) {
+            background-color: #3a6fd6;
         }
-        
-        .fullscreen-alarm {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            background-color: #f00;
-            z-index: 100;
-            opacity: 0;
-            pointer-events: none;
-            animation: fullscreenAlarm 0.1s infinite alternate;
+        .button.secondary {
+            background-color: #6c757d;
+        }
+        .button.secondary:hover {
+            background-color: #5a6268;
+        }
+        .status {
+            font-size: 14px;
+            color: #666;
+            margin-top: 20px;
+            text-align: center;
+        }
+        .divider {
+            height: 1px;
+            background-color: #eee;
+            margin: 20px 0;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        .tabs {
+            display: flex;
+            margin-bottom: 15px;
+            border-bottom: 1px solid #ddd;
+        }
+        .tab {
+            padding: 10px 15px;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+        }
+        .tab.active {
+            border-bottom: 3px solid #5b8bf7;
+            font-weight: bold;
+        }
+        .withdraw-message {
+            text-align: center;
+            padding: 30px;
+            background-color: #f8f9fa;
+            border-radius: 12px;
+            margin: 20px 0;
+        }
+        .withdraw-icon {
+            font-size: 50px;
+            color: rgba(0,0,0,0.1);
+            margin-bottom: 15px;
+        }
+        .upgrade-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+        }
+        .upgrade-item:last-child {
+            border-bottom: none;
+        }
+        .upgrade-info {
+            flex: 1;
+        }
+        .upgrade-title {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        .upgrade-description {
+            font-size: 12px;
+            color: #666;
+        }
+        .upgrade-price {
+            font-weight: bold;
+            color: #28a745;
+            margin-left: 15px;
+        }
+        .user-item {
+            display: flex;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
+        }
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            margin-right: 15px;
+            background-color: #ddd;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 72px;
+            overflow: hidden;
+        }
+        .user-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .user-info {
+            flex: 1;
+        }
+        .user-name {
             font-weight: bold;
-            color: #000;
-            text-transform: uppercase;
+        }
+        .user-balance {
+            color: #28a745;
+            font-weight: bold;
+        }
+        .support-link {
+            color: #5b8bf7;
+            text-decoration: none;
+            display: block;
+            margin-top: 10px;
             text-align: center;
         }
-        
-        @keyframes fullscreenAlarm {
-            from { 
-                opacity: 0.9;
-                background-color: #f00;
-            }
-            to { 
-                opacity: 1;
-                background-color: #000;
-            }
+        .settings-item {
+            margin-bottom: 15px;
         }
-        
-        .blackout {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            background-color: #000;
-            z-index: 99;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.5s;
-        }
-        
-        .panic-btn {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            z-index: 1001;
-            padding: 10px;
-            background: #f00;
-            color: #fff;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-family: 'Share Tech Mono', monospace;
+        .settings-label {
+            display: block;
+            margin-bottom: 5px;
             font-weight: bold;
         }
     </style>
 </head>
 <body>
-    <div class="device-housing">
-        <div class="header">
-            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/4/49/Flag_of_Ukraine.svg/1200px-Flag_of_Ukraine.svg.png" alt="Герб України" class="logo">
-            <div class="title">ПОТУЖНОМЕТР</div>
-        </div>
-        
-        <div class="display-panel">
-            <div class="circular-meter">
-                <div class="meter-bg"></div>
-                <div class="meter-fill" id="meterFill"></div>
-                <div class="meter-center" id="meterValue">---</div>
-                <div class="alarm-text" id="alarmText">УВАГА!</div>
-                <div class="sparks" id="sparks"></div>
+    <div class="tabs">
+        <div class="tab active" onclick="switchTab('mining')">Майнинг</div>
+        <div class="tab" onclick="switchTab('top')">Топ</div>
+        <div class="tab" onclick="switchTab('upgrades')">Улучшения</div>
+        <div class="tab" onclick="switchTab('settings')">Настройки</div>
+    </div>
+
+    <div id="mining-tab" class="tab-content active">
+        <div class="container">
+            <div class="header">
+                <span>Домашний майнер</span>
+                <select class="currency-selector" id="currencySelector">
+                    <option value="RUB">RUB</option>
+                    <option value="USD">USD</option>
+                    <option value="EUR">EUR</option>
+                </select>
             </div>
             
-            <div class="digital-readout" id="digitalReadout">---</div>
-            <div class="status-display" id="statusDisplay">СИСТЕМА ГОТОВА</div>
-        </div>
-        
-        <div class="control-panel">
-            <button class="btn" id="measureBtn">
-                <i class="fas fa-bolt"></i> ВИМІРЯТИ
-            </button>
+            <div class="balance" id="balance">0 RUB</div>
+            
+            <div class="mining-section">
+                <div class="propeller" id="propeller">
+                    <div class="propeller-blade" style="transform: rotate(0deg);"></div>
+                    <div class="propeller-blade" style="transform: rotate(90deg);"></div>
+                    <div class="propeller-blade" style="transform: rotate(180deg);"></div>
+                    <div class="propeller-blade" style="transform: rotate(270deg);"></div>
+                </div>
+                <div id="status">Нажмите "Майнить" чтобы начать</div>
+            </div>
+            
+            <button class="button" id="mineButton">Майнить</button>
+            <div class="divider"></div>
+            <button class="button" id="withdrawButton">Вывод</button>
         </div>
     </div>
 
-    <div class="fullscreen-alarm" id="fullscreenAlarm">УВАГА! КРИТИЧНА ПОТУЖНІСТЬ!</div>
-    <div class="blackout" id="blackout"></div>
-    <button class="panic-btn" id="panicBtn">ВИМКНУТИ ТРИВОГУ</button>
+    <div id="top-tab" class="tab-content">
+        <div class="container">
+            <div class="header">Топ майнеров</div>
+            
+            <div id="topList">
+                <!-- Топ будет заполняться динамически -->
+                <div class="user-item">
+                    <div class="user-avatar">
+                        <img src="https://via.placeholder.com/40" alt="User">
+                    </div>
+                    <div class="user-info">
+                        <div class="user-name">Иван Иванов</div>
+                    </div>
+                    <div class="user-balance">1,245 RUB</div>
+                </div>
+                <!-- Другие пользователи -->
+            </div>
+        </div>
+    </div>
 
-    <audio id="warningSound" preload="auto">
-        <source src="sounds/uvaga.mp3" type="audio/mpeg">
-    </audio>
-    <audio id="dangerSound" preload="auto">
-        <source src="sounds/uvaga2.mp3" type="audio/mpeg">
-    </audio>
-    <audio id="explosionSound" preload="auto">
-        <source src="https://assets.mixkit.co/sfx/preview/mixkit-explosion-impact-1684.mp3" type="audio/mpeg">
-    </audio>
+    <div id="upgrades-tab" class="tab-content">
+        <div class="container">
+            <div class="header">Улучшения</div>
+            
+            <div id="upgradesList">
+                <div class="upgrade-item">
+                    <div class="upgrade-info">
+                        <div class="upgrade-title">Базовый процессор</div>
+                        <div class="upgrade-description">+0.01 к майнингу в секунду</div>
+                    </div>
+                    <div class="upgrade-price">50 RUB</div>
+                </div>
+                <div class="upgrade-item">
+                    <div class="upgrade-info">
+                        <div class="upgrade-title">Улучшенный кулер</div>
+                        <div class="upgrade-description">+5% к скорости майнинга</div>
+                    </div>
+                    <div class="upgrade-price">100 RUB</div>
+                </div>
+                <div class="upgrade-item">
+                    <div class="upgrade-info">
+                        <div class="upgrade-title">Видеокарта</div>
+                        <div class="upgrade-description">+0.03 к майнингу в секунду</div>
+                    </div>
+                    <div class="upgrade-price">200 RUB</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="settings-tab" class="tab-content">
+        <div class="container">
+            <div class="header">Настройки</div>
+            
+            <div class="settings-item">
+                <label class="settings-label">Валюта</label>
+                <select class="currency-selector" id="settingsCurrencySelector">
+                    <option value="RUB">RUB</option>
+                    <option value="USD">USD</option>
+                    <option value="EUR">EUR</option>
+                </select>
+            </div>
+            
+            <button class="button secondary" id="supportButton">Поддержка</button>
+            
+            <a href="https://t.me/HomeMining_support" class="support-link" target="_blank">
+                t.me/HomeMining_support
+            </a>
+        </div>
+    </div>
+
+    <div id="withdraw-modal" style="display: none;">
+        <div class="container">
+            <div class="withdraw-message">
+                <div class="withdraw-icon">
+                    <i class="far fa-frown"></i>
+                </div>
+                <h3>На данный момент мы не реализовали данную систему</h3>
+                <p>Но всё еще впереди!</p>
+            </div>
+            <button class="button" onclick="hideWithdrawModal()">Понятно</button>
+        </div>
+    </div>
 
     <script>
-        // ГЛОБАЛЬНІ ЗМІННІ ДЛЯ КОНТРОЛЮ ТРИВОГИ
-        let activeAlarmInterval = null;
-        let activeAlarmTimeout = null;
+        // Состояние приложения
+        const state = {
+            balance: 0,
+            isMining: false,
+            miningInterval: null,
+            rotationAngle: 0,
+            miningSpeed: 1,
+            sessionStartTime: 0,
+            currency: 'RUB',
+            exchangeRates: {
+                RUB: 1,
+                USD: 0.011,
+                EUR: 0.010
+            },
+            upgrades: [
+                { id: 1, name: "Базовый процессор", price: 50, effect: 0.01, purchased: false },
+                { id: 2, name: "Улучшенный кулер", price: 100, effect: 0.05, purchased: false },
+                { id: 3, name: "Видеокарта", price: 200, effect: 0.03, purchased: false }
+            ],
+            topUsers: [
+                { id: 1, name: "Иван Иванов", balance: 1245, avatar: "https://via.placeholder.com/40" },
+                { id: 2, name: "Анна Петрова", balance: 980, avatar: "https://via.placeholder.com/40" },
+                { id: 3, name: "Сергей Сидоров", balance: 750, avatar: "https://via.placeholder.com/40" },
+                { id: 4, name: "Елена Васильева", balance: 620, avatar: "https://via.placeholder.com/40" },
+                { id: 5, name: "Дмитрий Николаев", balance: 540, avatar: "https://via.placeholder.com/40" }
+            ]
+        };
 
-        function stopAllAlarms() {
-            if (activeAlarmInterval) clearInterval(activeAlarmInterval);
-            if (activeAlarmTimeout) clearTimeout(activeAlarmTimeout);
+        // Элементы DOM
+        const elements = {
+            balance: document.getElementById('balance'),
+            mineButton: document.getElementById('mineButton'),
+            withdrawButton: document.getElementById('withdrawButton'),
+            status: document.getElementById('status'),
+            propeller: document.getElementById('propeller'),
+            blades: document.querySelectorAll('.propeller-blade'),
+            currencySelector: document.getElementById('currencySelector'),
+            settingsCurrencySelector: document.getElementById('settingsCurrencySelector'),
+            topList: document.getElementById('topList'),
+            upgradesList: document.getElementById('upgradesList'),
+            withdrawModal: document.getElementById('withdraw-modal'),
+            supportButton: document.getElementById('supportButton')
+        };
+
+        // Инициализация приложения
+        function initApp() {
+            // Загружаем данные из localStorage
+            loadData();
             
-            document.getElementById('fullscreenAlarm').style.opacity = '0';
-            document.getElementById('blackout').style.opacity = '0';
-            document.getElementById('alarmText').style.opacity = '0';
+            // Обновляем интерфейс
+            updateBalance();
+            renderTopList();
+            renderUpgrades();
             
-            document.querySelector('.device-housing').classList.remove('warning', 'danger');
+            // Настройки Telegram WebApp
+            Telegram.WebApp.ready();
+            Telegram.WebApp.expand();
             
-            // Зупиняємо всі звуки
-            document.getElementById('warningSound').pause();
-            document.getElementById('dangerSound').pause();
+            // Добавляем текущего пользователя в топ
+            if (Telegram.WebApp.initDataUnsafe.user) {
+                const user = Telegram.WebApp.initDataUnsafe.user;
+                state.topUsers.unshift({
+                    id: user.id,
+                    name: `${user.first_name || ''} ${user.last_name || ''}`.trim() || `User${user.id}`,
+                    balance: Math.floor(state.balance),
+                    avatar: user.photo_url || "https://via.placeholder.com/40"
+                });
+                renderTopList();
+            }
         }
 
-        function loadSounds() {
-            const sounds = [
-                document.getElementById('warningSound'),
-                document.getElementById('dangerSound'),
-                document.getElementById('explosionSound')
-            ];
+        // Загрузка данных
+        function loadData() {
+            const savedData = localStorage.getItem('homeMinerData');
+            if (savedData) {
+                const data = JSON.parse(savedData);
+                state.balance = data.balance || 0;
+                state.currency = data.currency || 'RUB';
+                state.upgrades = data.upgrades || state.upgrades;
+                state.miningSpeed = calculateMiningSpeed();
+                
+                elements.currencySelector.value = state.currency;
+                elements.settingsCurrencySelector.value = state.currency;
+            }
+        }
+
+        // Сохранение данных
+        function saveData() {
+            const data = {
+                balance: state.balance,
+                currency: state.currency,
+                upgrades: state.upgrades
+            };
+            localStorage.setItem('homeMinerData', JSON.stringify(data));
+        }
+
+        // Расчет скорости майнинга
+        function calculateMiningSpeed() {
+            let speed = 1;
+            state.upgrades.forEach(upgrade => {
+                if (upgrade.purchased) {
+                    speed += upgrade.effect;
+                }
+            });
+            return speed;
+        }
+
+        // Обновление баланса
+        function updateBalance() {
+            const currencySymbol = {
+                RUB: '₽',
+                USD: '$',
+                EUR: '€'
+            };
+            elements.balance.textContent = `${state.balance.toFixed(2)} ${currencySymbol[state.currency]}`;
+        }
+
+        // Анимация пропеллера
+        function animatePropeller() {
+            state.rotationAngle += 10 * state.miningSpeed;
+            elements.blades.forEach((blade, index) => {
+                blade.style.transform = `rotate(${state.rotationAngle + (index * 90)}deg)`;
+            });
             
-            sounds.forEach(sound => {
-                sound.load();
-                sound.volume = 1.0; // МАКСИМАЛЬНА ГУЧНІСТЬ
+            if (state.isMining) {
+                requestAnimationFrame(animatePropeller);
+            }
+        }
+
+        // Майнинг
+        function startMining() {
+            if (state.isMining) return;
+            
+            state.isMining = true;
+            state.sessionStartTime = Date.now();
+            elements.mineButton.disabled = true;
+            updateStatus(`Майнинг... Осталось: 10:00`);
+            
+            // Случайное количество майнинга (0.005-0.015 в секунду)
+            const baseRate = 0.01 * state.exchangeRates[state.currency];
+            const minRate = baseRate * 0.5;
+            const maxRate = baseRate * 1.5;
+            
+            // Обновляем баланс каждую секунду
+            state.miningInterval = setInterval(() => {
+                // Случайное значение майнинга
+                const randomMultiplier = 0.5 + Math.random();
+                state.balance += (minRate + (maxRate - minRate) * Math.random()) * state.miningSpeed;
+                updateBalance();
+                
+                // Обновляем таймер
+                const elapsed = Math.floor((Date.now() - state.sessionStartTime) / 1000);
+                const remaining = 600 - elapsed; // 10 минут = 600 секунд
+                
+                if (remaining <= 0) {
+                    stopMining();
+                    updateStatus('Сессия завершена');
+                } else {
+                    const minutes = Math.floor(remaining / 60);
+                    const seconds = remaining % 60;
+                    updateStatus(`Майнинг... Осталось: ${minutes}:${seconds.toString().padStart(2, '0')}`);
+                }
+            }, 1000);
+            
+            // Запускаем анимацию
+            animatePropeller();
+            saveData();
+        }
+
+        function stopMining() {
+            state.isMining = false;
+            clearInterval(state.miningInterval);
+            elements.mineButton.disabled = false;
+            saveData();
+        }
+
+        function updateStatus(text) {
+            elements.status.textContent = text;
+        }
+
+        // Переключение вкладок
+        function switchTab(tabName) {
+            // Скрыть все вкладки
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Скрыть все табы
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Показать выбранную вкладку
+            document.getElementById(`${tabName}-tab`).classList.add('active');
+            
+            // Активировать выбранный таб
+            document.querySelectorAll('.tab').forEach(tab => {
+                if (tab.textContent === getTabName(tabName)) {
+                    tab.classList.add('active');
+                }
             });
         }
 
-        function createSparks(count) {
-            const sparksContainer = document.getElementById('sparks');
-            sparksContainer.innerHTML = '';
-            sparksContainer.style.opacity = '1';
-            
-            for (let i = 0; i < count; i++) {
-                const spark = document.createElement('div');
-                spark.className = 'spark';
-                spark.style.left = Math.random() * 100 + '%';
-                spark.style.top = -20 + 'px';
-                spark.style.transform = `rotate(${Math.random() * 360}deg)`;
-                spark.style.animationDelay = Math.random() * 0.5 + 's';
-                sparksContainer.appendChild(spark);
-            }
-            
-            setTimeout(() => {
-                sparksContainer.style.opacity = '0';
-            }, 1000);
+        function getTabName(tabId) {
+            const names = {
+                mining: 'Майнинг',
+                top: 'Топ',
+                upgrades: 'Улучшения',
+                settings: 'Настройки'
+            };
+            return names[tabId] || tabId;
         }
 
-        function getRandomPower() {
-            const rand = Math.random();
-            if (rand < 0.8) return Math.floor(Math.random() * 6) + 95; // 80% шанс на 95-100%
-            if (rand < 0.9) return Math.floor(Math.random() * 15) + 80; // 10% шанс на 80-94
-            return Math.floor(Math.random() * 80); // 10% шанс на 0-79
+        // Показать модальное окно вывода
+        function showWithdrawModal() {
+            elements.withdrawModal.style.display = 'block';
         }
 
-        function triggerFullscreenAlarm(text, duration) {
-            stopAllAlarms(); // Скидаємо попередні тривоги
-            
-            const alarm = document.getElementById('fullscreenAlarm');
-            const blackout = document.getElementById('blackout');
-            
-            alarm.textContent = text;
-            alarm.style.opacity = '1';
-            blackout.style.opacity = '0.7';
-            
-            let blinkState = true;
-            activeAlarmInterval = setInterval(() => {
-                blinkState = !blinkState;
-                alarm.style.opacity = blinkState ? '1' : '0.8';
-                blackout.style.opacity = blinkState ? '0.7' : '0.9';
-            }, 100);
-            
-            // АВТОМАТИЧНЕ ВИМКНЕННЯ через duration мс
-            activeAlarmTimeout = setTimeout(() => {
-                stopAllAlarms();
-            }, duration);
+        function hideWithdrawModal() {
+            elements.withdrawModal.style.display = 'none';
         }
 
-        function measurePower() {
-            stopAllAlarms(); // Скидаємо всі попередні тривоги
+        // Рендер списка топов
+        function renderTopList() {
+            elements.topList.innerHTML = '';
             
-            const btn = document.getElementById('measureBtn');
-            const meterFill = document.getElementById('meterFill');
-            const meterValue = document.getElementById('meterValue');
-            const digitalReadout = document.getElementById('digitalReadout');
-            const statusDisplay = document.getElementById('statusDisplay');
-            const alarmText = document.getElementById('alarmText');
-            const warningSound = document.getElementById('warningSound');
-            const dangerSound = document.getElementById('dangerSound');
-            const explosionSound = document.getElementById('explosionSound');
-            const deviceHousing = document.querySelector('.device-housing');
+            // Сортируем пользователей по балансу
+            const sortedUsers = [...state.topUsers].sort((a, b) => b.balance - a.balance);
             
-            btn.disabled = true;
-            btn.innerHTML = '<i class="fas fa-cog fa-spin"></i> ВИМІРЮВАННЯ';
-            meterFill.style.transform = 'rotate(-90deg)';
-            meterValue.textContent = '---';
-            digitalReadout.textContent = '---';
-            statusDisplay.textContent = 'ІНІЦІАЛІЗАЦІЯ...';
-            alarmText.style.opacity = '0';
-
-            setTimeout(() => {
-                statusDisplay.textContent = 'КАЛІБРУВАННЯ...';
+            sortedUsers.forEach(user => {
+                const userElement = document.createElement('div');
+                userElement.className = 'user-item';
                 
-                setTimeout(() => {
-                    statusDisplay.textContent = 'АНАЛІЗ...';
-                    
-                    setTimeout(() => {
-                        const power = getRandomPower();
-                        const angle = -90 + (power * 1.8);
-                        
-                        meterFill.style.transform = `rotate(${angle}deg)`;
-                        meterValue.textContent = power;
-                        digitalReadout.textContent = power.toString().padStart(3, '0');
-                        
-                        let statusText = '';
-                        
-                        if (power < 20) {
-                            statusText = 'МІНІМАЛЬНА ПОТУЖНІСТЬ';
-                        } else if (power < 40) {
-                            statusText = 'НИЗЬКА ПОТУЖНІСТЬ';
-                        } else if (power < 60) {
-                            statusText = 'СЕРЕДНЯ ПОТУЖНІСТЬ';
-                        } else if (power < 80) {
-                            statusText = 'ВИСОКА ПОТУЖНІСТЬ';
-                        } else if (power < 95) {
-                            statusText = 'ДУЖЕ ВИСОКА ПОТУЖНІСТЬ';
-                        } else if (power < 100) {
-                            statusText = 'КРИТИЧНА ПОТУЖНІСТЬ! УВАГА!';
-                            deviceHousing.classList.add('warning');
-                            alarmText.textContent = 'УВАГА!';
-                            alarmText.style.opacity = '1';
-                            warningSound.currentTime = 0;
-                            warningSound.play();
-                            createSparks(15);
-                            triggerFullscreenAlarm('УВАГА! КРИТИЧНИЙ РІВЕНЬ!', 3000);
-                        } else {
-                            statusText = 'ЗАВАЛЕННЯ ШКАЛИ! НЕБЕЗПЕКА!';
-                            deviceHousing.classList.add('danger');
-                            alarmText.textContent = 'НЕБЕЗПЕКА!';
-                            alarmText.style.opacity = '1';
-                            dangerSound.currentTime = 0;
-                            dangerSound.play();
-                            explosionSound.currentTime = 0;
-                            explosionSound.play();
-                            createSparks(30);
-                            triggerFullscreenAlarm('НЕБЕЗПЕКА! ЗАВАЛЕННЯ ШКАЛИ!', 5000);
-                            
-                            setTimeout(() => {
-                                const explosion = document.createElement('div');
-                                explosion.style.position = 'fixed';
-                                explosion.style.top = '0';
-                                explosion.style.left = '0';
-                                explosion.style.width = '100vw';
-                                explosion.style.height = '100vh';
-                                explosion.style.background = 'radial-gradient(circle, rgba(255,100,0,0.8) 0%, rgba(255,0,0,0) 70%)';
-                                explosion.style.zIndex = '1000';
-                                explosion.style.pointerEvents = 'none';
-                                explosion.style.opacity = '0';
-                                explosion.style.transition = 'opacity 0.5s';
-                                document.body.appendChild(explosion);
-                                
-                                setTimeout(() => explosion.style.opacity = '1', 10);
-                                setTimeout(() => {
-                                    explosion.style.opacity = '0';
-                                    setTimeout(() => explosion.remove(), 500);
-                                }, 1000);
-                            }, 300);
-                        }
-                        
-                        statusDisplay.textContent = statusText;
-                        btn.innerHTML = '<i class="fas fa-redo"></i> ПОВТОРИТИ';
-                        btn.disabled = false;
-                    }, 1500);
-                }, 1000);
-            }, 500);
+                userElement.innerHTML = `
+                    <div class="user-avatar">
+                        <img src="${user.avatar}" alt="${user.name}">
+                    </div>
+                    <div class="user-info">
+                        <div class="user-name">${user.name}</div>
+                    </div>
+                    <div class="user-balance">${user.balance.toLocaleString()} ${state.currency}</div>
+                `;
+                
+                elements.topList.appendChild(userElement);
+            });
         }
-        
-        document.addEventListener('DOMContentLoaded', () => {
-            loadSounds();
-            document.getElementById('measureBtn').addEventListener('click', measurePower);
-            document.getElementById('panicBtn').addEventListener('click', stopAllAlarms);
+
+        // Рендер улучшений
+        function renderUpgrades() {
+            elements.upgradesList.innerHTML = '';
+            
+            state.upgrades.forEach(upgrade => {
+                const upgradeElement = document.createElement('div');
+                upgradeElement.className = 'upgrade-item';
+                
+                if (upgrade.purchased) {
+                    upgradeElement.innerHTML = `
+                        <div class="upgrade-info">
+                            <div class="upgrade-title">${upgrade.name} (куплено)</div>
+                            <div class="upgrade-description">+${upgrade.effect * 100}% к скорости майнинга</div>
+                        </div>
+                        <div class="upgrade-price">✓</div>
+                    `;
+                } else {
+                    upgradeElement.innerHTML = `
+                        <div class="upgrade-info">
+                            <div class="upgrade-title">${upgrade.name}</div>
+                            <div class="upgrade-description">+${upgrade.effect * 100}% к скорости майнинга</div>
+                        </div>
+                        <div class="upgrade-price">${upgrade.price} ${state.currency}</div>
+                    `;
+                    
+                    upgradeElement.addEventListener('click', () => purchaseUpgrade(upgrade.id));
+                }
+                
+                elements.upgradesList.appendChild(upgradeElement);
+            });
+        }
+
+        // Покупка улучшения
+        function purchaseUpgrade(upgradeId) {
+            const upgrade = state.upgrades.find(u => u.id === upgradeId);
+            if (!upgrade || upgrade.purchased) return;
+            
+            if (state.balance >= upgrade.price) {
+                state.balance -= upgrade.price;
+                upgrade.purchased = true;
+                state.miningSpeed = calculateMiningSpeed();
+                
+                updateBalance();
+                renderUpgrades();
+                saveData();
+                
+                updateStatus(`Улучшение "${upgrade.name}" приобретено!`);
+            } else {
+                updateStatus(`Недостаточно средств для "${upgrade.name}"`);
+            }
+        }
+
+        // Смена валюты
+        function changeCurrency(newCurrency) {
+            if (state.currency === newCurrency) return;
+            
+            // Конвертируем баланс
+            state.balance = (state.balance / state.exchangeRates[state.currency]) * state.exchangeRates[newCurrency];
+            state.currency = newCurrency;
+            
+            // Обновляем интерфейс
+            updateBalance();
+            renderTopList();
+            renderUpgrades();
+            saveData();
+        }
+
+        // Обработчики событий
+        elements.mineButton.addEventListener('click', startMining);
+        elements.withdrawButton.addEventListener('click', showWithdrawModal);
+        elements.supportButton.addEventListener('click', () => {
+            window.open('https://t.me/HomeMining_support', '_blank');
         });
+
+        elements.currencySelector.addEventListener('change', (e) => {
+            changeCurrency(e.target.value);
+        });
+
+        elements.settingsCurrencySelector.addEventListener('change', (e) => {
+            changeCurrency(e.target.value);
+            elements.currencySelector.value = e.target.value;
+        });
+
+        // Инициализация приложения
+        document.addEventListener('DOMContentLoaded', initApp);
     </script>
 </body>
 </html>
