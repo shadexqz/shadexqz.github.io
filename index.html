@@ -3,327 +3,538 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Домашний майнер</title>
+    <title>GPU Miner PRO</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        body {
-            font-family: 'Segoe UI', Arial, sans-serif;
-            max-width: 100%;
-            padding: 20px;
-            background-color: #f5f5f5;
-            color: #333;
+        :root {
+            --primary: #6e45e2;
+            --secondary: #88d3ce;
+            --dark: #121826;
+            --darker: #0d1117;
+            --light: #f8f9fa;
+            --success: #28a745;
+            --danger: #dc3545;
+            --warning: #ffc107;
+        }
+
+        * {
+            box-sizing: border-box;
             margin: 0;
+            padding: 0;
         }
-        .container {
-            background: white;
-            border-radius: 12px;
+
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background-color: var(--dark);
+            color: var(--light);
+            min-height: 100vh;
             padding: 20px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            margin-bottom: 20px;
+            display: flex;
+            flex-direction: column;
         }
+
+        .app-container {
+            max-width: 100%;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
         .header {
-            font-size: 24px;
-            font-weight: bold;
-            margin-bottom: 20px;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
         }
+
+        .app-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
         .currency-selector {
-            font-size: 16px;
-            padding: 5px;
-            border-radius: 6px;
-            border: 1px solid #ddd;
-        }
-        .mining-section {
-            text-align: center;
-            margin: 30px 0;
-        }
-        .propeller {
-            width: 100px;
-            height: 100px;
-            margin: 0 auto 20px;
-            position: relative;
-        }
-        .propeller-blade {
-            position: absolute;
-            width: 40px;
-            height: 10px;
-            background-color: #5b8bf7;
-            border-radius: 5px;
-            top: 45px;
-            left: 30px;
-            transform-origin: left center;
-        }
-        .balance {
-            font-size: 28px;
-            font-weight: bold;
-            margin: 20px 0;
-            text-align: center;
-        }
-        .button {
-            background-color: #5b8bf7;
-            color: white;
-            border: none;
-            padding: 12px 24px;
+            background: var(--darker);
+            color: var(--light);
+            border: 1px solid rgba(255,255,255,0.1);
             border-radius: 8px;
-            font-size: 16px;
-            font-weight: bold;
-            cursor: pointer;
-            margin: 10px 0;
-            width: 100%;
-            transition: background-color 0.3s;
+            padding: 5px 10px;
+            font-size: 0.9rem;
         }
-        .button:disabled {
-            background-color: #cccccc;
+
+        .mining-container {
+            background: var(--darker);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        }
+
+        .balance-container {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .balance-label {
+            font-size: 0.9rem;
+            color: rgba(255,255,255,0.7);
+            margin-bottom: 5px;
+        }
+
+        .balance-amount {
+            font-size: 2.2rem;
+            font-weight: 700;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .gpu-container {
+            position: relative;
+            width: 180px;
+            height: 180px;
+            margin: 0 auto 25px;
+        }
+
+        .gpu-fan {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: conic-gradient(from 0deg, var(--darker) 0%, var(--dark) 50%, var(--darker) 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 0 20px rgba(110, 69, 226, 0.3);
+        }
+
+        .gpu-fan-inner {
+            width: 30%;
+            height: 30%;
+            background: var(--dark);
+            border-radius: 50%;
+            border: 3px solid rgba(255,255,255,0.1);
+        }
+
+        .gpu-blade {
+            position: absolute;
+            width: 45%;
+            height: 8px;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            border-radius: 4px;
+            transform-origin: 100% 50%;
+            top: 50%;
+            left: 50%;
+            margin-top: -4px;
+        }
+
+        .gpu-card {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(30,30,40,0.8), rgba(50,50,70,0.9));
+            border-radius: 12px;
+            transform: perspective(500px) rotateX(15deg);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+            padding-bottom: 20px;
+            overflow: hidden;
+        }
+
+        .gpu-brand {
+            font-size: 0.8rem;
+            color: rgba(255,255,255,0.5);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .status {
+            text-align: center;
+            font-size: 0.9rem;
+            color: rgba(255,255,255,0.7);
+            margin-bottom: 20px;
+            min-height: 20px;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary), #8a63e8);
+            color: white;
+        }
+
+        .btn-primary:disabled {
+            background: rgba(255,255,255,0.1);
+            color: rgba(255,255,255,0.5);
             cursor: not-allowed;
         }
-        .button:hover:not(:disabled) {
-            background-color: #3a6fd6;
+
+        .btn-primary:not(:disabled):hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(110, 69, 226, 0.4);
         }
-        .button.secondary {
-            background-color: #6c757d;
+
+        .btn-secondary {
+            background: rgba(255,255,255,0.05);
+            color: var(--light);
+            border: 1px solid rgba(255,255,255,0.1);
         }
-        .button.secondary:hover {
-            background-color: #5a6268;
+
+        .btn-secondary:hover {
+            background: rgba(255,255,255,0.1);
         }
-        .status {
-            font-size: 14px;
-            color: #666;
-            margin-top: 20px;
+
+        .tabs {
+            display: flex;
+            background: var(--darker);
+            border-radius: 12px;
+            padding: 5px;
+            margin-bottom: 20px;
+        }
+
+        .tab {
+            flex: 1;
             text-align: center;
+            padding: 10px;
+            cursor: pointer;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: all 0.2s ease;
         }
-        .divider {
-            height: 1px;
-            background-color: #eee;
-            margin: 20px 0;
+
+        .tab.active {
+            background: rgba(110, 69, 226, 0.2);
+            color: var(--primary);
         }
+
         .tab-content {
             display: none;
+            animation: fadeIn 0.3s ease;
         }
+
         .tab-content.active {
             display: block;
         }
-        .tabs {
-            display: flex;
-            margin-bottom: 15px;
-            border-bottom: 1px solid #ddd;
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
-        .tab {
-            padding: 10px 15px;
-            cursor: pointer;
-            border-bottom: 3px solid transparent;
-        }
-        .tab.active {
-            border-bottom: 3px solid #5b8bf7;
-            font-weight: bold;
-        }
-        .withdraw-message {
-            text-align: center;
-            padding: 30px;
-            background-color: #f8f9fa;
-            border-radius: 12px;
-            margin: 20px 0;
-        }
-        .withdraw-icon {
-            font-size: 50px;
-            color: rgba(0,0,0,0.1);
-            margin-bottom: 15px;
-        }
+
         .upgrade-item {
             display: flex;
-            justify-content: space-between;
-            align-items: center;
+            background: var(--darker);
+            border-radius: 12px;
             padding: 15px;
-            border-bottom: 1px solid #eee;
+            margin-bottom: 10px;
+            align-items: center;
+            transition: all 0.2s ease;
         }
-        .upgrade-item:last-child {
-            border-bottom: none;
+
+        .upgrade-item:active {
+            transform: scale(0.98);
         }
+
+        .upgrade-icon {
+            width: 40px;
+            height: 40px;
+            background: rgba(110, 69, 226, 0.1);
+            border-radius: 10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-right: 15px;
+            color: var(--primary);
+            font-size: 1.2rem;
+        }
+
         .upgrade-info {
             flex: 1;
         }
-        .upgrade-title {
-            font-weight: bold;
-            margin-bottom: 5px;
+
+        .upgrade-name {
+            font-weight: 600;
+            margin-bottom: 3px;
         }
-        .upgrade-description {
-            font-size: 12px;
-            color: #666;
+
+        .upgrade-desc {
+            font-size: 0.8rem;
+            color: rgba(255,255,255,0.6);
         }
+
         .upgrade-price {
-            font-weight: bold;
-            color: #28a745;
-            margin-left: 15px;
+            font-weight: 700;
+            color: var(--secondary);
         }
-        .user-item {
+
+        .upgrade-owned {
+            color: var(--success);
+            font-size: 0.9rem;
+        }
+
+        .top-user {
             display: flex;
             align-items: center;
-            padding: 10px 0;
-            border-bottom: 1px solid #eee;
+            padding: 12px 15px;
+            background: var(--darker);
+            border-radius: 12px;
+            margin-bottom: 10px;
         }
+
         .user-avatar {
             width: 40px;
             height: 40px;
             border-radius: 50%;
             margin-right: 15px;
-            background-color: #ddd;
+            background: rgba(255,255,255,0.1);
             display: flex;
-            align-items: center;
             justify-content: center;
+            align-items: center;
             overflow: hidden;
         }
+
         .user-avatar img {
             width: 100%;
             height: 100%;
             object-fit: cover;
         }
+
         .user-info {
             flex: 1;
         }
+
         .user-name {
-            font-weight: bold;
+            font-weight: 600;
+            margin-bottom: 2px;
         }
+
+        .user-hashrate {
+            font-size: 0.8rem;
+            color: rgba(255,255,255,0.6);
+        }
+
         .user-balance {
-            color: #28a745;
-            font-weight: bold;
+            font-weight: 700;
+            color: var(--secondary);
         }
-        .support-link {
-            color: #5b8bf7;
-            text-decoration: none;
-            display: block;
-            margin-top: 10px;
+
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+            padding: 20px;
+        }
+
+        .modal.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .modal-content {
+            background: var(--darker);
+            border-radius: 16px;
+            padding: 25px;
+            max-width: 100%;
+            width: 350px;
             text-align: center;
+            transform: scale(0.9);
+            transition: transform 0.3s ease;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
         }
-        .settings-item {
+
+        .modal.active .modal-content {
+            transform: scale(1);
+        }
+
+        .modal-icon {
+            font-size: 3.5rem;
+            color: rgba(255,255,255,0.1);
             margin-bottom: 15px;
         }
+
+        .modal-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .modal-text {
+            color: rgba(255,255,255,0.7);
+            margin-bottom: 20px;
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+
+        .settings-item {
+            margin-bottom: 20px;
+        }
+
         .settings-label {
             display: block;
-            margin-bottom: 5px;
-            font-weight: bold;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: rgba(255,255,255,0.8);
+        }
+
+        .support-link {
+            display: inline-block;
+            margin-top: 15px;
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .support-link:hover {
+            text-decoration: underline;
+        }
+
+        /* Анимации */
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .mining .gpu-fan {
+            animation: spin 0.8s linear infinite;
         }
     </style>
 </head>
 <body>
-    <div class="tabs">
-        <div class="tab active" onclick="switchTab('mining')">Майнинг</div>
-        <div class="tab" onclick="switchTab('top')">Топ</div>
-        <div class="tab" onclick="switchTab('upgrades')">Улучшения</div>
-        <div class="tab" onclick="switchTab('settings')">Настройки</div>
-    </div>
-
-    <div id="mining-tab" class="tab-content active">
-        <div class="container">
-            <div class="header">
-                <span>Домашний майнер</span>
-                <select class="currency-selector" id="currencySelector">
-                    <option value="RUB">RUB</option>
-                    <option value="USD">USD</option>
-                    <option value="EUR">EUR</option>
-                </select>
-            </div>
-            
-            <div class="balance" id="balance">0 RUB</div>
-            
-            <div class="mining-section">
-                <div class="propeller" id="propeller">
-                    <div class="propeller-blade" style="transform: rotate(0deg);"></div>
-                    <div class="propeller-blade" style="transform: rotate(90deg);"></div>
-                    <div class="propeller-blade" style="transform: rotate(180deg);"></div>
-                    <div class="propeller-blade" style="transform: rotate(270deg);"></div>
-                </div>
-                <div id="status">Нажмите "Майнить" чтобы начать</div>
-            </div>
-            
-            <button class="button" id="mineButton">Майнить</button>
-            <div class="divider"></div>
-            <button class="button" id="withdrawButton">Вывод</button>
+    <div class="app-container">
+        <div class="header">
+            <div class="app-title">GPU Miner PRO</div>
+            <select class="currency-selector" id="currencySelector">
+                <option value="RUB">RUB</option>
+                <option value="USD">USD</option>
+                <option value="EUR">EUR</option>
+            </select>
         </div>
-    </div>
 
-    <div id="top-tab" class="tab-content">
-        <div class="container">
-            <div class="header">Топ майнеров</div>
-            
-            <div id="topList">
-                <!-- Топ будет заполняться динамически -->
-                <div class="user-item">
-                    <div class="user-avatar">
-                        <img src="https://via.placeholder.com/40" alt="User">
-                    </div>
-                    <div class="user-info">
-                        <div class="user-name">Иван Иванов</div>
-                    </div>
-                    <div class="user-balance">1,245 RUB</div>
-                </div>
-                <!-- Другие пользователи -->
-            </div>
+        <div class="tabs">
+            <div class="tab active" data-tab="mining">Майнинг</div>
+            <div class="tab" data-tab="upgrades">Улучшения</div>
+            <div class="tab" data-tab="settings">Настройки</div>
         </div>
-    </div>
 
-    <div id="upgrades-tab" class="tab-content">
-        <div class="container">
-            <div class="header">Улучшения</div>
-            
-            <div id="upgradesList">
-                <div class="upgrade-item">
-                    <div class="upgrade-info">
-                        <div class="upgrade-title">Базовый процессор</div>
-                        <div class="upgrade-description">+0.01 к майнингу в секунду</div>
-                    </div>
-                    <div class="upgrade-price">50 RUB</div>
+        <div id="mining-tab" class="tab-content active">
+            <div class="mining-container">
+                <div class="balance-container">
+                    <div class="balance-label">Ваш баланс</div>
+                    <div class="balance-amount" id="balance">0 RUB</div>
                 </div>
-                <div class="upgrade-item">
-                    <div class="upgrade-info">
-                        <div class="upgrade-title">Улучшенный кулер</div>
-                        <div class="upgrade-description">+5% к скорости майнинга</div>
+
+                <div class="gpu-container">
+                    <div class="gpu-card">
+                        <div class="gpu-brand">RTX 3060</div>
                     </div>
-                    <div class="upgrade-price">100 RUB</div>
+                    <div class="gpu-fan" id="gpuFan">
+                        <div class="gpu-fan-inner"></div>
+                        <div class="gpu-blade" style="transform: rotate(0deg) translateX(50%);"></div>
+                        <div class="gpu-blade" style="transform: rotate(90deg) translateX(50%);"></div>
+                        <div class="gpu-blade" style="transform: rotate(180deg) translateX(50%);"></div>
+                        <div class="gpu-blade" style="transform: rotate(270deg) translateX(50%);"></div>
+                    </div>
                 </div>
-                <div class="upgrade-item">
-                    <div class="upgrade-info">
-                        <div class="upgrade-title">Видеокарта</div>
-                        <div class="upgrade-description">+0.03 к майнингу в секунду</div>
-                    </div>
-                    <div class="upgrade-price">200 RUB</div>
+
+                <div class="status" id="status">Готов к майнингу</div>
+
+                <div class="action-buttons">
+                    <button class="btn btn-primary" id="mineButton">
+                        <i class="fas fa-play"></i> Майнить
+                    </button>
+                    <button class="btn btn-secondary" id="withdrawButton">
+                        <i class="fas fa-wallet"></i> Вывод
+                    </button>
+                </div>
+            </div>
+
+            <div class="mining-container">
+                <h3 style="margin-bottom: 15px;">Топ майнеров</h3>
+                <div id="topList">
+                    <!-- Топ будет заполняться динамически -->
                 </div>
             </div>
         </div>
-    </div>
 
-    <div id="settings-tab" class="tab-content">
-        <div class="container">
-            <div class="header">Настройки</div>
-            
-            <div class="settings-item">
-                <label class="settings-label">Валюта</label>
-                <select class="currency-selector" id="settingsCurrencySelector">
-                    <option value="RUB">RUB</option>
-                    <option value="USD">USD</option>
-                    <option value="EUR">EUR</option>
-                </select>
+        <div id="upgrades-tab" class="tab-content">
+            <div class="mining-container">
+                <h3 style="margin-bottom: 15px;">Улучшения</h3>
+                <div id="upgradesList">
+                    <!-- Улучшения будут заполняться динамически -->
+                </div>
             </div>
-            
-            <button class="button secondary" id="supportButton">Поддержка</button>
-            
-            <a href="https://t.me/HomeMining_support" class="support-link" target="_blank">
-                t.me/HomeMining_support
-            </a>
+        </div>
+
+        <div id="settings-tab" class="tab-content">
+            <div class="mining-container">
+                <h3 style="margin-bottom: 15px;">Настройки</h3>
+                
+                <div class="settings-item">
+                    <label class="settings-label">Валюта</label>
+                    <select class="currency-selector" id="settingsCurrencySelector">
+                        <option value="RUB">RUB</option>
+                        <option value="USD">USD</option>
+                        <option value="EUR">EUR</option>
+                    </select>
+                </div>
+
+                <button class="btn btn-secondary" id="supportButton" style="width: 100%;">
+                    <i class="fas fa-headset"></i> Поддержка
+                </button>
+
+                <a href="https://t.me/HomeMining_support" class="support-link" target="_blank">
+                    t.me/HomeMining_support
+                </a>
+            </div>
         </div>
     </div>
 
-    <div id="withdraw-modal" style="display: none;">
-        <div class="container">
-            <div class="withdraw-message">
-                <div class="withdraw-icon">
-                    <i class="far fa-frown"></i>
-                </div>
-                <h3>На данный момент мы не реализовали данную систему</h3>
-                <p>Но всё еще впереди!</p>
+    <div class="modal" id="withdrawModal">
+        <div class="modal-content">
+            <div class="modal-icon">
+                <i class="far fa-frown"></i>
             </div>
-            <button class="button" onclick="hideWithdrawModal()">Понятно</button>
+            <h3 class="modal-title">Временно недоступно</h3>
+            <p class="modal-text">
+                На данный момент мы не реализовали данную систему, но всё еще впереди!
+            </p>
+            <button class="btn btn-primary" id="closeModalButton">Понятно</button>
         </div>
     </div>
 
@@ -333,75 +544,99 @@
             balance: 0,
             isMining: false,
             miningInterval: null,
-            rotationAngle: 0,
+            currency: 'RUB',
             miningSpeed: 1,
             sessionStartTime: 0,
-            currency: 'RUB',
             exchangeRates: {
                 RUB: 1,
                 USD: 0.011,
                 EUR: 0.010
             },
             upgrades: [
-                { id: 1, name: "Базовый процессор", price: 50, effect: 0.01, purchased: false },
-                { id: 2, name: "Улучшенный кулер", price: 100, effect: 0.05, purchased: false },
-                { id: 3, name: "Видеокарта", price: 200, effect: 0.03, purchased: false }
+                { 
+                    id: 1, 
+                    name: "Улучшенное охлаждение", 
+                    icon: "fas fa-fan",
+                    price: 50, 
+                    effect: 0.1, 
+                    purchased: false,
+                    description: "Увеличивает скорость майнинга на 10%"
+                },
+                { 
+                    id: 2, 
+                    name: "Разгон GPU", 
+                    icon: "fas fa-tachometer-alt",
+                    price: 100, 
+                    effect: 0.15, 
+                    purchased: false,
+                    description: "Увеличивает скорость майнинга на 15%"
+                },
+                { 
+                    id: 3, 
+                    name: "RTX 4090", 
+                    icon: "fas fa-microchip",
+                    price: 200, 
+                    effect: 0.25, 
+                    purchased: false,
+                    description: "Апгрейд до RTX 4090 (+25% скорости)"
+                }
             ],
             topUsers: [
-                { id: 1, name: "Иван Иванов", balance: 1245, avatar: "https://via.placeholder.com/40" },
-                { id: 2, name: "Анна Петрова", balance: 980, avatar: "https://via.placeholder.com/40" },
-                { id: 3, name: "Сергей Сидоров", balance: 750, avatar: "https://via.placeholder.com/40" },
-                { id: 4, name: "Елена Васильева", balance: 620, avatar: "https://via.placeholder.com/40" },
-                { id: 5, name: "Дмитрий Николаев", balance: 540, avatar: "https://via.placeholder.com/40" }
+                { 
+                    id: 1, 
+                    name: "Вы", 
+                    balance: 0, 
+                    avatar: "https://i.imgur.com/JqYeX7a.png",
+                    hashrate: "0 H/s"
+                }
             ]
         };
 
         // Элементы DOM
-        const elements = {
+        const DOM = {
             balance: document.getElementById('balance'),
             mineButton: document.getElementById('mineButton'),
             withdrawButton: document.getElementById('withdrawButton'),
             status: document.getElementById('status'),
-            propeller: document.getElementById('propeller'),
-            blades: document.querySelectorAll('.propeller-blade'),
+            gpuFan: document.getElementById('gpuFan'),
             currencySelector: document.getElementById('currencySelector'),
             settingsCurrencySelector: document.getElementById('settingsCurrencySelector'),
             topList: document.getElementById('topList'),
             upgradesList: document.getElementById('upgradesList'),
-            withdrawModal: document.getElementById('withdraw-modal'),
-            supportButton: document.getElementById('supportButton')
+            withdrawModal: document.getElementById('withdrawModal'),
+            closeModalButton: document.getElementById('closeModalButton'),
+            supportButton: document.getElementById('supportButton'),
+            tabs: document.querySelectorAll('.tab'),
+            tabContents: document.querySelectorAll('.tab-content')
         };
 
         // Инициализация приложения
         function initApp() {
-            // Загружаем данные из localStorage
             loadData();
+            setupEventListeners();
+            updateUI();
             
-            // Обновляем интерфейс
-            updateBalance();
-            renderTopList();
-            renderUpgrades();
-            
-            // Настройки Telegram WebApp
+            // Инициализация Telegram WebApp
             Telegram.WebApp.ready();
             Telegram.WebApp.expand();
             
-            // Добавляем текущего пользователя в топ
+            // Добавляем текущего пользователя
             if (Telegram.WebApp.initDataUnsafe.user) {
                 const user = Telegram.WebApp.initDataUnsafe.user;
-                state.topUsers.unshift({
+                state.topUsers[0] = {
                     id: user.id,
                     name: `${user.first_name || ''} ${user.last_name || ''}`.trim() || `User${user.id}`,
-                    balance: Math.floor(state.balance),
-                    avatar: user.photo_url || "https://via.placeholder.com/40"
-                });
+                    balance: state.balance,
+                    avatar: user.photo_url || "https://i.imgur.com/JqYeX7a.png",
+                    hashrate: "0 H/s"
+                };
                 renderTopList();
             }
         }
 
         // Загрузка данных
         function loadData() {
-            const savedData = localStorage.getItem('homeMinerData');
+            const savedData = localStorage.getItem('gpuMinerData');
             if (savedData) {
                 const data = JSON.parse(savedData);
                 state.balance = data.balance || 0;
@@ -409,8 +644,8 @@
                 state.upgrades = data.upgrades || state.upgrades;
                 state.miningSpeed = calculateMiningSpeed();
                 
-                elements.currencySelector.value = state.currency;
-                elements.settingsCurrencySelector.value = state.currency;
+                DOM.currencySelector.value = state.currency;
+                DOM.settingsCurrencySelector.value = state.currency;
             }
         }
 
@@ -421,39 +656,35 @@
                 currency: state.currency,
                 upgrades: state.upgrades
             };
-            localStorage.setItem('homeMinerData', JSON.stringify(data));
+            localStorage.setItem('gpuMinerData', JSON.stringify(data));
         }
 
         // Расчет скорости майнинга
         function calculateMiningSpeed() {
             let speed = 1;
             state.upgrades.forEach(upgrade => {
-                if (upgrade.purchased) {
-                    speed += upgrade.effect;
-                }
+                if (upgrade.purchased) speed += upgrade.effect;
             });
             return speed;
         }
 
-        // Обновление баланса
-        function updateBalance() {
-            const currencySymbol = {
-                RUB: '₽',
-                USD: '$',
-                EUR: '€'
-            };
-            elements.balance.textContent = `${state.balance.toFixed(2)} ${currencySymbol[state.currency]}`;
+        // Обновление интерфейса
+        function updateUI() {
+            updateBalance();
+            renderTopList();
+            renderUpgrades();
         }
 
-        // Анимация пропеллера
-        function animatePropeller() {
-            state.rotationAngle += 10 * state.miningSpeed;
-            elements.blades.forEach((blade, index) => {
-                blade.style.transform = `rotate(${state.rotationAngle + (index * 90)}deg)`;
-            });
+        // Обновление баланса
+        function updateBalance() {
+            const symbols = { RUB: '₽', USD: '$', EUR: '€' };
+            DOM.balance.textContent = `${state.balance.toFixed(2)} ${symbols[state.currency]}`;
             
-            if (state.isMining) {
-                requestAnimationFrame(animatePropeller);
+            // Обновляем баланс в топе
+            if (state.topUsers.length > 0) {
+                state.topUsers[0].balance = state.balance;
+                state.topUsers[0].hashrate = `${(state.miningSpeed * 100).toFixed(0)} H/s`;
+                renderTopList();
             }
         }
 
@@ -463,121 +694,69 @@
             
             state.isMining = true;
             state.sessionStartTime = Date.now();
-            elements.mineButton.disabled = true;
-            updateStatus(`Майнинг... Осталось: 10:00`);
+            DOM.mineButton.disabled = true;
+            DOM.gpuFan.classList.add('mining');
+            updateStatus('Майнинг...');
             
-            // Случайное количество майнинга (0.005-0.015 в секунду)
+            // Случайный майнинг с базовой скоростью 0.01 в секунду
             const baseRate = 0.01 * state.exchangeRates[state.currency];
-            const minRate = baseRate * 0.5;
-            const maxRate = baseRate * 1.5;
             
-            // Обновляем баланс каждую секунду
             state.miningInterval = setInterval(() => {
-                // Случайное значение майнинга
+                // Случайное значение (0.5x - 1.5x от базовой скорости)
                 const randomMultiplier = 0.5 + Math.random();
-                state.balance += (minRate + (maxRate - minRate) * Math.random()) * state.miningSpeed;
+                state.balance += baseRate * randomMultiplier * state.miningSpeed;
+                
                 updateBalance();
+                saveData();
                 
-                // Обновляем таймер
-                const elapsed = Math.floor((Date.now() - state.sessionStartTime) / 1000);
-                const remaining = 600 - elapsed; // 10 минут = 600 секунд
-                
-                if (remaining <= 0) {
-                    stopMining();
-                    updateStatus('Сессия завершена');
-                } else {
-                    const minutes = Math.floor(remaining / 60);
-                    const seconds = remaining % 60;
-                    updateStatus(`Майнинг... Осталось: ${minutes}:${seconds.toString().padStart(2, '0')}`);
+                // Обновляем статус каждые 3 секунды
+                if (Math.floor(Date.now() / 1000) % 3 === 0) {
+                    updateStatus(`Майнинг: ${(state.miningSpeed * 100 * randomMultiplier).toFixed(0)} H/s`);
                 }
             }, 1000);
-            
-            // Запускаем анимацию
-            animatePropeller();
-            saveData();
         }
 
         function stopMining() {
             state.isMining = false;
             clearInterval(state.miningInterval);
-            elements.mineButton.disabled = false;
+            DOM.mineButton.disabled = false;
+            DOM.gpuFan.classList.remove('mining');
+            updateStatus('Готов к майнингу');
             saveData();
         }
 
         function updateStatus(text) {
-            elements.status.textContent = text;
-        }
-
-        // Переключение вкладок
-        function switchTab(tabName) {
-            // Скрыть все вкладки
-            document.querySelectorAll('.tab-content').forEach(tab => {
-                tab.classList.remove('active');
-            });
-            
-            // Скрыть все табы
-            document.querySelectorAll('.tab').forEach(tab => {
-                tab.classList.remove('active');
-            });
-            
-            // Показать выбранную вкладку
-            document.getElementById(`${tabName}-tab`).classList.add('active');
-            
-            // Активировать выбранный таб
-            document.querySelectorAll('.tab').forEach(tab => {
-                if (tab.textContent === getTabName(tabName)) {
-                    tab.classList.add('active');
-                }
-            });
-        }
-
-        function getTabName(tabId) {
-            const names = {
-                mining: 'Майнинг',
-                top: 'Топ',
-                upgrades: 'Улучшения',
-                settings: 'Настройки'
-            };
-            return names[tabId] || tabId;
-        }
-
-        // Показать модальное окно вывода
-        function showWithdrawModal() {
-            elements.withdrawModal.style.display = 'block';
-        }
-
-        function hideWithdrawModal() {
-            elements.withdrawModal.style.display = 'none';
+            DOM.status.textContent = text;
         }
 
         // Рендер списка топов
         function renderTopList() {
-            elements.topList.innerHTML = '';
+            DOM.topList.innerHTML = '';
             
-            // Сортируем пользователей по балансу
-            const sortedUsers = [...state.topUsers].sort((a, b) => b.balance - a.balance);
+            // Сортируем по балансу (кроме первого пользователя - "Вы")
+            const sortedUsers = [...state.topUsers.slice(1)].sort((a, b) => b.balance - a.balance);
+            const usersToShow = [state.topUsers[0], ...sortedUsers.slice(0, 4)];
             
-            sortedUsers.forEach(user => {
+            usersToShow.forEach((user, index) => {
                 const userElement = document.createElement('div');
-                userElement.className = 'user-item';
-                
+                userElement.className = 'top-user';
                 userElement.innerHTML = `
                     <div class="user-avatar">
                         <img src="${user.avatar}" alt="${user.name}">
                     </div>
                     <div class="user-info">
-                        <div class="user-name">${user.name}</div>
+                        <div class="user-name">${index === 0 ? 'Вы' : user.name}</div>
+                        <div class="user-hashrate">${user.hashrate}</div>
                     </div>
-                    <div class="user-balance">${user.balance.toLocaleString()} ${state.currency}</div>
+                    <div class="user-balance">${user.balance.toFixed(2)} ${state.currency}</div>
                 `;
-                
-                elements.topList.appendChild(userElement);
+                DOM.topList.appendChild(userElement);
             });
         }
 
         // Рендер улучшений
         function renderUpgrades() {
-            elements.upgradesList.innerHTML = '';
+            DOM.upgradesList.innerHTML = '';
             
             state.upgrades.forEach(upgrade => {
                 const upgradeElement = document.createElement('div');
@@ -585,17 +764,23 @@
                 
                 if (upgrade.purchased) {
                     upgradeElement.innerHTML = `
-                        <div class="upgrade-info">
-                            <div class="upgrade-title">${upgrade.name} (куплено)</div>
-                            <div class="upgrade-description">+${upgrade.effect * 100}% к скорости майнинга</div>
+                        <div class="upgrade-icon">
+                            <i class="${upgrade.icon}"></i>
                         </div>
-                        <div class="upgrade-price">✓</div>
+                        <div class="upgrade-info">
+                            <div class="upgrade-name">${upgrade.name}</div>
+                            <div class="upgrade-desc">${upgrade.description}</div>
+                        </div>
+                        <div class="upgrade-owned">Куплено</div>
                     `;
                 } else {
                     upgradeElement.innerHTML = `
+                        <div class="upgrade-icon">
+                            <i class="${upgrade.icon}"></i>
+                        </div>
                         <div class="upgrade-info">
-                            <div class="upgrade-title">${upgrade.name}</div>
-                            <div class="upgrade-description">+${upgrade.effect * 100}% к скорости майнинга</div>
+                            <div class="upgrade-name">${upgrade.name}</div>
+                            <div class="upgrade-desc">${upgrade.description}</div>
                         </div>
                         <div class="upgrade-price">${upgrade.price} ${state.currency}</div>
                     `;
@@ -603,7 +788,7 @@
                     upgradeElement.addEventListener('click', () => purchaseUpgrade(upgrade.id));
                 }
                 
-                elements.upgradesList.appendChild(upgradeElement);
+                DOM.upgradesList.appendChild(upgradeElement);
             });
         }
 
@@ -621,7 +806,7 @@
                 renderUpgrades();
                 saveData();
                 
-                updateStatus(`Улучшение "${upgrade.name}" приобретено!`);
+                updateStatus(`Улучшение "${upgrade.name}" куплено!`);
             } else {
                 updateStatus(`Недостаточно средств для "${upgrade.name}"`);
             }
@@ -632,33 +817,70 @@
             if (state.currency === newCurrency) return;
             
             // Конвертируем баланс
-            state.balance = (state.balance / state.exchangeRates[state.currency]) * state.exchangeRates[newCurrency];
+            const newBalance = (state.balance / state.exchangeRates[state.currency]) * state.exchangeRates[newCurrency];
+            state.balance = newBalance;
             state.currency = newCurrency;
             
+            // Конвертируем цены улучшений
+            state.upgrades.forEach(upgrade => {
+                upgrade.price = Math.round((upgrade.price / state.exchangeRates[state.currency]) * state.exchangeRates[newCurrency]);
+            });
+            
             // Обновляем интерфейс
-            updateBalance();
-            renderTopList();
-            renderUpgrades();
+            updateUI();
             saveData();
         }
 
-        // Обработчики событий
-        elements.mineButton.addEventListener('click', startMining);
-        elements.withdrawButton.addEventListener('click', showWithdrawModal);
-        elements.supportButton.addEventListener('click', () => {
-            window.open('https://t.me/HomeMining_support', '_blank');
-        });
+        // Настройка обработчиков событий
+        function setupEventListeners() {
+            // Кнопки майнинга
+            DOM.mineButton.addEventListener('click', () => {
+                if (state.isMining) stopMining();
+                else startMining();
+            });
+            
+            // Кнопка вывода
+            DOM.withdrawButton.addEventListener('click', () => {
+                DOM.withdrawModal.classList.add('active');
+            });
+            
+            // Закрытие модального окна
+            DOM.closeModalButton.addEventListener('click', () => {
+                DOM.withdrawModal.classList.remove('active');
+            });
+            
+            // Кнопка поддержки
+            DOM.supportButton.addEventListener('click', () => {
+                window.open('https://t.me/HomeMining_support', '_blank');
+            });
+            
+            // Смена валюты
+            DOM.currencySelector.addEventListener('change', (e) => {
+                changeCurrency(e.target.value);
+                DOM.settingsCurrencySelector.value = e.target.value;
+            });
+            
+            DOM.settingsCurrencySelector.addEventListener('change', (e) => {
+                changeCurrency(e.target.value);
+                DOM.currencySelector.value = e.target.value;
+            });
+            
+            // Переключение вкладок
+            DOM.tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    // Убираем активный класс у всех вкладок
+                    DOM.tabs.forEach(t => t.classList.remove('active'));
+                    DOM.tabContents.forEach(c => c.classList.remove('active'));
+                    
+                    // Добавляем активный класс к выбранной вкладке
+                    tab.classList.add('active');
+                    const tabId = tab.getAttribute('data-tab');
+                    document.getElementById(`${tabId}-tab`).classList.add('active');
+                });
+            });
+        }
 
-        elements.currencySelector.addEventListener('change', (e) => {
-            changeCurrency(e.target.value);
-        });
-
-        elements.settingsCurrencySelector.addEventListener('change', (e) => {
-            changeCurrency(e.target.value);
-            elements.currencySelector.value = e.target.value;
-        });
-
-        // Инициализация приложения
+        // Запуск приложения
         document.addEventListener('DOMContentLoaded', initApp);
     </script>
 </body>
