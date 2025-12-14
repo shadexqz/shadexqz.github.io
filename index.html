@@ -829,7 +829,14 @@
             renderChat(data) {
                 const log = document.getElementById('chat-log');
                 const d = document.createElement('div');
-                const isMe = data.name === (this.state.players.find(p=>p.id===this.myId)?.name || 'Me');
+                
+                // --- FIX: Безопасная проверка "я ли это" ---
+                let isMe = false;
+                if (this.state && this.state.players) {
+                     const myP = this.state.players.find(p => p.id === this.myId);
+                     if (myP && data.name === myP.name) isMe = true;
+                }
+                
                 d.className = 'chat-msg' + (isMe ? ' me' : '');
                 if (data.sys) {
                     d.style.background = 'transparent';
