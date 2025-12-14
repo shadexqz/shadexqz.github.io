@@ -3,18 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Durak PRO: Classic + New Table</title>
+    <title>Durak PRO: Fixed Edition</title>
     <link rel="icon" href="data:;base64,iVBORw0KGgo=">
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Roboto+Condensed:wght@400;700;900&display=swap');
 
         :root {
-            /* Используем цвета старой логики, но фон зададим в body */
             --card-w: 120px;
             --card-h: 170px;
-            --radius: 6px;
+            --radius: 8px;
             --accent: #ff3d00;
+            --shadow-lg: 0 10px 30px rgba(0,0,0,0.5);
         }
 
         * { box-sizing: border-box; user-select: none; -webkit-tap-highlight-color: transparent; }
@@ -22,12 +22,10 @@
         body {
             margin: 0;
             font-family: 'Roboto Condensed', sans-serif;
-            /* --- НОВЫЙ ФОН (КРАСИВОЕ СУКНО) --- */
-            background-color: #1a3c32; 
+            background-color: #1a3c32;
             background-image: 
                 radial-gradient(circle at 50% 50%, rgba(255,255,255,0.1) 0%, rgba(0,0,0,0.4) 100%),
                 url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.08'/%3E%3C/svg%3E");
-            /* ---------------------------------- */
             height: 100vh;
             overflow: hidden;
             display: flex; flex-direction: column;
@@ -37,29 +35,29 @@
         /* --- LOBBY --- */
         #lobby {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.8); /* Чуть темнее для контраста */
+            background: rgba(0,0,0,0.85);
             z-index: 9999;
             display: flex; align-items: center; justify-content: center;
             backdrop-filter: blur(5px);
         }
         .panel {
             background: #eee; color: #111;
-            padding: 30px; border-radius: 8px;
+            padding: 30px; border-radius: 12px;
             width: 95%; max-width: 480px; text-align: center;
-            box-shadow: 0 20px 60px black; border: 1px solid #444;
+            box-shadow: var(--shadow-lg); border: 1px solid #444;
         }
         .panel h1 { margin: 0 0 20px; font-weight: 900; letter-spacing: 2px; color: #1a3c32; }
         
         .inp {
             width: 100%; padding: 12px; margin: 10px 0;
-            border: 2px solid #ccc; border-radius: 4px;
+            border: 2px solid #ccc; border-radius: 6px;
             font-size: 18px; font-weight: bold; text-align: center; font-family: inherit;
         }
         
         .btn {
             width: 100%; padding: 15px; border: none; margin-top: 5px;
             font-size: 18px; font-weight: bold; text-transform: uppercase;
-            cursor: pointer; border-radius: 4px; transition: 0.1s;
+            cursor: pointer; border-radius: 6px; transition: 0.1s;
             color: white; box-shadow: 0 4px 0 rgba(0,0,0,0.3);
         }
         .btn:active { transform: translateY(3px); box-shadow: none; }
@@ -69,7 +67,7 @@
         .avatars { display: flex; gap: 10px; justify-content: center; margin-bottom: 15px; }
         .ava-opt {
             width: 50px; height: 50px; border: 3px solid #ccc; cursor: pointer;
-            background-size: cover; border-radius: 8px; transition: 0.2s;
+            background-size: cover; border-radius: 12px; transition: 0.2s;
         }
         .ava-opt:hover { transform: scale(1.1); }
         .ava-opt.selected { border-color: #d32f2f; transform: scale(1.1); }
@@ -79,40 +77,110 @@
         /* --- GAME UI --- */
         #game { display: none; flex-direction: column; height: 100%; position: relative; }
 
-        /* --- ЧАТ (ИЗМЕНЕНО ПОЛОЖЕНИЕ) --- */
+        /* --- CHAT FIXED --- */
         .chat-sidebar {
             position: absolute; 
             top: 10px; 
-            right: 10px; /* БЫЛО LEFT, СТАЛО RIGHT */
+            right: 10px;
             width: 260px;
-            height: 250px; /* Фиксированная высота, чтобы не лезть на кнопки */
-            display: flex; flex-direction: column; pointer-events: none; z-index: 200;
+            height: 280px;
+            display: flex; flex-direction: column; 
+            z-index: 200;
+            background: rgba(0,0,0,0.7);
+            border-radius: 12px;
+            padding: 12px;
+            border: 1px solid rgba(255,255,255,0.1);
+            pointer-events: all;
         }
-        /* -------------------------------- */
-
         .chat-log {
             flex: 1; overflow-y: auto; display: flex; flex-direction: column; justify-content: flex-end;
-            margin-bottom: 5px; text-shadow: 1px 1px 2px black;
-            mask-image: linear-gradient(to top, black 85%, transparent 100%);
+            margin-bottom: 8px;
+            mask-image: linear-gradient(to top, black 90%, transparent 100%);
         }
         .chat-msg {
-            background: rgba(0,0,0,0.7); padding: 6px 10px; margin-bottom: 5px;
-            border-radius: 6px; color: #fff; font-size: 14px;
+            background: rgba(0,0,0,0.8); padding: 6px 10px; margin-bottom: 5px;
+            border-radius: 8px; color: #fff; font-size: 14px;
             pointer-events: auto; align-self: flex-start;
             display: flex; align-items: center; gap: 8px;
             border: 1px solid rgba(255,255,255,0.1);
+            animation: fadeIn 0.3s ease;
         }
-        .chat-msg.me { align-self: flex-end; background: rgba(20, 100, 160, 0.8); }
-        .chat-ava { width: 24px; height: 24px; border-radius: 4px; background: #fff; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .chat-msg.me { align-self: flex-end; background: rgba(20, 100, 160, 0.9); }
+        .chat-msg.sys { background: rgba(200, 150, 0, 0.8); font-style: italic; }
+        .chat-ava { width: 24px; height: 24px; border-radius: 6px; background: #fff; object-fit: cover; }
         
         .chat-inp-row { display: flex; pointer-events: auto; }
-        #chat-in { flex: 1; background: rgba(0,0,0,0.6); border: 1px solid #777; color: white; padding: 8px; border-radius: 4px 0 0 4px; }
-        #chat-send { width: 40px; background: #444; color: white; border: 1px solid #777; cursor: pointer; border-radius: 0 4px 4px 0; }
+        #chat-in { 
+            flex: 1; 
+            background: rgba(255,255,255,0.1); 
+            border: 1px solid rgba(255,255,255,0.3); 
+            color: white; 
+            padding: 10px;
+            border-radius: 6px 0 0 6px; 
+            font-size: 14px;
+        }
+        #chat-in::placeholder { color: rgba(255,255,255,0.5); }
+        #chat-send { 
+            width: 40px; 
+            background: var(--accent); 
+            color: white; 
+            border: none; 
+            cursor: pointer; 
+            border-radius: 0 6px 6px 0;
+            font-weight: bold;
+        }
 
-        .opponents-row { height: 150px; display: flex; justify-content: center; gap: 40px; padding-top: 15px; }
-        .player-wrap { position: relative; display: flex; flex-direction: column; align-items: center; width: 120px; }
+        /* --- OPPONENTS FIXED --- */
+        .opponents-row { 
+            height: 160px; 
+            display: flex; 
+            justify-content: center; 
+            gap: 40px; 
+            padding-top: 20px;
+            position: relative;
+            z-index: 50;
+        }
+        .player-wrap { 
+            position: relative; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            width: 120px; 
+        }
         
-        /* Timer SVG (Rounded Rect matches Avatar) */
+        /* Action Bubbles */
+        .action-bubble {
+            position: absolute;
+            top: -45px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0,0,0,0.85);
+            color: white;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 14px;
+            white-space: nowrap;
+            z-index: 100;
+            border: 2px solid var(--accent);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+            animation: bubblePop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        @keyframes bubblePop {
+            0% { transform: translateX(-50%) scale(0); opacity: 0; }
+            80% { transform: translateX(-50%) scale(1.1); }
+            100% { transform: translateX(-50%) scale(1); opacity: 1; }
+        }
+        
+        .bubble-attack { border-color: #2e7d32; background: rgba(46, 125, 50, 0.9); }
+        .bubble-take { border-color: #e65100; background: rgba(230, 81, 0, 0.9); }
+        .bubble-bito { border-color: #b71c1c; background: rgba(183, 28, 28, 0.9); }
+        .bubble-pass { border-color: #1565c0; background: rgba(21, 101, 192, 0.9); }
+
         .timer-svg {
             position: absolute; top: -5px; left: 50%; transform: translateX(-50%);
             width: 70px; height: 70px; pointer-events: none; z-index: 5;
@@ -124,75 +192,330 @@
         }
 
         .avatar { 
-            width: 60px; height: 60px; background: #444; border: 2px solid #fff; 
-            border-radius: 12px; z-index: 6; object-fit: cover; box-shadow: 0 4px 8px rgba(0,0,0,0.5);
+            width: 60px; height: 60px; 
+            background: #444; 
+            border: 3px solid #fff; 
+            border-radius: 12px; 
+            z-index: 6; 
+            object-fit: cover; 
+            box-shadow: var(--shadow-lg);
         }
-        .p-name { font-size: 14px; font-weight: bold; margin-top: 5px; text-shadow: 1px 1px 2px black; }
+        .avatar.turn { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent); }
         
-        .p-hand { position: relative; width: 60px; height: 40px; margin-top: 5px; }
-        .card-tiny {
-            width: 30px; height: 45px; background-image: url('https://deckofcardsapi.com/static/img/back.png');
-            background-size: cover; border-radius: 3px; border: 1px solid #fff;
-            position: absolute; box-shadow: 1px 1px 3px rgba(0,0,0,0.5);
+        .p-name { 
+            font-size: 14px; 
+            font-weight: bold; 
+            margin-top: 5px; 
+            text-shadow: 1px 1px 2px black; 
+            background: rgba(0,0,0,0.7);
+            padding: 2px 10px;
+            border-radius: 10px;
+            text-align: center;
+            max-width: 100%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .p-hand { 
+            position: relative; 
+            width: 60px; 
+            height: 50px; 
+            margin-top: 5px;
+            display: flex;
+            justify-content: center;
+        }
+        .card-back {
+            width: 40px; 
+            height: 60px; 
+            background-image: url('https://deckofcardsapi.com/static/img/back.png');
+            background-size: cover; 
+            border-radius: 5px; 
+            border: 2px solid #fff;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.4);
+            margin: 0 -10px;
+        }
+        .card-count {
+            position: absolute;
+            top: -15px;
+            background: rgba(0,0,0,0.9);
+            color: white;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-weight: bold;
+            font-size: 12px;
+            border: 1px solid rgba(255,255,255,0.3);
         }
 
-        .table-area { flex: 1; position: relative; display: flex; justify-content: center; align-items: center; }
+        /* --- TABLE AREA --- */
+        .table-area { 
+            flex: 1; 
+            position: relative; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+        }
         
-        /* КОЛОДА - СЛЕВА */
-        .deck-pos { position: absolute; left: 20px; top: 50%; transform: translateY(-50%); width: var(--card-w); height: var(--card-h); }
-        .bito-pos { position: absolute; right: 20px; top: 50%; transform: translateY(-50%); width: var(--card-w); height: var(--card-h); opacity: 0.7; }
+        .deck-pos { 
+            position: absolute; 
+            left: 30px; 
+            top: 50%; 
+            transform: translateY(-50%); 
+            width: var(--card-w); 
+            height: var(--card-h); 
+        }
+        .bito-pos { 
+            position: absolute; 
+            right: 30px; 
+            top: 50%; 
+            transform: translateY(-50%); 
+            width: var(--card-w); 
+            height: var(--card-h); 
+            opacity: 0.8; 
+        }
         
-        .trump { position: absolute; top: 10px; left: 20px; transform: rotate(90deg); z-index: 1; }
+        .trump { 
+            position: absolute; 
+            top: 0; 
+            left: 0; 
+            width: 100%; 
+            height: 100%;
+            transform: rotate(90deg); 
+            z-index: 1; 
+        }
         .deck-stack-card { 
-            position: absolute; width: 100%; height: 100%; 
-            background-image: url('https://deckofcardsapi.com/static/img/back.png'); background-size: cover;
-            border-radius: var(--radius); border: 1px solid #ccc; 
+            position: absolute; 
+            width: 100%; 
+            height: 100%; 
+            background-image: url('https://deckofcardsapi.com/static/img/back.png'); 
+            background-size: cover;
+            border-radius: var(--radius); 
+            border: 2px solid rgba(255,255,255,0.8);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.4);
         }
 
         .deck-count {
-             position: absolute; top: -25px; left: 0; width: 100%; text-align: center;
-             font-weight: bold; font-size: 14px; text-shadow: 1px 1px 2px black; color: white;
+             position: absolute; 
+             top: -25px; 
+             left: 0; 
+             width: 100%; 
+             text-align: center;
+             font-weight: bold; 
+             font-size: 16px; 
+             text-shadow: 1px 1px 3px black; 
+             color: white;
+             background: rgba(0,0,0,0.7);
+             padding: 3px;
+             border-radius: 6px;
         }
 
-        .slots-wrap { display: flex; gap: 15px; padding: 0 20px; align-items: center; perspective: 1000px; z-index: 10; }
-        .slot { width: var(--card-w); height: var(--card-h); position: relative; }
+        /* --- SLOTS WITH OVERLAP --- */
+        .slots-wrap { 
+            display: flex; 
+            flex-wrap: wrap; 
+            gap: 5px; 
+            padding: 0 20px; 
+            align-items: center; 
+            justify-content: center;
+            perspective: 1000px; 
+            z-index: 10; 
+            max-width: 800px;
+        }
+        .slot { 
+            width: var(--card-w); 
+            height: var(--card-h); 
+            position: relative; 
+            margin: 5px;
+        }
         
         .card {
-            width: var(--card-w); height: var(--card-h);
+            width: var(--card-w); 
+            height: var(--card-h);
             border-radius: var(--radius);
-            background-color: #fff; background-size: 100% 100%;
+            background-color: #fff; 
+            background-size: 100% 100%;
             position: absolute;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.4);
-            transition: all 0.5s cubic-bezier(0.19, 1, 0.22, 1);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.5);
+            backface-visibility: hidden;
+            transition: transform 0.5s cubic-bezier(0.19, 1, 0.22, 1), 
+                        opacity 0.5s ease;
         }
-        .card-att { top: 0; left: 0; z-index: 10; }
-        .card-def { top: 25px; left: 25px; z-index: 20; transform: rotate(10deg); }
-        .card-back { background-image: url('https://deckofcardsapi.com/static/img/back.png'); }
-
-        .my-zone { height: 220px; display: flex; justify-content: center; align-items: flex-end; padding-bottom: 20px; position: relative; }
-        .my-hand-wrap { display: flex; align-items: flex-end; }
-        .my-card { width: 55px; height: var(--card-h); position: relative; transition: width 0.2s; cursor: pointer; }
-        .my-card:hover { width: 80px; }
-        .my-card:last-child { width: var(--card-w); }
+        .card.animating {
+            z-index: 1000 !important;
+            transition: all 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
         
-        .my-card .card { position: absolute; bottom: 0; left: 0; transition: bottom 0.2s; transform: none !important; }
-        .my-card:hover .card { bottom: 40px; z-index: 100; }
-        .my-card.sel .card { bottom: 60px; box-shadow: 0 0 0 4px #ffeb3b; z-index: 101; }
+        .card-att { 
+            top: 0; 
+            left: 0; 
+            z-index: 10; 
+            transform: rotate(-3deg);
+        }
+        .card-def { 
+            top: 15px; 
+            left: 15px; 
+            z-index: 20; 
+            transform: rotate(5deg);
+        }
+        
+        .card-back { background-image: url('https://deckofcardsapi.com/static/img/back.png'); }
+        .card-invalid {
+            animation: shake 0.5s ease;
+        }
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
 
-        .controls { position: absolute; right: 20px; bottom: 250px; display: flex; flex-direction: column; align-items: flex-end; gap: 10px; z-index: 100; }
-        .status-badge { background: rgba(0,0,0,0.8); padding: 12px 25px; border-left: 6px solid #fff; font-size: 18px; font-weight: bold; box-shadow: 0 4px 6px black; }
-        .act-btn { border: none; padding: 16px 45px; font-size: 22px; font-weight: 900; text-transform: uppercase; cursor: pointer; color: white; box-shadow: 0 6px 20px rgba(0,0,0,0.6); border-radius: 4px; display: none; }
-        .btn-take { background: #e65100; }
-        .btn-bito { background: #b71c1c; }
+        /* --- PLAYER'S HAND - IMMERSIVE --- */
+        .my-zone { 
+            height: 250px; 
+            display: flex; 
+            justify-content: center; 
+            align-items: flex-end; 
+            padding-bottom: 10px; 
+            position: relative;
+            z-index: 100;
+        }
+        .my-hand-wrap { 
+            display: flex; 
+            align-items: flex-end;
+            padding: 0 20px;
+            height: 180px;
+        }
+        .my-card { 
+            width: 90px; 
+            height: calc(var(--card-h) + 20px); 
+            position: relative; 
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
+            cursor: pointer;
+            margin: 0 -15px;
+        }
+        .my-card:hover { 
+            width: 110px; 
+            transform: translateY(-15px);
+        }
+        .my-card:last-child { width: 90px; }
+        
+        .my-card .card { 
+            position: absolute; 
+            bottom: 0; 
+            left: 0; 
+            right: 0;
+            margin: auto;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
+            transform-origin: bottom center;
+        }
+        .my-card:hover .card { 
+            bottom: 30px; 
+            transform: scale(1.05);
+            z-index: 100; 
+            box-shadow: 0 15px 30px rgba(0,0,0,0.6);
+        }
+        .my-card.sel .card { 
+            bottom: 50px; 
+            transform: scale(1.1);
+            box-shadow: 0 0 0 4px #ffeb3b, 0 20px 40px rgba(0,0,0,0.7); 
+            z-index: 101; 
+        }
+        .my-card.disabled { opacity: 0.5; cursor: not-allowed; }
 
-        @media (max-width: 800px) {
+        /* --- CONTROLS --- */
+        .controls { 
+            position: absolute; 
+            right: 30px; 
+            bottom: 280px; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: flex-end; 
+            gap: 15px; 
+            z-index: 150; 
+        }
+        .status-badge { 
+            background: rgba(0,0,0,0.9); 
+            padding: 15px 30px; 
+            border-left: 6px solid #fff; 
+            font-size: 18px; 
+            font-weight: bold; 
+            box-shadow: var(--shadow-lg);
+            border-radius: 8px;
+            min-width: 200px;
+            text-align: center;
+        }
+        .act-btn { 
+            border: none; 
+            padding: 18px 50px; 
+            font-size: 22px; 
+            font-weight: 900; 
+            text-transform: uppercase; 
+            cursor: pointer; 
+            color: white; 
+            box-shadow: 0 8px 25px rgba(0,0,0,0.7); 
+            border-radius: 8px; 
+            display: none;
+            transition: all 0.2s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        .act-btn:active { transform: translateY(4px); box-shadow: 0 2px 10px rgba(0,0,0,0.5); }
+        .act-btn::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.7s;
+        }
+        .act-btn:hover::after { left: 100%; }
+        
+        .btn-take { background: linear-gradient(145deg, #e65100, #ff7043); }
+        .btn-bito { background: linear-gradient(145deg, #b71c1c, #d32f2f); }
+
+        /* --- TOAST MESSAGES --- */
+        .toast {
+            position: fixed;
+            top: 50px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0,0,0,0.9);
+            color: white;
+            padding: 12px 25px;
+            border-radius: 8px;
+            font-weight: bold;
+            border-left: 5px solid var(--accent);
+            box-shadow: var(--shadow-lg);
+            z-index: 1000;
+            animation: toastSlide 0.3s ease, toastFade 0.3s ease 2s forwards;
+        }
+        @keyframes toastSlide {
+            from { opacity: 0; transform: translateX(-50%) translateY(-20px); }
+            to { opacity: 1; transform: translateX(-50%) translateY(0); }
+        }
+        @keyframes toastFade {
+            to { opacity: 0; }
+        }
+
+        /* --- RESPONSIVE --- */
+        @media (max-width: 900px) {
+            :root { --card-w: 100px; --card-h: 145px; }
+            .opponents-row { height: 140px; gap: 20px; }
+            .my-zone { height: 200px; }
+            .controls { bottom: 220px; right: 15px; }
+            .chat-sidebar { display: none; } 
+            .my-card { width: 70px; margin: 0 -10px; }
+            .my-card:hover { width: 85px; }
+            .act-btn { padding: 15px 35px; font-size: 18px; }
+        }
+        
+        @media (max-width: 600px) {
             :root { --card-w: 80px; --card-h: 116px; }
             .opponents-row { height: 120px; gap: 10px; }
-            .my-zone { height: 160px; }
-            .controls { bottom: 170px; }
-            .chat-sidebar { display: none; } 
-            .my-card { width: 35px; } .my-card:hover { width: 50px; }
-            .panel { width: 95%; padding: 20px; }
+            .my-zone { height: 170px; }
+            .controls { bottom: 180px; }
+            .my-card { width: 55px; margin: 0 -8px; }
+            .my-card:hover { width: 65px; }
         }
     </style>
 </head>
@@ -201,7 +524,7 @@
     <!-- LOBBY -->
     <div id="lobby">
         <div class="panel" id="p-setup">
-            <h1>DURAK PRO</h1>
+            <h1>DURAK PRO FIXED</h1>
             
             <div class="avatars" id="ava-list"></div>
             <input type="text" id="p-name" class="inp" placeholder="ВАШ НИК" value="Игрок">
@@ -209,6 +532,7 @@
             <div class="opts">
                 <label><input type="radio" name="mode" value="2" checked> 1x1</label>
                 <label><input type="radio" name="mode" value="3"> 3 Игрока</label>
+                <label><input type="radio" name="mode" value="4"> 4 Игрока</label>
             </div>
             <div class="opts">
                 <label style="cursor:pointer; display:flex; align-items:center; gap:5px;">
@@ -234,12 +558,12 @@
 
     <!-- GAME -->
     <div id="game">
-        <!-- Chat is now on the RIGHT to avoid Deck overlap -->
+        <!-- Chat Fixed -->
         <div class="chat-sidebar">
             <div class="chat-log" id="chat-log"></div>
             <div class="chat-inp-row">
                 <input type="text" id="chat-in" placeholder="Сообщение..." autocomplete="off">
-                <button id="chat-send" onclick="Game.sendChat()">></button>
+                <button id="chat-send" onclick="Game.sendChat()">➤</button>
             </div>
         </div>
 
@@ -253,20 +577,20 @@
             </div>
             
             <div class="bito-pos" id="bito-visual">
-                 <div style="color:rgba(255,255,255,0.2); font-weight:bold; text-align:center; padding-top:40%;">БИТО</div>
+                <div style="color:rgba(255,255,255,0.2); font-weight:bold; text-align:center; padding-top:40%;">БИТО</div>
             </div>
 
             <div class="slots-wrap" id="slots-area"></div>
 
             <div class="controls">
-                <div class="status-badge" id="status-txt">...</div>
+                <div class="status-badge" id="status-txt">Подключение...</div>
                 <button class="act-btn btn-bito" id="btn-bito" onclick="Game.act('BITO')">БИТО</button>
                 <button class="act-btn btn-take" id="btn-take" onclick="Game.act('TAKE')">ВЗЯТЬ</button>
             </div>
         </div>
 
         <div class="my-zone">
-            <div class="player-wrap" style="position:absolute; bottom:10px; left:10px; width:auto; flex-direction:row; gap:15px;">
+            <div class="player-wrap" style="position:absolute; bottom:20px; left:20px; width:auto; flex-direction:row; gap:20px; align-items:center;">
                 <div style="position:relative;">
                     <img id="my-ava" class="avatar" src="">
                     <svg class="timer-svg" viewBox="0 0 70 70">
@@ -274,8 +598,8 @@
                     </svg>
                 </div>
                 <div style="text-align:left;">
-                    <div style="font-weight:bold; font-size:20px;">ВЫ</div>
-                    <div style="font-size:12px; color:#aaa;" id="my-cards-count">6 карт</div>
+                    <div style="font-weight:bold; font-size:22px; text-shadow: 2px 2px 4px rgba(0,0,0,0.8);">ВЫ</div>
+                    <div style="font-size:14px; color:#ddd; background:rgba(0,0,0,0.7); padding:3px 10px; border-radius:10px;" id="my-cards-count">6 карт</div>
                 </div>
             </div>
             <div class="my-hand-wrap" id="my-hand"></div>
@@ -289,7 +613,7 @@
         
         class Engine {
             constructor(hName, hAva, mode, transfer) {
-                this.mode = mode;
+                this.mode = parseInt(mode);
                 this.transfer = transfer;
                 this.players = [{id:'host', name:hName, ava:hAva, hand:[]}];
                 this.deck = [];
@@ -300,6 +624,8 @@
                 this.startTime = 0;
                 this.state = 'lobby';
                 this.win = null;
+                this.lastAction = null;
+                this.pendingActions = [];
             }
 
             addPlayer(id, name, ava) {
@@ -326,85 +652,124 @@
                 });
                 this.changeTurn(fp);
                 this.state = 'game';
+                this.lastAction = {type: 'start', player: fp};
             }
 
             changeTurn(idx) {
                 this.turn = idx;
                 this.startTime = Date.now();
+                this.lastAction = {type: 'turn', player: idx};
             }
 
-            next(off=1) { return (this.turn + off) % this.mode; }
+            next(off=1) { return (this.turn + off) % this.players.length; }
+            
             beat(a, d) {
                 if(a.s===d.s) return RANKS.indexOf(d.r) > RANKS.indexOf(a.r);
                 return d.s === this.trump.s;
             }
 
+            validateAttack(pidx, card, d) {
+                const p = this.players[pidx];
+                const isAttacker = (pidx === this.turn);
+                const isTransferer = (this.transfer && pidx === this.next() && this.field.length > 0 && this.field.every(s => !s.def));
+                
+                if(!isAttacker && !isTransferer) return {valid: false, reason: 'Не ваш ход'};
+                
+                if(this.field.length > 0) {
+                    const ranks = new Set(this.field.flatMap(x => [x.att.r, x.def?.r].filter(Boolean)));
+                    if(!ranks.has(card.r)) return {valid: false, reason: 'Нет такой карты на столе'};
+                }
+                
+                const defIdx = isTransferer ? (pidx + 1) % this.players.length : this.next();
+                const defP = this.players[defIdx];
+                const slotsFree = this.field.filter(x=>!x.def).length;
+                
+                if(slotsFree + 1 > defP.hand.length) return {valid: false, reason: 'У защищающегося недостаточно карт'};
+                if(this.field.length >= 6) return {valid: false, reason: 'Максимум 6 карт на столе'};
+                
+                return {valid: true, defIdx, isTransferer};
+            }
+
             move(pidx, type, d) {
-                if(this.state !== 'game') return;
+                if(this.state !== 'game') return {success: false, reason: 'Игра не начата'};
                 const p = this.players[pidx];
 
                 if(type === 'ATTACK') {
-                    const isAttacker = (pidx === this.turn);
-                    const isTransferer = (this.transfer && pidx === this.next() && this.field.length > 0 && this.field.every(s => !s.def));
-                    if(!isAttacker && !isTransferer) return;
-                    const c = p.hand[d.i];
-                    if(this.field.length > 0) {
-                        const ranks = new Set(this.field.flatMap(x => [x.att.r, x.def?.r].filter(Boolean)));
-                        if(!ranks.has(c.r)) return;
-                    }
-                    let defIdx = this.next();
-                    if(isTransferer) defIdx = (pidx + 1) % this.mode;
-                    const defP = this.players[defIdx];
-                    const slotsFree = this.field.filter(x=>!x.def).length;
-                    if(slotsFree + 1 > defP.hand.length) return;
-                    if(this.field.length >= 6) return;
+                    const card = p.hand[d.i];
+                    const validation = this.validateAttack(pidx, card, d);
+                    if(!validation.valid) return {success: false, reason: validation.reason};
+                    
                     p.hand.splice(d.i, 1);
-                    this.field.push({att: c, def: null, from: pidx});
-                    if(isTransferer) this.changeTurn(pidx);
-                    else this.startTime = Date.now();
-                    return true;
+                    this.field.push({att: card, def: null, from: pidx});
+                    
+                    if(validation.isTransferer) {
+                        this.changeTurn(pidx);
+                        this.lastAction = {type: 'transfer', player: pidx, card};
+                    } else {
+                        this.startTime = Date.now();
+                        this.lastAction = {type: 'attack', player: pidx, card};
+                    }
+                    
+                    this.pendingActions.push({type: 'attack', player: pidx, card});
+                    return {success: true, action: 'attack'};
                 }
 
                 if(type === 'DEFEND') {
-                    if(pidx !== this.next()) return;
+                    if(pidx !== this.next()) return {success: false, reason: 'Не ваш ход для защиты'};
                     const slot = this.field[d.s];
-                    if(!slot || slot.def) return;
-                    const c = p.hand[d.i];
-                    if(this.beat(slot.att, c)) {
-                        p.hand.splice(d.i, 1);
-                        slot.def = c;
-                        return true;
+                    if(!slot || slot.def) return {success: false, reason: 'Слот занят или не существует'};
+                    const card = p.hand[d.i];
+                    
+                    if(!this.beat(slot.att, card)) return {success: false, reason: 'Не можете побить эту карту'};
+                    
+                    p.hand.splice(d.i, 1);
+                    slot.def = card;
+                    this.lastAction = {type: 'defend', player: pidx, card, against: slot.att};
+                    this.pendingActions.push({type: 'defend', player: pidx, card});
+                    
+                    if(this.field.every(x => x.def)) {
+                        this.lastAction = {type: 'all_beaten', player: pidx};
                     }
+                    
+                    return {success: true, action: 'defend'};
                 }
 
                 if(type === 'BITO') {
-                    if(pidx !== this.turn) return;
-                    if(this.field.length===0 || this.field.some(x=>!x.def)) return;
+                    if(pidx !== this.turn) return {success: false, reason: 'Не ваш ход'};
+                    if(this.field.length===0 || this.field.some(x=>!x.def)) return {success: false, reason: 'Не все карты побиты'};
+                    
                     this.bitoCount += (this.field.length * 2);
                     this.field = [];
                     this.refill();
                     this.changeTurn(this.next());
-                    return true;
+                    this.lastAction = {type: 'bito', player: pidx};
+                    return {success: true, action: 'bito'};
                 }
 
                 if(type === 'TAKE') {
-                    if(pidx !== this.next()) return;
+                    if(pidx !== this.next()) return {success: false, reason: 'Не можете взять'};
+                    
                     this.field.forEach(x => {
                         p.hand.push(x.att);
                         if(x.def) p.hand.push(x.def);
                     });
                     this.field = [];
                     this.refill(true);
+                    
                     let nextTurn = this.next(2);
-                    if(this.mode===2) nextTurn = this.next(1);
+                    if(this.players.length===2) nextTurn = this.next(1);
+                    
                     this.changeTurn(nextTurn);
-                    return true;
+                    this.lastAction = {type: 'take', player: pidx};
+                    return {success: true, action: 'take'};
                 }
+                
+                return {success: false, reason: 'Неизвестное действие'};
             }
 
             refill(skipDef=false) {
                 const q = [];
-                for(let i=0; i<this.mode; i++) q.push((this.turn + i)%this.mode);
+                for(let i=0; i<this.players.length; i++) q.push((this.turn + i)%this.players.length);
                 q.forEach(idx => {
                     if(skipDef && idx === this.next()) return;
                     const p = this.players[idx];
@@ -424,7 +789,8 @@
                     t: this.turn,
                     tm: this.startTime,
                     ps: this.players.map(p => ({id:p.id, name:p.name, ava:p.ava, cnt:p.hand.length})),
-                    win: this.win
+                    win: this.win,
+                    lastAction: this.lastAction
                 };
             }
         }
@@ -446,15 +812,15 @@
                 });
             },
             create() {
-                const n = document.getElementById('p-name').value;
+                const n = document.getElementById('p-name').value || 'Игрок';
                 const mode = parseInt(document.querySelector('input[name="mode"]:checked').value);
                 const tr = document.getElementById('chk-transfer').checked;
                 Game.initHost(n, this.ava, mode, tr);
             },
             join() {
-                const n = document.getElementById('p-name').value;
+                const n = document.getElementById('p-name').value || 'Игрок';
                 const id = document.getElementById('join-id').value;
-                if(!id) return alert('ID?');
+                if(!id) return Game.showToast('Введите ID комнаты');
                 Game.initClient(n, this.ava, id);
             }
         };
@@ -462,6 +828,8 @@
         const Game = {
             role: null, eng: null, peer: null, conns: [], conn: null,
             myId: null, st: null, hand: [], sel: null,
+            actionBubbles: [],
+            animationQueue: [],
 
             initHost(n, a, m, t) {
                 this.role = 'host';
@@ -473,69 +841,187 @@
                     document.getElementById('host-id').value = id;
                 });
                 this.peer.on('connection', c => {
-                    c.on('open', () => this.conns.push(c));
-                    c.on('data', d => {
-                        if(d.t==='J') {
-                            if(this.eng.addPlayer(c.peer, d.n, d.a)) {
-                                this.bc({t:'C', n:'INFO', m:`${d.n} вошел`, s:1});
-                                document.getElementById('wait-msg').innerText = `${this.eng.players.length}/${this.eng.mode}`;
-                                if(this.eng.players.length === this.eng.mode) {
-                                    this.eng.start();
-                                    this.sync();
-                                    document.getElementById('lobby').style.display = 'none';
-                                    document.getElementById('game').style.display = 'flex';
-                                }
-                            } else c.close();
+                    c.on('open', () => {
+                        this.conns.push(c);
+                        this.bc({t:'C', n:'INFO', m:`Игрок подключился`, s:1});
+                    });
+                    c.on('data', d => this.handleData(c, d));
+                    c.on('close', () => {
+                        this.conns = this.conns.filter(conn => conn !== c);
+                        const playerIdx = this.eng.players.findIndex(p=>p.id===c.peer);
+                        if(playerIdx !== -1) {
+                            this.bc({t:'C', n:'INFO', m:`${this.eng.players[playerIdx].name} вышел`, s:1});
                         }
-                        if(d.t==='A') {
-                            const pIdx = this.eng.players.findIndex(p=>p.id===c.peer);
-                            if(pIdx!==-1 && this.eng.move(pIdx, d.a, d.d)) this.sync();
-                        }
-                        if(d.t==='C') this.bc(d);
                     });
                 });
+                this.peer.on('error', err => console.error('Peer error:', err));
             },
 
             initClient(n, a, id) {
                 this.role = 'client';
                 this.peer = new Peer();
                 this.peer.on('open', () => {
-                    this.conn = this.peer.connect(id);
+                    this.conn = this.peer.connect(id, {reliable: true});
                     this.conn.on('open', () => {
                         this.conn.send({t:'J', n, a});
                         document.getElementById('p-setup').style.display = 'none';
                         document.getElementById('status-txt').innerText = "Подключение...";
                     });
-                    this.conn.on('data', d => {
-                        if(d.t==='S') {
-                            document.getElementById('lobby').style.display = 'none';
-                            document.getElementById('game').style.display = 'flex';
-                            this.st = d.s; this.hand = d.h; this.myId = d.mid;
-                            this.draw();
-                        }
-                        if(d.t==='C') this.addChat(d);
+                    this.conn.on('data', d => this.handleData(null, d));
+                    this.conn.on('close', () => {
+                        this.showToast('Соединение разорвано');
+                        setTimeout(() => location.reload(), 2000);
                     });
                 });
+                this.peer.on('error', err => {
+                    console.error('Peer error:', err);
+                    this.showToast('Ошибка подключения');
+                });
+            },
+
+            handleData(conn, d) {
+                if(d.t==='J') {
+                    if(this.role==='host' && this.eng.addPlayer(conn.peer, d.n, d.a)) {
+                        this.bc({t:'C', n:'INFO', m:`${d.n} вошел`, s:1});
+                        document.getElementById('wait-msg').innerText = `${this.eng.players.length}/${this.eng.mode}`;
+                        if(this.eng.players.length === this.eng.mode) {
+                            this.eng.start();
+                            this.sync();
+                            document.getElementById('lobby').style.display = 'none';
+                            document.getElementById('game').style.display = 'flex';
+                        }
+                    }
+                }
+                if(d.t==='A') {
+                    if(this.role==='host') {
+                        const pIdx = this.eng.players.findIndex(p=>p.id===conn.peer);
+                        if(pIdx!==-1) {
+                            const result = this.eng.move(pIdx, d.a, d.d);
+                            if(result.success) {
+                                this.sync();
+                                this.bc({t:'ACT', a:d.a, p:pIdx, d:d.d, result});
+                            } else {
+                                conn.send({t:'ERR', m:result.reason});
+                            }
+                        }
+                    }
+                }
+                if(d.t==='C') this.bc(d);
+                if(d.t==='S') {
+                    document.getElementById('lobby').style.display = 'none';
+                    document.getElementById('game').style.display = 'flex';
+                    this.st = d.s; 
+                    this.hand = d.h; 
+                    this.myId = d.mid;
+                    this.draw();
+                }
+                if(d.t==='ERR') this.showToast(d.m);
+                if(d.t==='ACT') this.showActionBubble(d.p, d.a, d.result);
             },
 
             sync() {
                 if(this.role!=='host') return;
                 const snap = this.eng.dump();
-                this.st = snap; this.hand = this.eng.players[0].hand; this.myId = 'host';
+                this.st = snap; 
+                this.hand = this.eng.players[0].hand; 
+                this.myId = 'host';
                 this.draw();
                 this.conns.forEach(c => {
                     const p = this.eng.players.find(x=>x.id===c.peer);
-                    // FIXED: Check if player exists before sending hand
                     if(p) c.send({t:'S', s:snap, h:p.hand, mid:c.peer});
                 });
             },
 
             act(type, d={}) {
                 if(this.role==='host') {
-                    if(this.eng.move(0, type, d)) this.sync();
+                    const result = this.eng.move(0, type, d);
+                    if(result.success) {
+                        this.sync();
+                        this.bc({t:'ACT', a:type, p:0, d, result});
+                    } else {
+                        this.showToast(result.reason);
+                        if(type === 'ATTACK' || type === 'DEFEND') {
+                            this.showCardError(d.i);
+                        }
+                    }
                 } else {
                     this.conn.send({t:'A', a:type, d});
                 }
+                this.sel = null;
+            },
+
+            showCardError(cardIndex) {
+                const cards = document.querySelectorAll('.my-card');
+                if(cards[cardIndex]) {
+                    const card = cards[cardIndex].querySelector('.card');
+                    card.classList.add('card-invalid');
+                    setTimeout(() => card.classList.remove('card-invalid'), 500);
+                }
+            },
+
+            showToast(msg) {
+                const existing = document.querySelector('.toast');
+                if(existing) existing.remove();
+                
+                const toast = document.createElement('div');
+                toast.className = 'toast';
+                toast.innerText = msg;
+                document.body.appendChild(toast);
+                
+                setTimeout(() => {
+                    if(toast.parentNode) toast.remove();
+                }, 2500);
+            },
+
+            showActionBubble(playerIdx, action, result) {
+                if(!this.st || !this.st.ps || !this.st.ps[playerIdx]) return;
+                
+                const player = this.st.ps[playerIdx];
+                const playerWrap = document.querySelectorAll('.player-wrap')[playerIdx === 0 ? this.st.ps.length - 1 : playerIdx - 1];
+                if(!playerWrap) return;
+                
+                let text = '';
+                let bubbleClass = '';
+                
+                switch(action) {
+                    case 'ATTACK':
+                        text = 'Атакую!';
+                        bubbleClass = 'bubble-attack';
+                        break;
+                    case 'DEFEND':
+                        text = 'Бью!';
+                        bubbleClass = 'bubble-attack';
+                        break;
+                    case 'BITO':
+                        text = 'БИТО!';
+                        bubbleClass = 'bubble-bito';
+                        break;
+                    case 'TAKE':
+                        text = 'Беру...';
+                        bubbleClass = 'bubble-take';
+                        break;
+                    case 'TRANSFER':
+                        text = 'Перевожу!';
+                        bubbleClass = 'bubble-pass';
+                        break;
+                    default:
+                        text = 'Ходит';
+                }
+                
+                const bubble = document.createElement('div');
+                bubble.className = `action-bubble ${bubbleClass}`;
+                bubble.innerText = text;
+                bubble.style.top = '-50px';
+                
+                playerWrap.appendChild(bubble);
+                
+                setTimeout(() => {
+                    bubble.style.opacity = '0';
+                    bubble.style.transform = 'translateX(-50%) translateY(-20px)';
+                    setTimeout(() => {
+                        if(bubble.parentNode) bubble.remove();
+                    }, 300);
+                }, 2000);
             },
 
             sendChat() {
@@ -553,6 +1039,7 @@
                     this.conn.send({t:'C', m:val, id:this.myId});
                 }
                 i.value = '';
+                i.focus();
             },
 
             bc(d) {
@@ -584,21 +1071,53 @@
                 log.scrollTop = log.scrollHeight;
             },
 
-            // Safe Text Setter
-            safeTxt(id, txt) {
-                const el = document.getElementById(id);
-                if(el) el.innerText = txt;
+            animateCard(fromElem, toElem, cardData, type, callback) {
+                return new Promise(resolve => {
+                    const fromRect = fromElem.getBoundingClientRect();
+                    const toRect = toElem.getBoundingClientRect();
+                    
+                    const flyingCard = document.createElement('div');
+                    flyingCard.className = 'card animating';
+                    flyingCard.style.backgroundImage = `url('${IMG_API(cardData.r,cardData.s)}')`;
+                    flyingCard.style.position = 'fixed';
+                    flyingCard.style.left = fromRect.left + 'px';
+                    flyingCard.style.top = fromRect.top + 'px';
+                    flyingCard.style.width = 'var(--card-w)';
+                    flyingCard.style.height = 'var(--card-h)';
+                    flyingCard.style.zIndex = '10000';
+                    flyingCard.style.transformOrigin = 'center center';
+                    
+                    document.body.appendChild(flyingCard);
+                    
+                    setTimeout(() => {
+                        flyingCard.style.left = toRect.left + 'px';
+                        flyingCard.style.top = toRect.top + 'px';
+                        if(type === 'defend') {
+                            flyingCard.style.transform = 'rotate(10deg)';
+                        }
+                    }, 10);
+                    
+                    setTimeout(() => {
+                        flyingCard.remove();
+                        if(callback) callback();
+                        resolve();
+                    }, 600);
+                });
             },
 
             draw() {
                 const s = this.st;
                 if(!s) return;
-                if(s.win) { alert(s.win + " ПОБЕДИЛ!"); location.reload(); return; }
+                if(s.win) { 
+                    this.showToast(s.win + " ПОБЕДИЛ!");
+                    setTimeout(() => location.reload(), 3000);
+                    return; 
+                }
 
                 let myIdx = s.ps.findIndex(p=>p.id===this.myId);
                 if(myIdx===-1 && this.role==='host') myIdx=0;
 
-                // 1. OPPONENTS
+                // 1. OPPONENTS WITH VISIBLE CARD BACKS
                 const oppDiv = document.getElementById('opponents-area');
                 if(oppDiv) {
                     oppDiv.innerHTML = '';
@@ -609,27 +1128,34 @@
                         
                         const wrap = document.createElement('div');
                         wrap.className = 'player-wrap';
+                        
+                        // Card backs with count
                         let cardsHtml = '';
-                        for(let c=0; c<p.cnt; c++) {
-                            cardsHtml += `<div class="card-tiny" style="left:${c*5}px; top:${-c*1}px;"></div>`;
+                        const cardCount = Math.min(p.cnt, 5);
+                        for(let c=0; c<cardCount; c++) {
+                            cardsHtml += `<div class="card-back" style="transform: rotate(${c*2-5}deg);"></div>`;
                         }
                         
                         wrap.innerHTML = `
                             <div style="position:relative;">
-                                <img src="https://robohash.org/${p.ava}.png?set=set4" class="avatar">
+                                <img src="https://robohash.org/${p.ava}.png?set=set4" 
+                                     class="avatar ${isTurn ? 'turn' : ''}">
                                 <svg class="timer-svg" style="opacity:${isTurn?1:0}" viewBox="0 0 70 70">
                                     <rect class="timer-path" x="2" y="2" width="66" height="66" rx="12" ry="12"></rect>
                                 </svg>
                             </div>
-                            <div class="p-name">${p.name}</div>
-                            <div class="p-hand">${cardsHtml}</div>
+                            <div class="p-name" title="${p.name}">${p.name}</div>
+                            <div class="p-hand">
+                                ${cardsHtml}
+                                ${p.cnt > 0 ? `<div class="card-count">${p.cnt}</div>` : ''}
+                            </div>
                         `;
                         if(isTurn) this.animTimer(wrap.querySelector('.timer-path'), s.tm);
                         oppDiv.appendChild(wrap);
                     }
                 }
 
-                // 2. TABLE
+                // 2. DECK & TRUMP
                 this.safeTxt('deck-n', s.d);
                 const dSlot = document.getElementById('deck-visual');
                 if(dSlot) {
@@ -650,75 +1176,101 @@
 
                 const bitoEl = document.getElementById('bito-visual');
                 if(bitoEl) {
+                    bitoEl.innerHTML = '';
                     if(s.bc > 0) {
-                         bitoEl.innerHTML = '';
-                         const cnt = Math.min(Math.ceil(s.bc/2), 6);
+                         const cnt = Math.min(Math.ceil(s.bc/2), 8);
                          for(let i=0; i<cnt; i++) {
-                            bitoEl.innerHTML += `<div class="deck-stack-card" style="transform:rotate(${Math.random()*20-10}deg); top:${-i*1}px;"></div>`;
+                            const angle = Math.random()*30-15;
+                            bitoEl.innerHTML += `<div class="deck-stack-card" 
+                                style="transform:rotate(${angle}deg); 
+                                       top:${-i*1}px;
+                                       left:${Math.random()*10-5}px;"></div>`;
                          }
-                    } else bitoEl.innerHTML = '<div style="color:rgba(255,255,255,0.2); font-weight:bold; text-align:center; padding-top:40%;">БИТО</div>';
+                    } else {
+                        bitoEl.innerHTML = '<div style="color:rgba(255,255,255,0.2); font-weight:bold; text-align:center; padding-top:40%;">БИТО</div>';
+                    }
                 }
 
-                // 3. SLOTS
+                // 3. TABLE SLOTS WITH OVERLAP
                 const slDiv = document.getElementById('slots-area');
                 if(slDiv) {
                     slDiv.innerHTML='';
                     s.f.forEach((slot, si) => {
-                        const d = document.createElement('div'); d.className='slot';
-                        d.appendChild(this.mkC(slot.att, 'card-att'));
-                        if(slot.def) d.appendChild(this.mkC(slot.def, 'card-def'));
-                        else if(s.t !== myIdx && this.sel!==null) {
+                        const d = document.createElement('div'); 
+                        d.className='slot';
+                        const attCard = this.mkC(slot.att, 'card-att');
+                        d.appendChild(attCard);
+                        
+                        if(slot.def) {
+                            const defCard = this.mkC(slot.def, 'card-def');
+                            d.appendChild(defCard);
+                        } else if(s.t !== myIdx) {
                             const defIdx = (s.t+1)%s.ps.length;
                             if(myIdx === defIdx) {
-                                d.style.boxShadow = "inset 0 0 20px #ff3d00"; d.style.cursor="pointer";
-                                d.onclick = () => { this.act('DEFEND', {i:this.sel, s:si}); this.sel=null; };
+                                d.style.boxShadow = "inset 0 0 0 2px #ff3d00"; 
+                                d.style.borderRadius = "var(--radius)";
+                                d.style.cursor="pointer";
+                                d.onclick = () => { 
+                                    if(this.sel !== null) {
+                                        this.act('DEFEND', {i:this.sel, s:si}); 
+                                    }
+                                };
                             }
                         }
                         slDiv.appendChild(d);
                     });
                 }
 
-                // 4. ME
+                // 4. MY HAND - IMMERSIVE
                 const mh = document.getElementById('my-hand');
                 if(mh) {
                     mh.innerHTML='';
                     const myInfo = s.ps[myIdx];
                     if(myInfo) {
                         const ava = document.getElementById('my-ava');
-                        if(ava) ava.src = `https://robohash.org/${myInfo.ava}.png?set=set4`;
+                        if(ava) {
+                            ava.src = `https://robohash.org/${myInfo.ava}.png?set=set4`;
+                            ava.className = `avatar ${s.t === myIdx ? 'turn' : ''}`;
+                        }
                         this.safeTxt('my-cards-count', `${this.hand.length} карт`);
                     }
 
                     const myTimer = document.getElementById('my-timer');
                     if(myTimer) {
+                        const timerSvg = myTimer.parentElement;
                         if(s.t === myIdx) {
-                            myTimer.parentElement.style.opacity = 1;
+                            timerSvg.style.opacity = 1;
                             this.animTimer(myTimer, s.tm);
-                        } else myTimer.parentElement.style.opacity = 0;
+                        } else {
+                            timerSvg.style.opacity = 0;
+                        }
                     }
 
                     const isMyTurn = (s.t === myIdx);
-                    const isTransferPossible = (myIdx === (s.t+1)%s.ps.length && s.f.length>0 && s.f.every(x=>!x.def));
+                    const isTransferPossible = (this.eng?.transfer && myIdx === (s.t+1)%s.ps.length && s.f.length>0 && s.f.every(x=>!x.def));
 
                     this.hand.forEach((c,i) => {
-                        const w = document.createElement('div'); w.className='my-card';
-                        if(this.sel===i) w.classList.add('sel');
+                        const w = document.createElement('div'); 
+                        w.className='my-card' + (this.sel===i ? ' sel' : '');
                         w.appendChild(this.mkC(c));
                         
                         w.onclick = () => {
                             if(isMyTurn) {
+                                this.sel = i;
                                 this.act('ATTACK', {i}); 
                             } else if(isTransferPossible) {
-                                 this.act('ATTACK', {i});
+                                this.sel = i;
+                                this.act('ATTACK', {i});
                             } else { 
-                                this.sel = (this.sel===i)?null:i; this.draw(); 
+                                this.sel = (this.sel===i) ? null : i; 
+                                this.draw(); 
                             }
                         };
                         mh.appendChild(w);
                     });
                 }
 
-                // 5. STATUS
+                // 5. STATUS & CONTROLS
                 const bB = document.getElementById('btn-bito');
                 const bT = document.getElementById('btn-take');
                 const st = document.getElementById('status-txt');
@@ -728,18 +1280,33 @@
                 if(st) {
                     const isMyTurn = (s.t === myIdx);
                     if(isMyTurn) {
-                        st.innerText = "ВАШ ХОД"; st.style.borderLeftColor = "#2e7d32";
-                        if(s.f.length>0 && s.f.every(x=>x.def)) bB.style.display='block';
+                        st.innerText = "ВАШ ХОД"; 
+                        st.style.borderLeftColor = "#2e7d32";
+                        if(s.f.length>0 && s.f.every(x=>x.def)) {
+                            bB.style.display='block';
+                        }
                     } else {
                         const defIdx = (s.t+1)%s.ps.length;
-                        const isTransferPossible = (myIdx === defIdx && s.f.length>0 && s.f.every(x=>!x.def));
+                        const isTransferPossible = (this.eng?.transfer && myIdx === defIdx && s.f.length>0 && s.f.every(x=>!x.def));
 
                         if(myIdx === defIdx) {
-                            st.innerText = "ОТБИВАЙТЕСЬ"; st.style.borderLeftColor = "#ff3d00";
+                            st.innerText = "ОТБИВАЙТЕСЬ"; 
+                            st.style.borderLeftColor = "#ff3d00";
                             if(s.f.some(x=>!x.def)) bT.style.display='block';
                             if(isTransferPossible) st.innerText = "ОТБЕЙ ИЛИ ПЕРЕВЕДИ";
-                        } else st.innerText = `ХОДИТ: ${s.ps[s.t].name}`;
+                        } else {
+                            const turnPlayer = s.ps[s.t]?.name || 'Игрок';
+                            st.innerText = `ХОДИТ: ${turnPlayer}`;
+                            st.style.borderLeftColor = "#1565c0";
+                        }
                     }
+                }
+
+                // Show action bubble for last action
+                if(s.lastAction && s.lastAction.player !== undefined) {
+                    setTimeout(() => {
+                        this.showActionBubble(s.lastAction.player, s.lastAction.type);
+                    }, 300);
                 }
             },
 
@@ -751,16 +1318,35 @@
             },
 
             animTimer(el, start) {
+                if(!el || !start) return;
                 const dur = 30000;
                 const passed = Date.now() - start;
                 const pct = Math.max(0, (dur - passed) / dur);
                 const offset = 240 * (1 - pct);
                 el.style.strokeDashoffset = offset;
-                if(pct > 0) requestAnimationFrame(() => this.animTimer(el, start));
+                if(pct > 0 && pct <= 1) {
+                    requestAnimationFrame(() => this.animTimer(el, start));
+                }
+            },
+
+            safeTxt(id, txt) {
+                const el = document.getElementById(id);
+                if(el) el.innerText = txt;
             }
         };
 
-        document.getElementById('chat-in').addEventListener('keypress', e=>{if(e.key==='Enter')Game.sendChat()});
+        document.getElementById('chat-in').addEventListener('keypress', e => {
+            if(e.key==='Enter') Game.sendChat();
+        });
+        
+        document.getElementById('chat-in').addEventListener('focus', function() {
+            this.style.background = 'rgba(255,255,255,0.15)';
+        });
+        
+        document.getElementById('chat-in').addEventListener('blur', function() {
+            this.style.background = 'rgba(255,255,255,0.1)';
+        });
+
         Lobby.init();
 
     </script>
