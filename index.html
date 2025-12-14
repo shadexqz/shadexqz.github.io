@@ -3,762 +3,781 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Дурак Онлайн (Classic)</title>
+    <title>Durak Online (Realtime P2P)</title>
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
+
         :root {
-            /* Размеры карт увеличены */
-            --card-w: 100px;
-            --card-h: 145px;
-            --bg-felt: #274e13;
+            --bg-color: #355c7d; /* Цвет фона как на скрине */
+            --card-w: 90px;
+            --card-h: 130px;
+            --accent: #ffb300;
         }
 
         * { box-sizing: border-box; user-select: none; -webkit-tap-highlight-color: transparent; }
         
         body {
             margin: 0;
-            background-color: var(--bg-felt);
-            /* Текстура сукна */
+            font-family: 'Roboto', sans-serif;
+            background-color: var(--bg-color);
             background-image: 
-                radial-gradient(white, rgba(255,255,255,.2) 2px, transparent 3px),
-                radial-gradient(white, rgba(255,255,255,.15) 1px, transparent 2px),
-                radial-gradient(rgba(255,255,255,.1) 2px, transparent 3px);
-            background-size: 550px 550px, 350px 350px, 250px 250px;
-            background-position: 0 0, 40px 60px, 130px 270px;
-            font-family: 'Times New Roman', serif;
-            overflow: hidden;
+                radial-gradient(circle at 50% 50%, #456c8d 0%, #2a4865 100%);
             height: 100vh;
-            color: #fff;
-        }
-
-        /* --- UI ЛОББИ --- */
-        .modal-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.85);
-            display: flex; justify-content: center; align-items: center;
-            z-index: 9999;
-        }
-        .modal {
-            background: #fdfdfd;
-            color: #222;
-            padding: 30px;
-            border-radius: 4px;
-            width: 90%; max-width: 400px;
-            text-align: center;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.7);
-            border: 1px solid #999;
-        }
-        .modal h1 { margin: 0 0 15px; font-family: 'Courier New', monospace; text-transform: uppercase; letter-spacing: 2px; }
-        
-        input[type="text"] {
-            width: 100%; padding: 12px; margin: 10px 0;
-            font-size: 16px; border: 2px solid #333; border-radius: 4px;
-            font-family: monospace; text-align: center;
-        }
-        
-        .btn-main {
-            background: #d32f2f; color: #fff;
-            border: 2px solid #b71c1c;
-            padding: 12px 25px; font-size: 18px; font-weight: bold;
-            cursor: pointer; width: 100%; margin-top: 5px;
-            text-transform: uppercase;
-            box-shadow: 0 4px 0 #b71c1c;
-            transition: all 0.1s;
-        }
-        .btn-main:active { transform: translateY(4px); box-shadow: 0 0 0 #b71c1c; }
-        .btn-main:disabled { background: #999; border-color: #777; box-shadow: none; transform: none; cursor: not-allowed;}
-
-        /* --- ИГРОВОЕ ПОЛЕ --- */
-        #game-app {
-            display: none; /* Скрыто до старта */
+            overflow: hidden;
+            color: white;
+            display: flex;
             flex-direction: column;
-            height: 100%;
         }
 
-        /* Зона соперника */
-        .top-area {
-            height: 160px;
-            display: flex; justify-content: center; align-items: flex-start;
-            padding-top: 10px;
+        /* --- КАРТЫ (SVG) --- */
+        .card {
+            width: var(--card-w);
+            height: var(--card-h);
+            border-radius: 6px;
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.4);
             position: relative;
+            transition: transform 0.2s, margin 0.2s;
+            cursor: pointer;
+            background-color: white; /* подложка */
+        }
+        
+        .card:hover { transform: translateY(-10px); z-index: 50; }
+        .card.selected { transform: translateY(-20px); box-shadow: 0 0 10px var(--accent); z-index: 51; border: 2px solid var(--accent); }
+        
+        /* Хак для русификации букв (J, Q, K, A -> В, Д, К, Т) */
+        .card[data-rank="J"]::after { content: "В"; position: absolute; top:3px; left:4px; font-weight:bold; font-size:18px; color:inherit; background:white; padding:0 2px; line-height:1; }
+        .card[data-rank="Q"]::after { content: "Д"; position: absolute; top:3px; left:4px; font-weight:bold; font-size:18px; color:inherit; background:white; padding:0 2px; line-height:1; }
+        .card[data-rank="K"]::after { content: "К"; position: absolute; top:3px; left:4px; font-weight:bold; font-size:18px; color:inherit; background:white; padding:0 2px; line-height:1; }
+        .card[data-rank="A"]::after { content: "Т"; position: absolute; top:3px; left:4px; font-weight:bold; font-size:18px; color:inherit; background:white; padding:0 2px; line-height:1; }
+        
+        /* Цвет текста для хака */
+        .card.red::after { color: #d40000; }
+        .card.black::after { color: #2d2d2d; }
+
+        /* Рубашка */
+        .card-back {
+            background-image: url('https://raw.githubusercontent.com/htdebeer/SVG-cards/master/png/1x/back-red.png');
+            background-size: cover;
         }
 
-        /* Стол */
+        /* --- ЛОББИ (Стекло) --- */
+        #lobby {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.6);
+            backdrop-filter: blur(8px);
+            z-index: 9999;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .panel {
+            background: rgba(255, 255, 255, 0.95);
+            color: #333;
+            padding: 40px;
+            border-radius: 20px;
+            text-align: center;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+            max-width: 400px; width: 90%;
+        }
+        .btn {
+            background: linear-gradient(to bottom, #4caf50, #388e3c);
+            border: none; color: white;
+            padding: 15px 30px; font-size: 18px; font-weight: bold;
+            border-radius: 50px; cursor: pointer;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+            margin: 10px 0; width: 100%;
+            transition: transform 0.1s;
+        }
+        .btn:active { transform: scale(0.98); }
+        .btn.secondary { background: linear-gradient(to bottom, #2196f3, #1976d2); }
+        input.input-box {
+            width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #ccc;
+            margin-bottom: 10px; font-size: 16px; text-align: center;
+        }
+
+        /* --- ИГРОВОЙ ИНТЕРФЕЙС --- */
+        #game-board {
+            display: none; flex-direction: column; height: 100%; position: relative;
+        }
+
+        /* Верхняя панель (Соперник) */
+        .top-bar {
+            height: 120px;
+            display: flex; justify-content: center; align-items: center;
+            position: relative;
+            background: linear-gradient(to bottom, rgba(0,0,0,0.3), transparent);
+        }
+        .avatar-zone {
+            display: flex; flex-direction: column; align-items: center;
+            margin: 0 20px;
+        }
+        .avatar {
+            width: 60px; height: 60px; border-radius: 50%;
+            background: #ddd; border: 3px solid #fff;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+        .avatar img { width: 100%; height: 100%; object-fit: cover; }
+        .player-name { font-size: 14px; font-weight: bold; margin-top: 5px; text-shadow: 1px 1px 2px black; }
+        
+        /* Рука соперника */
+        .opp-hand { display: flex; margin-left: 20px; height: 80px; align-items: center; }
+        .opp-card {
+            width: 50px; height: 75px; 
+            background-image: url('https://raw.githubusercontent.com/htdebeer/SVG-cards/master/png/1x/back-red.png');
+            background-size: cover;
+            border-radius: 4px;
+            margin-left: -35px;
+            box-shadow: -2px 0 5px rgba(0,0,0,0.3);
+            border: 1px solid white;
+        }
+
+        /* Стол (Центр) */
         .table-area {
             flex: 1;
             position: relative;
             display: flex; justify-content: center; align-items: center;
         }
+        .field-row {
+            display: flex; gap: 15px;
+            min-height: var(--card-h);
+            padding: 20px;
+        }
+        .slot {
+            position: relative;
+            width: var(--card-w); height: var(--card-h);
+        }
+        /* Карта атаки */
+        .slot .card:nth-child(1) { position: absolute; top:0; left:0; z-index: 10; cursor: default; }
+        /* Карта защиты (с поворотом) */
+        .slot .card:nth-child(2) { position: absolute; top:15px; left:10px; z-index: 11; transform: rotate(10deg); cursor: default; }
+        .slot:hover .card { transform: none; } /* Отключаем ховер на столе */
 
-        /* Моя рука */
-        .bottom-area {
+        /* Колода и Козырь */
+        .deck-zone {
+            position: absolute; left: 20px; top: 50%; transform: translateY(-50%);
+            display: flex; align-items: center;
+        }
+        .trump-card-el {
+            transform: rotate(90deg); margin-right: -40px; margin-bottom: -10px;
+        }
+        .deck-stack {
+            z-index: 5;
+            position: relative;
+        }
+        .deck-badge {
+            position: absolute; top: -15px; right: -10px;
+            background: red; color: white; font-weight: bold;
+            border-radius: 50%; width: 24px; height: 24px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 12px; z-index: 20; border: 2px solid white;
+        }
+
+        /* Рука игрока */
+        .player-hand {
             height: 180px;
             display: flex; justify-content: center; align-items: flex-end;
             padding-bottom: 20px;
-            z-index: 10;
+            /* Смещение карт веером */
+            perspective: 1000px;
         }
+        .my-card-wrapper {
+            margin-right: -40px;
+            transition: 0.3s;
+        }
+        .my-card-wrapper:last-child { margin-right: 0; }
+        .my-card-wrapper:hover { margin-bottom: 15px; margin-right: -10px; z-index: 100; }
 
-        /* --- КАРТЫ (Стиль "Атлас") --- */
-        .card {
-            width: var(--card-w);
-            height: var(--card-h);
-            background: #fcfcfc;
-            border-radius: 8px;
-            position: relative;
-            box-shadow: 2px 2px 5px rgba(0,0,0,0.4);
-            display: flex; flex-direction: column; justify-content: space-between;
-            padding: 5px;
-            margin: 0 -35px; /* Наложение карт веером */
-            transition: transform 0.2s, margin 0.2s;
-            cursor: pointer;
-            border: 1px solid #ccc;
+        /* Кнопки действий */
+        .actions-ui {
+            position: absolute; right: 20px; bottom: 180px;
+            display: flex; flex-direction: column; align-items: flex-end; gap: 10px;
         }
-        
-        .card:hover { transform: translateY(-15px); z-index: 100; }
-        .card.selected { transform: translateY(-25px); border: 2px solid #ffeb3b; z-index: 101; }
-        
-        .card.red { color: #d60000; }
-        .card.black { color: #111; }
-
-        /* Типографика карты */
-        .rank-tl { font-size: 24px; font-weight: bold; line-height: 1; text-align: center; }
-        .suit-tl { font-size: 20px; line-height: 1; text-align: center; }
-        
-        .rank-br { font-size: 24px; font-weight: bold; line-height: 1; text-align: center; transform: rotate(180deg); }
-        .suit-br { font-size: 20px; line-height: 1; text-align: center; transform: rotate(180deg); }
-
-        .center-suit {
-            position: absolute; top: 50%; left: 50%;
-            transform: translate(-50%, -50%);
-            font-size: 50px;
-        }
-
-        /* Рубашка ("Сетка") */
-        .card-back {
-            background-color: #fff;
-            background-image: 
-                linear-gradient(45deg, #d32f2f 25%, transparent 25%, transparent 75%, #d32f2f 75%, #d32f2f),
-                linear-gradient(45deg, #d32f2f 25%, transparent 25%, transparent 75%, #d32f2f 75%, #d32f2f);
-            background-size: 10px 10px;
-            background-position: 0 0, 5px 5px;
-            border: 4px solid white;
-        }
-        .card-back * { display: none; }
-
-        /* Карты на столе */
-        .field-slot {
-            width: var(--card-w); height: var(--card-h);
-            margin: 0 10px;
-            position: relative;
-        }
-        .field-card { position: absolute; top:0; left:0; margin:0; }
-        .field-card:nth-child(2) { top: 20px; left: 15px; transform: rotate(8deg); z-index: 5; }
-        .field-card:hover { transform: none; } /* На столе карты не прыгают */
-
-        /* Колода и козырь */
-        .deck-container {
-            position: absolute; left: 20px; top: 50%; transform: translateY(-50%);
-            width: var(--card-w); height: var(--card-h);
-        }
-        .trump {
-            position: absolute; left: 20px; top: 10px;
-            transform: rotate(90deg); z-index: 1;
-        }
-        .deck-stack {
-            position: absolute; top: 0; left: 0; z-index: 2;
-        }
-        .deck-counter {
-            position: absolute; top: -30px; width: 100%;
-            text-align: center; background: rgba(0,0,0,0.5);
-            border-radius: 10px; padding: 2px; font-size: 14px;
-        }
-
-        /* --- ИНТЕРФЕЙС УПРАВЛЕНИЯ --- */
-        .game-controls {
-            position: absolute; right: 20px; top: 50%; transform: translateY(-50%);
-            display: flex; flex-direction: column; gap: 15px;
-            align-items: flex-end;
-        }
-        .status-msg {
-            background: rgba(0,0,0,0.6); padding: 10px 20px;
-            border-radius: 4px; font-size: 18px; color: #fff;
-            text-align: right;
-            border-left: 4px solid #fff;
+        .game-status {
+            background: rgba(0,0,0,0.7); padding: 8px 16px; border-radius: 8px;
+            font-size: 16px; margin-bottom: 5px;
         }
         .action-btn {
-            padding: 15px 40px; font-size: 20px; font-weight: bold;
-            border-radius: 30px; border: none; cursor: pointer;
-            box-shadow: 0 5px 10px rgba(0,0,0,0.5);
-            display: none; /* Скрыта по умолчанию */
+            width: 80px; height: 80px;
+            border-radius: 12px; border: none;
+            font-weight: bold; color: white; font-size: 14px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.4);
+            cursor: pointer; display: none;
+            background-size: 40px; background-position: center 10px; background-repeat: no-repeat;
+            padding-top: 40px;
         }
-        .btn-take { background: #ff9800; color: #000; }
-        .btn-bito { background: #d32f2f; color: #fff; }
+        .btn-bito { background-color: #d32f2f; } /* Красная */
+        .btn-take { background-color: #f57c00; } /* Оранжевая */
+        .btn-pass { background-color: #388e3c; } /* Зеленая */
 
-        /* --- ЧАТ --- */
-        #chat-wrap {
+        /* ЧАТ */
+        #chat-btn-toggle {
             position: absolute; top: 10px; right: 10px;
-            width: 300px; height: 180px;
-            display: flex; flex-direction: column;
-            pointer-events: none; /* Чтобы клики сквозь него проходили на поле, если пусто */
+            background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.3);
+            color: white; width: 40px; height: 40px; border-radius: 50%;
+            cursor: pointer; z-index: 200; font-size: 20px;
         }
-        #chat-log {
-            flex: 1; overflow-y: auto; 
-            padding-right: 5px;
-            display: flex; flex-direction: column; justify-content: flex-end;
-            margin-bottom: 5px;
-            /* Скроллбар */
-            scrollbar-width: thin;
-            scrollbar-color: rgba(255,255,255,0.3) transparent;
+        .chat-box {
+            position: absolute; top: 60px; right: 10px; width: 280px; height: 200px;
+            background: rgba(30, 30, 30, 0.9); border-radius: 8px;
+            display: none; flex-direction: column; z-index: 200;
+            border: 1px solid #555; font-size: 13px;
         }
-        .msg {
-            background: rgba(0,0,0,0.5);
-            padding: 4px 8px; margin-bottom: 4px; border-radius: 4px;
-            color: white; font-size: 14px; align-self: flex-end;
-            pointer-events: auto;
-            max-width: 100%;
-            word-wrap: break-word;
+        .chat-visible { display: flex; }
+        .chat-msgs {
+            flex: 1; overflow-y: auto; padding: 10px;
+            color: #ddd;
         }
-        .msg.opp { background: rgba(211, 47, 47, 0.6); align-self: flex-start; }
-        .msg.sys { background: rgba(255, 193, 7, 0.4); color: #fff; align-self: center; font-style: italic; font-size: 12px;}
-
-        #chat-controls {
-            display: flex; pointer-events: auto; background: rgba(0,0,0,0.5); border-radius: 4px;
+        .chat-msg { margin-bottom: 4px; word-break: break-word; }
+        .chat-msg b { color: var(--accent); }
+        .chat-input-area {
+            display: flex; border-top: 1px solid #555;
         }
-        #chat-input {
-            flex: 1; background: transparent; border: none; color: white; padding: 8px; outline: none;
+        .chat-input {
+            flex: 1; background: transparent; border: none; color: white; padding: 10px; outline: none;
         }
-        #chat-send {
-            background: #4caf50; border: none; color: white; padding: 0 15px; cursor: pointer; font-weight: bold;
+        .chat-send {
+            background: var(--accent); border: none; color: black; font-weight: bold;
+            padding: 0 15px; cursor: pointer;
+        }
+        .unread-dot {
+            position: absolute; top: 0; right: 0; width: 12px; height: 12px; background: red; border-radius: 50%; border: 2px solid white; display: none;
         }
 
-        /* --- АДАПТИВ ДЛЯ МОБИЛ --- */
+        /* Адаптив */
         @media (max-width: 600px) {
-            :root { --card-w: 65px; --card-h: 96px; }
-            .card { margin: 0 -20px; }
-            .rank-tl, .rank-br { font-size: 16px; }
-            .suit-tl, .suit-br { font-size: 14px; }
-            .center-suit { font-size: 30px; }
-            
-            .game-controls { bottom: 200px; top: auto; right: 10px; }
-            .deck-container { left: 10px; }
-            #chat-wrap { width: 220px; height: 120px; top: 5px; right: 5px; }
-            .msg { font-size: 11px; }
-            
-            .top-area { height: 110px; }
-            .bottom-area { height: 120px; }
-            .field-slot { margin: 0 2px; }
+            :root { --card-w: 60px; --card-h: 90px; }
+            .opp-card { width: 30px; height: 45px; margin-left: -20px; }
+            .player-hand { height: 130px; }
+            .actions-ui { bottom: 140px; }
+            .action-btn { width: 60px; height: 60px; font-size: 11px; padding-top: 0; display: flex; justify-content: center; align-items: center; }
         }
     </style>
 </head>
 <body>
 
     <!-- ЛОББИ -->
-    <div id="lobby" class="modal-overlay">
-        <div class="modal">
-            <h1>ДУРАК ОНЛАЙН</h1>
-            <div id="menu-main">
-                <button class="btn-main" onclick="App.createGame()">Создать игру</button>
-                <div style="margin: 15px 0; font-style: italic; color:#666;">- или -</div>
-                <input type="text" id="join-id" placeholder="Вставьте ID игры">
-                <button class="btn-main" style="background:#4caf50; border-color:#388e3c;" onclick="App.joinGame()">Войти</button>
+    <div id="lobby">
+        <div class="panel">
+            <h1 style="margin:0 0 20px 0; color:#355c7d;">DURAK P2P</h1>
+            <div id="lobby-menu">
+                <input type="text" id="my-name" class="input-box" placeholder="Ваше имя" value="Игрок">
+                <button class="btn" onclick="App.hostGame()">Создать стол</button>
+                <div style="margin:10px; opacity:0.5">- или -</div>
+                <input type="text" id="join-id" class="input-box" placeholder="ID стола">
+                <button class="btn secondary" onclick="App.joinGame()">Присоединиться</button>
             </div>
-            
-            <div id="menu-host" style="display:none;">
-                <p>Отправьте эту ссылку другу:</p>
-                <input type="text" id="invite-link" readonly onclick="this.select()">
-                <p style="font-size: 14px; color: #555;" id="status-text">Ожидание подключения...</p>
-                <button class="btn-main" style="background:#777; border-color:#555;" onclick="location.reload()">Отмена</button>
+            <div id="lobby-wait" style="display:none;">
+                <h3>Ожидание соперника...</h3>
+                <p>Отправьте ID другу:</p>
+                <input type="text" id="host-id-display" class="input-box" readonly onclick="this.select()">
+                <div class="loader">⌛</div>
             </div>
         </div>
     </div>
 
     <!-- ИГРА -->
-    <div id="game-app">
-        <!-- Чат -->
-        <div id="chat-wrap">
-            <div id="chat-log"></div>
-            <div id="chat-controls">
-                <input type="text" id="chat-input" placeholder="Чат (Enter)..." onkeydown="if(event.key==='Enter') App.sendChat()">
-                <button id="chat-send" onclick="App.sendChat()">></button>
+    <div id="game-board">
+        <!-- Кнопка чата -->
+        <button id="chat-btn-toggle" onclick="UI.toggleChat()">💬<div class="unread-dot" id="chat-dot"></div></button>
+        <div class="chat-box" id="chat-window">
+            <div class="chat-msgs" id="chat-history">
+                <div class="chat-msg" style="color:#aaa;"><i>Чат игры...</i></div>
+            </div>
+            <div class="chat-input-area">
+                <input type="text" class="chat-input" id="chat-in" placeholder="Сообщение..." onkeypress="if(event.key==='Enter') App.sendChat()">
+                <button class="chat-send" onclick="App.sendChat()">➤</button>
             </div>
         </div>
 
-        <!-- Рука соперника -->
-        <div class="top-area" id="opp-hand"></div>
+        <!-- Верх: Соперник -->
+        <div class="top-bar">
+            <div class="avatar-zone">
+                <div class="avatar"><img src="https://robohash.org/opponent?set=set4" alt="Opp"></div>
+                <div class="player-name" id="opp-name">Соперник</div>
+            </div>
+            <div class="opp-hand" id="opp-hand-container">
+                <!-- Карты соперника -->
+            </div>
+        </div>
 
-        <!-- Стол -->
+        <!-- Центр: Стол -->
         <div class="table-area">
             <!-- Колода -->
-            <div class="deck-container">
-                <div id="deck-count" class="deck-counter">36</div>
-                <div id="trump-card"></div> <!-- Сюда рендерится козырь -->
-                <div id="deck-top" class="card card-back deck-stack"></div>
+            <div class="deck-zone">
+                <div id="trump-slot" class="trump-card-el"></div>
+                <div id="deck-slot" class="card card-back deck-stack"></div>
+                <div class="deck-badge" id="deck-count">36</div>
+            </div>
+            
+            <!-- Поле битвы -->
+            <div class="field-row" id="field-container">
+                <!-- Слоты -->
             </div>
 
-            <!-- Карты в игре -->
-            <div id="field-slots" style="display:flex; justify-content: center;"></div>
-            
-            <!-- Кнопки и статус -->
-            <div class="game-controls">
-                <div id="game-status" class="status-msg">Ожидание...</div>
-                <button id="btn-action" class="action-btn" onclick="App.doAction()">БИТО</button>
+            <!-- UI Действий -->
+            <div class="actions-ui">
+                <div class="game-status" id="status-text">Ожидание хода...</div>
+                <button class="action-btn btn-bito" id="btn-bito" onclick="App.doAction('BITO')">БИТО</button>
+                <button class="action-btn btn-take" id="btn-take" onclick="App.doAction('TAKE')">ВЗЯТЬ</button>
             </div>
         </div>
 
-        <!-- Моя рука -->
-        <div class="bottom-area" id="my-hand"></div>
+        <!-- Низ: Я -->
+        <div class="player-hand" id="my-hand-container">
+            <!-- Мои карты -->
+        </div>
+        <div style="position: absolute; bottom: 10px; left: 10px; display: flex; align-items: center; gap:10px;">
+            <div class="avatar" style="width: 50px; height: 50px;"><img src="https://robohash.org/me?set=set4" alt="Me"></div>
+            <div class="player-name" id="my-name-display">Я</div>
+        </div>
     </div>
 
     <script>
-        // --- ДАННЫЕ КАРТ ---
-        const SUITS = ['♠', '♣', '♥', '♦'];
+        // --- ДАННЫЕ И УТИЛИТЫ ---
+        // Используем SVG карты из open source репозитория
+        const SUITS = ['S', 'C', 'H', 'D']; // Spades, Clubs, Hearts, Diamonds
         const RANKS = ['6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A'];
-        // Русские названия для отображения
-        const DISPLAY = {
-            '6':'6', '7':'7', '8':'8', '9':'9', '10':'10', 
-            'J':'В', 'Q':'Д', 'K':'К', 'A':'Т'
+        
+        // Генерация URL для SVG карты
+        // Используем rawgit или аналогичный CDN для карт
+        const getCardUrl = (rank, suit) => {
+            // Формат имен файлов в репозитории: 6H.svg, KD.svg, etc.
+            // Репо: https://github.com/htdebeer/SVG-cards
+            return `https://raw.githubusercontent.com/htdebeer/SVG-cards/master/svg/${rank}${suit}.svg`;
         };
 
-        function isRed(suit) { return suit === '♥' || suit === '♦'; }
+        const getSuitSymbol = (s) => {
+            if(s==='S') return '♠'; if(s==='C') return '♣';
+            if(s==='H') return '♥'; if(s==='D') return '♦';
+        };
 
-        // --- ЛОГИКА ИГРЫ (Движок) ---
-        class DurakGame {
+        const isRed = (s) => s==='H' || s==='D';
+
+        // --- ЛОГИКА ДУРАКА (Engine) ---
+        class GameEngine {
             constructor() {
                 this.deck = [];
                 this.trump = null;
                 this.hands = { host: [], client: [] };
-                this.field = []; // {attack: card, defend: card|null}
-                this.turn = 'host'; // чей ход (кто атакует)
-                this.stage = 'lobby'; 
-                this.winner = null;
+                this.field = []; 
+                this.turn = 'host';
+                this.gameOver = false;
+                this.names = { host: 'Host', client: 'Client' };
             }
 
-            start() {
-                // Генерация колоды
+            init(hostName, clientName) {
+                this.names.host = hostName;
+                this.names.client = clientName;
                 this.deck = [];
-                SUITS.forEach(s => RANKS.forEach(r => this.deck.push({r, s})));
-                // Тасовка
-                this.deck.sort(() => Math.random() - 0.5);
-                
-                // Раздача по 6
+                SUITS.forEach(s => RANKS.forEach(r => this.deck.push({r, s, id: r+s})));
+                this.deck.sort(() => Math.random() - 0.5); // Shuffle
+
                 this.hands.host = this.deck.splice(0, 6);
                 this.hands.client = this.deck.splice(0, 6);
                 
-                // Козырь
-                this.trump = this.deck.pop(); // Последняя карта
-                this.deck.unshift(this.trump); // Кладем в НАЧАЛО массива (низ колоды визуально)
-                
-                // Определение первого хода
+                this.trump = this.deck.pop();
+                this.deck.unshift(this.trump); // В массив в начало (низ колоды)
+
+                // Кто первый ходит (у кого меньший козырь)
                 let minH = 100, minC = 100;
                 const val = c => RANKS.indexOf(c.r);
-                
                 this.hands.host.forEach(c => { if(c.s === this.trump.s && val(c) < minH) minH = val(c); });
                 this.hands.client.forEach(c => { if(c.s === this.trump.s && val(c) < minC) minC = val(c); });
                 
-                this.turn = (minC < minH) ? 'client' : 'host';
-                this.stage = 'game';
+                this.turn = (minC < minH && minC !== 100) ? 'client' : 'host';
             }
 
-            // Проверка: бьет ли c1 карту c2
-            canBeat(attack, defend) {
-                if (defend.s === attack.s) return RANKS.indexOf(defend.r) > RANKS.indexOf(attack.r);
-                return defend.s === this.trump.s;
+            canBeat(att, def) {
+                if (def.s === att.s) return RANKS.indexOf(def.r) > RANKS.indexOf(att.r);
+                return def.s === this.trump.s;
             }
 
             attack(player, cardIdx) {
-                if (player !== this.turn) return false;
-                const card = this.hands[player][cardIdx];
+                if(player !== this.turn) return false;
+                const hand = this.hands[player];
+                if(!hand[cardIdx]) return false;
+                const card = hand[cardIdx];
 
-                // Если поле не пустое, ранг должен совпадать
-                if (this.field.length > 0) {
-                    const ranks = new Set();
-                    this.field.forEach(pair => {
-                        ranks.add(pair.attack.r);
-                        if(pair.defend) ranks.add(pair.defend.r);
-                    });
-                    if (!ranks.has(card.r)) return false;
+                if(this.field.length > 0) {
+                    // Подкидной: ранг должен быть на столе
+                    const ranks = new Set(this.field.flatMap(p => [p.att.r, p.def?.r].filter(Boolean)));
+                    if(!ranks.has(card.r)) return false;
                 }
 
-                // Лимиты (макс 6 пар или кол-во карт у защищающегося)
-                const defPlayer = player === 'host' ? 'client' : 'host';
-                const unbeaten = this.field.filter(p => !p.defend).length;
-                if (unbeaten >= this.hands[defPlayer].length && this.field.length > 0) return false;
-                if (this.field.length >= 6) return false;
+                // Лимит 6 или карт защищающегося
+                const defPlayer = player==='host'?'client':'host';
+                const unbeat = this.field.filter(p=>!p.def).length;
+                if(unbeat >= this.hands[defPlayer].length) return false;
+                if(this.field.length >= 6) return false;
 
-                // Ход
-                this.hands[player].splice(cardIdx, 1);
-                this.field.push({ attack: card, defend: null });
+                hand.splice(cardIdx, 1);
+                this.field.push({ att: card, def: null });
                 return true;
             }
 
             defend(player, cardIdx, slotIdx) {
-                if (player === this.turn) return false; // Защищается тот, чей сейчас НЕ ход
-                if (!this.field[slotIdx] || this.field[slotIdx].defend) return false;
-
-                const attCard = this.field[slotIdx].attack;
-                const defCard = this.hands[player][cardIdx];
-
-                if (this.canBeat(attCard, defCard)) {
+                if(player === this.turn) return false;
+                const slot = this.field[slotIdx];
+                if(!slot || slot.def) return false;
+                
+                const card = this.hands[player][cardIdx];
+                if(this.canBeat(slot.att, card)) {
                     this.hands[player].splice(cardIdx, 1);
-                    this.field[slotIdx].defend = defCard;
+                    slot.def = card;
                     return true;
                 }
                 return false;
             }
 
             bito(player) {
-                if (player !== this.turn) return false;
-                // Нельзя бито если пусто или не все побиты
-                if (this.field.length === 0 || this.field.some(p => !p.defend)) return false;
-
+                if(player !== this.turn) return false;
+                if(this.field.length === 0 || this.field.some(p => !p.def)) return false;
+                
                 this.field = [];
-                this.drawPhase();
-                this.turn = (this.turn === 'host') ? 'client' : 'host'; // Смена хода
+                this.drawCards();
+                this.turn = this.turn==='host'?'client':'host';
                 this.checkWin();
                 return true;
             }
 
             take(player) {
-                if (player === this.turn) return false; // Берет защищающийся
+                if(player === this.turn) return false;
                 
-                // Забирает всё
                 this.field.forEach(p => {
-                    this.hands[player].push(p.attack);
-                    if(p.defend) this.hands[player].push(p.defend);
+                    this.hands[player].push(p.att);
+                    if(p.def) this.hands[player].push(p.def);
                 });
                 this.field = [];
-                this.drawPhase(true); // Только атакующий добирает
-                // Ход остается у атакующего (игрок пропускает ход)
+                this.drawCards(true); // Только атакующий добирает
+                // Ход не меняется (атакующий тот же)
                 this.checkWin();
                 return true;
             }
 
-            drawPhase(skipDefender = false) {
-                const attacker = this.turn;
-                const defender = attacker === 'host' ? 'client' : 'host';
-                
-                // Сначала атакующий
-                while(this.hands[attacker].length < 6 && this.deck.length > 0) {
-                    this.hands[attacker].push(this.deck.pop()); // Берем с конца (верх колоды)
-                }
-                if (!skipDefender) {
-                    while(this.hands[defender].length < 6 && this.deck.length > 0) {
-                        this.hands[defender].push(this.deck.pop());
+            drawCards(skipDefender = false) {
+                const att = this.turn;
+                const def = att==='host'?'client':'host';
+                const fill = (p) => {
+                    while(this.hands[p].length < 6 && this.deck.length > 0) {
+                        this.hands[p].push(this.deck.pop()); // Берем сверху (конец массива)
                     }
-                }
+                };
+                fill(att);
+                if(!skipDefender) fill(def);
             }
 
             checkWin() {
-                if (this.deck.length === 0) {
-                    if (this.hands.host.length === 0) this.winner = 'host';
-                    else if (this.hands.client.length === 0) this.winner = 'client';
+                if(this.deck.length === 0) {
+                    if(this.hands.host.length === 0) this.gameOver = 'host';
+                    else if(this.hands.client.length === 0) this.gameOver = 'client';
                 }
             }
 
             getState() {
                 return {
                     trump: this.trump,
-                    deckSize: this.deck.length,
-                    handsSizes: { host: this.hands.host.length, client: this.hands.client.length },
+                    deckCount: this.deck.length,
                     field: this.field,
                     turn: this.turn,
-                    winner: this.winner
+                    handsCounts: { host: this.hands.host.length, client: this.hands.client.length },
+                    gameOver: this.gameOver,
+                    names: this.names
                 };
             }
         }
 
-        // --- СЕТЬ И UI ---
+        // --- NETWORK & CONTROLLER ---
         const App = {
             peer: null,
             conn: null,
-            role: null, // 'host' | 'client'
-            game: null, // Only exists on Host
-            myHand: [], // Local copy
-            selectedCardIdx: null,
-            lastState: null,
+            role: null, // 'host' or 'client'
+            name: 'Player',
+            game: null, // Exists only on Host
+            state: null,
+            myHand: [],
+            selIdx: null, // Selected card index
 
             init() {
                 const url = new URLSearchParams(window.location.search);
                 if(url.has('game')) {
                     document.getElementById('join-id').value = url.get('game');
-                    this.joinGame();
                 }
             },
 
-            createGame() {
+            hostGame() {
                 this.role = 'host';
-                this.game = new DurakGame();
-                this.peer = new Peer();
+                this.name = document.getElementById('my-name').value || 'Host';
+                this.game = new GameEngine();
                 
+                this.peer = new Peer();
                 this.peer.on('open', id => {
-                    document.getElementById('menu-main').style.display = 'none';
-                    document.getElementById('menu-host').style.display = 'block';
-                    document.getElementById('invite-link').value = location.origin + location.pathname + '?game=' + id;
+                    document.getElementById('lobby-menu').style.display = 'none';
+                    document.getElementById('lobby-wait').style.display = 'block';
+                    document.getElementById('host-id-display').value = id;
                 });
 
                 this.peer.on('connection', conn => {
                     this.conn = conn;
-                    this.setupConnection();
+                    this.setupConn();
                 });
             },
 
             joinGame() {
                 const id = document.getElementById('join-id').value;
-                if(!id) return alert("Введите ID!");
-                
+                if(!id) return alert("Введите ID");
                 this.role = 'client';
+                this.name = document.getElementById('my-name').value || 'Client';
+                
                 this.peer = new Peer();
-                this.peer.on('open', myId => {
+                this.peer.on('open', () => {
                     this.conn = this.peer.connect(id);
-                    this.setupConnection();
+                    this.setupConn();
                 });
             },
 
-            setupConnection() {
-                // Если мы клиент - при открытии шлем READY
+            setupConn() {
                 this.conn.on('open', () => {
-                    document.getElementById('lobby').style.display = 'none';
-                    document.getElementById('game-app').style.display = 'flex';
-                    this.logChat('System', 'Подключено к игре!');
-                    
-                    if (this.role === 'client') {
-                        this.conn.send({ type: 'READY' });
+                    // Handshake: Client отправляет имя
+                    if(this.role === 'client') {
+                        this.conn.send({ type: 'HI', name: this.name });
                     }
                 });
 
                 this.conn.on('data', data => {
-                    // Обработка входящих
-                    switch(data.type) {
-                        case 'READY': // Только для Хоста
-                            if(this.role === 'host') {
-                                this.game.start();
-                                this.sync();
-                                this.logChat('System', 'Игрок подключился. Игра началась!');
-                            }
-                            break;
-                        case 'STATE': // Прилетело состояние
-                            this.lastState = data.state;
-                            this.myHand = data.hand;
-                            this.render();
-                            break;
-                        case 'ACTION': // Только для Хоста
-                            if(this.role === 'host') this.handleHostAction(data);
-                            break;
-                        case 'CHAT':
-                            this.logChat('Opponent', data.msg);
-                            break;
+                    if(data.type === 'HI' && this.role === 'host') {
+                        // Host receives name, starts game
+                        this.game.init(this.name, data.name);
+                        this.sync();
+                        UI.startGame();
+                    }
+                    else if(data.type === 'SYNC') {
+                        this.state = data.state;
+                        this.myHand = data.hand;
+                        if(!UI.gameRunning) UI.startGame();
+                        UI.render();
+                    }
+                    else if(data.type === 'ACT' && this.role === 'host') {
+                        this.handleAct(data);
+                    }
+                    else if(data.type === 'CHAT') {
+                        UI.addChatMsg(data.sender, data.msg);
                     }
                 });
-
-                this.conn.on('close', () => alert("Соединение разорвано!"));
-                this.conn.on('error', err => alert("Ошибка сети: " + err));
+                
+                this.conn.on('close', () => alert("Связь потеряна"));
             },
 
-            // Логика Хоста по обработке действий
-            handleHostAction(data) {
+            handleAct(data) {
+                // Host logic wrapper
                 let ok = false;
-                const p = data.player;
-                if (data.act === 'ATTACK') ok = this.game.attack(p, data.idx);
-                if (data.act === 'DEFEND') ok = this.game.defend(p, data.idx, data.slot);
-                if (data.act === 'BITO') ok = this.game.bito(p);
-                if (data.act === 'TAKE') ok = this.game.take(p);
-                
+                const p = data.p;
+                if(data.act === 'ATTACK') ok = this.game.attack(p, data.idx);
+                else if(data.act === 'DEFEND') ok = this.game.defend(p, data.idx, data.slot);
+                else if(data.act === 'BITO') ok = this.game.bito(p);
+                else if(data.act === 'TAKE') ok = this.game.take(p);
+
                 if(ok) this.sync();
-                // Если не ok - просто игнорируем, клиент останется при своем
             },
 
-            // Отправка состояния всем
             sync() {
-                const state = this.game.getState();
+                if(this.role !== 'host') return;
+                const common = this.game.getState();
                 
-                // Хосту рендерим сразу
-                this.lastState = state;
+                // Update Self
+                this.state = common;
                 this.myHand = this.game.hands.host;
-                this.render();
+                UI.render();
 
-                // Клиенту шлем его руку и общее состояние
-                if(this.conn && this.conn.open) {
-                    this.conn.send({
-                        type: 'STATE',
-                        state: state,
-                        hand: this.game.hands.client
-                    });
-                }
+                // Send to Client
+                this.conn.send({
+                    type: 'SYNC',
+                    state: common,
+                    hand: this.game.hands.client
+                });
             },
 
-            // Действия Игрока (UI -> Network)
-            userAction(act, payload={}) {
+            sendAct(act, payload={}) {
                 if(this.role === 'host') {
-                    this.handleHostAction({ player: 'host', act, ...payload });
+                    this.handleAct({ p: 'host', act, ...payload });
                 } else {
-                    this.conn.send({ type: 'ACTION', player: 'client', act, ...payload });
+                    this.conn.send({ type: 'ACT', p: 'client', act, ...payload });
                 }
             },
 
-            // UI Render
-            render() {
-                const s = this.lastState;
-                if(!s) return;
+            sendChat() {
+                const input = document.getElementById('chat-in');
+                const txt = input.value.trim();
+                if(!txt) return;
+                
+                // Show locally
+                UI.addChatMsg('Я', txt);
+                // Send
+                if(this.conn) this.conn.send({ type: 'CHAT', sender: this.name, msg: txt });
+                input.value = '';
+            },
 
-                if(s.winner) {
-                    alert(s.winner === this.role ? "ПОБЕДА!" : "ДУРАК!");
-                    location.href = location.pathname; // Рестарт
+            doAction(type) {
+                this.sendAct(type);
+            }
+        };
+
+        // --- UI RENDERER ---
+        const UI = {
+            gameRunning: false,
+            
+            startGame() {
+                this.gameRunning = true;
+                document.getElementById('lobby').style.display = 'none';
+                document.getElementById('game-board').style.display = 'flex';
+                document.getElementById('my-name-display').innerText = App.name;
+            },
+
+            render() {
+                const s = App.state;
+                if(s.gameOver) {
+                    alert("Игра окончена! Победитель: " + s.names[s.gameOver]);
+                    location.reload();
                     return;
                 }
 
-                // 1. Колода и козырь
-                const trumpEl = document.getElementById('trump-card');
+                // Opponent Info
+                const oppRole = App.role === 'host' ? 'client' : 'host';
+                document.getElementById('opp-name').innerText = s.names[oppRole];
+                
+                // 1. Deck & Trump
+                const trumpEl = document.getElementById('trump-slot');
                 trumpEl.innerHTML = '';
-                if(s.deckSize > 0) {
-                    const tCard = this.createCardHTML(s.trump);
-                    tCard.classList.add('trump');
-                    trumpEl.appendChild(tCard);
-                    document.getElementById('deck-top').style.display = s.deckSize > 1 ? 'block' : 'none';
-                } else {
-                    // Козыря нет визуально, если колода пуста совсем
-                    document.getElementById('deck-top').style.display = 'none';
-                    // Но масть козырная сохраняется в логике
-                    // Можно показать иконку козыря где-то, но в классике просто помнят
-                }
-                document.getElementById('deck-count').innerText = s.deckSize;
+                const deckBadge = document.getElementById('deck-count');
+                const deckBack = document.getElementById('deck-slot');
 
-                // 2. Рука соперника (рубашки)
-                const oppCount = (this.role === 'host') ? s.handsSizes.client : s.handsSizes.host;
-                const oppDiv = document.getElementById('opp-hand');
+                if(s.deckCount > 0) {
+                    trumpEl.appendChild(this.createCard(s.trump));
+                    deckBadge.innerText = s.deckCount;
+                    deckBack.style.visibility = s.deckCount > 1 ? 'visible' : 'hidden';
+                } else {
+                    deckBadge.innerText = '0';
+                    deckBack.style.visibility = 'hidden';
+                    // Show trump icon ghost if needed, or leave empty
+                }
+
+                // 2. Opponent Hand
+                const oppCount = s.handsCounts[oppRole];
+                const oppDiv = document.getElementById('opp-hand-container');
                 oppDiv.innerHTML = '';
                 for(let i=0; i<oppCount; i++) {
                     const c = document.createElement('div');
-                    c.className = 'card card-back';
+                    c.className = 'opp-card';
                     oppDiv.appendChild(c);
                 }
 
-                // 3. Стол
-                const fieldDiv = document.getElementById('field-slots');
+                // 3. Field
+                const fieldDiv = document.getElementById('field-container');
                 fieldDiv.innerHTML = '';
-                s.field.forEach((pair, idx) => {
+                s.field.forEach((slotData, idx) => {
                     const slot = document.createElement('div');
-                    slot.className = 'field-slot';
+                    slot.className = 'slot';
                     
-                    // Атакующая
-                    const c1 = this.createCardHTML(pair.attack);
-                    c1.classList.add('field-card');
-                    slot.appendChild(c1);
-
-                    // Защищающаяся
-                    if(pair.defend) {
-                        const c2 = this.createCardHTML(pair.defend);
-                        c2.classList.add('field-card');
-                        slot.appendChild(c2);
+                    slot.appendChild(this.createCard(slotData.att));
+                    if(slotData.def) {
+                        slot.appendChild(this.createCard(slotData.def));
                     } else {
-                        // Если это слот для защиты и сейчас мой ход (защита) - клик по слоту
-                        if(this.role !== s.turn && this.selectedCardIdx !== null) {
+                        // Drop zone for click
+                        if(App.role !== s.turn && App.selIdx !== null) {
                             slot.onclick = () => {
-                                this.userAction('DEFEND', { idx: this.selectedCardIdx, slot: idx });
-                                this.selectedCardIdx = null;
+                                App.sendAct('DEFEND', { idx: App.selIdx, slot: idx });
+                                App.selIdx = null;
                             };
-                            slot.style.cursor = 'pointer';
-                            slot.style.border = '2px dashed yellow';
+                            slot.style.boxShadow = "inset 0 0 10px #ffb300";
+                            slot.style.borderRadius = "6px";
+                            slot.style.cursor = "pointer";
                         }
                     }
                     fieldDiv.appendChild(slot);
                 });
 
-                // 4. Моя рука
-                const myDiv = document.getElementById('my-hand');
+                // 4. My Hand
+                const myDiv = document.getElementById('my-hand-container');
                 myDiv.innerHTML = '';
-                this.myHand.forEach((c, i) => {
-                    const cardEl = this.createCardHTML(c);
-                    if(this.selectedCardIdx === i) cardEl.classList.add('selected');
+                App.myHand.forEach((c, i) => {
+                    const wrap = document.createElement('div');
+                    wrap.className = 'my-card-wrapper';
+                    const el = this.createCard(c);
+                    if(App.selIdx === i) el.classList.add('selected');
                     
-                    cardEl.onclick = () => {
-                        // Если мой ход (Атака) - сразу кидаем
-                        if(this.role === s.turn) {
-                            this.userAction('ATTACK', { idx: i });
+                    el.onclick = () => {
+                        if(App.role === s.turn) {
+                            App.sendAct('ATTACK', { idx: i });
                         } else {
-                            // Защита - просто выделяем
-                            this.selectedCardIdx = (this.selectedCardIdx === i) ? null : i;
-                            this.render(); // перерисовка выделения
+                            App.selIdx = (App.selIdx === i) ? null : i;
+                            this.render();
                         }
                     };
-                    myDiv.appendChild(cardEl);
+                    wrap.appendChild(el);
+                    myDiv.appendChild(wrap);
                 });
 
-                // 5. Статусы и Кнопки
-                const st = document.getElementById('game-status');
-                const btn = document.getElementById('btn-action');
-                const isAttacker = (this.role === s.turn);
-                
-                if(isAttacker) {
-                    st.innerText = "ВАШ ХОД (Атака)";
-                    st.style.color = "#8bc34a";
-                    // Кнопка БИТО, если поле не пусто и все побито (в реале можно жать и раньше, если хост разрешит, но сделаем строго)
-                    const allBeat = s.field.length > 0 && s.field.every(p => p.defend);
-                    if(allBeat) {
-                        btn.style.display = 'block';
-                        btn.innerText = 'БИТО';
-                        btn.className = 'action-btn btn-bito';
-                    } else {
-                        btn.style.display = 'none';
-                    }
+                // 5. Controls
+                const isMyTurn = App.role === s.turn;
+                const status = document.getElementById('status-text');
+                const btnBito = document.getElementById('btn-bito');
+                const btnTake = document.getElementById('btn-take');
+
+                btnBito.style.display = 'none';
+                btnTake.style.display = 'none';
+
+                if(isMyTurn) {
+                    status.innerText = "Ваш ход (Атака)";
+                    status.style.color = "#81c784";
+                    // Если есть что бить
+                    const allCovered = s.field.length > 0 && s.field.every(p => p.def);
+                    if(allCovered) btnBito.style.display = 'block'; 
                 } else {
-                    st.innerText = "ЗАЩИЩАЙТЕСЬ!";
-                    st.style.color = "#ff9800";
-                    // Кнопка ВЗЯТЬ, если нас бьют
-                    if(s.field.some(p => !p.defend)) {
-                        btn.style.display = 'block';
-                        btn.innerText = 'ВЗЯТЬ';
-                        btn.className = 'action-btn btn-take';
-                    } else {
-                        btn.style.display = 'none';
-                    }
+                    status.innerText = "Отбивайтесь!";
+                    status.style.color = "#ffb74d";
+                    if(s.field.some(p => !p.def)) btnTake.style.display = 'block';
                 }
             },
 
-            doAction() {
-                const txt = document.getElementById('btn-action').innerText;
-                if(txt === 'БИТО') this.userAction('BITO');
-                if(txt === 'ВЗЯТЬ') this.userAction('TAKE');
-            },
-
-            // --- CHAT ---
-            sendChat() {
-                const inp = document.getElementById('chat-input');
-                const msg = inp.value.trim();
-                if(!msg) return;
-                
-                // Шлем
-                if(this.conn) this.conn.send({ type: 'CHAT', msg: msg });
-                // Рендерим себе
-                this.logChat('Me', msg);
-                inp.value = '';
-            },
-
-            logChat(sender, msg) {
-                const log = document.getElementById('chat-log');
-                const d = document.createElement('div');
-                d.className = 'msg ' + (sender === 'Me' ? '' : (sender === 'System' ? 'sys' : 'opp'));
-                d.innerText = (sender === 'Me' ? '' : (sender==='System'?'Info: ':'> ')) + msg;
-                log.appendChild(d);
-                log.scrollTop = log.scrollHeight;
-            },
-
-            // --- HTML GENERATOR ---
-            createCardHTML(c) {
+            createCard(c) {
                 const el = document.createElement('div');
                 const color = isRed(c.s) ? 'red' : 'black';
                 el.className = `card ${color}`;
-                el.innerHTML = `
-                    <div class="rank-tl">${DISPLAY[c.r]}</div>
-                    <div class="suit-tl">${c.s}</div>
-                    <div class="center-suit">${c.s}</div>
-                    <div class="rank-br">${DISPLAY[c.r]}</div>
-                    <div class="suit-br">${c.s}</div>
-                `;
+                el.dataset.rank = c.r; // For CSS content hack
+                el.style.backgroundImage = `url('${getCardUrl(c.r, c.s)}')`;
                 return el;
+            },
+
+            addChatMsg(sender, msg) {
+                const box = document.getElementById('chat-history');
+                const div = document.createElement('div');
+                div.className = 'chat-msg';
+                div.innerHTML = `<b>${sender}:</b> ${msg}`;
+                box.appendChild(div);
+                box.scrollTop = box.scrollHeight;
+
+                const win = document.getElementById('chat-window');
+                if(win.style.display !== 'flex' && sender !== 'Я') {
+                    document.getElementById('chat-dot').style.display = 'block';
+                }
+            },
+
+            toggleChat() {
+                const win = document.getElementById('chat-window');
+                const dot = document.getElementById('chat-dot');
+                if(win.style.display === 'flex') {
+                    win.style.display = 'none';
+                } else {
+                    win.style.display = 'flex';
+                    dot.style.display = 'none';
+                }
             }
         };
 
         App.init();
+
     </script>
 </body>
 </html>
