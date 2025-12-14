@@ -3,17 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Durak PRO: Final Fixed</title>
+    <title>Durak PRO: Enhanced Edition</title>
     <link rel="icon" href="data:;base64,iVBORw0KGgo=">
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Roboto+Condensed:wght@400;700;900&display=swap');
 
         :root {
-            --bg-felt: #204060;
-            --card-w: 120px;
-            --card-h: 170px;
-            --radius: 6px;
+            --bg-felt: linear-gradient(135deg, #1e3a8a 0%, #3730a3 50%, #1e40af 100%);
+            --card-w: 140px;
+            --card-h: 200px;
+            --radius: 8px;
             --accent: #ff3d00;
         }
 
@@ -22,14 +22,26 @@
         body {
             margin: 0;
             font-family: 'Roboto Condensed', sans-serif;
-            background-color: var(--bg-felt);
-            background-image: 
-                radial-gradient(circle at center, rgba(255,255,255,0.05) 0%, transparent 70%),
-                url("data:image/svg+xml,%3Csvg width='4' height='4' viewBox='0 0 4 4' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 3h1v1H1V3zm2-2h1v1H3V1z' fill='%23000000' fill-opacity='0.2' fill-rule='evenodd'/%3E%3C/svg%3E");
+            background: var(--bg-felt);
+            background-attachment: fixed;
             height: 100vh;
             overflow: hidden;
             display: flex; flex-direction: column;
             color: white;
+            position: relative;
+        }
+
+        /* Голубое сукно как в Дурак Онлайн */
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: 
+                radial-gradient(circle at 30% 30%, rgba(255,255,255,0.1) 0%, transparent 50%),
+                radial-gradient(circle at 70% 70%, rgba(255,255,255,0.05) 0%, transparent 50%),
+                linear-gradient(45deg, transparent 49%, rgba(255,255,255,0.02) 50%, transparent 51%),
+                url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Ccircle cx='30' cy='30' r='1'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+            z-index: -1;
         }
 
         /* --- LOBBY --- */
@@ -75,111 +87,243 @@
         /* --- GAME UI --- */
         #game { display: none; flex-direction: column; height: 100%; position: relative; }
 
+        /* Перемещенный чат */
         .chat-sidebar {
-            position: absolute; top: 10px; left: 10px; bottom: 240px; width: 260px;
+            position: absolute; top: 10px; right: 10px; width: 280px; height: 400px;
             display: flex; flex-direction: column; pointer-events: none; z-index: 200;
+            background: rgba(0,0,0,0.3); border-radius: 8px; padding: 10px;
+            backdrop-filter: blur(5px);
         }
         .chat-log {
             flex: 1; overflow-y: auto; display: flex; flex-direction: column; justify-content: flex-end;
-            margin-bottom: 5px; text-shadow: 1px 1px 2px black;
+            margin-bottom: 10px; text-shadow: 1px 1px 2px black;
             mask-image: linear-gradient(to top, black 85%, transparent 100%);
         }
         .chat-msg {
-            background: rgba(0,0,0,0.7); padding: 6px 10px; margin-bottom: 5px;
-            border-radius: 6px; color: #fff; font-size: 14px;
+            background: rgba(0,0,0,0.8); padding: 8px 12px; margin-bottom: 6px;
+            border-radius: 8px; color: #fff; font-size: 14px;
             pointer-events: auto; align-self: flex-start;
             display: flex; align-items: center; gap: 8px;
             border: 1px solid rgba(255,255,255,0.1);
+            animation: slideInLeft 0.3s ease-out;
         }
-        .chat-msg.me { align-self: flex-end; background: rgba(20, 100, 160, 0.8); }
+        .chat-msg.me { 
+            align-self: flex-end; 
+            background: rgba(30, 58, 138, 0.9);
+            animation: slideInRight 0.3s ease-out;
+        }
         .chat-ava { width: 24px; height: 24px; border-radius: 4px; background: #fff; }
         
         .chat-inp-row { display: flex; pointer-events: auto; }
-        #chat-in { flex: 1; background: rgba(0,0,0,0.6); border: 1px solid #777; color: white; padding: 8px; border-radius: 4px 0 0 4px; }
-        #chat-send { width: 40px; background: #444; color: white; border: 1px solid #777; cursor: pointer; border-radius: 0 4px 4px 0; }
+        #chat-in { 
+            flex: 1; background: rgba(0,0,0,0.7); border: 1px solid #555; 
+            color: white; padding: 10px; border-radius: 6px 0 0 6px;
+            font-size: 14px;
+        }
+        #chat-send { 
+            width: 45px; background: #1565c0; color: white; border: 1px solid #555; 
+            cursor: pointer; border-radius: 0 6px 6px 0; font-weight: bold;
+            transition: background 0.2s;
+        }
+        #chat-send:hover { background: #1976d2; }
 
-        .opponents-row { height: 150px; display: flex; justify-content: center; gap: 40px; padding-top: 15px; }
-        .player-wrap { position: relative; display: flex; flex-direction: column; align-items: center; width: 120px; }
+        @keyframes slideInLeft {
+            from { transform: translateX(-20px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        @keyframes slideInRight {
+            from { transform: translateX(20px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        .opponents-row { height: 180px; display: flex; justify-content: center; gap: 50px; padding-top: 20px; }
+        .player-wrap { position: relative; display: flex; flex-direction: column; align-items: center; width: 140px; }
         
         /* Timer SVG (Rounded Rect matches Avatar) */
         .timer-svg {
-            position: absolute; top: -5px; left: 50%; transform: translateX(-50%);
-            width: 70px; height: 70px; pointer-events: none; z-index: 5;
+            position: absolute; top: -8px; left: 50%; transform: translateX(-50%);
+            width: 80px; height: 80px; pointer-events: none; z-index: 5;
         }
         .timer-path {
             fill: none; stroke: var(--accent); stroke-width: 4;
             stroke-dasharray: 240; stroke-dashoffset: 240; 
             transition: stroke-dashoffset 1s linear;
+            filter: drop-shadow(0 0 6px var(--accent));
         }
 
         .avatar { 
-            width: 60px; height: 60px; background: #444; border: 2px solid #fff; 
-            border-radius: 12px; z-index: 6; object-fit: cover; box-shadow: 0 4px 8px rgba(0,0,0,0.5);
+            width: 70px; height: 70px; background: #444; border: 3px solid #fff; 
+            border-radius: 15px; z-index: 6; object-fit: cover; 
+            box-shadow: 0 6px 12px rgba(0,0,0,0.6);
+            transition: transform 0.3s ease;
         }
-        .p-name { font-size: 14px; font-weight: bold; margin-top: 5px; text-shadow: 1px 1px 2px black; }
+        .avatar:hover { transform: scale(1.05); }
+        .p-name { font-size: 16px; font-weight: bold; margin-top: 8px; text-shadow: 2px 2px 4px black; }
         
-        .p-hand { position: relative; width: 60px; height: 40px; margin-top: 5px; }
+        .p-hand { position: relative; width: 80px; height: 50px; margin-top: 8px; }
         .card-tiny {
-            width: 30px; height: 45px; background-image: url('https://deckofcardsapi.com/static/img/back.png');
-            background-size: cover; border-radius: 3px; border: 1px solid #fff;
-            position: absolute; box-shadow: 1px 1px 3px rgba(0,0,0,0.5);
+            width: 35px; height: 50px; background-image: url('https://deckofcardsapi.com/static/img/back.png');
+            background-size: cover; border-radius: 4px; border: 1px solid #fff;
+            position: absolute; box-shadow: 2px 2px 6px rgba(0,0,0,0.6);
+            transition: transform 0.2s ease;
         }
 
         .table-area { flex: 1; position: relative; display: flex; justify-content: center; align-items: center; }
-        .deck-pos { position: absolute; left: 20px; top: 50%; transform: translateY(-50%); width: var(--card-w); height: var(--card-h); }
-        .bito-pos { position: absolute; right: 20px; top: 50%; transform: translateY(-50%); width: var(--card-w); height: var(--card-h); opacity: 0.7; }
         
-        .trump { position: absolute; top: 10px; left: 20px; transform: rotate(90deg); z-index: 1; }
+        /* Отдельная колода для битых карт */
+        .deck-pos { position: absolute; left: 30px; top: 50%; transform: translateY(-50%); width: var(--card-w); height: var(--card-h); }
+        .bito-pos { 
+            position: absolute; right: 30px; top: 50%; transform: translateY(-50%); 
+            width: var(--card-w); height: var(--card-h);
+            background: rgba(0,0,0,0.3); border: 2px dashed rgba(255,255,255,0.3);
+            border-radius: var(--radius); display: flex; align-items: center; justify-content: center;
+        }
+        
+        .trump { position: absolute; top: 15px; left: 30px; transform: rotate(90deg); z-index: 1; }
         .deck-stack-card { 
             position: absolute; width: 100%; height: 100%; 
             background-image: url('https://deckofcardsapi.com/static/img/back.png'); background-size: cover;
             border-radius: var(--radius); border: 1px solid #ccc; 
+            box-shadow: 0 4px 8px rgba(0,0,0,0.4);
+            transition: transform 0.3s ease;
         }
+        .deck-stack-card:hover { transform: translateY(-2px); }
 
         .deck-count {
-             position: absolute; top: -25px; left: 0; width: 100%; text-align: center;
-             font-weight: bold; font-size: 14px; text-shadow: 1px 1px 2px black; color: white;
+             position: absolute; top: -30px; left: 0; width: 100%; text-align: center;
+             font-weight: bold; font-size: 16px; text-shadow: 2px 2px 4px black; color: white;
+             background: rgba(0,0,0,0.5); padding: 2px 8px; border-radius: 4px;
         }
 
-        .slots-wrap { display: flex; gap: 15px; padding: 0 20px; align-items: center; perspective: 1000px; z-index: 10; }
+        .slots-wrap { 
+            display: flex; gap: 20px; padding: 0 30px; align-items: center; 
+            perspective: 1000px; z-index: 10; 
+        }
         .slot { width: var(--card-w); height: var(--card-h); position: relative; }
         
+        /* Анимации карт */
         .card {
             width: var(--card-w); height: var(--card-h);
             border-radius: var(--radius);
             background-color: #fff; background-size: 100% 100%;
             position: absolute;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.4);
-            transition: all 0.5s cubic-bezier(0.19, 1, 0.22, 1);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.5);
+            transition: all 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            border: 2px solid rgba(255,255,255,0.8);
         }
-        .card-att { top: 0; left: 0; z-index: 10; }
-        .card-def { top: 25px; left: 25px; z-index: 20; transform: rotate(10deg); }
+        .card:hover { transform: translateY(-5px); box-shadow: 0 12px 25px rgba(0,0,0,0.6); }
+        
+        .card-att { 
+            top: 0; left: 0; z-index: 10; 
+            animation: cardFlyIn 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+        .card-def { 
+            top: 30px; left: 30px; z-index: 20; transform: rotate(15deg); 
+            animation: cardDefend 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
         .card-back { background-image: url('https://deckofcardsapi.com/static/img/back.png'); }
 
-        .my-zone { height: 220px; display: flex; justify-content: center; align-items: flex-end; padding-bottom: 20px; position: relative; }
-        .my-hand-wrap { display: flex; align-items: flex-end; }
-        .my-card { width: 55px; height: var(--card-h); position: relative; transition: width 0.2s; cursor: pointer; }
-        .my-card:hover { width: 80px; }
+        @keyframes cardFlyIn {
+            0% { transform: translateY(-200px) rotate(-180deg) scale(0.5); opacity: 0; }
+            50% { transform: translateY(-50px) rotate(-90deg) scale(0.8); opacity: 0.7; }
+            100% { transform: translateY(0) rotate(0deg) scale(1); opacity: 1; }
+        }
+
+        @keyframes cardDefend {
+            0% { transform: translateX(-200px) rotate(-90deg) scale(0.5); opacity: 0; }
+            50% { transform: translateX(-30px) rotate(5deg) scale(0.9); opacity: 0.7; }
+            100% { transform: translateX(30px) rotate(15deg) scale(1); opacity: 1; }
+        }
+
+        /* Увеличенная рука игрока */
+        .my-zone { height: 280px; display: flex; justify-content: center; align-items: flex-end; padding-bottom: 30px; position: relative; }
+        .my-hand-wrap { display: flex; align-items: flex-end; gap: 5px; }
+        .my-card { 
+            width: 80px; height: var(--card-h); position: relative; 
+            transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94); 
+            cursor: pointer; 
+        }
+        .my-card:hover { 
+            width: 120px; 
+            transform: translateY(-20px) scale(1.05);
+            z-index: 100;
+        }
         .my-card:last-child { width: var(--card-w); }
         
-        .my-card .card { position: absolute; bottom: 0; left: 0; transition: bottom 0.2s; transform: none !important; }
-        .my-card:hover .card { bottom: 40px; z-index: 100; }
-        .my-card.sel .card { bottom: 60px; box-shadow: 0 0 0 4px #ffeb3b; z-index: 101; }
+        .my-card .card { 
+            position: absolute; bottom: 0; left: 0; 
+            transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94); 
+            transform: none !important; 
+        }
+        .my-card:hover .card { 
+            bottom: 30px; z-index: 100; 
+            box-shadow: 0 15px 30px rgba(0,0,0,0.7);
+        }
+        .my-card.sel .card { 
+            bottom: 40px; 
+            box-shadow: 0 0 0 4px #ffeb3b, 0 15px 30px rgba(0,0,0,0.7); 
+            z-index: 101; 
+            animation: cardSelect 0.3s ease-out;
+        }
 
-        .controls { position: absolute; right: 20px; bottom: 250px; display: flex; flex-direction: column; align-items: flex-end; gap: 10px; z-index: 100; }
-        .status-badge { background: rgba(0,0,0,0.8); padding: 12px 25px; border-left: 6px solid #fff; font-size: 18px; font-weight: bold; box-shadow: 0 4px 6px black; }
-        .act-btn { border: none; padding: 16px 45px; font-size: 22px; font-weight: 900; text-transform: uppercase; cursor: pointer; color: white; box-shadow: 0 6px 20px rgba(0,0,0,0.6); border-radius: 4px; display: none; }
-        .btn-take { background: #e65100; }
-        .btn-bito { background: #b71c1c; }
+        @keyframes cardSelect {
+            0% { transform: scale(1) rotate(0deg); }
+            50% { transform: scale(1.1) rotate(5deg); }
+            100% { transform: scale(1) rotate(0deg); }
+        }
+
+        .controls { position: absolute; left: 30px; bottom: 300px; display: flex; flex-direction: column; align-items: flex-start; gap: 15px; z-index: 100; }
+        .status-badge { 
+            background: rgba(0,0,0,0.85); padding: 15px 30px; 
+            border-left: 6px solid #fff; font-size: 20px; font-weight: bold; 
+            box-shadow: 0 6px 12px rgba(0,0,0,0.6); border-radius: 0 8px 8px 0;
+            backdrop-filter: blur(10px);
+        }
+        .act-btn { 
+            border: none; padding: 18px 50px; font-size: 24px; font-weight: 900; 
+            text-transform: uppercase; cursor: pointer; color: white; 
+            box-shadow: 0 8px 25px rgba(0,0,0,0.6); border-radius: 8px; 
+            display: none; transition: all 0.2s ease;
+            position: relative; overflow: hidden;
+        }
+        .act-btn::before {
+            content: '';
+            position: absolute; top: 0; left: -100%; width: 100%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s;
+        }
+        .act-btn:hover::before { left: 100%; }
+        .act-btn:hover { transform: translateY(-3px); box-shadow: 0 12px 30px rgba(0,0,0,0.8); }
+        .btn-take { background: linear-gradient(135deg, #e65100, #ff6d00); }
+        .btn-bito { background: linear-gradient(135deg, #b71c1c, #d32f2f); }
+
+        /* Информация об игроке */
+        .my-info {
+            position: absolute; bottom: 15px; left: 15px; 
+            display: flex; align-items: center; gap: 20px;
+            background: rgba(0,0,0,0.7); padding: 15px 25px; border-radius: 12px;
+            backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1);
+        }
+        .my-info-avatar {
+            position: relative;
+        }
+        .my-info-text h3 {
+            margin: 0; font-size: 22px; font-weight: bold; color: #fff;
+        }
+        .my-info-text p {
+            margin: 5px 0 0; font-size: 14px; color: #aaa;
+        }
 
         @media (max-width: 800px) {
-            :root { --card-w: 80px; --card-h: 116px; }
-            .opponents-row { height: 120px; gap: 10px; }
-            .my-zone { height: 160px; }
-            .controls { bottom: 170px; }
-            .chat-sidebar { display: none; } 
-            .my-card { width: 35px; } .my-card:hover { width: 50px; }
+            :root { --card-w: 100px; --card-h: 140px; }
+            .opponents-row { height: 140px; gap: 20px; }
+            .my-zone { height: 200px; }
+            .controls { bottom: 210px; left: 20px; }
+            .chat-sidebar { width: 250px; height: 300px; top: 10px; right: 10px; }
+            .my-card { width: 50px; } 
+            .my-card:hover { width: 70px; }
             .panel { width: 95%; padding: 20px; }
+            .my-info { bottom: 10px; left: 10px; padding: 10px 15px; }
         }
     </style>
 </head>
@@ -225,7 +369,7 @@
             <div class="chat-log" id="chat-log"></div>
             <div class="chat-inp-row">
                 <input type="text" id="chat-in" placeholder="Сообщение..." autocomplete="off">
-                <button id="chat-send" onclick="Game.sendChat()">></button>
+                <button id="chat-send" onclick="Game.sendChat()">▶</button>
             </div>
         </div>
 
@@ -239,7 +383,7 @@
             </div>
             
             <div class="bito-pos" id="bito-visual">
-                 <div style="color:rgba(255,255,255,0.2); font-weight:bold; text-align:center; padding-top:40%;">БИТО</div>
+                 <div style="color:rgba(255,255,255,0.4); font-weight:bold; text-align:center; font-size:18px;">БИТО</div>
             </div>
 
             <div class="slots-wrap" id="slots-area"></div>
@@ -252,16 +396,16 @@
         </div>
 
         <div class="my-zone">
-            <div class="player-wrap" style="position:absolute; bottom:10px; left:10px; width:auto; flex-direction:row; gap:15px;">
-                <div style="position:relative;">
-                    <img id="my-ava" class="avatar" src="">
-                    <svg class="timer-svg" viewBox="0 0 70 70">
+            <div class="my-info">
+                <div class="my-info-avatar">
+                    <img id="my-ava" class="avatar" src="" style="width: 60px; height: 60px;">
+                    <svg class="timer-svg" viewBox="0 0 70 70" style="width: 70px; height: 70px;">
                         <rect class="timer-path" id="my-timer" x="2" y="2" width="66" height="66" rx="12" ry="12"></rect>
                     </svg>
                 </div>
-                <div style="text-align:left;">
-                    <div style="font-weight:bold; font-size:20px;">ВЫ</div>
-                    <div style="font-size:12px; color:#aaa;" id="my-cards-count">6 карт</div>
+                <div class="my-info-text">
+                    <h3>ВЫ</h3>
+                    <p id="my-cards-count">6 карт</p>
                 </div>
             </div>
             <div class="my-hand-wrap" id="my-hand"></div>
@@ -511,7 +655,6 @@
                 this.draw();
                 this.conns.forEach(c => {
                     const p = this.eng.players.find(x=>x.id===c.peer);
-                    // FIXED: Check if player exists before sending hand
                     if(p) c.send({t:'S', s:snap, h:p.hand, mid:c.peer});
                 });
             },
@@ -570,7 +713,6 @@
                 log.scrollTop = log.scrollHeight;
             },
 
-            // Safe Text Setter
             safeTxt(id, txt) {
                 const el = document.getElementById(id);
                 if(el) el.innerText = txt;
@@ -597,7 +739,7 @@
                         wrap.className = 'player-wrap';
                         let cardsHtml = '';
                         for(let c=0; c<p.cnt; c++) {
-                            cardsHtml += `<div class="card-tiny" style="left:${c*5}px; top:${-c*1}px;"></div>`;
+                            cardsHtml += `<div class="card-tiny" style="left:${c*8}px; top:${-c*2}px; transform: rotate(${Math.random()*10-5}deg);"></div>`;
                         }
                         
                         wrap.innerHTML = `
@@ -621,9 +763,9 @@
                 if(dSlot) {
                     dSlot.innerHTML = '';
                     if(s.d > 0) {
-                        const maxVis = Math.min(s.d, 5);
+                        const maxVis = Math.min(s.d, 7);
                         for(let i=0; i<maxVis; i++) {
-                            dSlot.innerHTML += `<div class="deck-stack-card" style="top:${-i*2}px; left:${-i*1}px;"></div>`;
+                            dSlot.innerHTML += `<div class="deck-stack-card" style="top:${-i*3}px; left:${-i*2}px; transform: rotate(${Math.random()*6-3}deg);"></div>`;
                         }
                     }
                 }
@@ -638,11 +780,11 @@
                 if(bitoEl) {
                     if(s.bc > 0) {
                          bitoEl.innerHTML = '';
-                         const cnt = Math.min(Math.ceil(s.bc/2), 6);
+                         const cnt = Math.min(Math.ceil(s.bc/2), 8);
                          for(let i=0; i<cnt; i++) {
-                            bitoEl.innerHTML += `<div class="deck-stack-card" style="transform:rotate(${Math.random()*20-10}deg); top:${-i*1}px;"></div>`;
+                            bitoEl.innerHTML += `<div class="deck-stack-card" style="transform:rotate(${Math.random()*40-20}deg); top:${-i*2}px; left:${Math.random()*10-5}px; opacity: 0.7;"></div>`;
                          }
-                    } else bitoEl.innerHTML = '<div style="color:rgba(255,255,255,0.2); font-weight:bold; text-align:center; padding-top:40%;">БИТО</div>';
+                    } else bitoEl.innerHTML = '<div style="color:rgba(255,255,255,0.4); font-weight:bold; text-align:center; font-size:18px; padding-top: 30%;">БИТО</div>';
                 }
 
                 // 3. SLOTS
@@ -656,7 +798,9 @@
                         else if(s.t !== myIdx && this.sel!==null) {
                             const defIdx = (s.t+1)%s.ps.length;
                             if(myIdx === defIdx) {
-                                d.style.boxShadow = "inset 0 0 20px #ff3d00"; d.style.cursor="pointer";
+                                d.style.boxShadow = "inset 0 0 25px rgba(255, 61, 0, 0.6)"; 
+                                d.style.cursor="pointer";
+                                d.style.borderRadius = "8px";
                                 d.onclick = () => { this.act('DEFEND', {i:this.sel, s:si}); this.sel=null; };
                             }
                         }
@@ -714,17 +858,20 @@
                 if(st) {
                     const isMyTurn = (s.t === myIdx);
                     if(isMyTurn) {
-                        st.innerText = "ВАШ ХОД"; st.style.borderLeftColor = "#2e7d32";
+                        st.innerText = "ВАШ ХОД"; st.style.borderLeftColor = "#4caf50";
                         if(s.f.length>0 && s.f.every(x=>x.def)) bB.style.display='block';
                     } else {
                         const defIdx = (s.t+1)%s.ps.length;
                         const isTransferPossible = (myIdx === defIdx && s.f.length>0 && s.f.every(x=>!x.def));
 
                         if(myIdx === defIdx) {
-                            st.innerText = "ОТБИВАЙТЕСЬ"; st.style.borderLeftColor = "#ff3d00";
+                            st.innerText = "ОТБИВАЙТЕСЬ"; st.style.borderLeftColor = "#ff5722";
                             if(s.f.some(x=>!x.def)) bT.style.display='block';
                             if(isTransferPossible) st.innerText = "ОТБЕЙ ИЛИ ПЕРЕВЕДИ";
-                        } else st.innerText = `ХОДИТ: ${s.ps[s.t].name}`;
+                        } else {
+                            st.innerText = `ХОДИТ: ${s.ps[s.t].name}`;
+                            st.style.borderLeftColor = "#2196f3";
+                        }
                     }
                 }
             },
