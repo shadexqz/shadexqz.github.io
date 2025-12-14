@@ -3,420 +3,380 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Durak PRO: Enhanced Edition</title>
+    <title>Durak Online PRO</title>
     <link rel="icon" href="data:;base64,iVBORw0KGgo=">
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Roboto+Condensed:wght@400;700;900&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
 
         :root {
-            --bg-felt: linear-gradient(135deg, #1e3a8a 0%, #3730a3 50%, #1e40af 100%);
-            --card-w: 140px;
-            --card-h: 200px;
-            --radius: 8px;
-            --accent: #ff3d00;
+            /* Стиль "Дурак Онлайн" */
+            --bg-color: #2b3e50;
+            --felt-gradient: radial-gradient(circle at 50% 50%, #3a6073 0%, #16222a 100%);
+            
+            /* Размеры карт (Большие) */
+            --card-w: 120px;
+            --card-h: 175px;
+            --card-radius: 8px;
+            
+            --accent: #ffb300;
         }
 
         * { box-sizing: border-box; user-select: none; -webkit-tap-highlight-color: transparent; }
         
         body {
             margin: 0;
-            font-family: 'Roboto Condensed', sans-serif;
-            background: var(--bg-felt);
-            background-attachment: fixed;
+            font-family: 'Roboto', sans-serif;
+            background: var(--felt-gradient);
             height: 100vh;
             overflow: hidden;
-            display: flex; flex-direction: column;
             color: white;
-            position: relative;
+            display: flex;
+            flex-direction: column;
         }
 
-        /* Голубое сукно как в Дурак Онлайн */
-        body::before {
-            content: '';
+        /* --- СЛОЙ АНИМАЦИИ --- */
+        #anim-layer {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none; z-index: 9999;
+        }
+        .flying-card {
             position: absolute;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: 
-                radial-gradient(circle at 30% 30%, rgba(255,255,255,0.1) 0%, transparent 50%),
-                radial-gradient(circle at 70% 70%, rgba(255,255,255,0.05) 0%, transparent 50%),
-                linear-gradient(45deg, transparent 49%, rgba(255,255,255,0.02) 50%, transparent 51%),
-                url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Ccircle cx='30' cy='30' r='1'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
-            z-index: -1;
+            width: var(--card-w); height: var(--card-h);
+            background-size: 100% 100%;
+            border-radius: var(--card-radius);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.5);
+            transition: all 0.6s cubic-bezier(0.25, 1, 0.5, 1);
+            transform-origin: center;
         }
 
-        /* --- LOBBY --- */
+        /* --- ЛОББИ --- */
         #lobby {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: #111; z-index: 9999;
+            background: rgba(0,0,0,0.95); z-index: 10000;
             display: flex; align-items: center; justify-content: center;
         }
         .panel {
-            background: #eee; color: #111;
-            padding: 30px; border-radius: 8px;
-            width: 95%; max-width: 480px; text-align: center;
-            box-shadow: 0 20px 60px black; border: 1px solid #444;
+            background: #fff; color: #333; padding: 40px;
+            border-radius: 12px; width: 90%; max-width: 450px;
+            text-align: center; box-shadow: 0 0 50px rgba(0,0,0,0.8);
         }
-        .panel h1 { margin: 0 0 20px; font-weight: 900; letter-spacing: 2px; color: #204060; }
+        .panel h1 { margin-top: 0; color: #2b3e50; }
         
         .inp {
-            width: 100%; padding: 12px; margin: 10px 0;
-            border: 2px solid #ccc; border-radius: 4px;
-            font-size: 18px; font-weight: bold; text-align: center; font-family: inherit;
+            width: 100%; padding: 15px; margin: 10px 0;
+            border: 2px solid #ccc; border-radius: 6px;
+            font-size: 18px; text-align: center; font-weight: bold;
         }
-        
         .btn {
-            width: 100%; padding: 15px; border: none; margin-top: 5px;
+            width: 100%; padding: 15px; border: none; margin-top: 10px;
             font-size: 18px; font-weight: bold; text-transform: uppercase;
-            cursor: pointer; border-radius: 4px; transition: 0.1s;
-            color: white; box-shadow: 0 4px 0 rgba(0,0,0,0.3);
+            cursor: pointer; border-radius: 6px; color: white;
+            transition: transform 0.1s;
         }
-        .btn:active { transform: translateY(3px); box-shadow: none; }
-        .btn-create { background: #2e7d32; }
-        .btn-join { background: #1565c0; }
+        .btn:active { transform: scale(0.98); }
+        .btn-green { background: #27ae60; }
+        .btn-blue { background: #2980b9; }
 
-        .avatars { display: flex; gap: 10px; justify-content: center; margin-bottom: 15px; }
+        .avatar-select { display: flex; justify-content: center; gap: 10px; margin: 20px 0; }
         .ava-opt {
-            width: 50px; height: 50px; border: 3px solid #ccc; cursor: pointer;
-            background-size: cover; border-radius: 8px; transition: 0.2s;
+            width: 50px; height: 50px; border-radius: 50%; border: 3px solid transparent;
+            cursor: pointer; background-size: cover; transition: 0.2s;
         }
-        .ava-opt:hover { transform: scale(1.1); }
-        .ava-opt.selected { border-color: #d32f2f; transform: scale(1.1); }
+        .ava-opt.active { border-color: var(--accent); transform: scale(1.15); }
 
-        .opts { display: flex; gap: 20px; justify-content: center; margin: 15px 0; font-weight: bold; font-size: 18px; }
+        /* --- ИГРОВОЕ ПОЛЕ --- */
+        #game {
+            display: none; flex: 1; position: relative;
+        }
 
-        /* --- GAME UI --- */
-        #game { display: none; flex-direction: column; height: 100%; position: relative; }
-
-        /* Перемещенный чат */
+        /* ЧАТ (Слева, фиксированный) */
         .chat-sidebar {
-            position: absolute; top: 10px; right: 10px; width: 280px; height: 400px;
-            display: flex; flex-direction: column; pointer-events: none; z-index: 200;
-            background: rgba(0,0,0,0.3); border-radius: 8px; padding: 10px;
-            backdrop-filter: blur(5px);
+            position: absolute; top: 0; left: 0; bottom: 0; width: 250px;
+            background: rgba(0,0,0,0.3); backdrop-filter: blur(5px);
+            display: flex; flex-direction: column; z-index: 50;
+            border-right: 1px solid rgba(255,255,255,0.1);
+            transition: transform 0.3s;
         }
+        .chat-toggle { display: none; } /* Для мобил можно добавить кнопку */
+        
         .chat-log {
-            flex: 1; overflow-y: auto; display: flex; flex-direction: column; justify-content: flex-end;
-            margin-bottom: 10px; text-shadow: 1px 1px 2px black;
-            mask-image: linear-gradient(to top, black 85%, transparent 100%);
+            flex: 1; overflow-y: auto; padding: 10px;
+            display: flex; flex-direction: column; justify-content: flex-end;
         }
-        .chat-msg {
-            background: rgba(0,0,0,0.8); padding: 8px 12px; margin-bottom: 6px;
-            border-radius: 8px; color: #fff; font-size: 14px;
-            pointer-events: auto; align-self: flex-start;
-            display: flex; align-items: center; gap: 8px;
-            border: 1px solid rgba(255,255,255,0.1);
-            animation: slideInLeft 0.3s ease-out;
+        .msg {
+            margin-bottom: 8px; font-size: 13px; color: #ddd;
+            word-break: break-word; line-height: 1.4;
         }
-        .chat-msg.me { 
-            align-self: flex-end; 
-            background: rgba(30, 58, 138, 0.9);
-            animation: slideInRight 0.3s ease-out;
+        .msg b { color: var(--accent); }
+        .msg img { 
+            width: 20px; height: 20px; border-radius: 50%; 
+            vertical-align: middle; margin-right: 5px; border: 1px solid #fff;
         }
-        .chat-ava { width: 24px; height: 24px; border-radius: 4px; background: #fff; }
         
-        .chat-inp-row { display: flex; pointer-events: auto; }
-        #chat-in { 
-            flex: 1; background: rgba(0,0,0,0.7); border: 1px solid #555; 
-            color: white; padding: 10px; border-radius: 6px 0 0 6px;
-            font-size: 14px;
-        }
-        #chat-send { 
-            width: 45px; background: #1565c0; color: white; border: 1px solid #555; 
-            cursor: pointer; border-radius: 0 6px 6px 0; font-weight: bold;
-            transition: background 0.2s;
-        }
-        #chat-send:hover { background: #1976d2; }
+        .chat-input-area { padding: 10px; border-top: 1px solid rgba(255,255,255,0.1); display: flex; }
+        #chat-in { flex: 1; background: rgba(0,0,0,0.5); border: none; color: white; padding: 8px; border-radius: 4px; }
+        #chat-send { background: transparent; border: none; color: var(--accent); font-size: 20px; cursor: pointer; padding: 0 10px; }
 
-        @keyframes slideInLeft {
-            from { transform: translateX(-20px); opacity: 0; }
-            to { transform: translateX(0); opacity: 1; }
+        /* ВЕРХНЯЯ ЗОНА (Соперники) */
+        .top-zone {
+            height: 140px; margin-left: 250px; /* Отступ под чат */
+            display: flex; justify-content: center; align-items: flex-start;
+            padding-top: 15px; gap: 40px;
         }
-        @keyframes slideInRight {
-            from { transform: translateX(20px); opacity: 0; }
-            to { transform: translateX(0); opacity: 1; }
+        .player-info {
+            display: flex; flex-direction: column; align-items: center;
+            width: 100px; position: relative;
         }
-
-        .opponents-row { height: 180px; display: flex; justify-content: center; gap: 50px; padding-top: 20px; }
-        .player-wrap { position: relative; display: flex; flex-direction: column; align-items: center; width: 140px; }
+        .avatar {
+            width: 64px; height: 64px; background: #333; border: 2px solid #fff;
+            border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+            position: relative; z-index: 2; object-fit: cover;
+        }
+        /* Индикатор хода (пульсация) */
+        .player-info.turn .avatar { border-color: var(--accent); box-shadow: 0 0 15px var(--accent); }
         
-        /* Timer SVG (Rounded Rect matches Avatar) */
-        .timer-svg {
-            position: absolute; top: -8px; left: 50%; transform: translateX(-50%);
-            width: 80px; height: 80px; pointer-events: none; z-index: 5;
-        }
-        .timer-path {
-            fill: none; stroke: var(--accent); stroke-width: 4;
-            stroke-dasharray: 240; stroke-dashoffset: 240; 
-            transition: stroke-dashoffset 1s linear;
-            filter: drop-shadow(0 0 6px var(--accent));
-        }
-
-        .avatar { 
-            width: 70px; height: 70px; background: #444; border: 3px solid #fff; 
-            border-radius: 15px; z-index: 6; object-fit: cover; 
-            box-shadow: 0 6px 12px rgba(0,0,0,0.6);
-            transition: transform 0.3s ease;
-        }
-        .avatar:hover { transform: scale(1.05); }
-        .p-name { font-size: 16px; font-weight: bold; margin-top: 8px; text-shadow: 2px 2px 4px black; }
+        .p-name { font-size: 14px; font-weight: bold; margin-top: 5px; text-shadow: 1px 1px 2px black; }
         
-        .p-hand { position: relative; width: 80px; height: 50px; margin-top: 8px; }
-        .card-tiny {
-            width: 35px; height: 50px; background-image: url('https://deckofcardsapi.com/static/img/back.png');
+        /* Рука соперника (стопка) */
+        .p-hand-stack {
+            margin-top: -15px; z-index: 1; display: flex; justify-content: center;
+        }
+        .mini-card {
+            width: 40px; height: 56px; background-image: url('https://deckofcardsapi.com/static/img/back.png');
             background-size: cover; border-radius: 4px; border: 1px solid #fff;
-            position: absolute; box-shadow: 2px 2px 6px rgba(0,0,0,0.6);
-            transition: transform 0.2s ease;
+            margin-left: -30px; box-shadow: -2px 0 5px rgba(0,0,0,0.3);
+        }
+        .mini-card:first-child { margin-left: 0; }
+
+        /* ЦЕНТР (Стол) */
+        .table-center {
+            flex: 1; margin-left: 250px; position: relative;
+            display: flex; justify-content: center; align-items: center;
         }
 
-        .table-area { flex: 1; position: relative; display: flex; justify-content: center; align-items: center; }
-        
-        /* Отдельная колода для битых карт */
-        .deck-pos { position: absolute; left: 30px; top: 50%; transform: translateY(-50%); width: var(--card-w); height: var(--card-h); }
-        .bito-pos { 
-            position: absolute; right: 30px; top: 50%; transform: translateY(-50%); 
+        /* Колода (Слева) */
+        .deck-wrap {
+            position: absolute; left: 40px; top: 50%; transform: translateY(-50%);
             width: var(--card-w); height: var(--card-h);
-            background: rgba(0,0,0,0.3); border: 2px dashed rgba(255,255,255,0.3);
-            border-radius: var(--radius); display: flex; align-items: center; justify-content: center;
         }
-        
-        .trump { position: absolute; top: 15px; left: 30px; transform: rotate(90deg); z-index: 1; }
-        .deck-stack-card { 
-            position: absolute; width: 100%; height: 100%; 
-            background-image: url('https://deckofcardsapi.com/static/img/back.png'); background-size: cover;
-            border-radius: var(--radius); border: 1px solid #ccc; 
-            box-shadow: 0 4px 8px rgba(0,0,0,0.4);
-            transition: transform 0.3s ease;
+        .trump-card {
+            position: absolute; left: 20px; top: 0; transform: rotate(90deg);
+            z-index: 0; box-shadow: 2px 2px 5px rgba(0,0,0,0.3);
         }
-        .deck-stack-card:hover { transform: translateY(-2px); }
-
-        .deck-count {
-             position: absolute; top: -30px; left: 0; width: 100%; text-align: center;
-             font-weight: bold; font-size: 16px; text-shadow: 2px 2px 4px black; color: white;
-             background: rgba(0,0,0,0.5); padding: 2px 8px; border-radius: 4px;
+        .deck-top { position: absolute; top:0; left:0; z-index: 2; }
+        .deck-counter {
+            position: absolute; top: -30px; width: 100%; text-align: center;
+            background: rgba(0,0,0,0.5); border-radius: 10px; padding: 2px; font-size: 13px;
         }
 
-        .slots-wrap { 
-            display: flex; gap: 20px; padding: 0 30px; align-items: center; 
-            perspective: 1000px; z-index: 10; 
-        }
-        .slot { width: var(--card-w); height: var(--card-h); position: relative; }
-        
-        /* Анимации карт */
-        .card {
+        /* Бито (Справа) */
+        .bito-wrap {
+            position: absolute; right: 40px; top: 50%; transform: translateY(-50%);
             width: var(--card-w); height: var(--card-h);
-            border-radius: var(--radius);
-            background-color: #fff; background-size: 100% 100%;
-            position: absolute;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.5);
-            transition: all 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            border: 2px solid rgba(255,255,255,0.8);
+            border: 2px dashed rgba(255,255,255,0.2); border-radius: var(--card-radius);
+            display: flex; align-items: center; justify-content: center;
         }
-        .card:hover { transform: translateY(-5px); box-shadow: 0 12px 25px rgba(0,0,0,0.6); }
-        
-        .card-att { 
-            top: 0; left: 0; z-index: 10; 
-            animation: cardFlyIn 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-        }
-        .card-def { 
-            top: 30px; left: 30px; z-index: 20; transform: rotate(15deg); 
-            animation: cardDefend 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-        }
-        .card-back { background-image: url('https://deckofcardsapi.com/static/img/back.png'); }
-
-        @keyframes cardFlyIn {
-            0% { transform: translateY(-200px) rotate(-180deg) scale(0.5); opacity: 0; }
-            50% { transform: translateY(-50px) rotate(-90deg) scale(0.8); opacity: 0.7; }
-            100% { transform: translateY(0) rotate(0deg) scale(1); opacity: 1; }
+        .bito-text { color: rgba(255,255,255,0.2); font-weight: bold; font-size: 20px; }
+        /* Карты в бито (визуально) */
+        .bito-card {
+            position: absolute; width: 100%; height: 100%;
+            background-image: url('https://deckofcardsapi.com/static/img/back.png');
+            background-size: cover; border-radius: var(--card-radius);
         }
 
-        @keyframes cardDefend {
-            0% { transform: translateX(-200px) rotate(-90deg) scale(0.5); opacity: 0; }
-            50% { transform: translateX(-30px) rotate(5deg) scale(0.9); opacity: 0.7; }
-            100% { transform: translateX(30px) rotate(15deg) scale(1); opacity: 1; }
+        /* Слоты карт (По центру) */
+        .field-slots {
+            display: flex; gap: 15px; align-items: center; justify-content: center;
+            z-index: 10;
         }
-
-        /* Увеличенная рука игрока */
-        .my-zone { height: 280px; display: flex; justify-content: center; align-items: flex-end; padding-bottom: 30px; position: relative; }
-        .my-hand-wrap { display: flex; align-items: flex-end; gap: 5px; }
-        .my-card { 
-            width: 80px; height: var(--card-h); position: relative; 
-            transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94); 
-            cursor: pointer; 
-        }
-        .my-card:hover { 
-            width: 120px; 
-            transform: translateY(-20px) scale(1.05);
-            z-index: 100;
-        }
-        .my-card:last-child { width: var(--card-w); }
-        
-        .my-card .card { 
-            position: absolute; bottom: 0; left: 0; 
-            transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94); 
-            transform: none !important; 
-        }
-        .my-card:hover .card { 
-            bottom: 30px; z-index: 100; 
-            box-shadow: 0 15px 30px rgba(0,0,0,0.7);
-        }
-        .my-card.sel .card { 
-            bottom: 40px; 
-            box-shadow: 0 0 0 4px #ffeb3b, 0 15px 30px rgba(0,0,0,0.7); 
-            z-index: 101; 
-            animation: cardSelect 0.3s ease-out;
-        }
-
-        @keyframes cardSelect {
-            0% { transform: scale(1) rotate(0deg); }
-            50% { transform: scale(1.1) rotate(5deg); }
-            100% { transform: scale(1) rotate(0deg); }
-        }
-
-        .controls { position: absolute; left: 30px; bottom: 300px; display: flex; flex-direction: column; align-items: flex-start; gap: 15px; z-index: 100; }
-        .status-badge { 
-            background: rgba(0,0,0,0.85); padding: 15px 30px; 
-            border-left: 6px solid #fff; font-size: 20px; font-weight: bold; 
-            box-shadow: 0 6px 12px rgba(0,0,0,0.6); border-radius: 0 8px 8px 0;
-            backdrop-filter: blur(10px);
-        }
-        .act-btn { 
-            border: none; padding: 18px 50px; font-size: 24px; font-weight: 900; 
-            text-transform: uppercase; cursor: pointer; color: white; 
-            box-shadow: 0 8px 25px rgba(0,0,0,0.6); border-radius: 8px; 
-            display: none; transition: all 0.2s ease;
-            position: relative; overflow: hidden;
-        }
-        .act-btn::before {
-            content: '';
-            position: absolute; top: 0; left: -100%; width: 100%; height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
-            transition: left 0.5s;
-        }
-        .act-btn:hover::before { left: 100%; }
-        .act-btn:hover { transform: translateY(-3px); box-shadow: 0 12px 30px rgba(0,0,0,0.8); }
-        .btn-take { background: linear-gradient(135deg, #e65100, #ff6d00); }
-        .btn-bito { background: linear-gradient(135deg, #b71c1c, #d32f2f); }
-
-        /* Информация об игроке */
-        .my-info {
-            position: absolute; bottom: 15px; left: 15px; 
-            display: flex; align-items: center; gap: 20px;
-            background: rgba(0,0,0,0.7); padding: 15px 25px; border-radius: 12px;
-            backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1);
-        }
-        .my-info-avatar {
+        .slot {
+            width: var(--card-w); height: var(--card-h);
             position: relative;
         }
-        .my-info-text h3 {
-            margin: 0; font-size: 22px; font-weight: bold; color: #fff;
+        
+        /* Карты */
+        .card {
+            width: var(--card-w); height: var(--card-h);
+            border-radius: var(--card-radius);
+            background-color: #fff; background-size: 100% 100%;
+            position: absolute;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.4);
+            transition: transform 0.2s;
         }
-        .my-info-text p {
-            margin: 5px 0 0; font-size: 14px; color: #aaa;
-        }
+        .card-att { top: 0; left: 0; z-index: 10; }
+        .card-def { top: 25px; left: 20px; z-index: 20; transform: rotate(10deg); }
+        .card-back { background-image: url('https://deckofcardsapi.com/static/img/back.png'); }
 
-        @media (max-width: 800px) {
-            :root { --card-w: 100px; --card-h: 140px; }
-            .opponents-row { height: 140px; gap: 20px; }
-            .my-zone { height: 200px; }
-            .controls { bottom: 210px; left: 20px; }
-            .chat-sidebar { width: 250px; height: 300px; top: 10px; right: 10px; }
-            .my-card { width: 50px; } 
-            .my-card:hover { width: 70px; }
-            .panel { width: 95%; padding: 20px; }
-            .my-info { bottom: 10px; left: 10px; padding: 10px 15px; }
+        /* НИЗ (Я) */
+        .my-zone {
+            height: 220px; margin-left: 250px;
+            display: flex; flex-direction: column; align-items: center; justify-content: flex-end;
+            padding-bottom: 20px; position: relative;
+            background: linear-gradient(to top, rgba(0,0,0,0.5), transparent);
+        }
+        
+        .my-hand {
+            display: flex; justify-content: center; align-items: flex-end;
+            margin-bottom: 10px; perspective: 1000px;
+        }
+        .my-card-wrapper {
+            width: 50px; /* Сжатие */
+            height: var(--card-h);
+            position: relative;
+            transition: width 0.3s ease;
+            cursor: pointer;
+        }
+        .my-card-wrapper:hover { width: 90px; } /* Раскрытие при наведении */
+        .my-card-wrapper:last-child { width: var(--card-w); }
+        
+        .my-card-wrapper .card {
+            position: absolute; bottom: 0; left: 0;
+            transition: bottom 0.2s, transform 0.2s;
+            transform-origin: bottom center;
+        }
+        /* Эффект просмотра карты */
+        .my-card-wrapper:hover .card { bottom: 40px; z-index: 100; transform: scale(1.1); }
+        .my-card-wrapper.selected .card { bottom: 60px; box-shadow: 0 0 0 4px var(--accent); z-index: 101; }
+
+        .my-info {
+            position: absolute; bottom: 20px; left: 20px;
+            display: flex; align-items: center; gap: 10px;
+        }
+        .my-ava { width: 60px; height: 60px; border-radius: 12px; border: 2px solid #fff; background: #333; }
+        .my-info.turn .my-ava { border-color: var(--accent); box-shadow: 0 0 15px var(--accent); }
+
+        /* КНОПКИ */
+        .controls {
+            position: absolute; right: 30px; bottom: 240px;
+            display: flex; flex-direction: column; gap: 10px; align-items: flex-end;
+        }
+        .status-bubble {
+            background: rgba(0,0,0,0.7); padding: 10px 20px; border-radius: 20px;
+            font-size: 16px; font-weight: bold; border: 1px solid rgba(255,255,255,0.2);
+        }
+        .act-btn {
+            border: none; padding: 15px 40px; font-size: 20px; font-weight: 900;
+            text-transform: uppercase; border-radius: 8px; cursor: pointer; color: white;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.5); display: none;
+            transition: transform 0.1s;
+        }
+        .act-btn:active { transform: scale(0.95); }
+        .btn-take { background: linear-gradient(to bottom, #f39c12, #d35400); }
+        .btn-bito { background: linear-gradient(to bottom, #e74c3c, #c0392b); }
+
+        /* АДАПТИВ (Мобилки) */
+        @media (max-width: 900px) {
+            :root { --card-w: 80px; --card-h: 116px; }
+            .chat-sidebar { display: none; } /* На мобилках чат скрываем ради места */
+            .top-zone, .table-center, .my-zone { margin-left: 0; }
+            .top-zone { height: 100px; }
+            .my-zone { height: 150px; }
+            .deck-wrap { left: 10px; } .bito-wrap { right: 10px; }
+            .controls { bottom: 170px; right: 10px; }
+            .my-card-wrapper { width: 30px; } .my-card-wrapper:hover { width: 50px; }
         }
     </style>
 </head>
 <body>
 
-    <!-- LOBBY -->
-    <div id="lobby">
-        <div class="panel" id="p-setup">
-            <h1>DURAK PRO</h1>
-            
-            <div class="avatars" id="ava-list"></div>
-            <input type="text" id="p-name" class="inp" placeholder="ВАШ НИК" value="Игрок">
+    <!-- СЛОЙ АНИМАЦИИ -->
+    <div id="anim-layer"></div>
 
-            <div class="opts">
-                <label><input type="radio" name="mode" value="2" checked> 1x1</label>
+    <!-- ЛОББИ -->
+    <div id="lobby">
+        <div class="panel" id="panel-setup">
+            <h1>DURAK ONLINE PRO</h1>
+            
+            <div class="avatar-select" id="ava-list"></div>
+            <input type="text" id="my-name" class="inp" placeholder="Ваше Имя" value="Игрок">
+
+            <div style="margin: 15px 0; font-weight: bold; font-size: 18px;">
+                <label><input type="radio" name="mode" value="2" checked> 1 на 1</label>
+                <span style="margin:0 10px">|</span>
                 <label><input type="radio" name="mode" value="3"> 3 Игрока</label>
             </div>
-            <div class="opts">
-                <label style="cursor:pointer; display:flex; align-items:center; gap:5px;">
-                    <input type="checkbox" id="chk-transfer" style="width:20px; height:20px;"> Переводной
+            
+            <div style="margin-bottom: 15px;">
+                <label style="cursor:pointer; font-weight:bold;">
+                    <input type="checkbox" id="chk-transfer" style="transform:scale(1.5);"> Переводной
                 </label>
             </div>
 
-            <button class="btn btn-create" onclick="Lobby.create()">Создать стол</button>
-            <div style="margin:15px; color:#555; font-weight:bold;">- ИЛИ -</div>
+            <button class="btn btn-green" onclick="Lobby.create()">СОЗДАТЬ СТОЛ</button>
+            <div style="margin:10px; color:#aaa;">или</div>
             <input type="text" id="join-id" class="inp" placeholder="Вставьте ID">
-            <button class="btn btn-join" onclick="Lobby.join()">Войти</button>
+            <button class="btn btn-blue" onclick="Lobby.join()">ПРИСОЕДИНИТЬСЯ</button>
         </div>
 
-        <div class="panel" id="p-wait" style="display:none;">
+        <div class="panel" id="panel-wait" style="display:none;">
             <h2>Комната создана</h2>
-            <p>Скопируйте ID:</p>
-            <input type="text" id="host-id" class="inp" style="background:#eee;" readonly onclick="this.select()">
-            <p id="wait-msg" style="color:#d32f2f; font-weight:bold; font-size:20px;">1/2</p>
-            <div style="font-size:30px; animation:spin 1s infinite linear;">↻</div>
-            <style>@keyframes spin { 100% {transform:rotate(360deg);} }</style>
+            <p>Ваш ID:</p>
+            <input type="text" id="host-id-disp" class="inp" style="background:#eee;" readonly onclick="this.select()">
+            <p id="wait-count" style="color:#2980b9; font-weight:bold; font-size:24px;">1/2</p>
+            <div style="font-size:30px; margin-top:20px;">⌛</div>
         </div>
     </div>
 
-    <!-- GAME -->
+    <!-- ИГРА -->
     <div id="game">
+        <!-- Чат -->
         <div class="chat-sidebar">
-            <div class="chat-log" id="chat-log"></div>
-            <div class="chat-inp-row">
+            <div class="chat-log" id="chat-log">
+                <div class="msg" style="color:#aaa; text-align:center;">--- ЧАТ ---</div>
+            </div>
+            <div class="chat-input-area">
                 <input type="text" id="chat-in" placeholder="Сообщение..." autocomplete="off">
-                <button id="chat-send" onclick="Game.sendChat()">▶</button>
+                <button id="chat-send" onclick="Game.sendChat()">➤</button>
             </div>
         </div>
 
-        <div class="opponents-row" id="opponents-area"></div>
+        <!-- Соперники -->
+        <div class="top-zone" id="top-opponents"></div>
 
-        <div class="table-area">
-            <div class="deck-pos">
-                <div class="deck-count" id="deck-n">36</div>
+        <!-- Стол -->
+        <div class="table-center">
+            <!-- Колода -->
+            <div class="deck-wrap" id="deck-area">
+                <div class="deck-counter" id="deck-num">36</div>
                 <div id="trump-slot"></div>
-                <div id="deck-visual" style="position:absolute; top:0; left:0; width:100%; height:100%;"></div>
-            </div>
-            
-            <div class="bito-pos" id="bito-visual">
-                 <div style="color:rgba(255,255,255,0.4); font-weight:bold; text-align:center; font-size:18px;">БИТО</div>
+                <div id="deck-slot" class="card card-back deck-top"></div>
             </div>
 
-            <div class="slots-wrap" id="slots-area"></div>
+            <!-- Слоты -->
+            <div class="field-slots" id="table-slots"></div>
 
+            <!-- Бито -->
+            <div class="bito-wrap" id="bito-area">
+                <div class="bito-text">БИТО</div>
+            </div>
+
+            <!-- Кнопки -->
             <div class="controls">
-                <div class="status-badge" id="status-txt">...</div>
+                <div class="status-bubble" id="game-status">Ожидание...</div>
                 <button class="act-btn btn-bito" id="btn-bito" onclick="Game.act('BITO')">БИТО</button>
                 <button class="act-btn btn-take" id="btn-take" onclick="Game.act('TAKE')">ВЗЯТЬ</button>
             </div>
         </div>
 
+        <!-- Моя рука -->
         <div class="my-zone">
-            <div class="my-info">
-                <div class="my-info-avatar">
-                    <img id="my-ava" class="avatar" src="" style="width: 60px; height: 60px;">
-                    <svg class="timer-svg" viewBox="0 0 70 70" style="width: 70px; height: 70px;">
-                        <rect class="timer-path" id="my-timer" x="2" y="2" width="66" height="66" rx="12" ry="12"></rect>
-                    </svg>
-                </div>
-                <div class="my-info-text">
-                    <h3>ВЫ</h3>
-                    <p id="my-cards-count">6 карт</p>
-                </div>
+            <div class="my-info" id="my-info-box">
+                <img id="my-ava-img" class="my-ava" src="">
+                <div style="font-weight:bold; text-shadow:1px 1px 2px black;">ВЫ</div>
             </div>
-            <div class="my-hand-wrap" id="my-hand"></div>
+            <div class="my-hand" id="my-hand"></div>
         </div>
     </div>
 
     <script>
-        const IMG_API = (r,s) => `https://deckofcardsapi.com/static/img/${r}${s}.png`;
-        const SUITS = ['S','C','H','D'];
+        const SUITS = ['S','C','H','D']; 
         const RANKS = ['6','7','8','9','0','J','Q','K','A'];
-        
+        // Картинки. 0 = 10 для API
+        const GET_IMG = (r,s) => `https://deckofcardsapi.com/static/img/${r}${s}.png`;
+        const AVATARS = [1,2,3,4,5,6]; // RoboHash sets
+
+        // --- ДВИЖОК ИГРЫ (Логика Хоста) ---
         class Engine {
             constructor(hName, hAva, mode, transfer) {
                 this.mode = mode;
@@ -426,10 +386,9 @@
                 this.trump = null;
                 this.field = [];
                 this.bitoCount = 0;
-                this.turn = 0;
-                this.startTime = 0;
+                this.turn = 0; // Индекс игрока, чей ход
                 this.state = 'lobby';
-                this.win = null;
+                this.winner = null;
             }
 
             addPlayer(id, name, ava) {
@@ -439,150 +398,181 @@
             }
 
             start() {
+                // Генерация колоды
                 this.deck = [];
                 SUITS.forEach(s => RANKS.forEach(r => this.deck.push({r, s})));
                 this.deck.sort(() => Math.random() - 0.5);
+
+                // Раздача
                 this.players.forEach(p => p.hand = this.deck.splice(0,6));
+
+                // Козырь
                 this.trump = this.deck.pop();
                 this.deck.unshift(this.trump);
-                
-                let min=100, fp=0;
+
+                // Определение первого хода (младший козырь)
+                let minVal = 100, firstP = 0;
                 this.players.forEach((p,i) => {
                     p.hand.forEach(c => {
-                        if(c.s===this.trump.s && RANKS.indexOf(c.r)<min) {
-                            min = RANKS.indexOf(c.r); fp=i;
+                        if(c.s === this.trump.s && RANKS.indexOf(c.r) < minVal) {
+                            minVal = RANKS.indexOf(c.r); firstP = i;
                         }
                     });
                 });
-                this.changeTurn(fp);
+                this.turn = firstP;
                 this.state = 'game';
             }
 
-            changeTurn(idx) {
-                this.turn = idx;
-                this.startTime = Date.now();
+            next(offset=1) { return (this.turn + offset) % this.mode; }
+            
+            canBeat(att, def) {
+                if(att.s === def.s) return RANKS.indexOf(def.r) > RANKS.indexOf(att.r);
+                return def.s === this.trump.s;
             }
 
-            next(off=1) { return (this.turn + off) % this.mode; }
-            beat(a, d) {
-                if(a.s===d.s) return RANKS.indexOf(d.r) > RANKS.indexOf(a.r);
-                return d.s === this.trump.s;
-            }
-
-            move(pidx, type, d) {
+            // Обработка действий
+            move(pidx, type, data) {
                 if(this.state !== 'game') return;
                 const p = this.players[pidx];
 
+                // АТАКА (или Перевод)
                 if(type === 'ATTACK') {
                     const isAttacker = (pidx === this.turn);
-                    const isTransferer = (this.transfer && pidx === this.next() && this.field.length > 0 && this.field.every(s => !s.def));
-                    if(!isAttacker && !isTransferer) return;
-                    const c = p.hand[d.i];
+                    // Условие перевода: ход следующего игрока (он должен отбиваться, но кидает такую же), поле не пустое и не бито
+                    const isTransfer = (this.transfer && pidx === this.next() && this.field.length > 0 && this.field.every(s => !s.def));
+                    
+                    if(!isAttacker && !isTransfer) return false;
+
+                    const card = p.hand[data.i];
+
+                    // Проверка номинала (подкидной)
                     if(this.field.length > 0) {
-                        const ranks = new Set(this.field.flatMap(x => [x.att.r, x.def?.r].filter(Boolean)));
-                        if(!ranks.has(c.r)) return;
+                        const ranks = new Set(this.field.flatMap(s => [s.att.r, s.def?.r].filter(Boolean)));
+                        if(!ranks.has(card.r)) return false;
                     }
-                    let defIdx = this.next();
-                    if(isTransferer) defIdx = (pidx + 1) % this.mode;
-                    const defP = this.players[defIdx];
-                    const slotsFree = this.field.filter(x=>!x.def).length;
-                    if(slotsFree + 1 > defP.hand.length) return;
-                    if(this.field.length >= 6) return;
-                    p.hand.splice(d.i, 1);
-                    this.field.push({att: c, def: null, from: pidx});
-                    if(isTransferer) this.changeTurn(pidx);
-                    else this.startTime = Date.now();
+
+                    // Проверка лимитов карт у следующего
+                    let targetIdx = this.next();
+                    if(isTransfer) targetIdx = (pidx + 1) % this.mode;
+                    
+                    const targetP = this.players[targetIdx];
+                    const slotsNeeded = this.field.filter(x=>!x.def).length + 1; // +1 текущая карта
+                    
+                    if(slotsNeeded > targetP.hand.length) return false;
+                    if(this.field.length >= 6) return false;
+
+                    // Ход валиден
+                    p.hand.splice(data.i, 1);
+                    this.field.push({ att: card, def: null, from: pidx });
+
+                    if(isTransfer) this.turn = pidx; // Переводящий становится атакующим
                     return true;
                 }
 
+                // ЗАЩИТА
                 if(type === 'DEFEND') {
-                    if(pidx !== this.next()) return;
-                    const slot = this.field[d.s];
-                    if(!slot || slot.def) return;
-                    const c = p.hand[d.i];
-                    if(this.beat(slot.att, c)) {
-                        p.hand.splice(d.i, 1);
-                        slot.def = c;
+                    if(pidx !== this.next()) return false;
+                    const slot = this.field[data.s];
+                    if(!slot || slot.def) return false;
+                    
+                    const card = p.hand[data.i];
+                    if(this.canBeat(slot.att, card)) {
+                        p.hand.splice(data.i, 1);
+                        slot.def = card;
                         return true;
                     }
                 }
 
+                // БИТО
                 if(type === 'BITO') {
-                    if(pidx !== this.turn) return;
-                    if(this.field.length===0 || this.field.some(x=>!x.def)) return;
+                    if(pidx !== this.turn) return false;
+                    if(this.field.length===0 || this.field.some(x=>!x.def)) return false;
+                    
                     this.bitoCount += (this.field.length * 2);
                     this.field = [];
                     this.refill();
-                    this.changeTurn(this.next());
+                    this.turn = this.next();
                     return true;
                 }
 
+                // ВЗЯТЬ
                 if(type === 'TAKE') {
-                    if(pidx !== this.next()) return;
-                    this.field.forEach(x => {
-                        p.hand.push(x.att);
-                        if(x.def) p.hand.push(x.def);
+                    if(pidx !== this.next()) return false;
+                    
+                    // Забирает все карты со стола
+                    this.field.forEach(s => {
+                        p.hand.push(s.att);
+                        if(s.def) p.hand.push(s.def);
                     });
                     this.field = [];
-                    this.refill(true);
+                    this.refill(true); // Атакующие добирают, взявший - нет
+                    
+                    // Ход переходит через одного (в режиме 2 игрока - к тому же атакующему)
                     let nextTurn = this.next(2);
-                    if(this.mode===2) nextTurn = this.next(1);
-                    this.changeTurn(nextTurn);
+                    if(this.mode === 2) nextTurn = this.next(1);
+                    this.turn = nextTurn;
                     return true;
                 }
             }
 
-            refill(skipDef=false) {
-                const q = [];
-                for(let i=0; i<this.mode; i++) q.push((this.turn + i)%this.mode);
-                q.forEach(idx => {
-                    if(skipDef && idx === this.next()) return;
+            refill(skipLoser = false) {
+                const queue = [];
+                for(let i=0; i<this.mode; i++) queue.push((this.turn + i) % this.mode);
+                
+                queue.forEach(idx => {
+                    if(skipLoser && idx === this.next()) return;
                     const p = this.players[idx];
-                    while(p.hand.length < 6 && this.deck.length > 0) p.hand.push(this.deck.pop());
+                    while(p.hand.length < 6 && this.deck.length > 0) {
+                        p.hand.push(this.deck.pop());
+                    }
                 });
-                this.players.forEach(p => {
-                    if(p.hand.length===0 && this.deck.length===0 && !this.win) this.win = p.name;
-                });
+
+                // Проверка победы
+                if(this.deck.length === 0) {
+                    this.players.forEach(p => {
+                        if(p.hand.length === 0 && !this.win) this.win = p.name;
+                    });
+                }
             }
 
-            dump() {
+            getSnapshot() {
                 return {
                     d: this.deck.length,
                     tr: this.trump,
                     f: this.field,
                     bc: this.bitoCount,
                     t: this.turn,
-                    tm: this.startTime,
                     ps: this.players.map(p => ({id:p.id, name:p.name, ava:p.ava, cnt:p.hand.length})),
                     win: this.win
                 };
             }
         }
 
+        // --- КЛИЕНТ (UI) ---
         const Lobby = {
             ava: 1,
             init() {
-                const el = document.getElementById('ava-list');
-                [1,2,3,4,5].forEach(i => {
+                const c = document.getElementById('ava-list');
+                AVATARS.forEach(i => {
                     const d = document.createElement('div');
-                    d.className = 'ava-opt' + (i===1?' selected':'');
+                    d.className = 'ava-opt' + (i===1?' active':'');
                     d.style.backgroundImage = `url('https://robohash.org/${i}.png?set=set4')`;
                     d.onclick = () => {
                         this.ava=i;
-                        document.querySelectorAll('.ava-opt').forEach(x=>x.classList.remove('selected'));
-                        d.classList.add('selected');
+                        document.querySelectorAll('.ava-opt').forEach(x=>x.classList.remove('active'));
+                        d.classList.add('active');
                     };
-                    el.appendChild(d);
+                    c.appendChild(d);
                 });
             },
             create() {
-                const n = document.getElementById('p-name').value;
-                const mode = parseInt(document.querySelector('input[name="mode"]:checked').value);
-                const tr = document.getElementById('chk-transfer').checked;
-                Game.initHost(n, this.ava, mode, tr);
+                const n = document.getElementById('my-name').value;
+                const m = parseInt(document.querySelector('input[name="mode"]:checked').value);
+                const t = document.getElementById('chk-transfer').checked;
+                Game.initHost(n, this.ava, m, t);
             },
             join() {
-                const n = document.getElementById('p-name').value;
+                const n = document.getElementById('my-name').value;
                 const id = document.getElementById('join-id').value;
                 if(!id) return alert('ID?');
                 Game.initClient(n, this.ava, id);
@@ -592,54 +582,57 @@
         const Game = {
             role: null, eng: null, peer: null, conns: [], conn: null,
             myId: null, st: null, hand: [], sel: null,
+            
+            // Состояние для анимаций (чтобы знать откуда лететь)
+            lastFieldLen: 0,
+            lastBitoCnt: 0,
+            lastHandLen: 0,
 
+            // HOST START
             initHost(n, a, m, t) {
-                this.role = 'host';
-                this.eng = new Engine(n, a, m, t);
+                this.role='host'; this.eng=new Engine(n, a, m, t);
                 this.peer = new Peer();
                 this.peer.on('open', id => {
-                    document.getElementById('p-setup').style.display = 'none';
-                    document.getElementById('p-wait').style.display = 'block';
-                    document.getElementById('host-id').value = id;
+                    document.getElementById('panel-setup').style.display='none';
+                    document.getElementById('panel-wait').style.display='block';
+                    document.getElementById('host-id-disp').value = id;
                 });
                 this.peer.on('connection', c => {
                     c.on('open', () => this.conns.push(c));
                     c.on('data', d => {
                         if(d.t==='J') {
                             if(this.eng.addPlayer(c.peer, d.n, d.a)) {
-                                this.bc({t:'C', n:'INFO', m:`${d.n} вошел`, s:1});
-                                document.getElementById('wait-msg').innerText = `${this.eng.players.length}/${this.eng.mode}`;
-                                if(this.eng.players.length === this.eng.mode) {
+                                this.bc({t:'C', n:'SYS', m:`${d.n} зашел`});
+                                document.getElementById('wait-count').innerText = `${this.eng.players.length}/${this.eng.mode}`;
+                                if(this.eng.players.length === m) {
                                     this.eng.start();
                                     this.sync();
-                                    document.getElementById('lobby').style.display = 'none';
-                                    document.getElementById('game').style.display = 'flex';
                                 }
                             } else c.close();
                         }
                         if(d.t==='A') {
-                            const pIdx = this.eng.players.findIndex(p=>p.id===c.peer);
-                            if(pIdx!==-1 && this.eng.move(pIdx, d.a, d.d)) this.sync();
+                            const idx = this.eng.players.findIndex(p=>p.id===c.peer);
+                            if(idx!==-1 && this.eng.move(idx, d.a, d.d)) this.sync();
                         }
                         if(d.t==='C') this.bc(d);
                     });
                 });
             },
 
+            // CLIENT START
             initClient(n, a, id) {
-                this.role = 'client';
+                this.role='client';
                 this.peer = new Peer();
                 this.peer.on('open', () => {
                     this.conn = this.peer.connect(id);
                     this.conn.on('open', () => {
                         this.conn.send({t:'J', n, a});
-                        document.getElementById('p-setup').style.display = 'none';
-                        document.getElementById('status-txt').innerText = "Подключение...";
+                        document.getElementById('lobby').style.display='none';
                     });
                     this.conn.on('data', d => {
                         if(d.t==='S') {
-                            document.getElementById('lobby').style.display = 'none';
-                            document.getElementById('game').style.display = 'flex';
+                            document.getElementById('lobby').style.display='none';
+                            document.getElementById('game').style.display='flex';
                             this.st = d.s; this.hand = d.h; this.myId = d.mid;
                             this.draw();
                         }
@@ -650,7 +643,7 @@
 
             sync() {
                 if(this.role!=='host') return;
-                const snap = this.eng.dump();
+                const snap = this.eng.getSnapshot();
                 this.st = snap; this.hand = this.eng.players[0].hand; this.myId = 'host';
                 this.draw();
                 this.conns.forEach(c => {
@@ -667,235 +660,266 @@
                 }
             },
 
+            // CHAT
             sendChat() {
                 const i = document.getElementById('chat-in');
-                const val = i.value.trim();
-                if(!val) return;
+                const v = i.value.trim();
+                if(!v) return;
                 
-                let name = 'Я';
-                if(this.role==='host' && this.eng) name = this.eng.players[0].name;
+                let myName = 'Я', myAva = 1;
+                if(this.role==='host') { myName = this.eng.players[0].name; myAva = this.eng.players[0].ava; }
                 
                 if(this.role==='host') {
-                    const msg = {t:'C', n:name, m:val, id:this.myId, a:this.eng.players[0].ava};
+                    const msg = {t:'C', n:myName, a:myAva, m:v, id:this.myId};
                     this.addChat(msg); this.bc(msg);
                 } else {
-                    this.conn.send({t:'C', m:val, id:this.myId});
+                    this.conn.send({t:'C', m:v, id:this.myId});
                 }
-                i.value = '';
+                i.value='';
             },
-
             bc(d) {
                 if(d.t==='C' && !d.n && this.eng) {
-                    const p = this.eng.players.find(x=>x.id === d.id);
-                    if(p) { d.n = p.name; d.a = p.ava; }
-                    else d.n = '???';
+                    const p = this.eng.players.find(x=>x.id===d.id);
+                    if(p) { d.n=p.name; d.a=p.ava; }
                 }
-                this.conns.forEach(c=>c.send(d)); 
-                if(d.t==='C') this.addChat(d); 
+                this.conns.forEach(c=>c.send(d));
+                if(d.t==='C') this.addChat(d);
             },
-
             addChat(d) {
-                const log = document.getElementById('chat-log');
+                const box = document.getElementById('chat-log');
                 const el = document.createElement('div');
                 let isMe = false;
-                if(this.st && this.st.ps) {
+                // Try to identify self
+                if(this.st) {
                     const me = this.st.ps.find(p=>p.id===this.myId);
-                    if(me && d.n === me.name) isMe = true;
-                    if(!me && this.role==='host' && d.n === this.eng.players[0].name) isMe = true;
+                    if(me && d.n===me.name) isMe=true;
+                    if(!me && this.role==='host' && d.n===this.eng.players[0].name) isMe=true;
                 }
-                el.className = 'chat-msg' + (d.s ? ' sys' : (isMe ? ' me' : ''));
-                if(d.s) el.innerText = d.m;
-                else {
-                    const avaUrl = d.a ? `https://robohash.org/${d.a}.png?set=set4` : 'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=';
-                    el.innerHTML = `<img src="${avaUrl}" class="chat-ava"><b>${d.n}:</b> ${d.m}`;
-                }
-                log.appendChild(el);
-                log.scrollTop = log.scrollHeight;
+                el.className = 'msg chat-msg' + (isMe?' me':'');
+                const avaSrc = d.a ? `https://robohash.org/${d.a}.png?set=set4` : '';
+                
+                if(d.n==='SYS') el.innerHTML = `<i>${d.m}</i>`;
+                else el.innerHTML = `<img src="${avaSrc}"> <b>${d.n}:</b> ${d.m}`;
+                
+                box.appendChild(el);
+                box.scrollTop = box.scrollHeight;
             },
 
-            safeTxt(id, txt) {
-                const el = document.getElementById(id);
-                if(el) el.innerText = txt;
+            // ANIMATION SYSTEM
+            fly(fromRect, toRect, img) {
+                const el = document.createElement('div');
+                el.className = 'flying-card';
+                el.style.backgroundImage = `url('${img}')`;
+                el.style.left = fromRect.left + 'px';
+                el.style.top = fromRect.top + 'px';
+                document.getElementById('anim-layer').appendChild(el);
+                
+                // Trigger Reflow
+                el.getBoundingClientRect();
+                
+                el.style.left = toRect.left + 'px';
+                el.style.top = toRect.top + 'px';
+                
+                setTimeout(() => el.remove(), 600);
             },
 
+            // MAIN RENDER
             draw() {
                 const s = this.st;
                 if(!s) return;
-                if(s.win) { alert(s.win + " ПОБЕДИЛ!"); location.reload(); return; }
-
+                
+                // Identify Indexes
                 let myIdx = s.ps.findIndex(p=>p.id===this.myId);
                 if(myIdx===-1 && this.role==='host') myIdx=0;
 
-                // 1. OPPONENTS
-                const oppDiv = document.getElementById('opponents-area');
-                if(oppDiv) {
-                    oppDiv.innerHTML = '';
-                    for(let i=1; i<s.ps.length; i++) {
-                        const idx = (myIdx + i) % s.ps.length;
-                        const p = s.ps[idx];
-                        const isTurn = (s.t === idx);
+                // 1. OPPONENTS (Top)
+                const oppDiv = document.getElementById('top-opponents');
+                oppDiv.innerHTML = '';
+                
+                for(let i=1; i<s.ps.length; i++) {
+                    const idx = (myIdx + i) % s.ps.length;
+                    const p = s.ps[idx];
+                    const isTurn = (s.t === idx);
+                    
+                    const el = document.createElement('div');
+                    el.className = `player-info ${isTurn?'turn':''}`;
+                    el.id = `player-pos-${idx}`; // Anchor for animation
+                    
+                    // Render Stacked Hand
+                    let handHtml = '';
+                    for(let c=0; c<p.cnt; c++) {
+                        handHtml += `<div class="mini-card" style="margin-left:${c===0?0:-30}px"></div>`;
+                    }
+
+                    el.innerHTML = `
+                        <img src="https://robohash.org/${p.ava}.png?set=set4" class="avatar">
+                        <div class="p-name">${p.name}</div>
+                        <div class="p-hand-stack">${handHtml}</div>
+                    `;
+                    oppDiv.appendChild(el);
+                }
+
+                // 2. DECK & TRUMP
+                document.getElementById('deck-num').innerText = s.d;
+                const dSlot = document.getElementById('deck-slot');
+                dSlot.style.display = s.d > 1 ? 'block' : 'none';
+                
+                const tSlot = document.getElementById('trump-slot');
+                tSlot.innerHTML = '';
+                if(s.tr) {
+                    const tCard = document.createElement('div');
+                    tCard.className = 'card trump-card';
+                    tCard.style.backgroundImage = `url('${GET_IMG(s.tr.r, s.tr.s)}')`;
+                    tSlot.appendChild(tCard);
+                }
+
+                // 3. BITO (Visual Stack)
+                const bitoArea = document.getElementById('bito-area');
+                bitoArea.innerHTML = '<div class="bito-text">БИТО</div>';
+                
+                // Animation Check for Bito: If count increased significantly
+                if(s.bc > this.lastBitoCnt) {
+                    // Trigger flying to bito from center
+                    const tableRect = document.getElementById('table-slots').getBoundingClientRect();
+                    const bitoRect = bitoArea.getBoundingClientRect();
+                    this.fly(tableRect, bitoRect, 'https://deckofcardsapi.com/static/img/back.png');
+                }
+                this.lastBitoCnt = s.bc;
+
+                if(s.bc > 0) {
+                    const cnt = Math.min(Math.ceil(s.bc/2), 10);
+                    for(let i=0; i<cnt; i++) {
+                        const c = document.createElement('div');
+                        c.className = 'bito-card';
+                        c.style.transform = `rotate(${Math.random()*15-7}deg)`;
+                        c.style.top = `${-i}px`;
+                        bitoArea.appendChild(c);
+                    }
+                }
+
+                // 4. TABLE SLOTS & ANIMATIONS
+                const fieldDiv = document.getElementById('table-slots');
+                fieldDiv.innerHTML = '';
+                
+                s.f.forEach((slot, si) => {
+                    const d = document.createElement('div');
+                    d.className = 'slot';
+                    
+                    // Attack Card
+                    const c1 = document.createElement('div');
+                    c1.className = 'card card-att';
+                    const imgUrl = GET_IMG(slot.att.r, slot.att.s);
+                    c1.style.backgroundImage = `url('${imgUrl}')`;
+                    d.appendChild(c1);
+
+                    // Animate if this is new (index > stored length)
+                    if(si >= this.lastFieldLen) {
+                        let fromRect;
+                        if(slot.from === myIdx) {
+                            fromRect = document.getElementById('my-hand').getBoundingClientRect();
+                        } else {
+                            const oppEl = document.getElementById(`player-pos-${slot.from}`);
+                            fromRect = oppEl ? oppEl.getBoundingClientRect() : {top:0,left:0};
+                        }
+                        // We need coordinates of this specific slot, but it's not rendered yet in DOM fully
+                        // Simple hack: Fly to center of table container
+                        const destRect = fieldDiv.getBoundingClientRect(); 
+                        // Adjust slightly for slot index
+                        destRect.left += (si * 130); 
                         
-                        const wrap = document.createElement('div');
-                        wrap.className = 'player-wrap';
-                        let cardsHtml = '';
-                        for(let c=0; c<p.cnt; c++) {
-                            cardsHtml += `<div class="card-tiny" style="left:${c*8}px; top:${-c*2}px; transform: rotate(${Math.random()*10-5}deg);"></div>`;
-                        }
-                        
-                        wrap.innerHTML = `
-                            <div style="position:relative;">
-                                <img src="https://robohash.org/${p.ava}.png?set=set4" class="avatar">
-                                <svg class="timer-svg" style="opacity:${isTurn?1:0}" viewBox="0 0 70 70">
-                                    <rect class="timer-path" x="2" y="2" width="66" height="66" rx="12"></rect>
-                                </svg>
-                            </div>
-                            <div class="p-name">${p.name}</div>
-                            <div class="p-hand">${cardsHtml}</div>
-                        `;
-                        if(isTurn) this.animTimer(wrap.querySelector('.timer-path'), s.tm);
-                        oppDiv.appendChild(wrap);
+                        this.fly(fromRect, destRect, imgUrl);
                     }
-                }
 
-                // 2. TABLE
-                this.safeTxt('deck-n', s.d);
-                const dSlot = document.getElementById('deck-visual');
-                if(dSlot) {
-                    dSlot.innerHTML = '';
-                    if(s.d > 0) {
-                        const maxVis = Math.min(s.d, 7);
-                        for(let i=0; i<maxVis; i++) {
-                            dSlot.innerHTML += `<div class="deck-stack-card" style="top:${-i*3}px; left:${-i*2}px; transform: rotate(${Math.random()*6-3}deg);"></div>`;
+                    // Defense Card
+                    if(slot.def) {
+                        const c2 = document.createElement('div');
+                        c2.className = 'card card-def';
+                        c2.style.backgroundImage = `url('${GET_IMG(slot.def.r, slot.def.s)}')`;
+                        d.appendChild(c2);
+                    } else {
+                        // Logic for Click to Defend
+                        const nextP = (s.t + 1) % s.ps.length;
+                        if(myIdx === nextP && this.sel !== null) {
+                            d.style.boxShadow = "inset 0 0 20px #ffb300"; d.style.cursor="pointer";
+                            d.onclick = () => { this.act('DEFEND', {i:this.sel, s:si}); this.sel=null; };
                         }
                     }
-                }
+                    fieldDiv.appendChild(d);
+                });
+                this.lastFieldLen = s.f.length;
 
-                const tph = document.getElementById('trump-slot');
-                if(tph) {
-                    tph.innerHTML='';
-                    if(s.tr) tph.appendChild(this.mkC(s.tr, 'trump'));
-                }
+                // 5. MY HAND
+                const myInfoBox = document.getElementById('my-info-box');
+                const myHandDiv = document.getElementById('my-hand');
+                myHandDiv.innerHTML = '';
+                
+                if(s.t === myIdx) myInfoBox.classList.add('turn');
+                else myInfoBox.classList.remove('turn');
+                
+                const myInfo = s.ps[myIdx];
+                if(myInfo) document.getElementById('my-ava-img').src = `https://robohash.org/${myInfo.ava}.png?set=set4`;
 
-                const bitoEl = document.getElementById('bito-visual');
-                if(bitoEl) {
-                    if(s.bc > 0) {
-                         bitoEl.innerHTML = '';
-                         const cnt = Math.min(Math.ceil(s.bc/2), 8);
-                         for(let i=0; i<cnt; i++) {
-                            bitoEl.innerHTML += `<div class="deck-stack-card" style="transform:rotate(${Math.random()*40-20}deg); top:${-i*2}px; left:${Math.random()*10-5}px; opacity: 0.7;"></div>`;
-                         }
-                    } else bitoEl.innerHTML = '<div style="color:rgba(255,255,255,0.4); font-weight:bold; text-align:center; font-size:18px; padding-top: 30%;">БИТО</div>';
-                }
-
-                // 3. SLOTS
-                const slDiv = document.getElementById('slots-area');
-                if(slDiv) {
-                    slDiv.innerHTML='';
-                    s.f.forEach((slot, si) => {
-                        const d = document.createElement('div'); d.className='slot';
-                        d.appendChild(this.mkC(slot.att, 'card-att'));
-                        if(slot.def) d.appendChild(this.mkC(slot.def, 'card-def'));
-                        else if(s.t !== myIdx && this.sel!==null) {
-                            const defIdx = (s.t+1)%s.ps.length;
-                            if(myIdx === defIdx) {
-                                d.style.boxShadow = "inset 0 0 25px rgba(255, 61, 0, 0.6)"; 
-                                d.style.cursor="pointer";
-                                d.style.borderRadius = "8px";
-                                d.onclick = () => { this.act('DEFEND', {i:this.sel, s:si}); this.sel=null; };
-                            }
-                        }
-                        slDiv.appendChild(d);
-                    });
-                }
-
-                // 4. ME
-                const mh = document.getElementById('my-hand');
-                if(mh) {
-                    mh.innerHTML='';
-                    const myInfo = s.ps[myIdx];
-                    if(myInfo) {
-                        const ava = document.getElementById('my-ava');
-                        if(ava) ava.src = `https://robohash.org/${myInfo.ava}.png?set=set4`;
-                        this.safeTxt('my-cards-count', `${this.hand.length} карт`);
+                // Draw Cards if we have them (check for undefined error fix)
+                if(this.hand) {
+                    // Anim check: if hand grew, fly from deck
+                    if(this.hand.length > this.lastHandLen && this.lastHandLen !== 0) {
+                        // Fly from deck to me
+                        this.fly(document.getElementById('deck-area').getBoundingClientRect(), myHandDiv.getBoundingClientRect(), 'https://deckofcardsapi.com/static/img/back.png');
                     }
-
-                    const myTimer = document.getElementById('my-timer');
-                    if(myTimer) {
-                        if(s.t === myIdx) {
-                            myTimer.parentElement.style.opacity = 1;
-                            this.animTimer(myTimer, s.tm);
-                        } else myTimer.parentElement.style.opacity = 0;
-                    }
+                    this.lastHandLen = this.hand.length;
 
                     const isMyTurn = (s.t === myIdx);
-                    const isTransferPossible = (myIdx === (s.t+1)%s.ps.length && s.f.length>0 && s.f.every(x=>!x.def));
+                    // Transfer possible logic
+                    const isTransfer = (myIdx === (s.t+1)%s.ps.length && s.f.length>0 && s.f.every(x=>!x.def));
 
-                    this.hand.forEach((c,i) => {
-                        const w = document.createElement('div'); w.className='my-card';
-                        if(this.sel===i) w.classList.add('sel');
-                        w.appendChild(this.mkC(c));
+                    this.hand.forEach((c, i) => {
+                        const w = document.createElement('div');
+                        w.className = 'my-card-wrapper';
+                        if(this.sel === i) w.classList.add('selected');
                         
+                        const el = document.createElement('div');
+                        el.className = 'card';
+                        el.style.backgroundImage = `url('${GET_IMG(c.r,c.s)}')`;
+                        w.appendChild(el);
+
                         w.onclick = () => {
-                            if(isMyTurn) {
-                                this.act('ATTACK', {i}); 
-                            } else if(isTransferPossible) {
-                                 this.act('ATTACK', {i});
-                            } else { 
-                                this.sel = (this.sel===i)?null:i; this.draw(); 
-                            }
+                            if(isMyTurn) this.act('ATTACK', {i});
+                            else if(isTransfer) this.act('ATTACK', {i});
+                            else { this.sel = (this.sel===i)?null:i; this.draw(); }
                         };
-                        mh.appendChild(w);
+                        myHandDiv.appendChild(w);
                     });
                 }
 
-                // 5. STATUS
+                // 6. STATUS & BUTTONS
                 const bB = document.getElementById('btn-bito');
                 const bT = document.getElementById('btn-take');
-                const st = document.getElementById('status-txt');
-                if(bB) bB.style.display='none';
-                if(bT) bT.style.display='none';
+                const st = document.getElementById('game-status');
+                bB.style.display = 'none'; bT.style.display = 'none';
 
-                if(st) {
-                    const isMyTurn = (s.t === myIdx);
-                    if(isMyTurn) {
-                        st.innerText = "ВАШ ХОД"; st.style.borderLeftColor = "#4caf50";
-                        if(s.f.length>0 && s.f.every(x=>x.def)) bB.style.display='block';
+                if(s.t === myIdx) {
+                    st.innerText = "ВАШ ХОД"; st.style.borderLeftColor = "#27ae60";
+                    if(s.f.length > 0 && s.f.every(x=>x.def)) bB.style.display='block';
+                } else {
+                    const defIdx = (s.t + 1) % s.ps.length;
+                    if(myIdx === defIdx) {
+                        st.innerText = "ОТБИВАЙТЕСЬ"; st.style.borderLeftColor = "#e67e22";
+                        if(s.f.some(x=>!x.def)) bT.style.display='block';
+                        // Transfer hint
+                        const canTrans = (s.f.length>0 && s.f.every(x=>!x.def));
+                        if(canTrans) st.innerText = "ОТБЕЙ ИЛИ ПЕРЕВЕДИ";
                     } else {
-                        const defIdx = (s.t+1)%s.ps.length;
-                        const isTransferPossible = (myIdx === defIdx && s.f.length>0 && s.f.every(x=>!x.def));
-
-                        if(myIdx === defIdx) {
-                            st.innerText = "ОТБИВАЙТЕСЬ"; st.style.borderLeftColor = "#ff5722";
-                            if(s.f.some(x=>!x.def)) bT.style.display='block';
-                            if(isTransferPossible) st.innerText = "ОТБЕЙ ИЛИ ПЕРЕВЕДИ";
-                        } else {
-                            st.innerText = `ХОДИТ: ${s.ps[s.t].name}`;
-                            st.style.borderLeftColor = "#2196f3";
-                        }
+                        st.innerText = `ХОДИТ: ${s.ps[s.t].name}`;
+                        st.style.borderLeftColor = "#ccc";
                     }
                 }
-            },
-
-            mkC(c, cls='') {
-                const el = document.createElement('div');
-                el.className = `card ${cls}`;
-                el.style.backgroundImage = `url('${IMG_API(c.r,c.s)}')`;
-                return el;
-            },
-
-            animTimer(el, start) {
-                const dur = 30000;
-                const passed = Date.now() - start;
-                const pct = Math.max(0, (dur - passed) / dur);
-                const offset = 240 * (1 - pct);
-                el.style.strokeDashoffset = offset;
-                if(pct > 0) requestAnimationFrame(() => this.animTimer(el, start));
             }
         };
 
+        // Bind Chat Key
         document.getElementById('chat-in').addEventListener('keypress', e=>{if(e.key==='Enter')Game.sendChat()});
+        
         Lobby.init();
-
     </script>
 </body>
 </html>
