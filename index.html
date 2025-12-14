@@ -1,1 +1,754 @@
-1
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Durak PRO: Final Fixed</title>
+    <link rel="icon" href="data:;base64,iVBORw0KGgo=">
+    <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Roboto+Condensed:wght@400;700;900&display=swap');
+
+        :root {
+            --bg-felt: #204060;
+            --card-w: 120px;
+            --card-h: 170px;
+            --radius: 6px;
+            --accent: #ff3d00;
+        }
+
+        * { box-sizing: border-box; user-select: none; -webkit-tap-highlight-color: transparent; }
+        
+        body {
+            margin: 0;
+            font-family: 'Roboto Condensed', sans-serif;
+            background-color: var(--bg-felt);
+            background-image: 
+                radial-gradient(circle at center, rgba(255,255,255,0.05) 0%, transparent 70%),
+                url("data:image/svg+xml,%3Csvg width='4' height='4' viewBox='0 0 4 4' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 3h1v1H1V3zm2-2h1v1H3V1z' fill='%23000000' fill-opacity='0.2' fill-rule='evenodd'/%3E%3C/svg%3E");
+            height: 100vh;
+            overflow: hidden;
+            display: flex; flex-direction: column;
+            color: white;
+        }
+
+        /* --- LOBBY --- */
+        #lobby {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: #111; z-index: 9999;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .panel {
+            background: #eee; color: #111;
+            padding: 30px; border-radius: 8px;
+            width: 95%; max-width: 480px; text-align: center;
+            box-shadow: 0 20px 60px black; border: 1px solid #444;
+        }
+        .panel h1 { margin: 0 0 20px; font-weight: 900; letter-spacing: 2px; color: #204060; }
+        
+        .inp {
+            width: 100%; padding: 12px; margin: 10px 0;
+            border: 2px solid #ccc; border-radius: 4px;
+            font-size: 18px; font-weight: bold; text-align: center; font-family: inherit;
+        }
+        
+        .btn {
+            width: 100%; padding: 15px; border: none; margin-top: 5px;
+            font-size: 18px; font-weight: bold; text-transform: uppercase;
+            cursor: pointer; border-radius: 4px; transition: 0.1s;
+            color: white; box-shadow: 0 4px 0 rgba(0,0,0,0.3);
+        }
+        .btn:active { transform: translateY(3px); box-shadow: none; }
+        .btn-create { background: #2e7d32; }
+        .btn-join { background: #1565c0; }
+
+        .avatars { display: flex; gap: 10px; justify-content: center; margin-bottom: 15px; }
+        .ava-opt {
+            width: 50px; height: 50px; border: 3px solid #ccc; cursor: pointer;
+            background-size: cover; border-radius: 8px; transition: 0.2s;
+        }
+        .ava-opt:hover { transform: scale(1.1); }
+        .ava-opt.selected { border-color: #d32f2f; transform: scale(1.1); }
+
+        .opts { display: flex; gap: 20px; justify-content: center; margin: 15px 0; font-weight: bold; font-size: 18px; }
+
+        /* --- GAME UI --- */
+        #game { display: none; flex-direction: column; height: 100%; position: relative; }
+
+        .chat-sidebar {
+            position: absolute; top: 10px; left: 10px; bottom: 240px; width: 260px;
+            display: flex; flex-direction: column; pointer-events: none; z-index: 200;
+        }
+        .chat-log {
+            flex: 1; overflow-y: auto; display: flex; flex-direction: column; justify-content: flex-end;
+            margin-bottom: 5px; text-shadow: 1px 1px 2px black;
+            mask-image: linear-gradient(to top, black 85%, transparent 100%);
+        }
+        .chat-msg {
+            background: rgba(0,0,0,0.7); padding: 6px 10px; margin-bottom: 5px;
+            border-radius: 6px; color: #fff; font-size: 14px;
+            pointer-events: auto; align-self: flex-start;
+            display: flex; align-items: center; gap: 8px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        .chat-msg.me { align-self: flex-end; background: rgba(20, 100, 160, 0.8); }
+        .chat-ava { width: 24px; height: 24px; border-radius: 4px; background: #fff; }
+        
+        .chat-inp-row { display: flex; pointer-events: auto; }
+        #chat-in { flex: 1; background: rgba(0,0,0,0.6); border: 1px solid #777; color: white; padding: 8px; border-radius: 4px 0 0 4px; }
+        #chat-send { width: 40px; background: #444; color: white; border: 1px solid #777; cursor: pointer; border-radius: 0 4px 4px 0; }
+
+        .opponents-row { height: 150px; display: flex; justify-content: center; gap: 40px; padding-top: 15px; }
+        .player-wrap { position: relative; display: flex; flex-direction: column; align-items: center; width: 120px; }
+        
+        /* Timer SVG (Rounded Rect matches Avatar) */
+        .timer-svg {
+            position: absolute; top: -5px; left: 50%; transform: translateX(-50%);
+            width: 70px; height: 70px; pointer-events: none; z-index: 5;
+        }
+        .timer-path {
+            fill: none; stroke: var(--accent); stroke-width: 4;
+            stroke-dasharray: 240; stroke-dashoffset: 240; 
+            transition: stroke-dashoffset 1s linear;
+        }
+
+        .avatar { 
+            width: 60px; height: 60px; background: #444; border: 2px solid #fff; 
+            border-radius: 12px; z-index: 6; object-fit: cover; box-shadow: 0 4px 8px rgba(0,0,0,0.5);
+        }
+        .p-name { font-size: 14px; font-weight: bold; margin-top: 5px; text-shadow: 1px 1px 2px black; }
+        
+        .p-hand { position: relative; width: 60px; height: 40px; margin-top: 5px; }
+        .card-tiny {
+            width: 30px; height: 45px; background-image: url('https://deckofcardsapi.com/static/img/back.png');
+            background-size: cover; border-radius: 3px; border: 1px solid #fff;
+            position: absolute; box-shadow: 1px 1px 3px rgba(0,0,0,0.5);
+        }
+
+        .table-area { flex: 1; position: relative; display: flex; justify-content: center; align-items: center; }
+        .deck-pos { position: absolute; left: 20px; top: 50%; transform: translateY(-50%); width: var(--card-w); height: var(--card-h); }
+        .bito-pos { position: absolute; right: 20px; top: 50%; transform: translateY(-50%); width: var(--card-w); height: var(--card-h); opacity: 0.7; }
+        
+        .trump { position: absolute; top: 10px; left: 20px; transform: rotate(90deg); z-index: 1; }
+        .deck-stack-card { 
+            position: absolute; width: 100%; height: 100%; 
+            background-image: url('https://deckofcardsapi.com/static/img/back.png'); background-size: cover;
+            border-radius: var(--radius); border: 1px solid #ccc; 
+        }
+
+        .deck-count {
+             position: absolute; top: -25px; left: 0; width: 100%; text-align: center;
+             font-weight: bold; font-size: 14px; text-shadow: 1px 1px 2px black; color: white;
+        }
+
+        .slots-wrap { display: flex; gap: 15px; padding: 0 20px; align-items: center; perspective: 1000px; z-index: 10; }
+        .slot { width: var(--card-w); height: var(--card-h); position: relative; }
+        
+        .card {
+            width: var(--card-w); height: var(--card-h);
+            border-radius: var(--radius);
+            background-color: #fff; background-size: 100% 100%;
+            position: absolute;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.4);
+            transition: all 0.5s cubic-bezier(0.19, 1, 0.22, 1);
+        }
+        .card-att { top: 0; left: 0; z-index: 10; }
+        .card-def { top: 25px; left: 25px; z-index: 20; transform: rotate(10deg); }
+        .card-back { background-image: url('https://deckofcardsapi.com/static/img/back.png'); }
+
+        .my-zone { height: 220px; display: flex; justify-content: center; align-items: flex-end; padding-bottom: 20px; position: relative; }
+        .my-hand-wrap { display: flex; align-items: flex-end; }
+        .my-card { width: 55px; height: var(--card-h); position: relative; transition: width 0.2s; cursor: pointer; }
+        .my-card:hover { width: 80px; }
+        .my-card:last-child { width: var(--card-w); }
+        
+        .my-card .card { position: absolute; bottom: 0; left: 0; transition: bottom 0.2s; transform: none !important; }
+        .my-card:hover .card { bottom: 40px; z-index: 100; }
+        .my-card.sel .card { bottom: 60px; box-shadow: 0 0 0 4px #ffeb3b; z-index: 101; }
+
+        .controls { position: absolute; right: 20px; bottom: 250px; display: flex; flex-direction: column; align-items: flex-end; gap: 10px; z-index: 100; }
+        .status-badge { background: rgba(0,0,0,0.8); padding: 12px 25px; border-left: 6px solid #fff; font-size: 18px; font-weight: bold; box-shadow: 0 4px 6px black; }
+        .act-btn { border: none; padding: 16px 45px; font-size: 22px; font-weight: 900; text-transform: uppercase; cursor: pointer; color: white; box-shadow: 0 6px 20px rgba(0,0,0,0.6); border-radius: 4px; display: none; }
+        .btn-take { background: #e65100; }
+        .btn-bito { background: #b71c1c; }
+
+        @media (max-width: 800px) {
+            :root { --card-w: 80px; --card-h: 116px; }
+            .opponents-row { height: 120px; gap: 10px; }
+            .my-zone { height: 160px; }
+            .controls { bottom: 170px; }
+            .chat-sidebar { display: none; } 
+            .my-card { width: 35px; } .my-card:hover { width: 50px; }
+            .panel { width: 95%; padding: 20px; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- LOBBY -->
+    <div id="lobby">
+        <div class="panel" id="p-setup">
+            <h1>DURAK PRO</h1>
+            
+            <div class="avatars" id="ava-list"></div>
+            <input type="text" id="p-name" class="inp" placeholder="ВАШ НИК" value="Игрок">
+
+            <div class="opts">
+                <label><input type="radio" name="mode" value="2" checked> 1x1</label>
+                <label><input type="radio" name="mode" value="3"> 3 Игрока</label>
+            </div>
+            <div class="opts">
+                <label style="cursor:pointer; display:flex; align-items:center; gap:5px;">
+                    <input type="checkbox" id="chk-transfer" style="width:20px; height:20px;"> Переводной
+                </label>
+            </div>
+
+            <button class="btn btn-create" onclick="Lobby.create()">Создать стол</button>
+            <div style="margin:15px; color:#555; font-weight:bold;">- ИЛИ -</div>
+            <input type="text" id="join-id" class="inp" placeholder="Вставьте ID">
+            <button class="btn btn-join" onclick="Lobby.join()">Войти</button>
+        </div>
+
+        <div class="panel" id="p-wait" style="display:none;">
+            <h2>Комната создана</h2>
+            <p>Скопируйте ID:</p>
+            <input type="text" id="host-id" class="inp" style="background:#eee;" readonly onclick="this.select()">
+            <p id="wait-msg" style="color:#d32f2f; font-weight:bold; font-size:20px;">1/2</p>
+            <div style="font-size:30px; animation:spin 1s infinite linear;">↻</div>
+            <style>@keyframes spin { 100% {transform:rotate(360deg);} }</style>
+        </div>
+    </div>
+
+    <!-- GAME -->
+    <div id="game">
+        <div class="chat-sidebar">
+            <div class="chat-log" id="chat-log"></div>
+            <div class="chat-inp-row">
+                <input type="text" id="chat-in" placeholder="Сообщение..." autocomplete="off">
+                <button id="chat-send" onclick="Game.sendChat()">></button>
+            </div>
+        </div>
+
+        <div class="opponents-row" id="opponents-area"></div>
+
+        <div class="table-area">
+            <div class="deck-pos">
+                <div class="deck-count" id="deck-n">36</div>
+                <div id="trump-slot"></div>
+                <div id="deck-visual" style="position:absolute; top:0; left:0; width:100%; height:100%;"></div>
+            </div>
+            
+            <div class="bito-pos" id="bito-visual">
+                 <div style="color:rgba(255,255,255,0.2); font-weight:bold; text-align:center; padding-top:40%;">БИТО</div>
+            </div>
+
+            <div class="slots-wrap" id="slots-area"></div>
+
+            <div class="controls">
+                <div class="status-badge" id="status-txt">...</div>
+                <button class="act-btn btn-bito" id="btn-bito" onclick="Game.act('BITO')">БИТО</button>
+                <button class="act-btn btn-take" id="btn-take" onclick="Game.act('TAKE')">ВЗЯТЬ</button>
+            </div>
+        </div>
+
+        <div class="my-zone">
+            <div class="player-wrap" style="position:absolute; bottom:10px; left:10px; width:auto; flex-direction:row; gap:15px;">
+                <div style="position:relative;">
+                    <img id="my-ava" class="avatar" src="">
+                    <svg class="timer-svg" viewBox="0 0 70 70">
+                        <rect class="timer-path" id="my-timer" x="2" y="2" width="66" height="66" rx="12" ry="12"></rect>
+                    </svg>
+                </div>
+                <div style="text-align:left;">
+                    <div style="font-weight:bold; font-size:20px;">ВЫ</div>
+                    <div style="font-size:12px; color:#aaa;" id="my-cards-count">6 карт</div>
+                </div>
+            </div>
+            <div class="my-hand-wrap" id="my-hand"></div>
+        </div>
+    </div>
+
+    <script>
+        const IMG_API = (r,s) => `https://deckofcardsapi.com/static/img/${r}${s}.png`;
+        const SUITS = ['S','C','H','D'];
+        const RANKS = ['6','7','8','9','0','J','Q','K','A'];
+        
+        class Engine {
+            constructor(hName, hAva, mode, transfer) {
+                this.mode = mode;
+                this.transfer = transfer;
+                this.players = [{id:'host', name:hName, ava:hAva, hand:[]}];
+                this.deck = [];
+                this.trump = null;
+                this.field = [];
+                this.bitoCount = 0;
+                this.turn = 0;
+                this.startTime = 0;
+                this.state = 'lobby';
+                this.win = null;
+            }
+
+            addPlayer(id, name, ava) {
+                if(this.players.length >= this.mode) return false;
+                this.players.push({id, name, ava, hand:[]});
+                return true;
+            }
+
+            start() {
+                this.deck = [];
+                SUITS.forEach(s => RANKS.forEach(r => this.deck.push({r, s})));
+                this.deck.sort(() => Math.random() - 0.5);
+                this.players.forEach(p => p.hand = this.deck.splice(0,6));
+                this.trump = this.deck.pop();
+                this.deck.unshift(this.trump);
+                
+                let min=100, fp=0;
+                this.players.forEach((p,i) => {
+                    p.hand.forEach(c => {
+                        if(c.s===this.trump.s && RANKS.indexOf(c.r)<min) {
+                            min = RANKS.indexOf(c.r); fp=i;
+                        }
+                    });
+                });
+                this.changeTurn(fp);
+                this.state = 'game';
+            }
+
+            changeTurn(idx) {
+                this.turn = idx;
+                this.startTime = Date.now();
+            }
+
+            next(off=1) { return (this.turn + off) % this.mode; }
+            beat(a, d) {
+                if(a.s===d.s) return RANKS.indexOf(d.r) > RANKS.indexOf(a.r);
+                return d.s === this.trump.s;
+            }
+
+            move(pidx, type, d) {
+                if(this.state !== 'game') return;
+                const p = this.players[pidx];
+
+                if(type === 'ATTACK') {
+                    const isAttacker = (pidx === this.turn);
+                    const isTransferer = (this.transfer && pidx === this.next() && this.field.length > 0 && this.field.every(s => !s.def));
+                    if(!isAttacker && !isTransferer) return;
+                    const c = p.hand[d.i];
+                    if(this.field.length > 0) {
+                        const ranks = new Set(this.field.flatMap(x => [x.att.r, x.def?.r].filter(Boolean)));
+                        if(!ranks.has(c.r)) return;
+                    }
+                    let defIdx = this.next();
+                    if(isTransferer) defIdx = (pidx + 1) % this.mode;
+                    const defP = this.players[defIdx];
+                    const slotsFree = this.field.filter(x=>!x.def).length;
+                    if(slotsFree + 1 > defP.hand.length) return;
+                    if(this.field.length >= 6) return;
+                    p.hand.splice(d.i, 1);
+                    this.field.push({att: c, def: null, from: pidx});
+                    if(isTransferer) this.changeTurn(pidx);
+                    else this.startTime = Date.now();
+                    return true;
+                }
+
+                if(type === 'DEFEND') {
+                    if(pidx !== this.next()) return;
+                    const slot = this.field[d.s];
+                    if(!slot || slot.def) return;
+                    const c = p.hand[d.i];
+                    if(this.beat(slot.att, c)) {
+                        p.hand.splice(d.i, 1);
+                        slot.def = c;
+                        return true;
+                    }
+                }
+
+                if(type === 'BITO') {
+                    if(pidx !== this.turn) return;
+                    if(this.field.length===0 || this.field.some(x=>!x.def)) return;
+                    this.bitoCount += (this.field.length * 2);
+                    this.field = [];
+                    this.refill();
+                    this.changeTurn(this.next());
+                    return true;
+                }
+
+                if(type === 'TAKE') {
+                    if(pidx !== this.next()) return;
+                    this.field.forEach(x => {
+                        p.hand.push(x.att);
+                        if(x.def) p.hand.push(x.def);
+                    });
+                    this.field = [];
+                    this.refill(true);
+                    let nextTurn = this.next(2);
+                    if(this.mode===2) nextTurn = this.next(1);
+                    this.changeTurn(nextTurn);
+                    return true;
+                }
+            }
+
+            refill(skipDef=false) {
+                const q = [];
+                for(let i=0; i<this.mode; i++) q.push((this.turn + i)%this.mode);
+                q.forEach(idx => {
+                    if(skipDef && idx === this.next()) return;
+                    const p = this.players[idx];
+                    while(p.hand.length < 6 && this.deck.length > 0) p.hand.push(this.deck.pop());
+                });
+                this.players.forEach(p => {
+                    if(p.hand.length===0 && this.deck.length===0 && !this.win) this.win = p.name;
+                });
+            }
+
+            dump() {
+                return {
+                    d: this.deck.length,
+                    tr: this.trump,
+                    f: this.field,
+                    bc: this.bitoCount,
+                    t: this.turn,
+                    tm: this.startTime,
+                    ps: this.players.map(p => ({id:p.id, name:p.name, ava:p.ava, cnt:p.hand.length})),
+                    win: this.win
+                };
+            }
+        }
+
+        const Lobby = {
+            ava: 1,
+            init() {
+                const el = document.getElementById('ava-list');
+                [1,2,3,4,5].forEach(i => {
+                    const d = document.createElement('div');
+                    d.className = 'ava-opt' + (i===1?' selected':'');
+                    d.style.backgroundImage = `url('https://robohash.org/${i}.png?set=set4')`;
+                    d.onclick = () => {
+                        this.ava=i;
+                        document.querySelectorAll('.ava-opt').forEach(x=>x.classList.remove('selected'));
+                        d.classList.add('selected');
+                    };
+                    el.appendChild(d);
+                });
+            },
+            create() {
+                const n = document.getElementById('p-name').value;
+                const mode = parseInt(document.querySelector('input[name="mode"]:checked').value);
+                const tr = document.getElementById('chk-transfer').checked;
+                Game.initHost(n, this.ava, mode, tr);
+            },
+            join() {
+                const n = document.getElementById('p-name').value;
+                const id = document.getElementById('join-id').value;
+                if(!id) return alert('ID?');
+                Game.initClient(n, this.ava, id);
+            }
+        };
+
+        const Game = {
+            role: null, eng: null, peer: null, conns: [], conn: null,
+            myId: null, st: null, hand: [], sel: null,
+
+            initHost(n, a, m, t) {
+                this.role = 'host';
+                this.eng = new Engine(n, a, m, t);
+                this.peer = new Peer();
+                this.peer.on('open', id => {
+                    document.getElementById('p-setup').style.display = 'none';
+                    document.getElementById('p-wait').style.display = 'block';
+                    document.getElementById('host-id').value = id;
+                });
+                this.peer.on('connection', c => {
+                    c.on('open', () => this.conns.push(c));
+                    c.on('data', d => {
+                        if(d.t==='J') {
+                            if(this.eng.addPlayer(c.peer, d.n, d.a)) {
+                                this.bc({t:'C', n:'INFO', m:`${d.n} вошел`, s:1});
+                                document.getElementById('wait-msg').innerText = `${this.eng.players.length}/${this.eng.mode}`;
+                                if(this.eng.players.length === this.eng.mode) {
+                                    this.eng.start();
+                                    this.sync();
+                                    document.getElementById('lobby').style.display = 'none';
+                                    document.getElementById('game').style.display = 'flex';
+                                }
+                            } else c.close();
+                        }
+                        if(d.t==='A') {
+                            const pIdx = this.eng.players.findIndex(p=>p.id===c.peer);
+                            if(pIdx!==-1 && this.eng.move(pIdx, d.a, d.d)) this.sync();
+                        }
+                        if(d.t==='C') this.bc(d);
+                    });
+                });
+            },
+
+            initClient(n, a, id) {
+                this.role = 'client';
+                this.peer = new Peer();
+                this.peer.on('open', () => {
+                    this.conn = this.peer.connect(id);
+                    this.conn.on('open', () => {
+                        this.conn.send({t:'J', n, a});
+                        document.getElementById('p-setup').style.display = 'none';
+                        document.getElementById('status-txt').innerText = "Подключение...";
+                    });
+                    this.conn.on('data', d => {
+                        if(d.t==='S') {
+                            document.getElementById('lobby').style.display = 'none';
+                            document.getElementById('game').style.display = 'flex';
+                            this.st = d.s; this.hand = d.h; this.myId = d.mid;
+                            this.draw();
+                        }
+                        if(d.t==='C') this.addChat(d);
+                    });
+                });
+            },
+
+            sync() {
+                if(this.role!=='host') return;
+                const snap = this.eng.dump();
+                this.st = snap; this.hand = this.eng.players[0].hand; this.myId = 'host';
+                this.draw();
+                this.conns.forEach(c => {
+                    const p = this.eng.players.find(x=>x.id===c.peer);
+                    // FIXED: Check if player exists before sending hand
+                    if(p) c.send({t:'S', s:snap, h:p.hand, mid:c.peer});
+                });
+            },
+
+            act(type, d={}) {
+                if(this.role==='host') {
+                    if(this.eng.move(0, type, d)) this.sync();
+                } else {
+                    this.conn.send({t:'A', a:type, d});
+                }
+            },
+
+            sendChat() {
+                const i = document.getElementById('chat-in');
+                const val = i.value.trim();
+                if(!val) return;
+                
+                let name = 'Я';
+                if(this.role==='host' && this.eng) name = this.eng.players[0].name;
+                
+                if(this.role==='host') {
+                    const msg = {t:'C', n:name, m:val, id:this.myId, a:this.eng.players[0].ava};
+                    this.addChat(msg); this.bc(msg);
+                } else {
+                    this.conn.send({t:'C', m:val, id:this.myId});
+                }
+                i.value = '';
+            },
+
+            bc(d) {
+                if(d.t==='C' && !d.n && this.eng) {
+                    const p = this.eng.players.find(x=>x.id === d.id);
+                    if(p) { d.n = p.name; d.a = p.ava; }
+                    else d.n = '???';
+                }
+                this.conns.forEach(c=>c.send(d)); 
+                if(d.t==='C') this.addChat(d); 
+            },
+
+            addChat(d) {
+                const log = document.getElementById('chat-log');
+                const el = document.createElement('div');
+                let isMe = false;
+                if(this.st && this.st.ps) {
+                    const me = this.st.ps.find(p=>p.id===this.myId);
+                    if(me && d.n === me.name) isMe = true;
+                    if(!me && this.role==='host' && d.n === this.eng.players[0].name) isMe = true;
+                }
+                el.className = 'chat-msg' + (d.s ? ' sys' : (isMe ? ' me' : ''));
+                if(d.s) el.innerText = d.m;
+                else {
+                    const avaUrl = d.a ? `https://robohash.org/${d.a}.png?set=set4` : 'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=';
+                    el.innerHTML = `<img src="${avaUrl}" class="chat-ava"><b>${d.n}:</b> ${d.m}`;
+                }
+                log.appendChild(el);
+                log.scrollTop = log.scrollHeight;
+            },
+
+            // Safe Text Setter
+            safeTxt(id, txt) {
+                const el = document.getElementById(id);
+                if(el) el.innerText = txt;
+            },
+
+            draw() {
+                const s = this.st;
+                if(!s) return;
+                if(s.win) { alert(s.win + " ПОБЕДИЛ!"); location.reload(); return; }
+
+                let myIdx = s.ps.findIndex(p=>p.id===this.myId);
+                if(myIdx===-1 && this.role==='host') myIdx=0;
+
+                // 1. OPPONENTS
+                const oppDiv = document.getElementById('opponents-area');
+                if(oppDiv) {
+                    oppDiv.innerHTML = '';
+                    for(let i=1; i<s.ps.length; i++) {
+                        const idx = (myIdx + i) % s.ps.length;
+                        const p = s.ps[idx];
+                        const isTurn = (s.t === idx);
+                        
+                        const wrap = document.createElement('div');
+                        wrap.className = 'player-wrap';
+                        let cardsHtml = '';
+                        for(let c=0; c<p.cnt; c++) {
+                            cardsHtml += `<div class="card-tiny" style="left:${c*5}px; top:${-c*1}px;"></div>`;
+                        }
+                        
+                        wrap.innerHTML = `
+                            <div style="position:relative;">
+                                <img src="https://robohash.org/${p.ava}.png?set=set4" class="avatar">
+                                <svg class="timer-svg" style="opacity:${isTurn?1:0}" viewBox="0 0 70 70">
+                                    <rect class="timer-path" x="2" y="2" width="66" height="66" rx="12"></rect>
+                                </svg>
+                            </div>
+                            <div class="p-name">${p.name}</div>
+                            <div class="p-hand">${cardsHtml}</div>
+                        `;
+                        if(isTurn) this.animTimer(wrap.querySelector('.timer-path'), s.tm);
+                        oppDiv.appendChild(wrap);
+                    }
+                }
+
+                // 2. TABLE
+                this.safeTxt('deck-n', s.d);
+                const dSlot = document.getElementById('deck-visual');
+                if(dSlot) {
+                    dSlot.innerHTML = '';
+                    if(s.d > 0) {
+                        const maxVis = Math.min(s.d, 5);
+                        for(let i=0; i<maxVis; i++) {
+                            dSlot.innerHTML += `<div class="deck-stack-card" style="top:${-i*2}px; left:${-i*1}px;"></div>`;
+                        }
+                    }
+                }
+
+                const tph = document.getElementById('trump-slot');
+                if(tph) {
+                    tph.innerHTML='';
+                    if(s.tr) tph.appendChild(this.mkC(s.tr, 'trump'));
+                }
+
+                const bitoEl = document.getElementById('bito-visual');
+                if(bitoEl) {
+                    if(s.bc > 0) {
+                         bitoEl.innerHTML = '';
+                         const cnt = Math.min(Math.ceil(s.bc/2), 6);
+                         for(let i=0; i<cnt; i++) {
+                            bitoEl.innerHTML += `<div class="deck-stack-card" style="transform:rotate(${Math.random()*20-10}deg); top:${-i*1}px;"></div>`;
+                         }
+                    } else bitoEl.innerHTML = '<div style="color:rgba(255,255,255,0.2); font-weight:bold; text-align:center; padding-top:40%;">БИТО</div>';
+                }
+
+                // 3. SLOTS
+                const slDiv = document.getElementById('slots-area');
+                if(slDiv) {
+                    slDiv.innerHTML='';
+                    s.f.forEach((slot, si) => {
+                        const d = document.createElement('div'); d.className='slot';
+                        d.appendChild(this.mkC(slot.att, 'card-att'));
+                        if(slot.def) d.appendChild(this.mkC(slot.def, 'card-def'));
+                        else if(s.t !== myIdx && this.sel!==null) {
+                            const defIdx = (s.t+1)%s.ps.length;
+                            if(myIdx === defIdx) {
+                                d.style.boxShadow = "inset 0 0 20px #ff3d00"; d.style.cursor="pointer";
+                                d.onclick = () => { this.act('DEFEND', {i:this.sel, s:si}); this.sel=null; };
+                            }
+                        }
+                        slDiv.appendChild(d);
+                    });
+                }
+
+                // 4. ME
+                const mh = document.getElementById('my-hand');
+                if(mh) {
+                    mh.innerHTML='';
+                    const myInfo = s.ps[myIdx];
+                    if(myInfo) {
+                        const ava = document.getElementById('my-ava');
+                        if(ava) ava.src = `https://robohash.org/${myInfo.ava}.png?set=set4`;
+                        this.safeTxt('my-cards-count', `${this.hand.length} карт`);
+                    }
+
+                    const myTimer = document.getElementById('my-timer');
+                    if(myTimer) {
+                        if(s.t === myIdx) {
+                            myTimer.parentElement.style.opacity = 1;
+                            this.animTimer(myTimer, s.tm);
+                        } else myTimer.parentElement.style.opacity = 0;
+                    }
+
+                    const isMyTurn = (s.t === myIdx);
+                    const isTransferPossible = (myIdx === (s.t+1)%s.ps.length && s.f.length>0 && s.f.every(x=>!x.def));
+
+                    this.hand.forEach((c,i) => {
+                        const w = document.createElement('div'); w.className='my-card';
+                        if(this.sel===i) w.classList.add('sel');
+                        w.appendChild(this.mkC(c));
+                        
+                        w.onclick = () => {
+                            if(isMyTurn) {
+                                this.act('ATTACK', {i}); 
+                            } else if(isTransferPossible) {
+                                 this.act('ATTACK', {i});
+                            } else { 
+                                this.sel = (this.sel===i)?null:i; this.draw(); 
+                            }
+                        };
+                        mh.appendChild(w);
+                    });
+                }
+
+                // 5. STATUS
+                const bB = document.getElementById('btn-bito');
+                const bT = document.getElementById('btn-take');
+                const st = document.getElementById('status-txt');
+                if(bB) bB.style.display='none';
+                if(bT) bT.style.display='none';
+
+                if(st) {
+                    const isMyTurn = (s.t === myIdx);
+                    if(isMyTurn) {
+                        st.innerText = "ВАШ ХОД"; st.style.borderLeftColor = "#2e7d32";
+                        if(s.f.length>0 && s.f.every(x=>x.def)) bB.style.display='block';
+                    } else {
+                        const defIdx = (s.t+1)%s.ps.length;
+                        const isTransferPossible = (myIdx === defIdx && s.f.length>0 && s.f.every(x=>!x.def));
+
+                        if(myIdx === defIdx) {
+                            st.innerText = "ОТБИВАЙТЕСЬ"; st.style.borderLeftColor = "#ff3d00";
+                            if(s.f.some(x=>!x.def)) bT.style.display='block';
+                            if(isTransferPossible) st.innerText = "ОТБЕЙ ИЛИ ПЕРЕВЕДИ";
+                        } else st.innerText = `ХОДИТ: ${s.ps[s.t].name}`;
+                    }
+                }
+            },
+
+            mkC(c, cls='') {
+                const el = document.createElement('div');
+                el.className = `card ${cls}`;
+                el.style.backgroundImage = `url('${IMG_API(c.r,c.s)}')`;
+                return el;
+            },
+
+            animTimer(el, start) {
+                const dur = 30000;
+                const passed = Date.now() - start;
+                const pct = Math.max(0, (dur - passed) / dur);
+                const offset = 240 * (1 - pct);
+                el.style.strokeDashoffset = offset;
+                if(pct > 0) requestAnimationFrame(() => this.animTimer(el, start));
+            }
+        };
+
+        document.getElementById('chat-in').addEventListener('keypress', e=>{if(e.key==='Enter')Game.sendChat()});
+        Lobby.init();
+
+    </script>
+</body>
+</html>
