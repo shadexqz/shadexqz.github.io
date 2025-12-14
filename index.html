@@ -3,20 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Durak Elite 3P</title>
+    <title>Durak Elite Fixed</title>
+    <link rel="icon" href="data:;base64,iVBORw0KGgo=">
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
     <style>
-        /* --- ШРИФТЫ И БАЗА --- */
-        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&display=swap');
 
         :root {
-            --bg-color: #355c7d; /* То самое синее сукно */
-            --bg-gradient: radial-gradient(circle at center, #355c7d 0%, #1e3c50 100%);
-            --card-w: 120px;
-            --card-h: 175px;
-            --radius: 8px;
-            --primary: #f8b195;
-            --accent: #c06c84;
+            --bg-gradient: radial-gradient(circle at center, #2b32b2 0%, #1488cc 100%); /* Глубокий синий */
+            --card-w: 110px;
+            --card-h: 160px;
+            --radius: 6px;
+            --accent: #ffeb3b;
         }
 
         * { box-sizing: border-box; user-select: none; -webkit-tap-highlight-color: transparent; }
@@ -36,105 +34,105 @@
             width: var(--card-w); height: var(--card-h);
             border-radius: var(--radius);
             background-color: #fff;
-            background-size: 100% 100%;
+            background-position: center;
+            background-size: cover;
             background-repeat: no-repeat;
             position: relative;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.4);
-            transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1), box-shadow 0.3s;
-            transform-origin: center bottom;
-        }
-        
-        .card:hover {
-            transform: translateY(-25px) scale(1.05);
-            box-shadow: 0 15px 30px rgba(0,0,0,0.6);
-            z-index: 100 !important;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+            transition: transform 0.2s, margin 0.2s;
+            /* Чтобы текст не мешал картинке, но был виден если картинки нет */
+            color: #333; 
         }
 
+        .card.red { color: #d32f2f; }
+        .card.black { color: #212121; }
+        
+        /* Мини-индексы на случай если картинка не грузится */
+        .corner-idx {
+            position: absolute; font-weight: 900; font-size: 14px;
+            background: rgba(255,255,255,0.8); padding: 1px 4px; border-radius: 4px;
+        }
+        .tl { top: 4px; left: 4px; }
+        .br { bottom: 4px; right: 4px; transform: rotate(180deg); }
+
+        .card:hover {
+            transform: translateY(-25px);
+            z-index: 100 !important;
+        }
         .card.selected {
-            transform: translateY(-40px) scale(1.05);
-            box-shadow: 0 0 0 4px #ffeb3b;
+            transform: translateY(-40px);
+            box-shadow: 0 0 0 4px var(--accent);
             z-index: 101 !important;
         }
 
         .card-back { background-image: url('https://deckofcardsapi.com/static/img/back.png'); }
 
-        /* Маленькие карты (для соперников) */
         .card-mini {
-            width: 45px; height: 65px;
+            width: 40px; height: 60px;
             border-radius: 4px;
             background-image: url('https://deckofcardsapi.com/static/img/back.png');
             background-size: cover;
             border: 1px solid #fff;
-            box-shadow: -2px 2px 5px rgba(0,0,0,0.3);
+            box-shadow: -2px 0 5px rgba(0,0,0,0.3);
         }
 
         /* --- ЛОББИ --- */
         #lobby {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.9); z-index: 9999;
+            background: rgba(0,0,0,0.95); z-index: 9999;
             display: flex; align-items: center; justify-content: center;
         }
         .panel {
             background: #fff; color: #333;
-            padding: 30px; border-radius: 20px;
-            width: 90%; max-width: 450px;
-            text-align: center;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+            padding: 30px; border-radius: 12px;
+            width: 90%; max-width: 400px; text-align: center;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.7);
         }
-        .avatar-grid {
-            display: flex; justify-content: center; gap: 10px; margin: 15px 0;
-        }
+        .avatar-grid { display: flex; justify-content: center; gap: 10px; margin: 15px 0; }
         .ava-option {
             width: 50px; height: 50px; border-radius: 50%;
-            cursor: pointer; border: 3px solid transparent;
-            transition: 0.2s;
+            cursor: pointer; border: 3px solid transparent; background: #eee;
+            background-size: cover;
         }
-        .ava-option:hover { transform: scale(1.1); }
-        .ava-option.active { border-color: var(--accent); transform: scale(1.15); }
+        .ava-option.active { border-color: #2b32b2; transform: scale(1.1); }
         
-        .mode-select {
-            display: flex; gap: 10px; margin-bottom: 15px;
-        }
+        .mode-select { display: flex; gap: 10px; margin-bottom: 15px; }
         .mode-btn {
             flex: 1; padding: 10px; border: 2px solid #ddd;
-            background: #f9f9f9; cursor: pointer; border-radius: 8px; font-weight: bold;
+            cursor: pointer; border-radius: 6px; font-weight: bold;
         }
-        .mode-btn.active { border-color: var(--bg-color); background: #e3f2fd; color: var(--bg-color); }
+        .mode-btn.active { background: #2b32b2; color: white; border-color: #2b32b2; }
 
-        .inp { width: 100%; padding: 12px; margin-bottom: 10px; border: 2px solid #ddd; border-radius: 8px; font-size: 16px; text-align: center;}
-        .btn { width: 100%; padding: 14px; border: none; font-size: 16px; font-weight: bold; color: white; border-radius: 8px; cursor: pointer; transition: 0.2s; margin-top: 5px;}
-        .btn-create { background: var(--accent); }
-        .btn-join { background: #355c7d; }
+        .inp { width: 100%; padding: 12px; margin-bottom: 10px; border: 2px solid #ccc; border-radius: 6px; font-size: 16px; text-align: center;}
+        .btn { width: 100%; padding: 14px; border: none; font-size: 16px; font-weight: bold; color: white; border-radius: 6px; cursor: pointer; margin-top: 5px;}
+        .btn-create { background: #2b32b2; }
+        .btn-join { background: #1488cc; }
 
-        /* --- ИГРОВОЕ ПОЛЕ --- */
+        /* --- ИГРА --- */
         #game { display: none; flex-direction: column; height: 100%; position: relative; }
 
-        /* ВЕРХНЯЯ ЗОНА (Соперники) */
         .top-zone {
-            height: 140px;
-            display: flex; justify-content: space-between; align-items: flex-start;
+            height: 130px; display: flex; justify-content: space-between; align-items: flex-start;
             padding: 10px 20px;
         }
         .opponent {
             display: flex; flex-direction: column; align-items: center;
-            width: 120px; transition: opacity 0.3s;
+            width: 100px; opacity: 0.5; transition: opacity 0.3s;
         }
-        .opponent.inactive { opacity: 0.4; }
-        .opp-ava { width: 50px; height: 50px; border-radius: 50%; border: 2px solid #fff; box-shadow: 0 4px 5px rgba(0,0,0,0.3); }
+        .opponent.active-turn { opacity: 1; transform: scale(1.05); }
+        .opp-ava { width: 45px; height: 45px; border-radius: 50%; border: 2px solid #fff; background: #aaa; }
         .opp-hand { display: flex; justify-content: center; margin-top: 5px; height: 40px; }
-        .opp-hand .card-mini { margin-left: -30px; }
+        .opp-hand .card-mini { margin-left: -25px; }
         .opp-hand .card-mini:first-child { margin-left: 0; }
-        .opp-name { font-size: 12px; font-weight: bold; margin-top: 4px; text-shadow: 1px 1px 2px black; }
 
-        /* ЦЕНТР (Стол) */
         .table-zone {
             flex: 1; position: relative;
             display: flex; justify-content: center; align-items: center;
         }
-
+        
         /* Колода */
         .deck-area {
-            position: absolute; left: 20px; top: 50%; transform: translateY(-50%);
+            position: absolute; left: 10px; top: 50%; transform: translateY(-50%);
             width: var(--card-w); height: var(--card-h);
         }
         .trump-card {
@@ -142,382 +140,317 @@
             transform: rotate(90deg) translateX(20px); z-index: 1;
         }
         .deck-stack { position: absolute; z-index: 2; top:0; left:0; }
-        .deck-badge {
-            position: absolute; top: -20px; left: 50%; transform: translateX(-50%);
-            background: rgba(0,0,0,0.6); padding: 4px 10px; border-radius: 10px; font-size: 12px;
+        .deck-cnt {
+            position: absolute; top: -25px; left: 50%; transform: translateX(-50%);
+            background: rgba(0,0,0,0.6); padding: 2px 8px; border-radius: 10px; font-size: 12px;
         }
 
-        /* Слоты карт на столе */
-        .slots-container {
-            display: flex; gap: 15px; padding: 0 20px;
-            align-items: center;
-            perspective: 1000px;
+        .slots-row {
+            display: flex; gap: 10px; padding: 0 10px;
+            align-items: center; perspective: 1000px;
+            max-width: 100%; overflow-x: auto;
         }
-        .slot {
-            width: var(--card-w); height: var(--card-h);
-            position: relative;
-        }
-        .slot-att { position: absolute; top: 0; left: 0; z-index: 10; cursor: default; }
-        .slot-def { position: absolute; top: 20px; left: 15px; z-index: 20; transform: rotate(8deg); cursor: default; }
-        
-        /* НИЗ (Я) */
+        .slot { width: var(--card-w); height: var(--card-h); position: relative; flex-shrink: 0;}
+        .slot-att { position: absolute; top:0; left:0; z-index: 10; }
+        .slot-def { position: absolute; top:20px; left:15px; z-index: 20; transform: rotate(8deg); }
+
+        /* Игрок */
         .player-zone {
-            height: 220px;
-            display: flex; flex-direction: column; justify-content: flex-end; align-items: center;
+            height: 200px; display: flex; flex-direction: column; justify-content: flex-end; align-items: center;
             padding-bottom: 10px; position: relative;
-            background: linear-gradient(to top, rgba(0,0,0,0.3), transparent);
+            background: linear-gradient(to top, rgba(0,0,0,0.4), transparent);
         }
-        .my-hand {
-            display: flex; justify-content: center; align-items: flex-end;
-            margin-bottom: 10px;
-        }
+        .my-hand { display: flex; justify-content: center; align-items: flex-end; margin-bottom: 15px; }
         .my-card-wrap {
-            width: 50px; /* Сжатие карт */
-            height: var(--card-h);
-            position: relative;
-            transition: width 0.3s;
+            width: 45px; height: var(--card-h); position: relative; transition: width 0.2s;
         }
-        .my-card-wrap:hover { width: 70px; } /* Раздвигаем при наведении */
+        .my-card-wrap:hover { width: 70px; }
         .my-card-wrap:last-child { width: var(--card-w); }
         .my-card-wrap .card { position: absolute; bottom: 0; left: 0; cursor: pointer; }
 
         .my-info {
-            position: absolute; bottom: 20px; left: 20px;
+            position: absolute; bottom: 15px; left: 15px;
             display: flex; align-items: center; gap: 10px;
         }
-        .my-ava { width: 60px; height: 60px; border-radius: 50%; border: 3px solid #ffeb3b; }
+        .my-ava { width: 55px; height: 55px; border-radius: 50%; border: 3px solid transparent; background: #aaa;}
+        .my-ava.my-turn { border-color: var(--accent); }
 
-        /* УПРАВЛЕНИЕ */
+        /* Контролы */
         .controls {
-            position: absolute; right: 20px; bottom: 240px;
-            display: flex; flex-direction: column; align-items: flex-end; gap: 10px;
+            position: absolute; right: 10px; bottom: 220px;
+            display: flex; flex-direction: column; align-items: flex-end; gap: 8px;
         }
         .status-msg {
-            background: rgba(255,255,255,0.1); backdrop-filter: blur(5px);
-            padding: 10px 20px; border-radius: 8px; font-weight: bold;
-            border-left: 4px solid white; text-align: right; margin-bottom: 5px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            background: rgba(0,0,0,0.5); padding: 8px 15px; border-radius: 6px;
+            border-left: 4px solid #fff; font-size: 14px; text-align: right;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
         }
         .act-btn {
-            border: none; padding: 15px 40px; border-radius: 50px;
-            font-size: 18px; font-weight: bold; color: white; cursor: pointer;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.3);
-            text-transform: uppercase; letter-spacing: 1px;
-            transition: transform 0.1s; display: none;
+            border: none; padding: 12px 30px; border-radius: 30px;
+            font-size: 16px; font-weight: bold; color: white; cursor: pointer;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3); display: none;
         }
-        .act-btn:active { transform: scale(0.95); }
-        .btn-take { background: linear-gradient(45deg, #ff9800, #f57c00); }
-        .btn-bito { background: linear-gradient(45deg, #f44336, #d32f2f); }
+        .btn-take { background: #f57c00; }
+        .btn-bito { background: #d32f2f; }
 
-        /* ЧАТ */
-        .chat-container {
-            position: absolute; top: 10px; right: 10px; width: 300px; height: 200px;
+        /* Чат */
+        .chat-box {
+            position: absolute; top: 10px; right: 10px; width: 280px; height: 180px;
             display: flex; flex-direction: column; pointer-events: none; z-index: 500;
         }
-        .chat-log {
+        .chat-msgs {
             flex: 1; overflow-y: auto; display: flex; flex-direction: column; justify-content: flex-end;
-            margin-bottom: 5px; padding: 5px; text-shadow: 1px 1px 1px rgba(0,0,0,0.8);
+            padding: 5px; text-shadow: 1px 1px 1px black;
         }
-        .chat-msg {
-            background: rgba(0,0,0,0.5); color: white; padding: 5px 10px;
-            border-radius: 6px; margin-bottom: 4px; font-size: 13px;
-            align-self: flex-start; max-width: 90%; word-break: break-word; pointer-events: auto;
+        .msg {
+            background: rgba(0,0,0,0.6); padding: 4px 8px; margin-bottom: 3px;
+            border-radius: 4px; font-size: 12px; align-self: flex-start;
+            pointer-events: auto; max-width: 90%; word-wrap: break-word;
         }
-        .chat-msg.me { align-self: flex-end; background: rgba(53, 92, 125, 0.8); }
-        .chat-msg b { color: #f8b195; }
+        .msg.me { align-self: flex-end; background: rgba(20, 136, 204, 0.7); }
+        .msg b { color: var(--accent); }
         
-        .chat-input-row {
-            display: flex; pointer-events: auto; background: rgba(255,255,255,0.1);
-            backdrop-filter: blur(5px); border-radius: 20px; padding: 2px;
+        .chat-input {
+            display: flex; pointer-events: auto; background: rgba(0,0,0,0.5);
+            border-radius: 4px; padding: 2px;
         }
-        #chat-in {
-            flex: 1; background: transparent; border: none; color: white; padding: 8px 15px; outline: none;
-        }
-        #chat-btn {
-            background: transparent; border: none; color: #fff; font-size: 18px; padding: 0 15px; cursor: pointer;
-        }
+        #chat-in { flex: 1; background: transparent; border: none; color: white; padding: 6px; outline: none; }
+        #chat-go { background: transparent; border: none; color: white; cursor: pointer; padding: 0 10px; }
 
-        /* АДАПТИВ */
         @media (max-width: 700px) {
             :root { --card-w: 80px; --card-h: 116px; }
-            .top-zone { height: 100px; padding: 5px 10px; }
-            .player-zone { height: 160px; }
-            .controls { bottom: 180px; }
-            .act-btn { padding: 12px 25px; font-size: 14px; }
-            .chat-container { width: 220px; height: 150px; }
+            .top-zone { height: 100px; }
+            .player-zone { height: 150px; }
+            .controls { bottom: 160px; }
+            .chat-box { width: 200px; height: 140px; }
             .my-card-wrap { width: 35px; }
             .my-card-wrap:hover { width: 50px; }
-            .deck-area { left: 10px; }
-            .slots-container { gap: 5px; padding: 0 5px; }
+            .deck-area { left: 5px; }
         }
     </style>
 </head>
 <body>
 
-    <!-- ЛОББИ -->
+    <!-- LOBBY -->
     <div id="lobby">
-        <div class="panel" id="panel-setup">
-            <h2 style="color: #355c7d; margin-top:0;">DURAK ELITE</h2>
+        <div class="panel" id="p-setup">
+            <h2 style="margin:0 0 15px 0; color:#2b32b2;">ДУРАК ОНЛАЙН</h2>
+            <div class="avatar-grid" id="ava-list"></div>
+            <input type="text" id="my-name" class="inp" placeholder="Твой ник" value="Игрок">
             
-            <label>Выбери аватар:</label>
-            <div class="avatar-grid" id="ava-select">
-                <!-- JS Generated -->
-            </div>
-
-            <input type="text" id="p-name" class="inp" placeholder="Твое имя" value="Player">
-
-            <label>Режим игры:</label>
             <div class="mode-select">
                 <div class="mode-btn active" onclick="Lobby.setMode(2)">1 vs 1</div>
                 <div class="mode-btn" onclick="Lobby.setMode(3)">1 vs 1 vs 1</div>
             </div>
 
-            <button class="btn btn-create" onclick="Lobby.create()">СОЗДАТЬ СТОЛ</button>
-            <div style="margin:10px; color:#999;">— или —</div>
-            <input type="text" id="join-code" class="inp" placeholder="Код стола">
-            <button class="btn btn-join" onclick="Lobby.join()">ПРИСОЕДИНИТЬСЯ</button>
+            <button class="btn btn-create" onclick="Lobby.create()">СОЗДАТЬ ИГРУ</button>
+            <div style="margin:10px; color:#aaa;">- или -</div>
+            <input type="text" id="join-id" class="inp" placeholder="ID Комнаты">
+            <button class="btn btn-join" onclick="Lobby.join()">ВОЙТИ</button>
         </div>
 
-        <div class="panel" id="panel-wait" style="display:none;">
-            <h3>Ожидание игроков...</h3>
-            <p>Код для друзей:</p>
-            <input type="text" id="host-id-disp" class="inp" style="background:#eee; font-weight:bold;" readonly onclick="this.select()">
-            <div id="wait-status" style="margin-top:10px; color:var(--accent);">0/2 подключено</div>
-            <div style="font-size:30px; margin-top:15px; animation: spin 2s infinite;">⌛</div>
+        <div class="panel" id="p-wait" style="display:none;">
+            <h3>Ждем игроков...</h3>
+            <p>ID Комнаты:</p>
+            <input type="text" id="host-key" class="inp" style="background:#eee; font-weight:bold;" readonly onclick="this.select()">
+            <div id="wait-txt" style="color:blue; margin-top:10px;">0/2 подключено</div>
+            <div style="font-size:24px; margin-top:15px; animation: spin 2s infinite;">⌛</div>
         </div>
     </div>
 
-    <!-- ИГРА -->
+    <!-- GAME -->
     <div id="game">
-        <div class="chat-container">
-            <div class="chat-log" id="chat-log"></div>
-            <div class="chat-input-row">
+        <div class="chat-box">
+            <div class="chat-msgs" id="chat-hist"></div>
+            <div class="chat-input">
                 <input type="text" id="chat-in" placeholder="Чат..." autocomplete="off">
-                <button id="chat-btn" onclick="Game.sendChat()">➤</button>
+                <button id="chat-go" onclick="Game.chat()">➤</button>
             </div>
         </div>
 
-        <!-- Верх: Соперники (до 2х) -->
-        <div class="top-zone" id="top-opponents"></div>
+        <div class="top-zone" id="top-opps"></div>
 
-        <!-- Центр: Стол -->
         <div class="table-zone">
             <div class="deck-area">
-                <div class="deck-badge" id="deck-num">36</div>
+                <div class="deck-cnt" id="deck-n">36</div>
                 <div id="trump-ph"></div>
                 <div id="deck-ph" class="card card-back deck-stack"></div>
             </div>
-
-            <div class="slots-container" id="table-slots"></div>
-
+            <div class="slots-row" id="table-slots"></div>
             <div class="controls">
-                <div class="status-msg" id="game-status">Загрузка...</div>
+                <div class="status-msg" id="status-txt">Загрузка...</div>
                 <button class="act-btn btn-bito" id="btn-bito" onclick="Game.act('BITO')">БИТО</button>
                 <button class="act-btn btn-take" id="btn-take" onclick="Game.act('TAKE')">ВЗЯТЬ</button>
             </div>
         </div>
 
-        <!-- Низ: Я -->
         <div class="player-zone">
             <div class="my-hand" id="my-hand"></div>
             <div class="my-info">
                 <img id="my-ava-img" class="my-ava" src="">
-                <div style="font-weight:bold; text-shadow:1px 1px 2px black;">Вы</div>
+                <div style="font-weight:bold;">ВЫ</div>
             </div>
         </div>
     </div>
 
     <script>
-        // --- ДАННЫЕ ---
+        // CONFIG
         const SUITS = ['S', 'C', 'H', 'D'];
         const RANKS = ['6', '7', '8', '9', '0', 'J', 'Q', 'K', 'A'];
-        const IMG_API = (r,s) => `https://deckofcardsapi.com/static/img/${r}${s}.png`;
-        const AVATARS = [1, 2, 3, 4, 5]; // RoboHash sets
+        const DISPLAY = {'6':'6', '7':'7', '8':'8', '9':'9', '0':'10', 'J':'J', 'Q':'Q', 'K':'K', 'A':'A'};
+        const SUIT_ICONS = {'S':'♠', 'C':'♣', 'H':'♥', 'D':'♦'};
+        
+        // Images: Using '0' for 10
+        const GET_IMG = (r,s) => `https://deckofcardsapi.com/static/img/${r}${s}.png`;
+        const AVATARS = [1,2,3,4,5];
 
-        // --- ЛОГИКА ИГРЫ (SERVER-SIDE MOCK) ---
+        // --- GAME ENGINE (HOST) ---
         class Engine {
-            constructor(hostName, hostAva, mode) {
-                this.mode = mode; // 2 or 3
-                this.players = [{ id: 'host', name: hostName, ava: hostAva, hand: [] }];
+            constructor(hName, hAva, mode) {
+                this.mode = mode; 
+                this.players = [{ id: 'host', name: hName, ava: hAva, hand: [] }];
                 this.deck = [];
                 this.trump = null;
                 this.field = [];
-                this.turnIdx = 0; // Кто ходит
+                this.turn = 0;
                 this.state = 'lobby';
-                this.winner = null;
+                this.win = null;
             }
-
-            addPlayer(id, name, ava) {
-                if (this.players.length >= this.mode) return false;
+            
+            addP(id, name, ava) {
+                if(this.players.length >= this.mode) return false;
                 this.players.push({ id, name, ava, hand: [] });
                 return true;
             }
 
             start() {
-                if (this.players.length !== this.mode) return false;
+                if(this.players.length !== this.mode) return;
                 
-                // Deck Gen
+                // Deck
                 this.deck = [];
                 SUITS.forEach(s => RANKS.forEach(r => this.deck.push({r, s})));
                 this.deck.sort(() => Math.random() - 0.5);
 
-                // Deal 6
-                this.players.forEach(p => {
-                    p.hand = this.deck.splice(0, 6);
-                });
+                // Hands
+                this.players.forEach(p => p.hand = this.deck.splice(0, 6));
 
                 // Trump
                 this.trump = this.deck.pop();
                 this.deck.unshift(this.trump);
 
-                // First Turn logic (min trump)
-                let minVal = 100;
-                let firstP = 0;
-                const getVal = r => RANKS.indexOf(r);
-                
-                this.players.forEach((p, idx) => {
+                // First Turn
+                let min = 100, fp = 0;
+                const val = r => RANKS.indexOf(r);
+                this.players.forEach((p, i) => {
                     p.hand.forEach(c => {
-                        if(c.s === this.trump.s && getVal(c.r) < minVal) {
-                            minVal = getVal(c.r);
-                            firstP = idx;
-                        }
+                        if(c.s === this.trump.s && val(c.r) < min) { min = val(c.r); fp = i; }
                     });
                 });
-                
-                this.turnIdx = firstP;
+                this.turn = fp;
                 this.state = 'game';
-                return true;
             }
 
-            // Utils
-            getNextP(offset = 1) { return (this.turnIdx + offset) % this.mode; }
-            canBeat(att, def) {
-                if(att.s === def.s) return RANKS.indexOf(def.r) > RANKS.indexOf(att.r);
-                return def.s === this.trump.s;
+            next(off=1) { return (this.turn + off) % this.mode; }
+            beat(a, d) {
+                if(a.s===d.s) return RANKS.indexOf(d.r) > RANKS.indexOf(a.r);
+                return d.s === this.trump.s;
             }
 
-            // Actions
-            move(pIndex, type, data) {
-                if (this.state !== 'game') return;
-                const p = this.players[pIndex];
+            move(pidx, type, d) {
+                if(this.state !== 'game') return;
+                const p = this.players[pidx];
 
-                if (type === 'ATTACK') {
-                    if (pIndex !== this.turnIdx) return; // Only attacker
-                    // Logic: Podkidnoy logic (rank match) or empty field
-                    const card = p.hand[data.idx];
-                    if (this.field.length > 0) {
-                        const ranks = new Set(this.field.flatMap(s => [s.att.r, s.def?.r].filter(Boolean)));
-                        if (!ranks.has(card.r)) return;
-                    }
+                if(type === 'ATT') {
+                    if(pidx !== this.turn) return;
+                    const c = p.hand[d.i];
                     
-                    // Limits
-                    const defenderIdx = this.getNextP();
-                    const defender = this.players[defenderIdx];
-                    const openSlots = this.field.filter(s => !s.def).length;
-                    if (openSlots >= defender.hand.length) return; // Cannot attack more than defender has
-                    if (this.field.length >= 6) return;
+                    // Logic check
+                    if(this.field.length > 0) {
+                        const all = new Set(this.field.flatMap(x => [x.att.r, x.def?.r].filter(Boolean)));
+                        if(!all.has(c.r)) return;
+                    }
+                    const defP = this.players[this.next()];
+                    const free = this.field.filter(x=>!x.def).length;
+                    if(free >= defP.hand.length) return;
+                    if(this.field.length >= 6) return;
 
-                    // Execute
-                    p.hand.splice(data.idx, 1);
-                    this.field.push({ att: card, def: null });
+                    p.hand.splice(d.i, 1);
+                    this.field.push({ att: c, def: null });
                     return true;
                 }
 
-                if (type === 'DEFEND') {
-                    if (pIndex !== this.getNextP()) return; // Only defender
-                    const slot = this.field[data.slot];
-                    if (!slot || slot.def) return;
-                    
-                    const card = p.hand[data.idx];
-                    if (this.canBeat(slot.att, card)) {
-                        p.hand.splice(data.idx, 1);
-                        slot.def = card;
+                if(type === 'DEF') {
+                    if(pidx !== this.next()) return;
+                    const slot = this.field[d.s];
+                    if(!slot || slot.def) return;
+                    const c = p.hand[d.i];
+                    if(this.beat(slot.att, c)) {
+                        p.hand.splice(d.i, 1);
+                        slot.def = c;
                         return true;
                     }
                 }
 
-                if (type === 'BITO') {
-                    if (pIndex !== this.turnIdx) return; // Attacker decides Bito
-                    if (this.field.length === 0 || this.field.some(s => !s.def)) return;
-                    
+                if(type === 'BITO') {
+                    if(pidx !== this.turn) return;
+                    if(this.field.length===0 || this.field.some(x=>!x.def)) return;
                     this.field = [];
-                    this.drawCards();
-                    this.turnIdx = this.getNextP(); // Turn passes to defender (who successfully defended)
+                    this.refill();
+                    this.turn = this.next();
                     return true;
                 }
 
-                if (type === 'TAKE') {
-                    if (pIndex !== this.getNextP()) return; // Defender takes
-                    
-                    // Collect all
-                    this.field.forEach(s => {
-                        p.hand.push(s.att);
-                        if(s.def) p.hand.push(s.def);
+                if(type === 'TAKE') {
+                    if(pidx !== this.next()) return;
+                    this.field.forEach(x => {
+                        p.hand.push(x.att);
+                        if(x.def) p.hand.push(x.def);
                     });
                     this.field = [];
-                    this.drawCards(true); // Attacker draws, Defender (p) doesn't
-                    
-                    this.turnIdx = this.getNextP(2); // Turn skips defender who took
-                    if(this.mode === 2) this.turnIdx = this.getNextP(1); // In 2p, attacker goes again? No, usually next player. If 2p, next is Attacker.
-                    // Correct Durak rules: If defender takes, next player (attacker) goes. In 2p, that's the same attacker.
-                    // My logic `getNextP(2)` implies skipping.
-                    // 2P: 0 attacks 1. 1 takes. Next turn: 0. (0+2)%2 = 0. Correct.
-                    // 3P: 0 attacks 1. 1 takes. Next turn: 2. (0+2)%3 = 2. Correct.
+                    this.refill(true);
+                    this.turn = this.next(2); // Skip defender who took
+                    if(this.mode === 2) this.turn = this.next(1); // In 2p, attacker goes again (which is next(1))
                     return true;
                 }
             }
 
-            drawCards(skipDefender = false) {
-                // Order: Attacker, then others, finally Defender (if didn't take)
-                // Simply fill everyone in order starting from Attacker
-                const order = [];
-                for(let i=0; i<this.mode; i++) order.push((this.turnIdx + i) % this.mode);
-                
-                order.forEach(pIdx => {
-                    if(skipDefender && pIdx === this.getNextP()) return; // Logic implies turnIdx hasn't changed yet
-                    const p = this.players[pIdx];
-                    while(p.hand.length < 6 && this.deck.length > 0) {
-                        p.hand.push(this.deck.pop());
-                    }
+            refill(skipDef=false) {
+                const arr = [];
+                for(let i=0; i<this.mode; i++) arr.push((this.turn + i)%this.mode);
+                arr.forEach(idx => {
+                    if(skipDef && idx === this.next()) return;
+                    const p = this.players[idx];
+                    while(p.hand.length < 6 && this.deck.length > 0) p.hand.push(this.deck.pop());
                 });
                 
-                // Check Win
-                if(this.deck.length === 0) {
-                    this.players.forEach(p => {
-                        if(p.hand.length === 0 && !this.winner) this.winner = p.name;
-                    });
-                }
+                this.players.forEach(p => {
+                    if(p.hand.length===0 && this.deck.length===0 && !this.win) this.win = p.name;
+                });
             }
 
-            getSnapshot() {
+            dump() {
                 return {
-                    deck: this.deck.length,
-                    trump: this.trump,
-                    field: this.field,
-                    turn: this.turnIdx,
-                    players: this.players.map(p => ({ name: p.name, ava: p.ava, cards: p.hand.length, id: p.id })),
-                    winner: this.winner
+                    d: this.deck.length,
+                    tr: this.trump,
+                    f: this.field,
+                    t: this.turn,
+                    ps: this.players.map(p=>({name:p.name, ava:p.ava, cnt:p.hand.length, id:p.id})),
+                    win: this.win
                 };
             }
         }
 
-        // --- КЛИЕНТ ---
+        // --- CLIENT ---
         const Lobby = {
-            ava: 1,
-            mode: 2,
+            ava: 1, mode: 2,
             init() {
-                const c = document.getElementById('ava-select');
+                const d = document.getElementById('ava-list');
                 AVATARS.forEach(i => {
-                    const d = document.createElement('div');
-                    d.className = 'ava-option' + (i===1?' active':'');
-                    d.style.backgroundImage = `url('https://robohash.org/${i}.png?set=set2')`;
-                    d.style.backgroundSize = 'cover';
-                    d.onclick = () => {
-                        this.ava = i;
-                        document.querySelectorAll('.ava-option').forEach(e=>e.classList.remove('active'));
-                        d.classList.add('active');
-                    };
-                    c.appendChild(d);
+                    const el = document.createElement('div');
+                    el.className = 'ava-option' + (i===1?' active':'');
+                    el.style.backgroundImage = `url('https://robohash.org/${i}.png?set=set2')`;
+                    el.onclick = () => { this.ava=i; document.querySelectorAll('.ava-option').forEach(x=>x.classList.remove('active')); el.classList.add('active'); };
+                    d.appendChild(el);
                 });
             },
             setMode(n) {
@@ -526,334 +459,261 @@
                 event.target.classList.add('active');
             },
             create() {
-                const name = document.getElementById('p-name').value || "Host";
-                Game.initHost(name, this.ava, this.mode);
+                const n = document.getElementById('my-name').value || "Host";
+                Game.initH(n, this.ava, this.mode);
             },
             join() {
-                const name = document.getElementById('p-name').value || "Guest";
-                const id = document.getElementById('join-code').value;
-                if(!id) return alert("Введите код");
-                Game.initClient(name, this.ava, id);
+                const n = document.getElementById('my-name').value || "Guest";
+                const k = document.getElementById('join-id').value;
+                if(!k) return alert("Нет ID");
+                Game.initC(n, this.ava, k);
             }
         };
 
         const Game = {
+            role: null,
+            eng: null, // Host
             peer: null,
-            conns: [], // For host: list of connections
-            conn: null, // For client: connection to host
-            role: null, // 'host' or 'client'
-            engine: null, // Host only
+            conns: [], // Host
+            conn: null, // Client
             
             myId: null,
-            state: null,
-            myHand: [],
-            selIdx: null,
+            st: null, // State
+            hand: [],
+            sel: null,
 
-            // HOST START
-            initHost(name, ava, mode) {
+            // HOST
+            initH(name, ava, mode) {
                 this.role = 'host';
-                this.engine = new Engine(name, ava, mode);
+                this.eng = new Engine(name, ava, mode);
                 this.peer = new Peer();
                 
                 this.peer.on('open', id => {
-                    document.getElementById('panel-setup').style.display = 'none';
-                    document.getElementById('panel-wait').style.display = 'block';
-                    document.getElementById('host-id-disp').value = id;
+                    document.getElementById('p-setup').style.display = 'none';
+                    document.getElementById('p-wait').style.display = 'block';
+                    document.getElementById('host-key').value = id;
                 });
-
-                this.peer.on('connection', conn => {
-                    conn.on('open', () => {
-                        this.conns.push(conn);
-                        // Handshake wait
-                    });
-                    conn.on('data', data => {
-                        if (data.t === 'JOIN') {
-                            const added = this.engine.addPlayer(conn.peer, data.name, data.ava);
-                            if(added) {
-                                this.broadcast({ t: 'CHAT', msg: `Игрок ${data.name} подключился`, sys: true });
-                                this.updateWaitStatus();
-                                if (this.engine.players.length === this.engine.mode) {
-                                    this.engine.start();
-                                    this.syncAll();
+                
+                this.peer.on('connection', c => {
+                    c.on('open', () => this.conns.push(c));
+                    c.on('data', d => {
+                        if(d.t==='JOIN') {
+                            if(this.eng.addP(c.peer, d.name, d.ava)) {
+                                this.broad({t:'CHAT', n:'INFO', m:`${d.name} вошел`, sys:true});
+                                document.getElementById('wait-txt').innerText = `${this.eng.players.length-1}/${this.eng.mode-1} подключено`;
+                                if(this.eng.players.length === this.eng.mode) {
+                                    this.eng.start();
+                                    this.sync();
                                 }
-                            } else {
-                                conn.close(); // Room full
-                            }
+                            } else c.close();
                         }
-                        if (data.t === 'ACT') {
-                            // Find player index
-                            const pIdx = this.engine.players.findIndex(p => p.id === conn.peer);
-                            if (pIdx > -1) {
-                                if(this.engine.move(pIdx, data.act, data.d)) this.syncAll();
-                            }
+                        if(d.t==='ACT') {
+                            const pIdx = this.eng.players.findIndex(p=>p.id===c.peer);
+                            if(pIdx!==-1 && this.eng.move(pIdx, d.a, d.d)) this.sync();
                         }
-                        if (data.t === 'CHAT') {
-                            this.broadcast(data); // Re-broadcast
-                        }
+                        if(d.t==='CHAT') this.broad(d);
                     });
                 });
             },
 
-            updateWaitStatus() {
-                document.getElementById('wait-status').innerText = `${this.conns.length}/${this.engine.mode - 1} подключено`;
-            },
-
-            // CLIENT START
-            initClient(name, ava, hostId) {
+            // CLIENT
+            initC(name, ava, key) {
                 this.role = 'client';
                 this.peer = new Peer();
-                this.peer.on('open', id => {
-                    this.conn = this.peer.connect(hostId);
+                this.peer.on('open', () => {
+                    this.conn = this.peer.connect(key);
                     this.conn.on('open', () => {
-                        this.conn.send({ t: 'JOIN', name, ava });
-                        document.getElementById('lobby').style.display = 'none'; // Wait for sync
-                        document.getElementById('game-status').innerText = "Подключение...";
+                        this.conn.send({t:'JOIN', name, ava});
+                        document.getElementById('p-setup').style.display = 'none';
+                        document.getElementById('status-txt').innerText = "Подключение...";
                     });
-                    this.conn.on('data', data => this.handleData(data));
+                    this.conn.on('data', d => this.handle(d));
                 });
             },
 
-            // SYNC LOGIC
-            syncAll() {
-                if (this.role !== 'host') return;
-                const snap = this.engine.getSnapshot();
+            // SYNC
+            sync() {
+                if(this.role !== 'host') return;
+                const snap = this.eng.dump();
                 
-                // 1. Host UI update
-                this.state = snap;
-                this.myHand = this.engine.players[0].hand;
-                this.myId = 'host'; // internal ID
-                this.render();
+                // Set Host state manually
+                this.st = snap;
+                this.hand = this.eng.players[0].hand; // IMPORTANT: Host hand
+                this.myId = 'host';
+                this.draw();
 
-                // 2. Send to clients
+                // Send to clients
                 this.conns.forEach(c => {
-                    const pIdx = this.engine.players.findIndex(p => p.id === c.peer);
-                    c.send({
-                        t: 'SYNC',
-                        snap: snap,
-                        hand: this.engine.players[pIdx].hand,
-                        pid: c.peer
-                    });
+                    const p = this.eng.players.find(x=>x.id===c.peer);
+                    c.send({t:'SYNC', s:snap, h:p.hand, mid:c.peer});
                 });
             },
 
-            handleData(data) {
-                if (data.t === 'SYNC') {
+            handle(d) {
+                if(d.t==='SYNC') {
                     document.getElementById('lobby').style.display = 'none';
                     document.getElementById('game').style.display = 'flex';
-                    this.state = data.snap;
-                    this.myHand = data.hand;
-                    this.myId = data.pid;
-                    this.render();
+                    this.st = d.s;
+                    this.hand = d.h;
+                    this.myId = d.mid;
+                    this.draw();
                 }
-                if (data.t === 'CHAT') {
-                    this.renderChat(data);
-                }
+                if(d.t==='CHAT') this.addChat(d);
             },
 
-            // ACTIONS
-            act(type, pl = {}) {
-                if (this.role === 'host') {
-                    if (this.engine.move(0, type, pl)) this.syncAll();
+            act(type, data={}) {
+                if(this.role === 'host') {
+                    if(this.eng.move(0, type, data)) this.sync();
                 } else {
-                    this.conn.send({ t: 'ACT', act: type, d: pl });
+                    this.conn.send({t:'ACT', a:type, d:data});
                 }
             },
 
-            sendChat() {
-                const inp = document.getElementById('chat-in');
-                const txt = inp.value.trim();
-                if(!txt) return;
+            chat() {
+                const i = document.getElementById('chat-in');
+                const t = i.value.trim();
+                if(!t) return;
                 
-                const myName = this.role==='host' ? this.engine.players[0].name : 'Me'; // Name handled by broadcast
-                // Actually easier to just send to host, host fills name
+                let name = 'Я';
+                if(this.role==='host') name = this.eng.players[0].name;
                 
-                if (this.role === 'host') {
-                    const msg = { t: 'CHAT', name: this.engine.players[0].name, msg: txt };
-                    this.renderChat(msg);
-                    this.broadcast(msg);
+                if(this.role==='host') {
+                    const m = {t:'CHAT', n:name, m:t};
+                    this.addChat(m);
+                    this.broad(m);
                 } else {
-                    this.conn.send({ t: 'CHAT', name: "PLACEHOLDER", msg: txt }); // Host uses stored name map if implemented, or passes client name
+                    this.conn.send({t:'CHAT', n:'...', m:t});
                 }
-                inp.value = '';
+                i.value = '';
             },
 
-            broadcast(data) {
-                this.conns.forEach(c => c.send(data));
-                if(data.t === 'CHAT') this.renderChat(data); // Host renders own broadcast
-            },
+            broad(d) { this.conns.forEach(c => c.send(d)); if(d.t==='CHAT') this.addChat(d); },
 
-            // RENDERER
-            render() {
-                const s = this.state;
-                if (!s) return;
-
-                if (s.winner) {
-                    alert(`Победил ${s.winner}!`);
-                    location.reload();
-                    return;
-                }
-
-                // 1. Determine My Index
-                let myIdx = s.players.findIndex(p => p.id === this.myId);
-                if (myIdx === -1 && this.role === 'host') myIdx = 0;
-
-                // 2. Render Opponents (Relative)
-                const oppContainer = document.getElementById('top-opponents');
-                oppContainer.innerHTML = '';
+            addChat(d) {
+                const log = document.getElementById('chat-hist');
+                const el = document.createElement('div');
                 
-                const count = s.players.length;
-                // Loop through other players
-                for(let i = 1; i < count; i++) {
-                    const oppIdx = (myIdx + i) % count;
-                    const p = s.players[oppIdx];
-                    const isTurn = (s.turn === oppIdx);
+                // Safe name check
+                let myName = '';
+                if(this.st && this.st.ps) {
+                    const me = this.st.ps.find(p=>p.id===this.myId);
+                    if(me) myName = me.name;
+                    else if(this.role==='host' && this.eng) myName = this.eng.players[0].name;
+                }
+                
+                const isMe = (d.n === myName);
+                el.className = 'msg ' + (isMe?'me':'');
+                if(d.sys) {
+                    el.style.background = 'transparent'; el.style.fontStyle = 'italic';
+                    el.innerText = d.m;
+                } else {
+                    el.innerHTML = `<b>${d.n}:</b> ${d.m}`;
+                }
+                log.appendChild(el);
+                log.scrollTop = log.scrollHeight;
+            },
 
-                    const div = document.createElement('div');
-                    div.className = 'opponent ' + (isTurn ? '' : 'inactive');
-                    div.innerHTML = `
-                        <img class="opp-ava" src="https://robohash.org/${p.ava}.png?set=set2" style="${isTurn ? 'border-color:#ffeb3b' : ''}">
+            // RENDER
+            draw() {
+                const s = this.st;
+                if(!s) return;
+                if(s.win) { alert(s.win + " победил!"); location.reload(); return; }
+
+                // Determine My Index
+                let myIdx = s.ps.findIndex(p=>p.id===this.myId);
+                if(myIdx === -1 && this.role==='host') myIdx = 0;
+
+                // 1. Opponents
+                const tops = document.getElementById('top-opps');
+                tops.innerHTML = '';
+                for(let i=1; i<s.ps.length; i++) {
+                    const oIdx = (myIdx + i) % s.ps.length;
+                    const p = s.ps[oIdx];
+                    const isTurn = (s.t === oIdx);
+                    
+                    const d = document.createElement('div');
+                    d.className = 'opponent' + (isTurn?' active-turn':'');
+                    d.innerHTML = `
+                        <img class="opp-ava" src="https://robohash.org/${p.ava}.png?set=set2" style="${isTurn?'border-color:#ffeb3b':''}">
                         <div class="opp-name">${p.name}</div>
-                        <div class="opp-hand">
-                            ${Array(p.cards).fill('<div class="card-mini"></div>').join('')}
-                        </div>
+                        <div class="opp-hand">${Array(p.cnt).fill('<div class="card-mini"></div>').join('')}</div>
                     `;
-                    oppContainer.appendChild(div);
+                    tops.appendChild(d);
                 }
 
-                // 3. Deck & Trump
-                const deckCount = document.getElementById('deck-num');
-                deckCount.innerText = s.deck;
-                const tPh = document.getElementById('trump-ph');
-                const dPh = document.getElementById('deck-ph');
-                tPh.innerHTML = '';
-                
-                if (s.deck > 0 || s.trump) {
-                    const tr = document.createElement('div');
-                    tr.className = 'card trump-card';
-                    tr.style.backgroundImage = `url('${IMG_API(s.trump.r, s.trump.s)}')`;
-                    tPh.appendChild(tr);
-                }
-                dPh.style.display = s.deck > 1 ? 'block' : 'none';
+                // 2. Table
+                document.getElementById('deck-n').innerText = s.d;
+                document.getElementById('deck-ph').style.display = s.d > 1 ? 'block' : 'none';
+                const tph = document.getElementById('trump-ph'); tph.innerHTML = '';
+                if(s.d>0 || s.tr) tph.appendChild(this.mkCard(s.tr, 'trump-card'));
 
-                // 4. Table
-                const tbl = document.getElementById('table-slots');
-                tbl.innerHTML = '';
-                s.field.forEach((slot, slotIdx) => {
+                const tsl = document.getElementById('table-slots'); tsl.innerHTML = '';
+                s.f.forEach((sl, idx) => {
                     const d = document.createElement('div');
                     d.className = 'slot';
-                    
-                    const c1 = document.createElement('div');
-                    c1.className = 'card slot-att';
-                    c1.style.backgroundImage = `url('${IMG_API(slot.att.r, slot.att.s)}')`;
-                    d.appendChild(c1);
-
-                    if (slot.def) {
-                        const c2 = document.createElement('div');
-                        c2.className = 'card slot-def';
-                        c2.style.backgroundImage = `url('${IMG_API(slot.def.r, slot.def.s)}')`;
-                        d.appendChild(c2);
-                    } else {
-                        // Dropzone for defender
-                        if (s.turn !== myIdx && this.selIdx !== null) {
-                            // Logic check: Am I the defender?
-                            const defenderIdx = (s.turn + 1) % count;
-                            if (myIdx === defenderIdx) {
-                                d.style.cursor = 'pointer';
-                                d.style.boxShadow = 'inset 0 0 20px #ffeb3b';
-                                d.onclick = () => {
-                                    this.act('DEFEND', { idx: this.selIdx, slot: slotIdx });
-                                    this.selIdx = null;
-                                };
-                            }
+                    d.appendChild(this.mkCard(sl.att, 'slot-att'));
+                    if(sl.def) d.appendChild(this.mkCard(sl.def, 'slot-def'));
+                    else if(s.t !== myIdx && this.sel!==null) {
+                        const defIdx = (s.t + 1)%s.ps.length;
+                        if(myIdx === defIdx) {
+                            d.style.boxShadow = 'inset 0 0 20px yellow'; d.style.cursor='pointer'; d.style.borderRadius='6px';
+                            d.onclick = () => { this.act('DEF', {i:this.sel, s:idx}); this.sel=null; };
                         }
                     }
-                    tbl.appendChild(d);
+                    tsl.appendChild(d);
                 });
 
-                // 5. My Hand
-                const handContainer = document.getElementById('my-hand');
-                handContainer.innerHTML = '';
-                const myInfo = s.players[myIdx];
+                // 3. Me
+                const mh = document.getElementById('my-hand'); mh.innerHTML = '';
+                const myInfo = s.ps[myIdx];
                 document.getElementById('my-ava-img').src = `https://robohash.org/${myInfo.ava}.png?set=set2`;
-                if(s.turn === myIdx) document.getElementById('my-ava-img').style.borderColor = '#ffeb3b';
-                else document.getElementById('my-ava-img').style.borderColor = 'transparent';
+                if(s.t===myIdx) document.getElementById('my-ava-img').classList.add('my-turn');
+                else document.getElementById('my-ava-img').classList.remove('my-turn');
 
-                this.myHand.forEach((c, i) => {
-                    const wrap = document.createElement('div');
-                    wrap.className = 'my-card-wrap';
-                    const el = document.createElement('div');
-                    el.className = 'card';
-                    if (this.selIdx === i) el.classList.add('selected');
-                    el.style.backgroundImage = `url('${IMG_API(c.r, c.s)}')`;
-                    
+                this.hand.forEach((c, i) => {
+                    const w = document.createElement('div'); w.className = 'my-card-wrap';
+                    const el = this.mkCard(c);
+                    if(this.sel===i) el.classList.add('selected');
                     el.onclick = () => {
-                        if (s.turn === myIdx) {
-                            this.act('ATTACK', { idx: i });
-                        } else {
-                            // Select
-                            this.selIdx = (this.selIdx === i) ? null : i;
-                            this.render();
-                        }
+                        if(s.t===myIdx) this.act('ATT', {i});
+                        else { this.sel = (this.sel===i)?null:i; this.draw(); }
                     };
-                    wrap.appendChild(el);
-                    handContainer.appendChild(wrap);
+                    w.appendChild(el); mh.appendChild(w);
                 });
 
-                // 6. Controls
-                const btnBito = document.getElementById('btn-bito');
-                const btnTake = document.getElementById('btn-take');
-                const msg = document.getElementById('game-status');
-                
-                btnBito.style.display = 'none';
-                btnTake.style.display = 'none';
+                // 4. Buttons
+                const b1 = document.getElementById('btn-bito');
+                const b2 = document.getElementById('btn-take');
+                const st = document.getElementById('status-txt');
+                b1.style.display = 'none'; b2.style.display = 'none';
 
-                if (s.turn === myIdx) {
-                    msg.innerText = "ВАШ ХОД (Атака)";
-                    msg.style.borderLeftColor = '#81c784';
-                    // Check if can bito
-                    const allDef = s.field.length > 0 && s.field.every(x => x.def);
-                    if (allDef) btnBito.style.display = 'block';
+                if(s.t===myIdx) {
+                    st.innerText = "ВАШ ХОД"; st.style.borderLeftColor = "#81c784";
+                    if(s.f.length>0 && s.f.every(x=>x.def)) b1.style.display='block';
                 } else {
-                    const defenderIdx = (s.turn + 1) % count;
-                    if (myIdx === defenderIdx) {
-                        msg.innerText = "ВАШ ХОД (Защита)";
-                        msg.style.borderLeftColor = '#ffb74d';
-                        if (s.field.some(x => !x.def)) btnTake.style.display = 'block';
-                    } else {
-                        msg.innerText = "Ожидание...";
-                        msg.style.borderLeftColor = '#ccc';
-                    }
+                    const defIdx = (s.t + 1)%s.ps.length;
+                    if(myIdx === defIdx) {
+                        st.innerText = "ЗАЩИЩАЙСЯ"; st.style.borderLeftColor = "#f57c00";
+                        if(s.f.some(x=>!x.def)) b2.style.display='block';
+                    } else st.innerText = "Ожидание...";
                 }
             },
 
-            renderChat(data) {
-                const log = document.getElementById('chat-log');
-                const d = document.createElement('div');
-                
-                // --- FIX: Безопасная проверка "я ли это" ---
-                let isMe = false;
-                if (this.state && this.state.players) {
-                     const myP = this.state.players.find(p => p.id === this.myId);
-                     if (myP && data.name === myP.name) isMe = true;
-                }
-                
-                d.className = 'chat-msg' + (isMe ? ' me' : '');
-                if (data.sys) {
-                    d.style.background = 'transparent';
-                    d.style.fontStyle = 'italic';
-                    d.innerHTML = data.msg;
-                } else {
-                    d.innerHTML = `<b>${data.name}:</b> ${data.msg}`;
-                }
-                log.appendChild(d);
-                log.scrollTop = log.scrollHeight;
+            mkCard(c, cls='') {
+                const el = document.createElement('div');
+                el.className = `card ${cls} ${(c.s==='H'||c.s==='D')?'red':'black'}`;
+                el.style.backgroundImage = `url('${GET_IMG(c.r, c.s)}')`;
+                // FALLBACK TEXT (Если картинка не прогрузится)
+                el.innerHTML = `
+                    <div class="corner-idx tl">${DISPLAY[c.r]}${SUIT_ICONS[c.s]}</div>
+                    <div class="corner-idx br">${DISPLAY[c.r]}${SUIT_ICONS[c.s]}</div>
+                `;
+                return el;
             }
         };
 
-        // Key bindings
-        document.getElementById('chat-in').addEventListener('keypress', e => {
-            if(e.key === 'Enter') Game.sendChat();
-        });
+        // Keyboard
+        document.getElementById('chat-in').addEventListener('keypress', e=>{if(e.key==='Enter') Game.chat()});
 
         Lobby.init();
     </script>
