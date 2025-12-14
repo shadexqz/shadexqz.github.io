@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Durak PRO: Full Version</title>
+    <title>Durak PRO: Final Fixed</title>
     <link rel="icon" href="data:;base64,iVBORw0KGgo=">
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
     <style>
@@ -23,7 +23,6 @@
             margin: 0;
             font-family: 'Roboto Condensed', sans-serif;
             background-color: var(--bg-felt);
-            /* Текстура сукна */
             background-image: 
                 radial-gradient(circle at center, rgba(255,255,255,0.05) 0%, transparent 70%),
                 url("data:image/svg+xml,%3Csvg width='4' height='4' viewBox='0 0 4 4' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 3h1v1H1V3zm2-2h1v1H3V1z' fill='%23000000' fill-opacity='0.2' fill-rule='evenodd'/%3E%3C/svg%3E");
@@ -72,11 +71,10 @@
         .ava-opt.selected { border-color: #d32f2f; transform: scale(1.1); }
 
         .opts { display: flex; gap: 20px; justify-content: center; margin: 15px 0; font-weight: bold; font-size: 18px; }
-        
+
         /* --- GAME UI --- */
         #game { display: none; flex-direction: column; height: 100%; position: relative; }
 
-        /* Chat Sidebar */
         .chat-sidebar {
             position: absolute; top: 10px; left: 10px; bottom: 240px; width: 260px;
             display: flex; flex-direction: column; pointer-events: none; z-index: 200;
@@ -100,18 +98,17 @@
         #chat-in { flex: 1; background: rgba(0,0,0,0.6); border: 1px solid #777; color: white; padding: 8px; border-radius: 4px 0 0 4px; }
         #chat-send { width: 40px; background: #444; color: white; border: 1px solid #777; cursor: pointer; border-radius: 0 4px 4px 0; }
 
-        /* Opponents */
         .opponents-row { height: 150px; display: flex; justify-content: center; gap: 40px; padding-top: 15px; }
         .player-wrap { position: relative; display: flex; flex-direction: column; align-items: center; width: 120px; }
         
-        /* Timer SVG (Rounded Rect) */
+        /* Timer SVG (Rounded Rect matches Avatar) */
         .timer-svg {
             position: absolute; top: -5px; left: 50%; transform: translateX(-50%);
             width: 70px; height: 70px; pointer-events: none; z-index: 5;
         }
         .timer-path {
             fill: none; stroke: var(--accent); stroke-width: 4;
-            stroke-dasharray: 240; stroke-dashoffset: 240; /* Approx perimeter */
+            stroke-dasharray: 240; stroke-dashoffset: 240; 
             transition: stroke-dashoffset 1s linear;
         }
 
@@ -121,7 +118,6 @@
         }
         .p-name { font-size: 14px; font-weight: bold; margin-top: 5px; text-shadow: 1px 1px 2px black; }
         
-        /* Opponent Hand (Stack) */
         .p-hand { position: relative; width: 60px; height: 40px; margin-top: 5px; }
         .card-tiny {
             width: 30px; height: 45px; background-image: url('https://deckofcardsapi.com/static/img/back.png');
@@ -129,38 +125,37 @@
             position: absolute; box-shadow: 1px 1px 3px rgba(0,0,0,0.5);
         }
 
-        /* Table */
         .table-area { flex: 1; position: relative; display: flex; justify-content: center; align-items: center; }
-        
         .deck-pos { position: absolute; left: 20px; top: 50%; transform: translateY(-50%); width: var(--card-w); height: var(--card-h); }
         .bito-pos { position: absolute; right: 20px; top: 50%; transform: translateY(-50%); width: var(--card-w); height: var(--card-h); opacity: 0.7; }
         
         .trump { position: absolute; top: 10px; left: 20px; transform: rotate(90deg); z-index: 1; }
-        /* Визуальная стопка колоды */
         .deck-stack-card { 
             position: absolute; width: 100%; height: 100%; 
             background-image: url('https://deckofcardsapi.com/static/img/back.png'); background-size: cover;
             border-radius: var(--radius); border: 1px solid #ccc; 
         }
 
+        .deck-count {
+             position: absolute; top: -25px; left: 0; width: 100%; text-align: center;
+             font-weight: bold; font-size: 14px; text-shadow: 1px 1px 2px black; color: white;
+        }
+
         .slots-wrap { display: flex; gap: 15px; padding: 0 20px; align-items: center; perspective: 1000px; z-index: 10; }
         .slot { width: var(--card-w); height: var(--card-h); position: relative; }
         
-        /* Cards */
         .card {
             width: var(--card-w); height: var(--card-h);
             border-radius: var(--radius);
             background-color: #fff; background-size: 100% 100%;
             position: absolute;
             box-shadow: 0 5px 15px rgba(0,0,0,0.4);
-            /* Анимация полета */
             transition: all 0.5s cubic-bezier(0.19, 1, 0.22, 1);
         }
         .card-att { top: 0; left: 0; z-index: 10; }
-        .card-def { top: 25px; left: 25px; z-index: 20; transform: rotate(15deg); }
+        .card-def { top: 25px; left: 25px; z-index: 20; transform: rotate(10deg); }
         .card-back { background-image: url('https://deckofcardsapi.com/static/img/back.png'); }
 
-        /* My Hand */
         .my-zone { height: 220px; display: flex; justify-content: center; align-items: flex-end; padding-bottom: 20px; position: relative; }
         .my-hand-wrap { display: flex; align-items: flex-end; }
         .my-card { width: 55px; height: var(--card-h); position: relative; transition: width 0.2s; cursor: pointer; }
@@ -171,16 +166,6 @@
         .my-card:hover .card { bottom: 40px; z-index: 100; }
         .my-card.sel .card { bottom: 60px; box-shadow: 0 0 0 4px #ffeb3b; z-index: 101; }
 
-        /* Flying Card (Animation Helper) */
-        .fly-card {
-            position: fixed; z-index: 9999; pointer-events: none;
-            width: var(--card-w); height: var(--card-h);
-            background-size: 100% 100%; border-radius: var(--radius);
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-            transition: all 0.6s cubic-bezier(0.19, 1, 0.22, 1);
-        }
-
-        /* Controls */
         .controls { position: absolute; right: 20px; bottom: 250px; display: flex; flex-direction: column; align-items: flex-end; gap: 10px; z-index: 100; }
         .status-badge { background: rgba(0,0,0,0.8); padding: 12px 25px; border-left: 6px solid #fff; font-size: 18px; font-weight: bold; box-shadow: 0 4px 6px black; }
         .act-btn { border: none; padding: 16px 45px; font-size: 22px; font-weight: 900; text-transform: uppercase; cursor: pointer; color: white; box-shadow: 0 6px 20px rgba(0,0,0,0.6); border-radius: 4px; display: none; }
@@ -247,13 +232,12 @@
         <div class="opponents-row" id="opponents-area"></div>
 
         <div class="table-area">
-            <!-- Deck -->
             <div class="deck-pos">
+                <div class="deck-count" id="deck-n">36</div>
                 <div id="trump-slot"></div>
                 <div id="deck-visual" style="position:absolute; top:0; left:0; width:100%; height:100%;"></div>
             </div>
             
-            <!-- Bito Pile -->
             <div class="bito-pos" id="bito-visual">
                  <div style="color:rgba(255,255,255,0.2); font-weight:bold; text-align:center; padding-top:40%;">БИТО</div>
             </div>
@@ -271,7 +255,6 @@
             <div class="player-wrap" style="position:absolute; bottom:10px; left:10px; width:auto; flex-direction:row; gap:15px;">
                 <div style="position:relative;">
                     <img id="my-ava" class="avatar" src="">
-                    <!-- Rounded Rect SVG for Timer -->
                     <svg class="timer-svg" viewBox="0 0 70 70">
                         <rect class="timer-path" id="my-timer" x="2" y="2" width="66" height="66" rx="12" ry="12"></rect>
                     </svg>
@@ -290,7 +273,6 @@
         const SUITS = ['S','C','H','D'];
         const RANKS = ['6','7','8','9','0','J','Q','K','A'];
         
-        // --- LOGIC ---
         class Engine {
             constructor(hName, hAva, mode, transfer) {
                 this.mode = mode;
@@ -347,41 +329,25 @@
                 if(this.state !== 'game') return;
                 const p = this.players[pidx];
 
-                // --- ATTACK & TRANSFER ---
                 if(type === 'ATTACK') {
                     const isAttacker = (pidx === this.turn);
-                    // Transfer condition: It is the defender's turn to act (conceptually), rank matches, field has no defs
                     const isTransferer = (this.transfer && pidx === this.next() && this.field.length > 0 && this.field.every(s => !s.def));
-                    
                     if(!isAttacker && !isTransferer) return;
-
                     const c = p.hand[d.i];
-
-                    // Check Rank Match
                     if(this.field.length > 0) {
                         const ranks = new Set(this.field.flatMap(x => [x.att.r, x.def?.r].filter(Boolean)));
                         if(!ranks.has(c.r)) return;
                     }
-
-                    // Check Limits
                     let defIdx = this.next();
-                    if(isTransferer) defIdx = (pidx + 1) % this.mode; // Target is next of transferer
-                    
+                    if(isTransferer) defIdx = (pidx + 1) % this.mode;
                     const defP = this.players[defIdx];
                     const slotsFree = this.field.filter(x=>!x.def).length;
-                    
-                    if(slotsFree + 1 > defP.hand.length) return; // +1 because we are adding a card
+                    if(slotsFree + 1 > defP.hand.length) return;
                     if(this.field.length >= 6) return;
-
                     p.hand.splice(d.i, 1);
-                    this.field.push({att: c, def: null, from: pidx}); // from is useful for animations
-
-                    if(isTransferer) {
-                        this.changeTurn(pidx); // Transferer becomes attacker
-                    } else {
-                        // Just a regular attack, refresh timer
-                        this.startTime = Date.now();
-                    }
+                    this.field.push({att: c, def: null, from: pidx});
+                    if(isTransferer) this.changeTurn(pidx);
+                    else this.startTime = Date.now();
                     return true;
                 }
 
@@ -415,7 +381,6 @@
                     });
                     this.field = [];
                     this.refill(true);
-                    
                     let nextTurn = this.next(2);
                     if(this.mode===2) nextTurn = this.next(1);
                     this.changeTurn(nextTurn);
@@ -450,7 +415,6 @@
             }
         }
 
-        // --- CLIENT ---
         const Lobby = {
             ava: 1,
             init() {
@@ -484,7 +448,6 @@
         const Game = {
             role: null, eng: null, peer: null, conns: [], conn: null,
             myId: null, st: null, hand: [], sel: null,
-            prevFieldLen: 0, // For animations tracking
 
             initHost(n, a, m, t) {
                 this.role = 'host';
@@ -548,7 +511,7 @@
                 this.draw();
                 this.conns.forEach(c => {
                     const p = this.eng.players.find(x=>x.id===c.peer);
-                    // Safe Check: Only send if player exists
+                    // FIXED: Check if player exists before sending hand
                     if(p) c.send({t:'S', s:snap, h:p.hand, mid:c.peer});
                 });
             },
@@ -566,24 +529,21 @@
                 const val = i.value.trim();
                 if(!val) return;
                 
-                // Get Name
                 let name = 'Я';
                 if(this.role==='host' && this.eng) name = this.eng.players[0].name;
-                // Clients send to host to resolve name
                 
                 if(this.role==='host') {
                     const msg = {t:'C', n:name, m:val, id:this.myId, a:this.eng.players[0].ava};
                     this.addChat(msg); this.bc(msg);
                 } else {
-                    this.conn.send({t:'C', m:val, id:this.myId}); // Host will resolve Name/Ava
+                    this.conn.send({t:'C', m:val, id:this.myId});
                 }
                 i.value = '';
             },
 
             bc(d) {
-                // If it's a client chat coming to host, resolve details
                 if(d.t==='C' && !d.n && this.eng) {
-                    const p = this.eng.players.find(x=>x.id === d.id); // d.id sent from client
+                    const p = this.eng.players.find(x=>x.id === d.id);
                     if(p) { d.n = p.name; d.a = p.ava; }
                     else d.n = '???';
                 }
@@ -594,8 +554,12 @@
             addChat(d) {
                 const log = document.getElementById('chat-log');
                 const el = document.createElement('div');
-                const isMe = (d.id === this.myId) || (this.role==='host' && d.n === this.eng.players[0].name);
-                
+                let isMe = false;
+                if(this.st && this.st.ps) {
+                    const me = this.st.ps.find(p=>p.id===this.myId);
+                    if(me && d.n === me.name) isMe = true;
+                    if(!me && this.role==='host' && d.n === this.eng.players[0].name) isMe = true;
+                }
                 el.className = 'chat-msg' + (d.s ? ' sys' : (isMe ? ' me' : ''));
                 if(d.s) el.innerText = d.m;
                 else {
@@ -606,22 +570,10 @@
                 log.scrollTop = log.scrollHeight;
             },
 
-            // ANIMATION HELPERS
-            animateFly(startRect, endRect, imgUrl) {
-                const el = document.createElement('div');
-                el.className = 'fly-card';
-                el.style.backgroundImage = `url('${imgUrl}')`;
-                el.style.left = startRect.left + 'px';
-                el.style.top = startRect.top + 'px';
-                document.body.appendChild(el);
-                
-                // Force reflow
-                el.offsetHeight; 
-
-                el.style.left = endRect.left + 'px';
-                el.style.top = endRect.top + 'px';
-
-                setTimeout(() => el.remove(), 600);
+            // Safe Text Setter
+            safeTxt(id, txt) {
+                const el = document.getElementById(id);
+                if(el) el.innerText = txt;
             },
 
             draw() {
@@ -632,148 +584,148 @@
                 let myIdx = s.ps.findIndex(p=>p.id===this.myId);
                 if(myIdx===-1 && this.role==='host') myIdx=0;
 
-                // --- 1. OPPONENTS ---
+                // 1. OPPONENTS
                 const oppDiv = document.getElementById('opponents-area');
-                oppDiv.innerHTML = '';
-                for(let i=1; i<s.ps.length; i++) {
-                    const idx = (myIdx + i) % s.ps.length;
-                    const p = s.ps[idx];
-                    const isTurn = (s.t === idx);
-                    
-                    const wrap = document.createElement('div');
-                    wrap.className = 'player-wrap';
-                    wrap.id = `player-${idx}`; // For anim target
-                    
-                    // Stacked cards visual
-                    let cardsHtml = '';
-                    for(let c=0; c<p.cnt; c++) {
-                        cardsHtml += `<div class="card-tiny" style="left:${c*5}px; top:${-c*1}px;"></div>`;
+                if(oppDiv) {
+                    oppDiv.innerHTML = '';
+                    for(let i=1; i<s.ps.length; i++) {
+                        const idx = (myIdx + i) % s.ps.length;
+                        const p = s.ps[idx];
+                        const isTurn = (s.t === idx);
+                        
+                        const wrap = document.createElement('div');
+                        wrap.className = 'player-wrap';
+                        let cardsHtml = '';
+                        for(let c=0; c<p.cnt; c++) {
+                            cardsHtml += `<div class="card-tiny" style="left:${c*5}px; top:${-c*1}px;"></div>`;
+                        }
+                        
+                        wrap.innerHTML = `
+                            <div style="position:relative;">
+                                <img src="https://robohash.org/${p.ava}.png?set=set4" class="avatar">
+                                <svg class="timer-svg" style="opacity:${isTurn?1:0}" viewBox="0 0 70 70">
+                                    <rect class="timer-path" x="2" y="2" width="66" height="66" rx="12"></rect>
+                                </svg>
+                            </div>
+                            <div class="p-name">${p.name}</div>
+                            <div class="p-hand">${cardsHtml}</div>
+                        `;
+                        if(isTurn) this.animTimer(wrap.querySelector('.timer-path'), s.tm);
+                        oppDiv.appendChild(wrap);
                     }
-                    
-                    wrap.innerHTML = `
-                        <div style="position:relative;">
-                            <img src="https://robohash.org/${p.ava}.png?set=set4" class="avatar">
-                            <svg class="timer-svg" style="opacity:${isTurn?1:0}" viewBox="0 0 70 70">
-                                <rect class="timer-path" x="2" y="2" width="66" height="66" rx="12"></rect>
-                            </svg>
-                        </div>
-                        <div class="p-name">${p.name}</div>
-                        <div class="p-hand">${cardsHtml}</div>
-                    `;
-                    if(isTurn) this.animTimer(wrap.querySelector('.timer-path'), s.tm);
-                    oppDiv.appendChild(wrap);
                 }
 
-                // --- 2. DECK & BITO ---
-                document.getElementById('deck-n').innerText = s.d;
+                // 2. TABLE
+                this.safeTxt('deck-n', s.d);
                 const dSlot = document.getElementById('deck-visual');
-                dSlot.innerHTML = '';
-                // Visual stack for deck
-                if(s.d > 0) {
-                   const maxVis = Math.min(s.d, 5);
-                   for(let i=0; i<maxVis; i++) {
-                       dSlot.innerHTML += `<div class="deck-stack-card" style="top:${-i*2}px; left:${-i*1}px;"></div>`;
-                   }
-                } else dSlot.innerHTML = '';
-
-                const tph = document.getElementById('trump-slot'); tph.innerHTML='';
-                if(s.tr) tph.appendChild(this.mkC(s.tr, 'trump'));
-
-                // Bito stack visual
-                const bitoEl = document.getElementById('bito-visual');
-                // Simple stack based on count
-                if(s.bc > 0) {
-                     bitoEl.innerHTML = '';
-                     const cnt = Math.min(Math.ceil(s.bc/2), 6);
-                     for(let i=0; i<cnt; i++) {
-                        bitoEl.innerHTML += `<div class="deck-stack-card" style="transform:rotate(${Math.random()*20-10}deg); top:${-i*1}px;"></div>`;
-                     }
-                } else bitoEl.innerHTML = '<div style="color:rgba(255,255,255,0.2); font-weight:bold; text-align:center; padding-top:40%;">БИТО</div>';
-
-                // --- 3. TABLE SLOTS ---
-                const slDiv = document.getElementById('slots-area');
-                slDiv.innerHTML='';
-                
-                // Animation check: if a new card appeared compared to memory
-                const isNewCard = (s.f.length > this.prevFieldLen);
-                
-                s.f.forEach((slot, si) => {
-                    const d = document.createElement('div'); d.className='slot';
-                    
-                    // Attack Card
-                    const c1 = this.mkC(slot.att, 'card-att');
-                    d.appendChild(c1);
-                    
-                    // Animate newly added attack card?
-                    // Simplified: We just render. Real physics would require tracking IDs.
-
-                    if(slot.def) d.appendChild(this.mkC(slot.def, 'card-def'));
-                    else {
-                        // Logic for Defender or Transferer
-                        const nextP = (s.t + 1) % s.ps.length;
-                        // Am I the defender?
-                        if(myIdx === nextP) {
-                            d.style.boxShadow = "inset 0 0 20px #ff3d00"; d.style.cursor="pointer";
-                            d.onclick = () => { this.act('DEFEND', {i:this.sel, s:si}); this.sel=null; };
+                if(dSlot) {
+                    dSlot.innerHTML = '';
+                    if(s.d > 0) {
+                        const maxVis = Math.min(s.d, 5);
+                        for(let i=0; i<maxVis; i++) {
+                            dSlot.innerHTML += `<div class="deck-stack-card" style="top:${-i*2}px; left:${-i*1}px;"></div>`;
                         }
                     }
-                    slDiv.appendChild(d);
-                });
-                this.prevFieldLen = s.f.length;
+                }
 
-                // --- 4. MY HAND ---
-                const mh = document.getElementById('my-hand'); mh.innerHTML='';
-                const myInfo = s.ps[myIdx];
-                document.getElementById('my-ava').src = `https://robohash.org/${myInfo.ava}.png?set=set4`;
-                document.getElementById('my-cards-count').innerText = `${this.hand.length} карт`;
-                
-                const myTimer = document.getElementById('my-timer');
-                if(s.t === myIdx) {
-                    myTimer.parentElement.style.opacity = 1;
-                    this.animTimer(myTimer, s.tm);
-                } else myTimer.parentElement.style.opacity = 0;
+                const tph = document.getElementById('trump-slot');
+                if(tph) {
+                    tph.innerHTML='';
+                    if(s.tr) tph.appendChild(this.mkC(s.tr, 'trump'));
+                }
 
-                // Logic to enable card clicking
-                // Enable if My Turn (Attack) OR I am next player & Transfer is possible
-                const isMyTurn = (s.t === myIdx);
-                const isTransferPossible = (myIdx === (s.t+1)%s.ps.length && s.f.length>0 && s.f.every(x=>!x.def));
+                const bitoEl = document.getElementById('bito-visual');
+                if(bitoEl) {
+                    if(s.bc > 0) {
+                         bitoEl.innerHTML = '';
+                         const cnt = Math.min(Math.ceil(s.bc/2), 6);
+                         for(let i=0; i<cnt; i++) {
+                            bitoEl.innerHTML += `<div class="deck-stack-card" style="transform:rotate(${Math.random()*20-10}deg); top:${-i*1}px;"></div>`;
+                         }
+                    } else bitoEl.innerHTML = '<div style="color:rgba(255,255,255,0.2); font-weight:bold; text-align:center; padding-top:40%;">БИТО</div>';
+                }
 
-                this.hand.forEach((c,i) => {
-                    const w = document.createElement('div'); w.className='my-card';
-                    if(this.sel===i) w.classList.add('sel');
-                    w.appendChild(this.mkC(c));
-                    
-                    w.onclick = () => {
-                        if(isMyTurn) {
-                            this.act('ATTACK', {i}); 
-                        } else if(isTransferPossible) {
-                             // Try to transfer
-                             this.act('ATTACK', {i});
-                        } else { 
-                            // Selection for defense
-                            this.sel = (this.sel===i)?null:i; this.draw(); 
+                // 3. SLOTS
+                const slDiv = document.getElementById('slots-area');
+                if(slDiv) {
+                    slDiv.innerHTML='';
+                    s.f.forEach((slot, si) => {
+                        const d = document.createElement('div'); d.className='slot';
+                        d.appendChild(this.mkC(slot.att, 'card-att'));
+                        if(slot.def) d.appendChild(this.mkC(slot.def, 'card-def'));
+                        else if(s.t !== myIdx && this.sel!==null) {
+                            const defIdx = (s.t+1)%s.ps.length;
+                            if(myIdx === defIdx) {
+                                d.style.boxShadow = "inset 0 0 20px #ff3d00"; d.style.cursor="pointer";
+                                d.onclick = () => { this.act('DEFEND', {i:this.sel, s:si}); this.sel=null; };
+                            }
                         }
-                    };
-                    mh.appendChild(w);
-                });
+                        slDiv.appendChild(d);
+                    });
+                }
 
-                // --- 5. STATUS ---
+                // 4. ME
+                const mh = document.getElementById('my-hand');
+                if(mh) {
+                    mh.innerHTML='';
+                    const myInfo = s.ps[myIdx];
+                    if(myInfo) {
+                        const ava = document.getElementById('my-ava');
+                        if(ava) ava.src = `https://robohash.org/${myInfo.ava}.png?set=set4`;
+                        this.safeTxt('my-cards-count', `${this.hand.length} карт`);
+                    }
+
+                    const myTimer = document.getElementById('my-timer');
+                    if(myTimer) {
+                        if(s.t === myIdx) {
+                            myTimer.parentElement.style.opacity = 1;
+                            this.animTimer(myTimer, s.tm);
+                        } else myTimer.parentElement.style.opacity = 0;
+                    }
+
+                    const isMyTurn = (s.t === myIdx);
+                    const isTransferPossible = (myIdx === (s.t+1)%s.ps.length && s.f.length>0 && s.f.every(x=>!x.def));
+
+                    this.hand.forEach((c,i) => {
+                        const w = document.createElement('div'); w.className='my-card';
+                        if(this.sel===i) w.classList.add('sel');
+                        w.appendChild(this.mkC(c));
+                        
+                        w.onclick = () => {
+                            if(isMyTurn) {
+                                this.act('ATTACK', {i}); 
+                            } else if(isTransferPossible) {
+                                 this.act('ATTACK', {i});
+                            } else { 
+                                this.sel = (this.sel===i)?null:i; this.draw(); 
+                            }
+                        };
+                        mh.appendChild(w);
+                    });
+                }
+
+                // 5. STATUS
                 const bB = document.getElementById('btn-bito');
                 const bT = document.getElementById('btn-take');
                 const st = document.getElementById('status-txt');
-                bB.style.display='none'; bT.style.display='none';
+                if(bB) bB.style.display='none';
+                if(bT) bT.style.display='none';
 
-                if(isMyTurn) {
-                    st.innerText = "ВАШ ХОД"; st.style.borderLeftColor = "#2e7d32";
-                    if(s.f.length>0 && s.f.every(x=>x.def)) bB.style.display='block';
-                } else {
-                    const defIdx = (s.t+1)%s.ps.length;
-                    if(myIdx === defIdx) {
-                        st.innerText = "ОТБИВАЙТЕСЬ"; st.style.borderLeftColor = "#ff3d00";
-                        if(s.f.some(x=>!x.def)) bT.style.display='block';
-                        // Hint for transfer
-                        if(isTransferPossible) st.innerText = "ОТБЕЙСЯ ИЛИ ПЕРЕВЕДИ";
-                    } else st.innerText = `ХОДИТ: ${s.ps[s.t].name}`;
+                if(st) {
+                    const isMyTurn = (s.t === myIdx);
+                    if(isMyTurn) {
+                        st.innerText = "ВАШ ХОД"; st.style.borderLeftColor = "#2e7d32";
+                        if(s.f.length>0 && s.f.every(x=>x.def)) bB.style.display='block';
+                    } else {
+                        const defIdx = (s.t+1)%s.ps.length;
+                        const isTransferPossible = (myIdx === defIdx && s.f.length>0 && s.f.every(x=>!x.def));
+
+                        if(myIdx === defIdx) {
+                            st.innerText = "ОТБИВАЙТЕСЬ"; st.style.borderLeftColor = "#ff3d00";
+                            if(s.f.some(x=>!x.def)) bT.style.display='block';
+                            if(isTransferPossible) st.innerText = "ОТБЕЙ ИЛИ ПЕРЕВЕДИ";
+                        } else st.innerText = `ХОДИТ: ${s.ps[s.t].name}`;
+                    }
                 }
             },
 
