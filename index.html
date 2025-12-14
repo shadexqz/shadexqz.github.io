@@ -3,444 +3,402 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Дурак Онлайн (P2P)</title>
+    <title>Дурак Онлайн (Classic)</title>
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
     <style>
         :root {
-            --bg-color: #2d5e40; /* Классическое зеленое сукно */
-            --card-width: 80px;
-            --card-height: 112px;
-            --radius: 8px;
-            --shadow: 0 4px 6px rgba(0,0,0,0.3);
+            /* Размеры карт увеличены */
+            --card-w: 100px;
+            --card-h: 145px;
+            --bg-felt: #274e13;
         }
 
-        * { box-sizing: border-box; user-select: none; }
+        * { box-sizing: border-box; user-select: none; -webkit-tap-highlight-color: transparent; }
+        
         body {
             margin: 0;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: var(--bg-color);
-            background-image: radial-gradient(circle at center, #35654d 0%, #1e3c29 100%);
-            color: white;
-            height: 100vh;
+            background-color: var(--bg-felt);
+            /* Текстура сукна */
+            background-image: 
+                radial-gradient(white, rgba(255,255,255,.2) 2px, transparent 3px),
+                radial-gradient(white, rgba(255,255,255,.15) 1px, transparent 2px),
+                radial-gradient(rgba(255,255,255,.1) 2px, transparent 3px);
+            background-size: 550px 550px, 350px 350px, 250px 250px;
+            background-position: 0 0, 40px 60px, 130px 270px;
+            font-family: 'Times New Roman', serif;
             overflow: hidden;
-            display: flex;
-            flex-direction: column;
+            height: 100vh;
+            color: #fff;
         }
 
-        /* --- UI Лобби --- */
-        #lobby {
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
+        /* --- UI ЛОББИ --- */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.85);
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
+            display: flex; justify-content: center; align-items: center;
+            z-index: 9999;
         }
-        .panel {
-            background: white;
-            color: #333;
-            padding: 2rem;
-            border-radius: 12px;
+        .modal {
+            background: #fdfdfd;
+            color: #222;
+            padding: 30px;
+            border-radius: 4px;
+            width: 90%; max-width: 400px;
             text-align: center;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
-            max-width: 400px;
-            width: 90%;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.7);
+            border: 1px solid #999;
         }
-        button {
-            background: #d32f2f;
-            color: white;
-            border: none;
-            padding: 12px 24px;
-            font-size: 16px;
-            border-radius: 6px;
-            cursor: pointer;
-            transition: 0.2s;
-            margin: 5px;
-            font-weight: bold;
-        }
-        button:hover { background: #b71c1c; }
-        button:disabled { background: #ccc; cursor: not-allowed; }
-        input {
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 6px;
-            width: 100%;
-            margin-bottom: 10px;
-            font-size: 16px;
-        }
-
-        /* --- Игровое поле --- */
-        #game-board {
-            flex: 1;
-            display: none; /* Скрыто до начала игры */
-            flex-direction: column;
-            position: relative;
-        }
-
-        /* Зоны */
-        .opponent-area { height: 120px; display: flex; justify-content: center; align-items: center; position: relative; }
-        .table-area { flex: 1; position: relative; display: flex; justify-content: center; align-items: center; }
-        .player-area { height: 160px; display: flex; justify-content: center; align-items: flex-end; padding-bottom: 20px; position: relative; }
-
-        /* Колода и Козырь */
-        .deck-area {
-            position: absolute;
-            left: 20px;
-            top: 50%;
-            transform: translateY(-50%);
-            display: flex;
-            align-items: center;
-        }
-        .trump-card {
-            position: absolute;
-            left: 20px;
-            transform: rotate(90deg) translateX(-20px);
-            z-index: 0;
-        }
-        .deck-stack {
-            position: relative;
-            z-index: 1;
-            background: #fff;
-            border: 2px solid #fff;
-            background-image: repeating-linear-gradient(45deg, #b71c1c 0, #b71c1c 10px, #d32f2f 10px, #d32f2f 20px);
-        }
-        .deck-count {
-            position: absolute;
-            top: -25px;
-            left: 10px;
-            font-weight: bold;
-            text-shadow: 1px 1px 2px black;
-        }
-
-        /* Карты */
-        .card {
-            width: var(--card-width);
-            height: var(--card-height);
-            background: white;
-            border-radius: var(--radius);
-            box-shadow: var(--shadow);
-            position: relative;
-            margin: 0 5px;
-            color: black;
-            font-weight: bold;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            padding: 5px;
-            cursor: pointer;
-            transition: transform 0.2s, margin 0.2s;
-        }
-        .card:hover { transform: translateY(-10px); }
-        .card.selected { border: 2px solid #ffeb3b; transform: translateY(-15px); }
+        .modal h1 { margin: 0 0 15px; font-family: 'Courier New', monospace; text-transform: uppercase; letter-spacing: 2px; }
         
-        .card.red { color: #d32f2f; }
-        .card.black { color: #212121; }
+        input[type="text"] {
+            width: 100%; padding: 12px; margin: 10px 0;
+            font-size: 16px; border: 2px solid #333; border-radius: 4px;
+            font-family: monospace; text-align: center;
+        }
+        
+        .btn-main {
+            background: #d32f2f; color: #fff;
+            border: 2px solid #b71c1c;
+            padding: 12px 25px; font-size: 18px; font-weight: bold;
+            cursor: pointer; width: 100%; margin-top: 5px;
+            text-transform: uppercase;
+            box-shadow: 0 4px 0 #b71c1c;
+            transition: all 0.1s;
+        }
+        .btn-main:active { transform: translateY(4px); box-shadow: 0 0 0 #b71c1c; }
+        .btn-main:disabled { background: #999; border-color: #777; box-shadow: none; transform: none; cursor: not-allowed;}
 
-        .card-top { font-size: 18px; line-height: 1; display: flex; flex-direction: column; align-items: center; width: 20px;}
-        .card-center { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 40px; }
-        .card-bottom { transform: rotate(180deg); font-size: 18px; line-height: 1; display: flex; flex-direction: column; align-items: center; width: 20px; align-self: flex-end;}
+        /* --- ИГРОВОЕ ПОЛЕ --- */
+        #game-app {
+            display: none; /* Скрыто до старта */
+            flex-direction: column;
+            height: 100%;
+        }
 
+        /* Зона соперника */
+        .top-area {
+            height: 160px;
+            display: flex; justify-content: center; align-items: flex-start;
+            padding-top: 10px;
+            position: relative;
+        }
+
+        /* Стол */
+        .table-area {
+            flex: 1;
+            position: relative;
+            display: flex; justify-content: center; align-items: center;
+        }
+
+        /* Моя рука */
+        .bottom-area {
+            height: 180px;
+            display: flex; justify-content: center; align-items: flex-end;
+            padding-bottom: 20px;
+            z-index: 10;
+        }
+
+        /* --- КАРТЫ (Стиль "Атлас") --- */
+        .card {
+            width: var(--card-w);
+            height: var(--card-h);
+            background: #fcfcfc;
+            border-radius: 8px;
+            position: relative;
+            box-shadow: 2px 2px 5px rgba(0,0,0,0.4);
+            display: flex; flex-direction: column; justify-content: space-between;
+            padding: 5px;
+            margin: 0 -35px; /* Наложение карт веером */
+            transition: transform 0.2s, margin 0.2s;
+            cursor: pointer;
+            border: 1px solid #ccc;
+        }
+        
+        .card:hover { transform: translateY(-15px); z-index: 100; }
+        .card.selected { transform: translateY(-25px); border: 2px solid #ffeb3b; z-index: 101; }
+        
+        .card.red { color: #d60000; }
+        .card.black { color: #111; }
+
+        /* Типографика карты */
+        .rank-tl { font-size: 24px; font-weight: bold; line-height: 1; text-align: center; }
+        .suit-tl { font-size: 20px; line-height: 1; text-align: center; }
+        
+        .rank-br { font-size: 24px; font-weight: bold; line-height: 1; text-align: center; transform: rotate(180deg); }
+        .suit-br { font-size: 20px; line-height: 1; text-align: center; transform: rotate(180deg); }
+
+        .center-suit {
+            position: absolute; top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 50px;
+        }
+
+        /* Рубашка ("Сетка") */
         .card-back {
-            background: #fff;
-            background-image: repeating-linear-gradient(45deg, #1565c0 0, #1565c0 10px, #0d47a1 10px, #0d47a1 20px);
-            border: 2px solid white;
+            background-color: #fff;
+            background-image: 
+                linear-gradient(45deg, #d32f2f 25%, transparent 25%, transparent 75%, #d32f2f 75%, #d32f2f),
+                linear-gradient(45deg, #d32f2f 25%, transparent 25%, transparent 75%, #d32f2f 75%, #d32f2f);
+            background-size: 10px 10px;
+            background-position: 0 0, 5px 5px;
+            border: 4px solid white;
         }
         .card-back * { display: none; }
 
-        /* Стол (карты в игре) */
+        /* Карты на столе */
         .field-slot {
+            width: var(--card-w); height: var(--card-h);
             margin: 0 10px;
             position: relative;
-            width: var(--card-width);
-            height: var(--card-height);
         }
-        .field-card { position: absolute; top: 0; left: 0; transition: all 0.3s; }
-        .field-card:nth-child(2) { top: 20px; left: 15px; transform: rotate(10deg); z-index: 2; }
+        .field-card { position: absolute; top:0; left:0; margin:0; }
+        .field-card:nth-child(2) { top: 20px; left: 15px; transform: rotate(8deg); z-index: 5; }
+        .field-card:hover { transform: none; } /* На столе карты не прыгают */
 
-        /* Статус бар и кнопки */
-        .game-ui {
-            position: absolute;
-            right: 20px;
-            bottom: 180px;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
+        /* Колода и козырь */
+        .deck-container {
+            position: absolute; left: 20px; top: 50%; transform: translateY(-50%);
+            width: var(--card-w); height: var(--card-h);
+        }
+        .trump {
+            position: absolute; left: 20px; top: 10px;
+            transform: rotate(90deg); z-index: 1;
+        }
+        .deck-stack {
+            position: absolute; top: 0; left: 0; z-index: 2;
+        }
+        .deck-counter {
+            position: absolute; top: -30px; width: 100%;
+            text-align: center; background: rgba(0,0,0,0.5);
+            border-radius: 10px; padding: 2px; font-size: 14px;
+        }
+
+        /* --- ИНТЕРФЕЙС УПРАВЛЕНИЯ --- */
+        .game-controls {
+            position: absolute; right: 20px; top: 50%; transform: translateY(-50%);
+            display: flex; flex-direction: column; gap: 15px;
             align-items: flex-end;
         }
-        .status-badge {
-            background: rgba(0,0,0,0.6);
-            padding: 10px 20px;
-            border-radius: 20px;
-            font-size: 18px;
-            margin-bottom: 10px;
-            backdrop-filter: blur(5px);
-            border: 1px solid rgba(255,255,255,0.2);
+        .status-msg {
+            background: rgba(0,0,0,0.6); padding: 10px 20px;
+            border-radius: 4px; font-size: 18px; color: #fff;
+            text-align: right;
+            border-left: 4px solid #fff;
         }
         .action-btn {
-            background: #ffb300;
-            color: #000;
-            padding: 15px 30px;
-            border-radius: 30px;
-            font-size: 18px;
-            box-shadow: 0 5px 15px rgba(255,179,0,0.4);
-            display: none;
+            padding: 15px 40px; font-size: 20px; font-weight: bold;
+            border-radius: 30px; border: none; cursor: pointer;
+            box-shadow: 0 5px 10px rgba(0,0,0,0.5);
+            display: none; /* Скрыта по умолчанию */
         }
-        .action-btn.active { display: block; }
+        .btn-take { background: #ff9800; color: #000; }
+        .btn-bito { background: #d32f2f; color: #fff; }
 
         /* --- ЧАТ --- */
-        #chat-container {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            width: 300px;
-            height: 200px;
+        #chat-wrap {
+            position: absolute; top: 10px; right: 10px;
+            width: 300px; height: 180px;
+            display: flex; flex-direction: column;
+            pointer-events: none; /* Чтобы клики сквозь него проходили на поле, если пусто */
+        }
+        #chat-log {
+            flex: 1; overflow-y: auto; 
+            padding-right: 5px;
+            display: flex; flex-direction: column; justify-content: flex-end;
+            margin-bottom: 5px;
+            /* Скроллбар */
+            scrollbar-width: thin;
+            scrollbar-color: rgba(255,255,255,0.3) transparent;
+        }
+        .msg {
             background: rgba(0,0,0,0.5);
-            border-radius: 8px;
-            display: flex;
-            flex-direction: column;
-            backdrop-filter: blur(4px);
-            border: 1px solid rgba(255,255,255,0.1);
-            transition: opacity 0.3s;
-            opacity: 0; /* Скрыт пока не в игре */
-            pointer-events: none;
+            padding: 4px 8px; margin-bottom: 4px; border-radius: 4px;
+            color: white; font-size: 14px; align-self: flex-end;
+            pointer-events: auto;
+            max-width: 100%;
+            word-wrap: break-word;
         }
-        #chat-container.visible { opacity: 1; pointer-events: all; }
-        
-        #chat-messages {
-            flex: 1;
-            overflow-y: auto;
-            padding: 10px;
-            font-size: 14px;
-            text-shadow: 1px 1px 1px black;
-        }
-        .msg { margin-bottom: 4px; }
-        .msg.me { color: #81c784; }
-        .msg.opp { color: #e57373; }
-        .msg.sys { color: #ffd54f; font-style: italic; }
+        .msg.opp { background: rgba(211, 47, 47, 0.6); align-self: flex-start; }
+        .msg.sys { background: rgba(255, 193, 7, 0.4); color: #fff; align-self: center; font-style: italic; font-size: 12px;}
 
-        #chat-input-area {
-            display: flex;
-            padding: 5px;
-            background: rgba(0,0,0,0.3);
+        #chat-controls {
+            display: flex; pointer-events: auto; background: rgba(0,0,0,0.5); border-radius: 4px;
         }
         #chat-input {
-            flex: 1;
-            background: rgba(255,255,255,0.2);
-            border: none;
-            color: white;
-            padding: 5px;
-            border-radius: 4px;
+            flex: 1; background: transparent; border: none; color: white; padding: 8px; outline: none;
         }
         #chat-send {
-            background: transparent;
-            color: white;
-            border: none;
-            font-size: 18px;
-            cursor: pointer;
-            padding: 0 10px;
+            background: #4caf50; border: none; color: white; padding: 0 15px; cursor: pointer; font-weight: bold;
         }
 
-        /* Адаптив для мобилок */
+        /* --- АДАПТИВ ДЛЯ МОБИЛ --- */
         @media (max-width: 600px) {
-            :root { --card-width: 60px; --card-height: 84px; }
-            .trump-card { transform: rotate(90deg) translateX(-10px); left: 10px;}
-            .game-ui { bottom: 150px; right: 10px; }
-            #chat-container { width: 200px; height: 150px; top: 5px; right: 5px; font-size: 12px; }
-            .opponent-area { height: 90px; }
-            .player-area { height: 130px; }
+            :root { --card-w: 65px; --card-h: 96px; }
+            .card { margin: 0 -20px; }
+            .rank-tl, .rank-br { font-size: 16px; }
+            .suit-tl, .suit-br { font-size: 14px; }
+            .center-suit { font-size: 30px; }
+            
+            .game-controls { bottom: 200px; top: auto; right: 10px; }
+            .deck-container { left: 10px; }
+            #chat-wrap { width: 220px; height: 120px; top: 5px; right: 5px; }
+            .msg { font-size: 11px; }
+            
+            .top-area { height: 110px; }
+            .bottom-area { height: 120px; }
+            .field-slot { margin: 0 2px; }
         }
     </style>
 </head>
 <body>
 
     <!-- ЛОББИ -->
-    <div id="lobby">
-        <div class="panel">
-            <h1>Дурак Онлайн</h1>
-            <p>P2P Карточная игра</p>
-            <hr style="opacity:0.2">
-            
-            <div id="host-controls">
-                <button onclick="GameApp.hostGame()">Создать игру</button>
-                <div id="invite-area" style="display:none; margin-top:15px;">
-                    <p>Ожидание соперника...</p>
-                    <input type="text" id="invite-link" readonly>
-                    <button onclick="GameApp.copyLink()" style="background:#388e3c; font-size:14px;">Копировать ссылку</button>
-                </div>
-            </div>
-
-            <hr style="opacity:0.2; margin: 20px 0;">
-
-            <div id="join-controls">
-                <input type="text" id="game-id-input" placeholder="Вставьте ID игры">
-                <button onclick="GameApp.joinGame()">Присоединиться</button>
+    <div id="lobby" class="modal-overlay">
+        <div class="modal">
+            <h1>ДУРАК ОНЛАЙН</h1>
+            <div id="menu-main">
+                <button class="btn-main" onclick="App.createGame()">Создать игру</button>
+                <div style="margin: 15px 0; font-style: italic; color:#666;">- или -</div>
+                <input type="text" id="join-id" placeholder="Вставьте ID игры">
+                <button class="btn-main" style="background:#4caf50; border-color:#388e3c;" onclick="App.joinGame()">Войти</button>
             </div>
             
-            <p id="lobby-status" style="color:#e57373; font-size: 14px; min-height: 20px;"></p>
+            <div id="menu-host" style="display:none;">
+                <p>Отправьте эту ссылку другу:</p>
+                <input type="text" id="invite-link" readonly onclick="this.select()">
+                <p style="font-size: 14px; color: #555;" id="status-text">Ожидание подключения...</p>
+                <button class="btn-main" style="background:#777; border-color:#555;" onclick="location.reload()">Отмена</button>
+            </div>
         </div>
     </div>
 
     <!-- ИГРА -->
-    <div id="game-board">
+    <div id="game-app">
         <!-- Чат -->
-        <div id="chat-container">
-            <div id="chat-messages"></div>
-            <div id="chat-input-area">
-                <input type="text" id="chat-input" placeholder="Чат..." onkeypress="if(event.key==='Enter') GameApp.sendChat()">
-                <button id="chat-send" onclick="GameApp.sendChat()">➤</button>
+        <div id="chat-wrap">
+            <div id="chat-log"></div>
+            <div id="chat-controls">
+                <input type="text" id="chat-input" placeholder="Чат (Enter)..." onkeydown="if(event.key==='Enter') App.sendChat()">
+                <button id="chat-send" onclick="App.sendChat()">></button>
             </div>
         </div>
 
-        <div class="opponent-area" id="opponent-hand">
-            <!-- Карты соперника (рубашки) -->
-        </div>
+        <!-- Рука соперника -->
+        <div class="top-area" id="opp-hand"></div>
 
+        <!-- Стол -->
         <div class="table-area">
-            <div class="deck-area">
-                <div id="trump-slot" class="trump-card"></div>
-                <div id="deck-slot" class="deck-stack card card-back"></div>
-                <div id="deck-counter" class="deck-count">36</div>
+            <!-- Колода -->
+            <div class="deck-container">
+                <div id="deck-count" class="deck-counter">36</div>
+                <div id="trump-card"></div> <!-- Сюда рендерится козырь -->
+                <div id="deck-top" class="card card-back deck-stack"></div>
             </div>
-            <div id="field" style="display: flex; justify-content: center;">
-                <!-- Пары карт на столе -->
+
+            <!-- Карты в игре -->
+            <div id="field-slots" style="display:flex; justify-content: center;"></div>
+            
+            <!-- Кнопки и статус -->
+            <div class="game-controls">
+                <div id="game-status" class="status-msg">Ожидание...</div>
+                <button id="btn-action" class="action-btn" onclick="App.doAction()">БИТО</button>
             </div>
         </div>
 
-        <div class="game-ui">
-            <div id="game-status" class="status-badge">Ожидание...</div>
-            <button id="action-btn" class="action-btn" onclick="GameApp.performAction()">Действие</button>
-        </div>
-
-        <div class="player-area" id="my-hand">
-            <!-- Мои карты -->
-        </div>
+        <!-- Моя рука -->
+        <div class="bottom-area" id="my-hand"></div>
     </div>
 
     <script>
-        // --- КОНСТАНТЫ И УТИЛИТЫ ---
+        // --- ДАННЫЕ КАРТ ---
         const SUITS = ['♠', '♣', '♥', '♦'];
         const RANKS = ['6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A'];
-        // Русская локализация карт
-        const RANK_DISPLAY = {'6':'6', '7':'7', '8':'8', '9':'9', '10':'10', 'J':'В', 'Q':'Д', 'K':'К', 'A':'Т'};
-        
-        function getCardColor(suit) {
-            return (suit === '♥' || suit === '♦') ? 'red' : 'black';
-        }
+        // Русские названия для отображения
+        const DISPLAY = {
+            '6':'6', '7':'7', '8':'8', '9':'9', '10':'10', 
+            'J':'В', 'Q':'Д', 'K':'К', 'A':'Т'
+        };
 
-        // --- ЛОГИКА ИГРЫ (Game Engine) ---
-        class DurakEngine {
+        function isRed(suit) { return suit === '♥' || suit === '♦'; }
+
+        // --- ЛОГИКА ИГРЫ (Движок) ---
+        class DurakGame {
             constructor() {
                 this.deck = [];
-                this.trumpCard = null;
-                this.trumpSuit = null;
+                this.trump = null;
                 this.hands = { host: [], client: [] };
-                this.field = []; // Array of {attack: Card, defend: Card|null}
-                this.attacker = 'host'; // 'host' or 'client'
-                this.gameState = 'LOBBY'; // LOBBY, PLAYING, ENDED
+                this.field = []; // {attack: card, defend: card|null}
+                this.turn = 'host'; // чей ход (кто атакует)
+                this.stage = 'lobby'; 
                 this.winner = null;
             }
 
-            initGame() {
+            start() {
+                // Генерация колоды
                 this.deck = [];
-                SUITS.forEach(s => RANKS.forEach(r => this.deck.push({ rank: r, suit: s })));
-                this.shuffleDeck();
+                SUITS.forEach(s => RANKS.forEach(r => this.deck.push({r, s})));
+                // Тасовка
+                this.deck.sort(() => Math.random() - 0.5);
                 
-                // Раздача
-                this.hands.host = this.drawCards(6);
-                this.hands.client = this.drawCards(6);
+                // Раздача по 6
+                this.hands.host = this.deck.splice(0, 6);
+                this.hands.client = this.deck.splice(0, 6);
                 
                 // Козырь
-                this.trumpCard = this.deck.shift(); // Последняя карта - козырь, лежит внизу
-                this.trumpSuit = this.trumpCard.suit;
-                this.deck.push(this.trumpCard); // Кладем её "под низ" (в массиве она последняя, визуально обработаем)
-
-                // Определение первого хода (у кого младший козырь)
-                this.attacker = this.findFirstAttacker();
-                this.gameState = 'PLAYING';
+                this.trump = this.deck.pop(); // Последняя карта
+                this.deck.unshift(this.trump); // Кладем в НАЧАЛО массива (низ колоды визуально)
+                
+                // Определение первого хода
+                let minH = 100, minC = 100;
+                const val = c => RANKS.indexOf(c.r);
+                
+                this.hands.host.forEach(c => { if(c.s === this.trump.s && val(c) < minH) minH = val(c); });
+                this.hands.client.forEach(c => { if(c.s === this.trump.s && val(c) < minC) minC = val(c); });
+                
+                this.turn = (minC < minH) ? 'client' : 'host';
+                this.stage = 'game';
             }
 
-            shuffleDeck() {
-                for (let i = this.deck.length - 1; i > 0; i--) {
-                    const j = Math.floor(Math.random() * (i + 1));
-                    [this.deck[i], this.deck[j]] = [this.deck[j], this.deck[i]];
-                }
+            // Проверка: бьет ли c1 карту c2
+            canBeat(attack, defend) {
+                if (defend.s === attack.s) return RANKS.indexOf(defend.r) > RANKS.indexOf(attack.r);
+                return defend.s === this.trump.s;
             }
 
-            drawCards(count) {
-                const drawn = [];
-                // Берем карты с "верха" (начала массива), но козырь в конце массива
-                // В реализации массива: 0 - верх, length-1 - низ (козырь)
-                // Чтобы было удобно, будем брать с 0. Козырь (последний элемент) берем последним.
-                while(drawn.length < count && this.deck.length > 0) {
-                    drawn.push(this.deck.shift());
-                }
-                return drawn;
-            }
-
-            findFirstAttacker() {
-                let minTrumpHost = 100;
-                let minTrumpClient = 100;
-                const getVal = (c) => RANKS.indexOf(c.rank);
-
-                this.hands.host.forEach(c => { if(c.suit === this.trumpSuit) minTrumpHost = Math.min(minTrumpHost, getVal(c)); });
-                this.hands.client.forEach(c => { if(c.suit === this.trumpSuit) minTrumpClient = Math.min(minTrumpClient, getVal(c)); });
-
-                if (minTrumpHost < minTrumpClient) return 'host';
-                if (minTrumpClient < minTrumpHost) return 'client';
-                return 'host'; // Default
-            }
-
-            getRankVal(rank) { return RANKS.indexOf(rank); }
-
-            // Проверка возможности защиты
-            canBeat(attackCard, defendCard) {
-                if (defendCard.suit === attackCard.suit) {
-                    return this.getRankVal(defendCard.rank) > this.getRankVal(attackCard.rank);
-                }
-                return defendCard.suit === this.trumpSuit;
-            }
-
-            // --- ДЕЙСТВИЯ ---
-            
-            // Атака
-            playAttack(player, cardIdx) {
-                if (player !== this.attacker) return false;
+            attack(player, cardIdx) {
+                if (player !== this.turn) return false;
                 const card = this.hands[player][cardIdx];
 
-                // Если поле пустое - любая карта
-                // Если не пустое - ранг должен совпадать с картами на столе
+                // Если поле не пустое, ранг должен совпадать
                 if (this.field.length > 0) {
-                    const ranksOnTable = new Set();
-                    this.field.forEach(slot => {
-                        ranksOnTable.add(slot.attack.rank);
-                        if(slot.defend) ranksOnTable.add(slot.defend.rank);
+                    const ranks = new Set();
+                    this.field.forEach(pair => {
+                        ranks.add(pair.attack.r);
+                        if(pair.defend) ranks.add(pair.defend.r);
                     });
-                    if (!ranksOnTable.has(card.rank)) return false;
+                    if (!ranks.has(card.r)) return false;
                 }
-                
-                // Лимит карт на столе (6 или кол-во карт у защищающегося)
-                const defender = player === 'host' ? 'client' : 'host';
-                const unbeatCards = this.field.filter(f => !f.defend).length;
-                if (unbeatCards >= this.hands[defender].length && this.field.length > 0) return false; // Нельзя подкинуть больше чем есть карт
+
+                // Лимиты (макс 6 пар или кол-во карт у защищающегося)
+                const defPlayer = player === 'host' ? 'client' : 'host';
+                const unbeaten = this.field.filter(p => !p.defend).length;
+                if (unbeaten >= this.hands[defPlayer].length && this.field.length > 0) return false;
                 if (this.field.length >= 6) return false;
 
-                // Move card
+                // Ход
                 this.hands[player].splice(cardIdx, 1);
                 this.field.push({ attack: card, defend: null });
                 return true;
             }
 
-            // Защита
-            playDefend(player, cardIdx, slotIdx) {
-                if (player === this.attacker) return false;
-                if (!this.field[slotIdx] || this.field[slotIdx].defend) return false; // Слот занят или не существует
+            defend(player, cardIdx, slotIdx) {
+                if (player === this.turn) return false; // Защищается тот, чей сейчас НЕ ход
+                if (!this.field[slotIdx] || this.field[slotIdx].defend) return false;
 
-                const attackCard = this.field[slotIdx].attack;
+                const attCard = this.field[slotIdx].attack;
                 const defCard = this.hands[player][cardIdx];
 
-                if (this.canBeat(attackCard, defCard)) {
+                if (this.canBeat(attCard, defCard)) {
                     this.hands[player].splice(cardIdx, 1);
                     this.field[slotIdx].defend = defCard;
                     return true;
@@ -448,46 +406,45 @@
                 return false;
             }
 
-            // Бито (Завершение хода)
-            actionBito(player) {
-                if (player !== this.attacker) return false;
-                // Все карты должны быть побиты
-                const allBeaten = this.field.every(slot => slot.defend !== null);
-                if (!allBeaten || this.field.length === 0) return false;
+            bito(player) {
+                if (player !== this.turn) return false;
+                // Нельзя бито если пусто или не все побиты
+                if (this.field.length === 0 || this.field.some(p => !p.defend)) return false;
 
-                // Очистка стола, добор карт, смена ролей
                 this.field = [];
-                this.refillHands();
-                this.attacker = (this.attacker === 'host') ? 'client' : 'host';
+                this.drawPhase();
+                this.turn = (this.turn === 'host') ? 'client' : 'host'; // Смена хода
                 this.checkWin();
                 return true;
             }
 
-            // Взять (Сдаться)
-            actionTake(player) {
-                if (player === this.attacker) return false;
+            take(player) {
+                if (player === this.turn) return false; // Берет защищающийся
                 
-                // Забирает все карты со стола
-                this.field.forEach(slot => {
-                    this.hands[player].push(slot.attack);
-                    if(slot.defend) this.hands[player].push(slot.defend);
+                // Забирает всё
+                this.field.forEach(p => {
+                    this.hands[player].push(p.attack);
+                    if(p.defend) this.hands[player].push(p.defend);
                 });
                 this.field = [];
-                this.refillHands(); // Атакующий добирает
-                // Атакующий снова ходит (тот же), так как защищающийся взял
+                this.drawPhase(true); // Только атакующий добирает
+                // Ход остается у атакующего (игрок пропускает ход)
                 this.checkWin();
                 return true;
             }
 
-            refillHands() {
-                // Сначала атакующий, потом защищающийся
-                const defender = (this.attacker === 'host') ? 'client' : 'host';
+            drawPhase(skipDefender = false) {
+                const attacker = this.turn;
+                const defender = attacker === 'host' ? 'client' : 'host';
                 
-                while(this.hands[this.attacker].length < 6 && this.deck.length > 0) {
-                    this.hands[this.attacker].push(this.deck.shift());
+                // Сначала атакующий
+                while(this.hands[attacker].length < 6 && this.deck.length > 0) {
+                    this.hands[attacker].push(this.deck.pop()); // Берем с конца (верх колоды)
                 }
-                while(this.hands[defender].length < 6 && this.deck.length > 0) {
-                    this.hands[defender].push(this.deck.shift());
+                if (!skipDefender) {
+                    while(this.hands[defender].length < 6 && this.deck.length > 0) {
+                        this.hands[defender].push(this.deck.pop());
+                    }
                 }
             }
 
@@ -497,358 +454,311 @@
                     else if (this.hands.client.length === 0) this.winner = 'client';
                 }
             }
-            
+
             getState() {
                 return {
-                    deckCount: this.deck.length,
-                    trumpCard: this.trumpCard,
-                    trumpSuit: this.trumpSuit,
-                    hands: { 
-                        host: this.hands.host.length, // Client only needs count
-                        client: this.hands.client.length 
-                    }, 
-                    myHand: null, // Populated before sending
+                    trump: this.trump,
+                    deckSize: this.deck.length,
+                    handsSizes: { host: this.hands.host.length, client: this.hands.client.length },
                     field: this.field,
-                    attacker: this.attacker,
+                    turn: this.turn,
                     winner: this.winner
                 };
             }
         }
 
-        // --- NETWORK & APP CONTROLLER ---
-        class GameApp {
-            static peer = null;
-            static conn = null;
-            static isHost = false;
-            static engine = null;
-            static myRole = null; // 'host' or 'client'
-            static myId = null;
+        // --- СЕТЬ И UI ---
+        const App = {
+            peer: null,
+            conn: null,
+            role: null, // 'host' | 'client'
+            game: null, // Only exists on Host
+            myHand: [], // Local copy
+            selectedCardIdx: null,
+            lastState: null,
 
-            static init() {
-                // Check URL params for auto-join
-                const urlParams = new URLSearchParams(window.location.search);
-                const gameId = urlParams.get('game');
-                if (gameId) {
-                    document.getElementById('game-id-input').value = gameId;
-                    // Optional: auto click join
+            init() {
+                const url = new URLSearchParams(window.location.search);
+                if(url.has('game')) {
+                    document.getElementById('join-id').value = url.get('game');
+                    this.joinGame();
                 }
-            }
+            },
 
-            // --- HOST LOGIC ---
-            static hostGame() {
-                this.isHost = true;
-                this.myRole = 'host';
-                this.engine = new DurakEngine();
-                
+            createGame() {
+                this.role = 'host';
+                this.game = new DurakGame();
                 this.peer = new Peer();
                 
-                this.peer.on('open', (id) => {
-                    this.myId = id;
-                    document.getElementById('invite-area').style.display = 'block';
-                    const link = `${window.location.origin}${window.location.pathname}?game=${id}`;
-                    document.getElementById('invite-link').value = link;
-                    this.logStatus("Ожидание подключения соперника...");
-                    
-                    document.getElementById('host-controls').querySelector('button').disabled = true;
-                    document.getElementById('join-controls').style.display = 'none';
+                this.peer.on('open', id => {
+                    document.getElementById('menu-main').style.display = 'none';
+                    document.getElementById('menu-host').style.display = 'block';
+                    document.getElementById('invite-link').value = location.origin + location.pathname + '?game=' + id;
                 });
 
-                this.peer.on('connection', (conn) => {
+                this.peer.on('connection', conn => {
                     this.conn = conn;
                     this.setupConnection();
-                    this.logStatus("Соперник подключился! Начинаем...");
-                    
-                    // Start Game
-                    this.engine.initGame();
-                    this.syncState();
-                    this.showGameBoard();
                 });
-            }
+            },
 
-            // --- CLIENT LOGIC ---
-            static joinGame() {
-                const gameId = document.getElementById('game-id-input').value.trim();
-                if (!gameId) return alert("Введите ID игры");
-
-                this.isHost = false;
-                this.myRole = 'client';
+            joinGame() {
+                const id = document.getElementById('join-id').value;
+                if(!id) return alert("Введите ID!");
+                
+                this.role = 'client';
                 this.peer = new Peer();
-
-                this.peer.on('open', (id) => {
-                    this.conn = this.peer.connect(gameId);
+                this.peer.on('open', myId => {
+                    this.conn = this.peer.connect(id);
                     this.setupConnection();
                 });
+            },
 
-                this.peer.on('error', (err) => {
-                    this.logStatus("Ошибка соединения: " + err.type);
-                });
-            }
-
-            // --- SHARED NETWORK LOGIC ---
-            static setupConnection() {
+            setupConnection() {
+                // Если мы клиент - при открытии шлем READY
                 this.conn.on('open', () => {
-                    console.log("Connected");
-                });
-
-                this.conn.on('data', (data) => {
-                    if (data.type === 'STATE') {
-                        UI.render(data.state, this.myRole);
-                    } else if (data.type === 'ACTION') {
-                        if (this.isHost) this.handleAction(data);
-                    } else if (data.type === 'CHAT') {
-                        UI.addChatMessage(data.sender, data.msg);
+                    document.getElementById('lobby').style.display = 'none';
+                    document.getElementById('game-app').style.display = 'flex';
+                    this.logChat('System', 'Подключено к игре!');
+                    
+                    if (this.role === 'client') {
+                        this.conn.send({ type: 'READY' });
                     }
                 });
-                
-                this.conn.on('close', () => {
-                    alert("Соединение разорвано");
-                    location.reload();
+
+                this.conn.on('data', data => {
+                    // Обработка входящих
+                    switch(data.type) {
+                        case 'READY': // Только для Хоста
+                            if(this.role === 'host') {
+                                this.game.start();
+                                this.sync();
+                                this.logChat('System', 'Игрок подключился. Игра началась!');
+                            }
+                            break;
+                        case 'STATE': // Прилетело состояние
+                            this.lastState = data.state;
+                            this.myHand = data.hand;
+                            this.render();
+                            break;
+                        case 'ACTION': // Только для Хоста
+                            if(this.role === 'host') this.handleHostAction(data);
+                            break;
+                        case 'CHAT':
+                            this.logChat('Opponent', data.msg);
+                            break;
+                    }
                 });
-            }
 
-            // Only Host runs this
-            static handleAction(data) {
-                let success = false;
+                this.conn.on('close', () => alert("Соединение разорвано!"));
+                this.conn.on('error', err => alert("Ошибка сети: " + err));
+            },
+
+            // Логика Хоста по обработке действий
+            handleHostAction(data) {
+                let ok = false;
                 const p = data.player;
+                if (data.act === 'ATTACK') ok = this.game.attack(p, data.idx);
+                if (data.act === 'DEFEND') ok = this.game.defend(p, data.idx, data.slot);
+                if (data.act === 'BITO') ok = this.game.bito(p);
+                if (data.act === 'TAKE') ok = this.game.take(p);
                 
-                if (data.action === 'ATTACK') {
-                    success = this.engine.playAttack(p, data.cardIdx);
-                } else if (data.action === 'DEFEND') {
-                    success = this.engine.playDefend(p, data.cardIdx, data.slotIdx);
-                } else if (data.action === 'TAKE') {
-                    success = this.engine.actionTake(p);
-                } else if (data.action === 'BITO') {
-                    success = this.engine.actionBito(p);
+                if(ok) this.sync();
+                // Если не ok - просто игнорируем, клиент останется при своем
+            },
+
+            // Отправка состояния всем
+            sync() {
+                const state = this.game.getState();
+                
+                // Хосту рендерим сразу
+                this.lastState = state;
+                this.myHand = this.game.hands.host;
+                this.render();
+
+                // Клиенту шлем его руку и общее состояние
+                if(this.conn && this.conn.open) {
+                    this.conn.send({
+                        type: 'STATE',
+                        state: state,
+                        hand: this.game.hands.client
+                    });
                 }
+            },
 
-                if (success) this.syncState();
-                // If invalid move, state isn't updated, client syncs back to old state eventually or stays same
-            }
-
-            static syncState() {
-                if (!this.isHost) return;
-                
-                // Prepare state for Host
-                const fullState = this.engine.getState();
-                
-                // Update Host UI directly
-                fullState.myHand = this.engine.hands.host;
-                UI.render(fullState, 'host');
-
-                // Send to Client (masking host hand)
-                const clientState = JSON.parse(JSON.stringify(fullState));
-                clientState.myHand = this.engine.hands.client; 
-                // swap hand counts for client perspective logic if needed, but UI handles it by role
-                this.conn.send({ type: 'STATE', state: clientState });
-            }
-
-            // --- UI ACTIONS -> NETWORK ---
-            static sendAction(actionType, payload = {}) {
-                if (this.isHost) {
-                    this.handleAction({ player: 'host', action: actionType, ...payload });
+            // Действия Игрока (UI -> Network)
+            userAction(act, payload={}) {
+                if(this.role === 'host') {
+                    this.handleHostAction({ player: 'host', act, ...payload });
                 } else {
-                    this.conn.send({ type: 'ACTION', player: 'client', action: actionType, ...payload });
+                    this.conn.send({ type: 'ACTION', player: 'client', act, ...payload });
                 }
-            }
-            
-            static sendChat() {
-                const input = document.getElementById('chat-input');
-                const msg = input.value.trim();
-                if (!msg) return;
-                
-                input.value = '';
-                // Show my own message
-                UI.addChatMessage('Me', msg);
-                
-                // Send to peer
-                const payload = { type: 'CHAT', msg: msg, sender: 'Opponent' };
-                if (this.conn) this.conn.send(payload);
-            }
+            },
 
-            // --- UI HELPERS ---
-            static copyLink() {
-                const copyText = document.getElementById("invite-link");
-                copyText.select();
-                document.execCommand("copy");
-                alert("Ссылка скопирована!");
-            }
-            
-            static logStatus(msg) {
-                document.getElementById('lobby-status').innerText = msg;
-            }
+            // UI Render
+            render() {
+                const s = this.lastState;
+                if(!s) return;
 
-            static showGameBoard() {
-                document.getElementById('lobby').style.display = 'none';
-                document.getElementById('game-board').style.display = 'flex';
-                document.getElementById('chat-container').classList.add('visible');
-            }
-            
-            // Кнопка действия (Бито/Взять)
-            static performAction() {
-                const btn = document.getElementById('action-btn');
-                if (btn.innerText === "Бито") this.sendAction('BITO');
-                else if (btn.innerText === "Взять") this.sendAction('TAKE');
-            }
-        }
-
-        // --- RENDERER ---
-        class UI {
-            static selectedAttackCardIdx = null;
-
-            static render(state, myRole) {
-                if (state.winner) {
-                    alert(state.winner === myRole ? "Победа! Ты красавчик!" : "Ты проиграл! Ну ты и Дурак...");
-                    location.reload();
+                if(s.winner) {
+                    alert(s.winner === this.role ? "ПОБЕДА!" : "ДУРАК!");
+                    location.href = location.pathname; // Рестарт
                     return;
                 }
 
-                // 1. Deck & Trump
-                const trumpHtml = this.createCardHTML(state.trumpCard, false);
-                document.getElementById('trump-slot').innerHTML = state.deckCount > 0 ? trumpHtml : '';
-                document.getElementById('trump-slot').style.opacity = state.deckCount > 0 ? 1 : 0.5; // Fade if empty
-                document.getElementById('deck-counter').innerText = state.deckCount;
-                document.getElementById('deck-slot').style.visibility = state.deckCount > 1 ? 'visible' : 'hidden'; // Hide deck back if only trump left
+                // 1. Колода и козырь
+                const trumpEl = document.getElementById('trump-card');
+                trumpEl.innerHTML = '';
+                if(s.deckSize > 0) {
+                    const tCard = this.createCardHTML(s.trump);
+                    tCard.classList.add('trump');
+                    trumpEl.appendChild(tCard);
+                    document.getElementById('deck-top').style.display = s.deckSize > 1 ? 'block' : 'none';
+                } else {
+                    // Козыря нет визуально, если колода пуста совсем
+                    document.getElementById('deck-top').style.display = 'none';
+                    // Но масть козырная сохраняется в логике
+                    // Можно показать иконку козыря где-то, но в классике просто помнят
+                }
+                document.getElementById('deck-count').innerText = s.deckSize;
 
-                // 2. Opponent Hand
-                const oppHandCount = (myRole === 'host') ? state.hands.client : state.hands.host;
-                const oppContainer = document.getElementById('opponent-hand');
-                oppContainer.innerHTML = '';
-                for(let i=0; i<oppHandCount; i++) {
-                    const card = document.createElement('div');
-                    card.className = 'card card-back';
-                    // Смещение карт веером
-                    card.style.position = 'absolute';
-                    card.style.marginLeft = (i * 30 - (oppHandCount*15)) + 'px';
-                    oppContainer.appendChild(card);
+                // 2. Рука соперника (рубашки)
+                const oppCount = (this.role === 'host') ? s.handsSizes.client : s.handsSizes.host;
+                const oppDiv = document.getElementById('opp-hand');
+                oppDiv.innerHTML = '';
+                for(let i=0; i<oppCount; i++) {
+                    const c = document.createElement('div');
+                    c.className = 'card card-back';
+                    oppDiv.appendChild(c);
                 }
 
-                // 3. Field
-                const fieldContainer = document.getElementById('field');
-                fieldContainer.innerHTML = '';
-                state.field.forEach((slot, slotIdx) => {
-                    const slotDiv = document.createElement('div');
-                    slotDiv.className = 'field-slot';
+                // 3. Стол
+                const fieldDiv = document.getElementById('field-slots');
+                fieldDiv.innerHTML = '';
+                s.field.forEach((pair, idx) => {
+                    const slot = document.createElement('div');
+                    slot.className = 'field-slot';
                     
-                    const attDiv = document.createElement('div');
-                    attDiv.className = 'card field-card ' + getCardColor(slot.attack.suit);
-                    attDiv.innerHTML = this.getCardInner(slot.attack);
-                    slotDiv.appendChild(attDiv);
+                    // Атакующая
+                    const c1 = this.createCardHTML(pair.attack);
+                    c1.classList.add('field-card');
+                    slot.appendChild(c1);
 
-                    if (slot.defend) {
-                        const defDiv = document.createElement('div');
-                        defDiv.className = 'card field-card ' + getCardColor(slot.defend.suit);
-                        defDiv.innerHTML = this.getCardInner(slot.defend);
-                        slotDiv.appendChild(defDiv);
+                    // Защищающаяся
+                    if(pair.defend) {
+                        const c2 = this.createCardHTML(pair.defend);
+                        c2.classList.add('field-card');
+                        slot.appendChild(c2);
                     } else {
-                        // Drop zone functionality for defense
-                        if (myRole !== state.attacker) {
-                            slotDiv.onclick = () => this.onFieldClick(slotIdx);
+                        // Если это слот для защиты и сейчас мой ход (защита) - клик по слоту
+                        if(this.role !== s.turn && this.selectedCardIdx !== null) {
+                            slot.onclick = () => {
+                                this.userAction('DEFEND', { idx: this.selectedCardIdx, slot: idx });
+                                this.selectedCardIdx = null;
+                            };
+                            slot.style.cursor = 'pointer';
+                            slot.style.border = '2px dashed yellow';
                         }
                     }
-                    fieldContainer.appendChild(slotDiv);
+                    fieldDiv.appendChild(slot);
                 });
 
-                // 4. My Hand
-                const myContainer = document.getElementById('my-hand');
-                myContainer.innerHTML = '';
-                state.myHand.forEach((card, idx) => {
-                    const cardDiv = document.createElement('div');
-                    cardDiv.className = 'card ' + getCardColor(card.suit);
-                    if (this.selectedAttackCardIdx === idx) cardDiv.classList.add('selected');
-                    cardDiv.innerHTML = this.getCardInner(card);
-                    cardDiv.onclick = () => this.onHandClick(idx, myRole, state);
-                    myContainer.appendChild(cardDiv);
+                // 4. Моя рука
+                const myDiv = document.getElementById('my-hand');
+                myDiv.innerHTML = '';
+                this.myHand.forEach((c, i) => {
+                    const cardEl = this.createCardHTML(c);
+                    if(this.selectedCardIdx === i) cardEl.classList.add('selected');
+                    
+                    cardEl.onclick = () => {
+                        // Если мой ход (Атака) - сразу кидаем
+                        if(this.role === s.turn) {
+                            this.userAction('ATTACK', { idx: i });
+                        } else {
+                            // Защита - просто выделяем
+                            this.selectedCardIdx = (this.selectedCardIdx === i) ? null : i;
+                            this.render(); // перерисовка выделения
+                        }
+                    };
+                    myDiv.appendChild(cardEl);
                 });
 
-                // 5. Status & Buttons
-                const statusEl = document.getElementById('game-status');
-                const btn = document.getElementById('action-btn');
+                // 5. Статусы и Кнопки
+                const st = document.getElementById('game-status');
+                const btn = document.getElementById('btn-action');
+                const isAttacker = (this.role === s.turn);
                 
-                const isMyTurn = (myRole === state.attacker);
-                const isDefending = !isMyTurn;
-
-                if (isMyTurn) {
-                    statusEl.innerText = "Ваш ход (Атака)";
-                    statusEl.style.color = "#81c784";
-                    // Кнопка "Бито" появляется, если есть карты на столе и все побиты (или ничего не побито - нельзя, но логика сервера проверит)
-                    // Упрощение: Кнопка Бито если поле не пустое и все слоты закрыты (или хост решит)
-                    // Реально: Бито доступно если все карты на столе побиты.
-                    const allBeaten = state.field.length > 0 && state.field.every(s => s.defend);
-                    
-                    if (allBeaten) {
-                        btn.innerText = "Бито";
-                        btn.classList.add('active');
-                        btn.style.background = "#d32f2f";
-                        btn.style.color = "white";
+                if(isAttacker) {
+                    st.innerText = "ВАШ ХОД (Атака)";
+                    st.style.color = "#8bc34a";
+                    // Кнопка БИТО, если поле не пусто и все побито (в реале можно жать и раньше, если хост разрешит, но сделаем строго)
+                    const allBeat = s.field.length > 0 && s.field.every(p => p.defend);
+                    if(allBeat) {
+                        btn.style.display = 'block';
+                        btn.innerText = 'БИТО';
+                        btn.className = 'action-btn btn-bito';
                     } else {
-                        btn.classList.remove('active');
+                        btn.style.display = 'none';
                     }
                 } else {
-                    statusEl.innerText = "Защищайтесь!";
-                    statusEl.style.color = "#e57373";
-                    // Кнопка "Взять" если нас атакуют
-                    if (state.field.some(s => !s.defend)) {
-                        btn.innerText = "Взять";
-                        btn.classList.add('active');
-                        btn.style.background = "#ffb300";
-                        btn.style.color = "black";
+                    st.innerText = "ЗАЩИЩАЙТЕСЬ!";
+                    st.style.color = "#ff9800";
+                    // Кнопка ВЗЯТЬ, если нас бьют
+                    if(s.field.some(p => !p.defend)) {
+                        btn.style.display = 'block';
+                        btn.innerText = 'ВЗЯТЬ';
+                        btn.className = 'action-btn btn-take';
                     } else {
-                         btn.classList.remove('active');
+                        btn.style.display = 'none';
                     }
                 }
-            }
+            },
 
-            static onHandClick(idx, myRole, state) {
-                // Если я атакующий - клик сразу играет карту (если валидно)
-                // Если я защищающийся - клик выбирает карту, потом клик по столу играет её
+            doAction() {
+                const txt = document.getElementById('btn-action').innerText;
+                if(txt === 'БИТО') this.userAction('BITO');
+                if(txt === 'ВЗЯТЬ') this.userAction('TAKE');
+            },
+
+            // --- CHAT ---
+            sendChat() {
+                const inp = document.getElementById('chat-input');
+                const msg = inp.value.trim();
+                if(!msg) return;
                 
-                if (myRole === state.attacker) {
-                    GameApp.sendAction('ATTACK', { cardIdx: idx });
-                } else {
-                    // Защита: выделяем карту
-                    if (this.selectedAttackCardIdx === idx) this.selectedAttackCardIdx = null;
-                    else this.selectedAttackCardIdx = idx;
-                    
-                    // Перерисовка чтобы показать выделение (локально)
-                    this.render(state, myRole);
-                }
-            }
+                // Шлем
+                if(this.conn) this.conn.send({ type: 'CHAT', msg: msg });
+                // Рендерим себе
+                this.logChat('Me', msg);
+                inp.value = '';
+            },
 
-            static onFieldClick(slotIdx) {
-                if (this.selectedAttackCardIdx !== null) {
-                    GameApp.sendAction('DEFEND', { cardIdx: this.selectedAttackCardIdx, slotIdx: slotIdx });
-                    this.selectedAttackCardIdx = null;
-                }
-            }
+            logChat(sender, msg) {
+                const log = document.getElementById('chat-log');
+                const d = document.createElement('div');
+                d.className = 'msg ' + (sender === 'Me' ? '' : (sender === 'System' ? 'sys' : 'opp'));
+                d.innerText = (sender === 'Me' ? '' : (sender==='System'?'Info: ':'> ')) + msg;
+                log.appendChild(d);
+                log.scrollTop = log.scrollHeight;
+            },
 
-            static createCardHTML(card, isBack) {
-                if (!card) return '';
-                if (isBack) return '<div class="card card-back"></div>';
-                const color = getCardColor(card.suit);
-                return `<div class="card ${color}">${this.getCardInner(card)}</div>`;
-            }
-
-            static getCardInner(card) {
-                const r = RANK_DISPLAY[card.rank];
-                return `
-                    <div class="card-top"><span>${r}</span><span>${card.suit}</span></div>
-                    <div class="card-center">${card.suit}</div>
-                    <div class="card-bottom"><span>${r}</span><span>${card.suit}</span></div>
+            // --- HTML GENERATOR ---
+            createCardHTML(c) {
+                const el = document.createElement('div');
+                const color = isRed(c.s) ? 'red' : 'black';
+                el.className = `card ${color}`;
+                el.innerHTML = `
+                    <div class="rank-tl">${DISPLAY[c.r]}</div>
+                    <div class="suit-tl">${c.s}</div>
+                    <div class="center-suit">${c.s}</div>
+                    <div class="rank-br">${DISPLAY[c.r]}</div>
+                    <div class="suit-br">${c.s}</div>
                 `;
+                return el;
             }
+        };
 
-            static addChatMessage(sender, text) {
-                const box = document.getElementById('chat-messages');
-                const div = document.createElement('div');
-                div.className = 'msg ' + (sender === 'Me' ? 'me' : (sender==='System'?'sys':'opp'));
-                div.innerHTML = `<b>${sender === 'Opponent' ? 'Соперник' : (sender === 'Me' ? 'Я' : '')}:</b> ${text}`;
-                box.appendChild(div);
-                box.scrollTop = box.scrollHeight;
-            }
-        }
-
-        GameApp.init();
-
+        App.init();
     </script>
 </body>
 </html>
