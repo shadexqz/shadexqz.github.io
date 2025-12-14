@@ -1,1012 +1,880 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Домашний Майнинг</title>
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Neon Durak P2P</title>
+    <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
     <style>
         :root {
-            --primary: #6e45e2;
-            --secondary: #88d3ce;
-            --dark: #121826;
-            --darker: #0d1117;
-            --light: #f8f9fa;
-            --success: #28a745;
-            --danger: #dc3545;
-            --warning: #ffc107;
+            --bg-dark: #0f172a;
+            --bg-table: #1e293b;
+            --accent: #38bdf8;
+            --accent-glow: rgba(56, 189, 248, 0.4);
+            --glass: rgba(30, 41, 59, 0.7);
+            --border: rgba(255, 255, 255, 0.1);
+            --text-main: #e2e8f0;
+            --card-w: 80px;
+            --card-h: 120px;
+            --danger: #f43f5e;
+            --success: #22c55e;
         }
 
-        * {
-            box-sizing: border-box;
+        @media (max-width: 600px) {
+            :root { --card-w: 60px; --card-h: 90px; }
+        }
+
+        * { box-sizing: border-box; user-select: none; -webkit-tap-highlight-color: transparent; }
+        
+        body {
             margin: 0;
             padding: 0;
-        }
-
-        body {
-            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-            background-color: var(--dark);
-            color: var(--light);
-            min-height: 100vh;
-            padding: 15px;
+            background: var(--bg-dark);
+            color: var(--text-main);
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            height: 100vh;
+            overflow: hidden;
             display: flex;
             flex-direction: column;
         }
 
-        .app-container {
-            max-width: 100%;
+        /* --- LOBBY SCREEN --- */
+        #lobby-screen {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+            transition: opacity 0.5s;
+        }
+
+        .hidden { opacity: 0; pointer-events: none; display: none !important; }
+
+        h1 {
+            font-size: 3rem;
+            margin: 0;
+            background: linear-gradient(45deg, #38bdf8, #818cf8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 20px var(--accent-glow);
+        }
+
+        .lobby-box {
+            background: var(--glass);
+            padding: 30px;
+            border-radius: 16px;
+            border: 1px solid var(--border);
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            max-width: 90%;
+            width: 400px;
+        }
+
+        input {
             width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            background: rgba(0,0,0,0.3);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: white;
+            font-size: 1rem;
+            text-align: center;
+        }
+
+        button {
+            background: linear-gradient(90deg, #38bdf8, #6366f1);
+            border: none;
+            padding: 12px 24px;
+            color: white;
+            font-weight: bold;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: transform 0.1s, box-shadow 0.2s;
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        button:active { transform: scale(0.98); }
+        button:disabled { opacity: 0.5; cursor: wait; }
+        
+        .btn-outline {
+            background: transparent;
+            border: 1px solid var(--accent);
+            color: var(--accent);
+        }
+
+        /* --- GAME UI --- */
+        #game-screen {
             flex: 1;
             display: flex;
             flex-direction: column;
-            margin: 0 auto;
+            background: radial-gradient(circle at center, #1e293b 0%, #0f172a 100%);
+            position: relative;
         }
 
-        .header {
+        .top-bar {
+            padding: 10px 20px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 15px;
-            padding-bottom: 10px;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
+            background: rgba(0,0,0,0.2);
+            border-bottom: 1px solid var(--border);
         }
 
-        .app-title {
-            font-size: 1.4rem;
-            font-weight: 700;
-            background: linear-gradient(90deg, var(--primary), var(--secondary));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+        .status-badge {
+            padding: 5px 12px;
+            border-radius: 20px;
+            background: var(--glass);
+            font-size: 0.9rem;
+            border: 1px solid var(--border);
         }
 
-        .currency-selector-container {
+        /* Hand Areas */
+        .hand-area {
+            height: 140px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
             position: relative;
         }
 
-        .currency-selector-btn {
-            background: var(--darker);
-            color: var(--light);
-            border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 8px;
-            padding: 6px 12px;
-            font-size: 0.9rem;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
+        .hand-area.opponent { margin-top: -30px; transform: scale(0.8); }
 
-        .currency-selector-btn:hover {
-            background: rgba(255,255,255,0.05);
-        }
-
-        .currency-selector-dropdown {
-            position: absolute;
-            right: 0;
-            top: 100%;
-            margin-top: 5px;
-            background: var(--darker);
-            border-radius: 8px;
-            padding: 8px;
-            min-width: 120px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-            z-index: 10;
-            display: none;
-        }
-
-        .currency-selector-dropdown.show {
-            display: block;
-        }
-
-        .currency-option {
-            padding: 8px 12px;
-            border-radius: 6px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            transition: background 0.2s ease;
-        }
-
-        .currency-option:hover {
-            background: rgba(255,255,255,0.05);
-        }
-
-        .currency-option.active {
-            background: rgba(110, 69, 226, 0.2);
-            color: var(--primary);
-        }
-
-        .mining-container {
-            background: var(--darker);
-            border-radius: 16px;
-            padding: 20px;
-            margin-bottom: 15px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        /* Table / Battle */
+        .table-area {
             flex: 1;
-        }
-
-        .balance-container {
-            text-align: center;
-            margin-bottom: 20px;
-        }
-
-        .balance-label {
-            font-size: 0.9rem;
-            color: rgba(255,255,255,0.7);
-            margin-bottom: 5px;
-        }
-
-        .balance-amount {
-            font-size: 2rem;
-            font-weight: 700;
-            background: linear-gradient(90deg, var(--primary), var(--secondary));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        .miner-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            perspective: 1000px;
             position: relative;
-            width: 160px;
-            height: 160px;
-            margin: 0 auto 20px;
-            background: rgba(30,30,40,0.8);
-            border-radius: 12px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            box-shadow: 0 8px 25px rgba(0,0,0,0.5);
         }
 
-        .miner-icon {
-            font-size: 3.5rem;
-            color: var(--primary);
-        }
-
-        .cooler {
+        .deck-area {
             position: absolute;
-            width: 80%;
-            height: 80%;
-            border-radius: 50%;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
             display: flex;
-            justify-content: center;
+            flex-direction: column;
             align-items: center;
         }
 
-        .cooler-center {
-            width: 25%;
-            height: 25%;
-            background: var(--dark);
-            border-radius: 50%;
-            border: 2px solid rgba(255,255,255,0.1);
-        }
-
-        .status {
-            text-align: center;
-            font-size: 0.9rem;
-            color: rgba(255,255,255,0.7);
-            margin-bottom: 15px;
-            min-height: 20px;
-        }
-
-        .action-buttons {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-            margin-bottom: 15px;
-        }
-
-        .btn {
-            padding: 12px;
-            border: none;
-            border-radius: 10px;
-            font-weight: 600;
-            font-size: 0.9rem;
-            cursor: pointer;
-            transition: all 0.2s ease;
+        .battle-zone {
             display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
             justify-content: center;
-            align-items: center;
-            gap: 8px;
+            padding: 0 60px; /* Space for deck */
         }
 
-        .btn-primary {
-            background: linear-gradient(135deg, var(--primary), #8a63e8);
-            color: white;
+        .bout {
+            position: relative;
+            width: var(--card-w);
+            height: var(--card-h);
         }
 
-        .btn-primary:disabled {
-            background: rgba(255,255,255,0.1);
-            color: rgba(255,255,255,0.5);
-            cursor: not-allowed;
-        }
-
-        .btn-primary:not(:disabled):hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 12px rgba(110, 69, 226, 0.4);
-        }
-
-        .btn-secondary {
-            background: rgba(255,255,255,0.05);
-            color: var(--light);
-            border: 1px solid rgba(255,255,255,0.1);
-        }
-
-        .btn-secondary:hover {
-            background: rgba(255,255,255,0.1);
-        }
-
-        .tabs {
+        /* Cards */
+        .card {
+            width: var(--card-w);
+            height: var(--card-h);
+            background: #e2e8f0;
+            border-radius: 8px;
+            position: relative;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
             display: flex;
-            background: var(--darker);
-            border-radius: 12px;
+            flex-direction: column;
+            justify-content: space-between;
             padding: 5px;
-            margin-bottom: 15px;
-            overflow-x: auto;
-        }
-
-        .tab {
-            flex: 1;
-            min-width: 80px;
-            text-align: center;
-            padding: 10px;
+            color: #1e293b;
+            font-weight: bold;
+            font-size: 14px;
+            transition: transform 0.2s, box-shadow 0.2s;
             cursor: pointer;
-            border-radius: 8px;
-            font-weight: 600;
-            transition: all 0.2s ease;
-            white-space: nowrap;
         }
 
-        .tab.active {
-            background: rgba(110, 69, 226, 0.2);
-            color: var(--primary);
+        .card[data-color="red"] { color: #ef4444; }
+        .card[data-color="black"] { color: #1e293b; }
+
+        .card.back {
+            background: linear-gradient(135deg, #1e293b 25%, #334155 25%, #334155 50%, #1e293b 50%, #1e293b 75%, #334155 75%, #334155 100%);
+            background-size: 20px 20px;
+            border: 2px solid #475569;
+        }
+        .card.back * { display: none; }
+
+        .card:hover { transform: translateY(-10px); z-index: 10; }
+        .card.selected { border: 3px solid var(--accent); transform: translateY(-15px); }
+        .card.defense { 
+            position: absolute; 
+            top: 15px; left: 15px; 
+            transform: rotate(10deg); 
+            z-index: 2; 
+            box-shadow: 2px 2px 5px rgba(0,0,0,0.4);
+        }
+        .card.defense:hover { transform: rotate(10deg) scale(1.1); }
+
+        .center-suit { 
+            position: absolute; 
+            top: 50%; left: 50%; 
+            transform: translate(-50%, -50%); 
+            font-size: 2rem; 
+            opacity: 0.8; 
         }
 
-        .tab-content {
-            display: none;
-            animation: fadeIn 0.3s ease;
+        .trump-indicator {
+            transform: rotate(90deg) translateX(30px);
+            margin-bottom: -40px;
+            z-index: 0;
         }
-
-        .tab-content.active {
-            display: block;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .upgrade-item {
+        
+        /* Action Bar */
+        .action-bar {
+            position: absolute;
+            bottom: 160px;
+            left: 50%;
+            transform: translateX(-50%);
             display: flex;
-            background: var(--darker);
-            border-radius: 12px;
-            padding: 12px;
-            margin-bottom: 10px;
-            align-items: center;
-            transition: all 0.2s ease;
-        }
-
-        .upgrade-item:active {
-            transform: scale(0.98);
-        }
-
-        .upgrade-icon {
-            width: 36px;
-            height: 36px;
-            background: rgba(110, 69, 226, 0.1);
-            border-radius: 8px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            margin-right: 12px;
-            color: var(--primary);
-            font-size: 1.1rem;
-        }
-
-        .upgrade-info {
-            flex: 1;
-        }
-
-        .upgrade-name {
-            font-weight: 600;
-            margin-bottom: 3px;
-            font-size: 0.95rem;
-        }
-
-        .upgrade-desc {
-            font-size: 0.75rem;
-            color: rgba(255,255,255,0.6);
-        }
-
-        .upgrade-price {
-            font-weight: 700;
-            color: var(--secondary);
-            font-size: 0.9rem;
-            margin-left: 10px;
-        }
-
-        .upgrade-owned {
-            color: var(--success);
-            font-size: 0.85rem;
-            margin-left: 10px;
-        }
-
-        .top-user {
-            display: flex;
-            align-items: center;
-            padding: 10px 12px;
-            background: var(--darker);
-            border-radius: 12px;
-            margin-bottom: 8px;
-        }
-
-        .user-avatar {
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            margin-right: 12px;
-            background: rgba(255,255,255,0.1);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            overflow: hidden;
-            flex-shrink: 0;
-        }
-
-        .user-avatar img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-        .user-info {
-            flex: 1;
-            min-width: 0;
-        }
-
-        .user-name {
-            font-weight: 600;
-            margin-bottom: 2px;
-            font-size: 0.9rem;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        .user-hashrate {
-            font-size: 0.75rem;
-            color: rgba(255,255,255,0.6);
-        }
-
-        .user-balance {
-            font-weight: 700;
-            color: var(--secondary);
-            font-size: 0.9rem;
-            margin-left: 10px;
-            white-space: nowrap;
-        }
-
-        .modal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0,0,0,0.8);
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            gap: 15px;
             z-index: 100;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.3s ease;
-            padding: 15px;
         }
 
-        .modal.active {
-            opacity: 1;
-            pointer-events: all;
+        /* Chat */
+        #chat-container {
+            position: fixed;
+            bottom: 20px; right: 20px;
+            width: 300px;
+            height: 200px;
+            background: var(--glass);
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            pointer-events: none; /* Let clicks pass through when idle */
         }
-
-        .modal-content {
-            background: var(--darker);
-            border-radius: 16px;
-            padding: 20px;
+        
+        #chat-container.active { pointer-events: auto; background: rgba(15, 23, 42, 0.95); }
+        
+        #chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 10px;
+            font-size: 0.8rem;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        
+        .chat-msg { padding: 4px 8px; border-radius: 4px; background: rgba(255,255,255,0.1); width: fit-content; }
+        .chat-msg.me { align-self: flex-end; background: var(--accent-glow); }
+        
+        #chat-input {
             width: 100%;
-            max-width: 320px;
-            text-align: center;
-            transform: scale(0.9);
-            transition: transform 0.3s ease;
-            box-shadow: 0 8px 30px rgba(0,0,0,0.5);
-        }
-
-        .modal.active .modal-content {
-            transform: scale(1);
-        }
-
-        .modal-icon {
-            font-size: 3rem;
-            color: rgba(255,255,255,0.1);
-            margin-bottom: 12px;
-        }
-
-        .modal-title {
-            font-size: 1.2rem;
-            font-weight: 700;
-            margin-bottom: 8px;
-        }
-
-        .modal-text {
-            color: rgba(255,255,255,0.7);
-            margin-bottom: 20px;
-            font-size: 0.9rem;
-            line-height: 1.4;
-        }
-
-        .modal-button {
-            width: 100%;
-            padding: 12px;
             border: none;
-            border-radius: 10px;
-            font-weight: 600;
-            background: linear-gradient(135deg, var(--primary), #8a63e8);
+            background: rgba(0,0,0,0.3);
             color: white;
-            cursor: pointer;
-            transition: all 0.2s ease;
+            padding: 8px;
+            border-top: 1px solid var(--border);
+            pointer-events: auto;
         }
 
-        .modal-button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 12px rgba(110, 69, 226, 0.4);
-        }
-
-        .settings-item {
-            margin-bottom: 15px;
-        }
-
-        .settings-label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 600;
-            color: rgba(255,255,255,0.8);
-            font-size: 0.9rem;
-        }
-
-        /* Анимации */
-        @keyframes spin {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
-        }
-
-        .mining .cooler {
-            animation: spin 1s linear infinite;
-        }
-
-        /* Адаптация для маленьких экранов */
-        @media (max-width: 350px) {
-            .gpu-container {
-                width: 140px;
-                height: 140px;
-            }
-            
-            .btn {
-                font-size: 0.8rem;
-                padding: 10px;
-            }
-            
-            .tab {
-                min-width: 70px;
-                padding: 8px;
-                font-size: 0.85rem;
-            }
-        }
+        /* Animations */
+        @keyframes deal { from { opacity: 0; transform: scale(0.5); } to { opacity: 1; transform: scale(1); } }
+        .anim-deal { animation: deal 0.3s ease-out; }
     </style>
 </head>
 <body>
-    <div class="app-container">
-        <div class="header">
-            <div class="app-title">Домашний Майнинг</div>
-            <div class="currency-selector-container">
-                <button class="currency-selector-btn" id="currencySelectorBtn">
-                    <span id="currentCurrency">RUB</span>
-                    <i class="fas fa-chevron-down"></i>
-                </button>
-                <div class="currency-selector-dropdown" id="currencyDropdown">
-                    <div class="currency-option active" data-currency="RUB">
-                        <i class="fas fa-ruble-sign"></i> RUB
-                    </div>
-                    <div class="currency-option" data-currency="USD">
-                        <i class="fas fa-dollar-sign"></i> USD
-                    </div>
-                    <div class="currency-option" data-currency="EUR">
-                        <i class="fas fa-euro-sign"></i> EUR
-                    </div>
-                </div>
-            </div>
+
+    <!-- LOBBY -->
+    <div id="lobby-screen">
+        <h1>NEON DURAK</h1>
+        <div class="lobby-box" id="lobby-menu">
+            <p>Peer-to-Peer Card Game</p>
+            <button onclick="net.createGame()">Create New Game</button>
+            <div style="margin: 10px 0; opacity: 0.5;">- OR -</div>
+            <input type="text" id="join-id" placeholder="Paste Game ID / URL here">
+            <button class="btn-outline" onclick="net.joinGameInput()">Join Game</button>
         </div>
-
-        <div class="tabs">
-            <div class="tab active" data-tab="mining">Майнинг</div>
-            <div class="tab" data-tab="top">Топ</div>
-            <div class="tab" data-tab="upgrades">Улучшения</div>
-            <div class="tab" data-tab="settings">Настройки</div>
-        </div>
-
-        <div id="mining-tab" class="tab-content active">
-            <div class="mining-container">
-                <div class="balance-container">
-                    <div class="balance-label">Ваш баланс</div>
-                    <div class="balance-amount" id="balance">0 ₽</div>
-                </div>
-
-                <div class="miner-container" id="minerContainer">
-                    <i class="miner-icon fas fa-microchip"></i>
-                    <div class="cooler" id="cooler">
-                        <div class="cooler-center"></div>
-                    </div>
-                </div>
-
-                <div class="status" id="status">Готов к майнингу</div>
-
-                <div class="action-buttons">
-                    <button class="btn btn-primary" id="mineButton">
-                        <i class="fas fa-play"></i> Майнить
-                    </button>
-                    <button class="btn btn-secondary" id="withdrawButton">
-                        <i class="fas fa-wallet"></i> Вывод
-                    </button>
-                </div>
-            </div>
-        </div>
-
-        <div id="top-tab" class="tab-content">
-            <div class="mining-container">
-                <div id="topList">
-                    <!-- Топ будет заполняться только текущим пользователем -->
-                </div>
-            </div>
-        </div>
-
-        <div id="upgrades-tab" class="tab-content">
-            <div class="mining-container">
-                <div id="upgradesList">
-                    <!-- Улучшения будут заполняться динамически -->
-                </div>
-            </div>
-        </div>
-
-        <div id="settings-tab" class="tab-content">
-            <div class="mining-container">
-                <div class="settings-item">
-                    <label class="settings-label">Валюта</label>
-                    <div class="currency-selector-container">
-                        <button class="currency-selector-btn" id="settingsCurrencySelectorBtn">
-                            <span id="settingsCurrentCurrency">RUB</span>
-                            <i class="fas fa-chevron-down"></i>
-                        </button>
-                        <div class="currency-selector-dropdown" id="settingsCurrencyDropdown">
-                            <div class="currency-option active" data-currency="RUB">
-                                <i class="fas fa-ruble-sign"></i> RUB
-                            </div>
-                            <div class="currency-option" data-currency="USD">
-                                <i class="fas fa-dollar-sign"></i> USD
-                            </div>
-                            <div class="currency-option" data-currency="EUR">
-                                <i class="fas fa-euro-sign"></i> EUR
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <button class="btn btn-secondary" id="supportButton">
-                    <i class="fas fa-headset"></i> Поддержка
-                </button>
-            </div>
+        
+        <div class="lobby-box hidden" id="lobby-waiting">
+            <p>Waiting for opponent...</p>
+            <input type="text" id="share-link" readonly onclick="this.select()">
+            <button onclick="ui.copyLink()">Copy Invite Link</button>
+            <p style="font-size: 0.8rem; opacity: 0.7;">Send this link to your friend</p>
         </div>
     </div>
 
-    <div class="modal" id="withdrawModal">
-        <div class="modal-content">
-            <div class="modal-icon">
-                <i class="far fa-frown"></i>
-            </div>
-            <h3 class="modal-title">Временно недоступно</h3>
-            <p class="modal-text">
-                На данный момент мы не реализовали данную систему, но всё еще впереди!
-            </p>
-            <button class="modal-button" id="closeModalButton">Понятно</button>
+    <!-- GAME -->
+    <div id="game-screen" class="hidden">
+        <div class="top-bar">
+            <div id="status-text">Connecting...</div>
+            <div class="status-badge" id="role-badge">Spectator</div>
         </div>
+
+        <!-- Opponent Hand (Backs) -->
+        <div class="hand-area opponent" id="opp-hand"></div>
+
+        <!-- Table -->
+        <div class="table-area">
+            <div class="deck-area">
+                <div id="deck-count" style="font-size:0.8rem; margin-bottom:5px;">36</div>
+                <div id="deck-pile"></div>
+            </div>
+            <div class="battle-zone" id="battle-field"></div>
+        </div>
+
+        <!-- Controls -->
+        <div class="action-bar" id="action-bar">
+            <!-- Buttons injected by JS -->
+        </div>
+
+        <!-- My Hand -->
+        <div class="hand-area" id="my-hand"></div>
     </div>
 
-    <script>
-        // Состояние приложения
+    <!-- CHAT -->
+    <div id="chat-container">
+        <div id="chat-messages"></div>
+        <input type="text" id="chat-input" placeholder="Type to chat..." onkeypress="ui.handleChatKey(event)">
+    </div>
+
+<script>
+/**
+ * UTILITIES
+ */
+const SUITS = ['♠', '♥', '♦', '♣'];
+const RANKS = ['6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A'];
+const VALUES = { '6':6, '7':7, '8':8, '9':9, '10':10, 'J':11, 'Q':12, 'K':13, 'A':14 };
+const COLORS = { '♠':'black', '♣':'black', '♥':'red', '♦':'red' };
+
+class Card {
+    constructor(rank, suit) {
+        this.rank = rank;
+        this.suit = suit;
+        this.value = VALUES[rank];
+        this.color = COLORS[suit];
+        this.id = rank + suit;
+    }
+}
+
+/**
+ * GAME ENGINE (Host Only)
+ * Manages the authoritative state of the game.
+ */
+class DurakEngine {
+    constructor() {
+        this.reset();
+    }
+
+    reset() {
+        this.deck = [];
+        this.hands = { host: [], client: [] };
+        this.table = []; // Array of {attack: Card, defense: Card|null}
+        this.trumpCard = null;
+        this.turn = null; // 'host' or 'client'
+        this.phase = 'attack'; // 'attack' or 'defense'
+        this.gameOver = false;
+        this.winner = null;
+    }
+
+    initGame() {
+        // Create Deck
+        this.deck = [];
+        for(let s of SUITS) for(let r of RANKS) this.deck.push(new Card(r,s));
+        
+        // Shuffle
+        for (let i = this.deck.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [this.deck[i], this.deck[j]] = [this.deck[j], this.deck[i]];
+        }
+
+        // Trump (last card)
+        this.trumpCard = this.deck[0]; // Logic uses index 0 as bottom
+        
+        // Deal 6 cards
+        for(let i=0; i<6; i++) {
+            this.hands.host.push(this.deck.pop());
+            this.hands.client.push(this.deck.pop());
+        }
+
+        // Determine First Player
+        const hLow = this._getLowestTrump(this.hands.host);
+        const cLow = this._getLowestTrump(this.hands.client);
+        
+        if(!hLow && !cLow) this.turn = 'host';
+        else if(hLow && !cLow) this.turn = 'host';
+        else if(!hLow && cLow) this.turn = 'client';
+        else this.turn = hLow.value < cLow.value ? 'host' : 'client';
+
+        this.broadcast();
+    }
+
+    _getLowestTrump(hand) {
+        let trumps = hand.filter(c => c.suit === this.trumpCard.suit);
+        if(trumps.length === 0) return null;
+        return trumps.sort((a,b) => a.value - b.value)[0];
+    }
+
+    // Process Action from Network
+    handleAction(role, action, data) {
+        if(this.gameOver) return;
+
+        // Attacking
+        if(action === 'ATTACK' && role === this.turn && this.phase === 'attack') {
+            const card = this.hands[role][data.index];
+            if(this._isValidAttack(card)) {
+                this.hands[role].splice(data.index, 1);
+                this.table.push({ attack: card, defense: null });
+                this.phase = 'defense';
+                this.broadcast();
+            }
+        }
+        
+        // Defending
+        else if(action === 'DEFEND' && role !== this.turn && this.phase === 'defense') {
+            const card = this.hands[role][data.index];
+            const boutIndex = this.table.findIndex(b => b.defense === null);
+            if(boutIndex !== -1 && this._canBeat(this.table[boutIndex].attack, card)) {
+                this.hands[role].splice(data.index, 1);
+                this.table[boutIndex].defense = card;
+                
+                // If all defended, check if attacker wants to add more
+                if(this.table.every(b => b.defense !== null)) {
+                    this.phase = 'attack'; // Back to attacker to add cards or pass
+                }
+                this.broadcast();
+            }
+        }
+
+        // Add Card (Podkidnoy) - Attacker adds card to defended table
+        else if(action === 'ADD' && role === this.turn && this.phase === 'attack') {
+            const card = this.hands[role][data.index];
+            if(this._isValidAdd(card)) {
+                 this.hands[role].splice(data.index, 1);
+                 this.table.push({ attack: card, defense: null });
+                 this.phase = 'defense';
+                 this.broadcast();
+            }
+        }
+
+        // Pass / Bito (Attacker gives up turn)
+        else if(action === 'PASS' && role === this.turn) {
+            // Can only pass if table is not empty and all defended (or attacker gives up adding)
+            if(this.table.length > 0) {
+                // If there are undefended cards, attacker can't just 'pass' to clear them, 
+                // but in Podkidnoy, "Pass" usually means "I'm done adding". 
+                // If everything is defended -> Bito -> Turn Swap.
+                // If not everything is defended -> Actually attacker can't pass, he waits for defender.
+                // Simplified: If all defended, Bito.
+                if(this.table.every(b => b.defense !== null)) {
+                    this.table = []; // Discard
+                    this._replenishHands();
+                    this._swapTurn();
+                    this.phase = 'attack';
+                    this.broadcast();
+                }
+            }
+        }
+
+        // Take (Defender takes cards)
+        else if(action === 'TAKE' && role !== this.turn) {
+            // Defender picks up everything
+            const allCards = [];
+            this.table.forEach(b => {
+                allCards.push(b.attack);
+                if(b.defense) allCards.push(b.defense);
+            });
+            this.table = [];
+            this.hands[role].push(...allCards);
+            this._replenishHands(); // Only attacker replenishes
+            // Turn does NOT swap (attacker goes again), but we need to reset phase
+            this.phase = 'attack';
+            this.broadcast();
+        }
+    }
+
+    _isValidAttack(card) {
+        if(this.table.length === 0) return true;
+        if(this.table.length >= 6) return false;
+        return this._isValidAdd(card);
+    }
+
+    _isValidAdd(card) {
+        // Rank must exist on table
+        const ranks = new Set();
+        this.table.forEach(b => {
+            ranks.add(b.attack.rank);
+            if(b.defense) ranks.add(b.defense.rank);
+        });
+        return ranks.has(card.rank);
+    }
+
+    _canBeat(attack, defense) {
+        if(defense.suit === attack.suit) return defense.value > attack.value;
+        if(defense.suit === this.trumpCard.suit && attack.suit !== this.trumpCard.suit) return true;
+        return false;
+    }
+
+    _replenishHands() {
+        // Attacker draws first
+        const attacker = this.turn;
+        const defender = this.turn === 'host' ? 'client' : 'host';
+
+        while(this.deck.length > 0 && this.hands[attacker].length < 6) this.hands[attacker].push(this.deck.pop());
+        while(this.deck.length > 0 && this.hands[defender].length < 6) this.hands[defender].push(this.deck.pop());
+
+        if(this.deck.length === 0) {
+            if(this.hands.host.length === 0) { this.gameOver = true; this.winner = 'Host'; }
+            if(this.hands.client.length === 0) { this.gameOver = true; this.winner = 'Client'; }
+        }
+    }
+
+    _swapTurn() {
+        this.turn = this.turn === 'host' ? 'client' : 'host';
+    }
+
+    // Send state to both players
+    broadcast() {
         const state = {
-            balance: 0,
-            isMining: false,
-            miningInterval: null,
-            currency: 'RUB',
-            miningSpeed: 1,
-            sessionStartTime: 0,
-            exchangeRates: {
-                RUB: 1,
-                USD: 0.011,  // 1 RUB = 0.011 USD
-                EUR: 0.010   // 1 RUB = 0.010 EUR
-            },
-            miningRates: {
-                RUB: 0.01,   // Базовый майнинг в рублях
-                USD: 0.005,  // Медленнее в долларах
-                EUR: 0.004   // И в евро
-            },
-            upgrades: [
-                { 
-                    id: 1, 
-                    name: "Улучшенный кулер", 
-                    icon: "fas fa-fan",
-                    price: 50, 
-                    effect: 0.1, 
-                    purchased: false,
-                    description: "+10% к скорости майнинга"
-                },
-                { 
-                    id: 2, 
-                    name: "Разгон GPU", 
-                    icon: "fas fa-tachometer-alt",
-                    price: 100, 
-                    effect: 0.15, 
-                    purchased: false,
-                    description: "+15% к скорости майнинга"
-                },
-                { 
-                    id: 3, 
-                    name: "Доп. вентиляторы", 
-                    icon: "fas fa-wind",
-                    price: 150, 
-                    effect: 0.2, 
-                    purchased: false,
-                    description: "+20% к скорости майнинга"
-                },
-                { 
-                    id: 4, 
-                    name: "Апгрейд на RTX 4090", 
-                    icon: "fas fa-microchip",
-                    price: 300, 
-                    effect: 0.5, 
-                    purchased: false,
-                    description: "+50% к скорости майнинга"
-                }
-            ],
-            topUsers: []  // Начально пустой массив
+            table: this.table,
+            trumpCard: this.trumpCard,
+            deckCount: this.deck.length,
+            turn: this.turn,
+            phase: this.phase,
+            gameOver: this.gameOver,
+            winner: this.winner
         };
 
-        // Элементы DOM
-        const DOM = {
-            balance: document.getElementById('balance'),
-            mineButton: document.getElementById('mineButton'),
-            withdrawButton: document.getElementById('withdrawButton'),
-            status: document.getElementById('status'),
-            cooler: document.getElementById('cooler'),
-            currencySelectorBtn: document.getElementById('currencySelectorBtn'),
-            currencyDropdown: document.getElementById('currencyDropdown'),
-            currentCurrency: document.getElementById('currentCurrency'),
-            settingsCurrencySelectorBtn: document.getElementById('settingsCurrencySelectorBtn'),
-            settingsCurrencyDropdown: document.getElementById('settingsCurrencyDropdown'),
-            settingsCurrentCurrency: document.getElementById('settingsCurrentCurrency'),
-            topList: document.getElementById('topList'),
-            upgradesList: document.getElementById('upgradesList'),
-            withdrawModal: document.getElementById('withdrawModal'),
-            closeModalButton: document.getElementById('closeModalButton'),
-            supportButton: document.getElementById('supportButton'),
-            tabs: document.querySelectorAll('.tab'),
-            tabContents: document.querySelectorAll('.tab-content')
-        };
+        // Send Host View
+        net.sendLocal({ ...state, myHand: this.hands.host, oppHandCount: this.hands.client.length, role: 'host' });
+        
+        // Send Client View (Scrub host cards)
+        net.sendToPeer({ ...state, myHand: this.hands.client, oppHandCount: this.hands.host.length, role: 'client' });
+    }
+}
 
-        // Инициализация приложения
-        function initApp() {
-            loadData();
-            setupEventListeners();
-            updateUI();
-            
-            // Инициализация Telegram WebApp
-            Telegram.WebApp.ready();
-            Telegram.WebApp.expand();
-            
-            // Добавляем текущего пользователя в топ
-            if (Telegram.WebApp.initDataUnsafe.user) {
-                const user = Telegram.WebApp.initDataUnsafe.user;
-                state.topUsers = [{
-                    id: user.id,
-                    name: `${user.first_name || ''} ${user.last_name || ''}`.trim() || `User${user.id}`,
-                    balance: state.balance,
-                    avatar: user.photo_url || "https://i.imgur.com/JqYeX7a.png",
-                    hashrate: "0 H/s"
-                }];
-                renderTopList();
-            }
+/**
+ * NETWORK MANAGER
+ * Handles PeerJS connections.
+ */
+class NetworkManager {
+    constructor() {
+        this.peer = null;
+        this.conn = null;
+        this.role = null; // 'host' or 'client'
+        this.gameId = null;
+    }
+
+    init() {
+        // Check URL for game ID
+        const params = new URLSearchParams(window.location.search);
+        const gameParam = params.get('game');
+
+        if(gameParam) {
+            this.joinGame(gameParam);
         }
+    }
 
-        // Загрузка данных
-        function loadData() {
-            const savedData = localStorage.getItem('homeMinerData');
-            if (savedData) {
-                const data = JSON.parse(savedData);
-                state.balance = data.balance || 0;
-                state.currency = data.currency || 'RUB';
-                state.upgrades = data.upgrades || state.upgrades;
-                state.miningSpeed = calculateMiningSpeed();
-                
-                updateCurrencySelectors();
-            }
-        }
-
-        // Сохранение данных
-        function saveData() {
-            const data = {
-                balance: state.balance,
-                currency: state.currency,
-                upgrades: state.upgrades
-            };
-            localStorage.setItem('homeMinerData', JSON.stringify(data));
-        }
-
-        // Обновление селекторов валют
-        function updateCurrencySelectors() {
-            DOM.currentCurrency.textContent = state.currency;
-            DOM.settingsCurrentCurrency.textContent = state.currency;
+    createGame() {
+        this.role = 'host';
+        // Open Peer
+        this.peer = new Peer(null, { debug: 2 });
+        
+        this.peer.on('open', (id) => {
+            this.gameId = id;
+            document.getElementById('lobby-menu').classList.add('hidden');
+            document.getElementById('lobby-waiting').classList.remove('hidden');
             
-            // Обновляем активные валюты в dropdown
-            document.querySelectorAll('.currency-option').forEach(option => {
-                option.classList.remove('active');
-                if (option.getAttribute('data-currency') === state.currency) {
-                    option.classList.add('active');
+            const link = `${window.location.origin}${window.location.pathname}?game=${id}`;
+            document.getElementById('share-link').value = link;
+        });
+
+        this.peer.on('connection', (conn) => {
+            this.conn = conn;
+            this._setupConnection();
+            ui.showGame();
+            gameEngine.initGame();
+        });
+
+        this.peer.on('error', (err) => alert("Connection Error: " + err));
+    }
+
+    joinGameInput() {
+        let id = document.getElementById('join-id').value;
+        if(id.includes('game=')) id = id.split('game=')[1];
+        if(!id) return;
+        this.joinGame(id);
+    }
+
+    joinGame(hostId) {
+        this.role = 'client';
+        document.getElementById('lobby-screen').classList.add('hidden'); // Show loader?
+        
+        this.peer = new Peer(null, { debug: 2 });
+        this.peer.on('open', () => {
+            this.conn = this.peer.connect(hostId);
+            this._setupConnection();
+        });
+        this.peer.on('error', err => alert("Failed to connect to host."));
+    }
+
+    _setupConnection() {
+        this.conn.on('open', () => {
+            console.log("Connected!");
+            ui.showGame();
+        });
+
+        this.conn.on('data', (data) => {
+            if(data.type === 'STATE') {
+                ui.render(data.payload);
+            } else if (data.type === 'ACTION') {
+                if(this.role === 'host') {
+                    gameEngine.handleAction('client', data.action, data.payload);
                 }
-            });
-        }
-
-        // Расчет скорости майнинга
-        function calculateMiningSpeed() {
-            let speed = 1;
-            state.upgrades.forEach(upgrade => {
-                if (upgrade.purchased) speed += upgrade.effect;
-            });
-            return speed;
-        }
-
-        // Обновление интерфейса
-        function updateUI() {
-            updateBalance();
-            renderTopList();
-            renderUpgrades();
-        }
-
-        // Обновление баланса
-        function updateBalance() {
-            const symbols = { RUB: '₽', USD: '$', EUR: '€' };
-            DOM.balance.textContent = `${state.balance.toFixed(2)} ${symbols[state.currency]}`;
-            
-            // Обновляем баланс в топе
-            if (state.topUsers.length > 0) {
-                state.topUsers[0].balance = state.balance;
-                state.topUsers[0].hashrate = `${(state.miningSpeed * 100).toFixed(0)} H/s`;
-                renderTopList();
+            } else if (data.type === 'CHAT') {
+                ui.addChatMessage(data.msg, false);
             }
+        });
+        
+        this.conn.on('close', () => alert("Peer disconnected"));
+    }
+
+    // Host calls this to update local UI
+    sendLocal(state) {
+        if(this.role === 'host') ui.render(state);
+    }
+
+    // Host calls this to update Peer
+    sendToPeer(state) {
+        if(this.conn && this.conn.open) {
+            this.conn.send({ type: 'STATE', payload: state });
+        }
+    }
+
+    // Client calls this to act
+    sendAction(action, payload = {}) {
+        if(this.role === 'client') {
+            this.conn.send({ type: 'ACTION', action, payload });
+        } else {
+            // Host acting locally
+            gameEngine.handleAction('host', action, payload);
+        }
+    }
+
+    sendChat(msg) {
+        if(this.conn && this.conn.open) {
+            this.conn.send({ type: 'CHAT', msg });
+            ui.addChatMessage(msg, true);
+        }
+    }
+}
+
+/**
+ * UI MANAGER
+ */
+class UIManager {
+    constructor() {
+        this.app = document.getElementById('game-screen');
+        this.lobby = document.getElementById('lobby-screen');
+        this.myHandEl = document.getElementById('my-hand');
+        this.oppHandEl = document.getElementById('opp-hand');
+        this.tableEl = document.getElementById('battle-field');
+        this.deckPileEl = document.getElementById('deck-pile');
+        this.statusEl = document.getElementById('status-text');
+        this.roleBadge = document.getElementById('role-badge');
+        this.actionBar = document.getElementById('action-bar');
+        
+        this.currentState = null;
+        this.selectedCardIdx = -1;
+    }
+
+    showGame() {
+        this.lobby.classList.add('hidden');
+        this.app.classList.remove('hidden');
+    }
+
+    copyLink() {
+        const copyText = document.getElementById("share-link");
+        copyText.select();
+        document.execCommand("copy");
+        alert("Link copied! Send it to player 2.");
+    }
+
+    render(state) {
+        this.currentState = state;
+        this.selectedCardIdx = -1;
+        
+        // Role Badge
+        this.roleBadge.textContent = state.role === 'host' ? "Host (You)" : "Client (You)";
+        
+        // Status Text
+        let status = "";
+        const isMyTurn = state.turn === state.role;
+        
+        if(state.gameOver) status = `Game Over! Winner: ${state.winner}`;
+        else if(isMyTurn) status = state.phase === 'attack' ? "Your Turn: Attack" : "Your Turn: Defend";
+        else status = `Opponent's Turn (${state.phase})`;
+        
+        this.statusEl.textContent = status;
+        this.statusEl.style.color = isMyTurn ? "var(--success)" : "var(--accent)";
+
+        // Render My Hand
+        this.myHandEl.innerHTML = '';
+        state.myHand.forEach((card, idx) => {
+            const el = this.createCardEl(card);
+            el.onclick = () => this.onCardClick(idx);
+            this.myHandEl.appendChild(el);
+        });
+
+        // Render Opponent Hand
+        this.oppHandEl.innerHTML = '';
+        for(let i=0; i<state.oppHandCount; i++) {
+            const back = document.createElement('div');
+            back.className = 'card back';
+            back.style.marginLeft = "-40px";
+            this.oppHandEl.appendChild(back);
         }
 
-        // Майнинг
-        function startMining() {
-            if (state.isMining) return;
+        // Render Table
+        this.tableEl.innerHTML = '';
+        state.table.forEach(bout => {
+            const boutEl = document.createElement('div');
+            boutEl.className = 'bout';
             
-            state.isMining = true;
-            state.sessionStartTime = Date.now();
-            DOM.mineButton.innerHTML = '<i class="fas fa-stop"></i> Стоп';
-            DOM.mineButton.classList.remove('btn-primary');
-            DOM.mineButton.classList.add('btn-secondary');
-            DOM.cooler.classList.add('mining');
-            updateStatus('Майнинг...');
-            
-            // Базовый майнинг зависит от валюты
-            const baseRate = state.miningRates[state.currency];
-            
-            state.miningInterval = setInterval(() => {
-                // Случайное значение (0.5x - 1.5x от базовой скорости)
-                const randomMultiplier = 0.5 + Math.random();
-                state.balance += baseRate * randomMultiplier * state.miningSpeed;
-                
-                updateBalance();
-                saveData();
-                
-                // Обновляем статус каждые 3 секунды
-                if (Math.floor(Date.now() / 1000) % 3 === 0) {
-                    updateStatus(`Майнинг: ${(state.miningSpeed * 100 * randomMultiplier).toFixed(0)} H/s`);
-                }
-            }, 1000);
-        }
+            // Attack Card
+            const aEl = this.createCardEl(bout.attack);
+            boutEl.appendChild(aEl);
 
-        function stopMining() {
-            state.isMining = false;
-            clearInterval(state.miningInterval);
-            DOM.mineButton.innerHTML = '<i class="fas fa-play"></i> Майнить';
-            DOM.mineButton.classList.add('btn-primary');
-            DOM.mineButton.classList.remove('btn-secondary');
-            DOM.cooler.classList.remove('mining');
-            updateStatus('Готов к майнингу');
-            saveData();
-        }
-
-        function updateStatus(text) {
-            DOM.status.textContent = text;
-        }
-
-        // Рендер списка топов (только текущий пользователь)
-        function renderTopList() {
-            DOM.topList.innerHTML = '';
-            
-            if (state.topUsers.length > 0) {
-                const user = state.topUsers[0];
-                const userElement = document.createElement('div');
-                userElement.className = 'top-user';
-                userElement.innerHTML = `
-                    <div class="user-avatar">
-                        <img src="${user.avatar}" alt="${user.name}">
-                    </div>
-                    <div class="user-info">
-                        <div class="user-name">Вы</div>
-                        <div class="user-hashrate">${user.hashrate}</div>
-                    </div>
-                    <div class="user-balance">${user.balance.toFixed(2)} ${state.currency}</div>
-                `;
-                DOM.topList.appendChild(userElement);
+            // Defense Card
+            if(bout.defense) {
+                const dEl = this.createCardEl(bout.defense);
+                dEl.classList.add('defense');
+                boutEl.appendChild(dEl);
             }
+            this.tableEl.appendChild(boutEl);
+        });
+
+        // Render Deck & Trump
+        this.deckPileEl.innerHTML = '';
+        document.getElementById('deck-count').innerText = state.deckCount + " cards";
+        
+        if(state.deckCount > 0 && state.trumpCard) {
+            // Trump under the deck
+            const trumpEl = this.createCardEl(state.trumpCard);
+            trumpEl.classList.add('trump-indicator');
+            this.deckPileEl.appendChild(trumpEl);
+            
+            if(state.deckCount > 1) {
+                const deckBack = document.createElement('div');
+                deckBack.className = 'card back';
+                deckBack.style.position = 'absolute';
+                deckBack.style.zIndex = '1';
+                this.deckPileEl.appendChild(deckBack);
+            }
+        } else if (state.trumpCard) {
+            // Last card (trump)
+             const trumpEl = this.createCardEl(state.trumpCard);
+             trumpEl.style.opacity = '0.5';
+             this.deckPileEl.appendChild(trumpEl);
         }
 
-        // Рендер улучшений
-        function renderUpgrades() {
-            DOM.upgradesList.innerHTML = '';
-            
-            state.upgrades.forEach(upgrade => {
-                const upgradeElement = document.createElement('div');
-                upgradeElement.className = 'upgrade-item';
-                
-                if (upgrade.purchased) {
-                    upgradeElement.innerHTML = `
-                        <div class="upgrade-icon">
-                            <i class="${upgrade.icon}"></i>
-                        </div>
-                        <div class="upgrade-info">
-                            <div class="upgrade-name">${upgrade.name}</div>
-                            <div class="upgrade-desc">${upgrade.description}</div>
-                        </div>
-                        <div class="upgrade-owned">Куплено</div>
-                    `;
-                } else {
-                    upgradeElement.innerHTML = `
-                        <div class="upgrade-icon">
-                            <i class="${upgrade.icon}"></i>
-                        </div>
-                        <div class="upgrade-info">
-                            <div class="upgrade-name">${upgrade.name}</div>
-                            <div class="upgrade-desc">${upgrade.description}</div>
-                        </div>
-                        <div class="upgrade-price">${upgrade.price} ${state.currency}</div>
-                    `;
-                    
-                    upgradeElement.addEventListener('click', () => purchaseUpgrade(upgrade.id));
+        // Action Buttons
+        this.actionBar.innerHTML = '';
+        if(!state.gameOver && isMyTurn) {
+            if(state.phase === 'attack') {
+                // If table has cards, can pass (Bito)
+                if(state.table.length > 0) {
+                    const btn = document.createElement('button');
+                    btn.innerText = "Pass / Bito";
+                    btn.onclick = () => net.sendAction('PASS');
+                    this.actionBar.appendChild(btn);
                 }
-                
-                DOM.upgradesList.appendChild(upgradeElement);
-            });
-        }
-
-        // Покупка улучшения
-        function purchaseUpgrade(upgradeId) {
-            const upgrade = state.upgrades.find(u => u.id === upgradeId);
-            if (!upgrade || upgrade.purchased) return;
-            
-            if (state.balance >= upgrade.price) {
-                state.balance -= upgrade.price;
-                upgrade.purchased = true;
-                state.miningSpeed = calculateMiningSpeed();
-                
-                updateBalance();
-                renderUpgrades();
-                saveData();
-                
-                updateStatus(`Улучшение "${upgrade.name}" куплено!`);
             } else {
-                updateStatus(`Недостаточно средств для "${upgrade.name}"`);
+                // Defending - can Take
+                const btn = document.createElement('button');
+                btn.innerText = "Take Cards";
+                btn.style.background = "var(--danger)";
+                btn.onclick = () => net.sendAction('TAKE');
+                this.actionBar.appendChild(btn);
+            }
+        } else if (state.gameOver) {
+             const btn = document.createElement('button');
+             btn.innerText = "Reload to Rematch";
+             btn.onclick = () => location.reload();
+             this.actionBar.appendChild(btn);
+        }
+    }
+
+    createCardEl(card) {
+        const el = document.createElement('div');
+        el.className = 'card anim-deal';
+        el.dataset.color = card.color;
+        el.innerHTML = `
+            <div style="font-size:1rem;">${card.rank}</div>
+            <div style="font-size:0.8rem;">${card.suit}</div>
+            <div class="center-suit">${card.suit}</div>
+            <div style="transform: rotate(180deg); text-align:center;">
+                <div style="font-size:1rem;">${card.rank}</div>
+                <div style="font-size:0.8rem;">${card.suit}</div>
+            </div>
+        `;
+        return el;
+    }
+
+    onCardClick(index) {
+        const state = this.currentState;
+        if(!state || state.gameOver) return;
+        if(state.turn !== state.role) return; // Not my turn
+
+        // Logic
+        if(state.phase === 'attack') {
+             // Try to play as attack or add
+             if(state.table.length === 0) {
+                 net.sendAction('ATTACK', { index });
+             } else {
+                 net.sendAction('ADD', { index });
+             }
+        } else {
+            // Defend
+            net.sendAction('DEFEND', { index });
+        }
+    }
+
+    handleChatKey(e) {
+        if(e.key === 'Enter') {
+            const input = document.getElementById('chat-input');
+            const msg = input.value.trim();
+            if(msg) {
+                net.sendChat(msg);
+                input.value = '';
             }
         }
+    }
 
-        // Смена валюты
-        function changeCurrency(newCurrency) {
-            if (state.currency === newCurrency) return;
-            
-            // Конвертируем баланс
-            const newBalance = (state.balance / state.exchangeRates[state.currency]) * state.exchangeRates[newCurrency];
-            state.balance = newBalance;
-            state.currency = newCurrency;
-            
-            // Конвертируем цены улучшений
-            state.upgrades.forEach(upgrade => {
-                upgrade.price = Math.round((upgrade.price / state.exchangeRates[state.currency]) * state.exchangeRates[newCurrency]);
-            });
-            
-            // Обновляем интерфейс
-            updateCurrencySelectors();
-            updateUI();
-            saveData();
-        }
+    addChatMessage(msg, isMe) {
+        const box = document.getElementById('chat-messages');
+        const div = document.createElement('div');
+        div.className = `chat-msg ${isMe ? 'me' : ''}`;
+        div.innerText = msg;
+        box.appendChild(div);
+        box.scrollTop = box.scrollHeight;
+    }
+}
 
-        // Настройка обработчиков событий
-        function setupEventListeners() {
-            // Кнопки майнинга
-            DOM.mineButton.addEventListener('click', () => {
-                if (state.isMining) stopMining();
-                else startMining();
-            });
-            
-            // Кнопка вывода
-            DOM.withdrawButton.addEventListener('click', () => {
-                DOM.withdrawModal.classList.add('active');
-            });
-            
-            // Закрытие модального окна
-            DOM.closeModalButton.addEventListener('click', () => {
-                DOM.withdrawModal.classList.remove('active');
-            });
-            
-            // Кнопка поддержки
-            DOM.supportButton.addEventListener('click', () => {
-                window.open('https://t.me/HomeMining_support', '_blank');
-            });
-            
-            // Выбор валюты в хедере
-            DOM.currencySelectorBtn.addEventListener('click', (e) => {
-                e.stopPropagation();
-                DOM.currencyDropdown.classList.toggle('show');
-            });
-            
-            // Выбор валюты в настройках
-            DOM.settingsCurrencySelectorBtn.addEventListener('click', (e) => {
-                e.stopPropagation();
-                DOM.settingsCurrencyDropdown.classList.toggle('show');
-            });
-            
-            // Обработка выбора валюты
-            document.querySelectorAll('.currency-option').forEach(option => {
-                option.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    const currency = option.getAttribute('data-currency');
-                    changeCurrency(currency);
-                    DOM.currencyDropdown.classList.remove('show');
-                    DOM.settingsCurrencyDropdown.classList.remove('show');
-                });
-            });
-            
-            // Закрытие dropdown при клике вне его
-            document.addEventListener('click', () => {
-                DOM.currencyDropdown.classList.remove('show');
-                DOM.settingsCurrencyDropdown.classList.remove('show');
-            });
-            
-            // Переключение вкладок
-            DOM.tabs.forEach(tab => {
-                tab.addEventListener('click', () => {
-                    // Убираем активный класс у всех вкладок
-                    DOM.tabs.forEach(t => t.classList.remove('active'));
-                    DOM.tabContents.forEach(c => c.classList.remove('active'));
-                    
-                    // Добавляем активный класс к выбранной вкладке
-                    tab.classList.add('active');
-                    const tabId = tab.getAttribute('data-tab');
-                    document.getElementById(`${tabId}-tab`).classList.add('active');
-                });
-            });
-        }
+// --- INIT ---
+const gameEngine = new DurakEngine();
+const ui = new UIManager();
+const net = new NetworkManager();
 
-        // Запуск приложения
-        document.addEventListener('DOMContentLoaded', initApp);
-    </script>
+net.init(); // Checks for URL params
+
+</script>
 </body>
 </html>
