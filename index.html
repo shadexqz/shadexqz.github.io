@@ -3,17 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Durak PRO: Final</title>
+    <title>Durak PRO: Full Version</title>
     <link rel="icon" href="data:;base64,iVBORw0KGgo=">
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Roboto+Condensed:wght@400;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Roboto+Condensed:wght@400;700;900&display=swap');
 
         :root {
             --bg-felt: #204060;
-            --card-w: 130px;
-            --card-h: 180px;
-            --radius: 4px;
+            --card-w: 120px;
+            --card-h: 170px;
+            --radius: 6px;
             --accent: #ff3d00;
         }
 
@@ -23,148 +23,178 @@
             margin: 0;
             font-family: 'Roboto Condensed', sans-serif;
             background-color: var(--bg-felt);
-            background-image: radial-gradient(circle at 50% 50%, #2c5a85 0%, #1a2a3a 100%);
+            /* Текстура сукна */
+            background-image: 
+                radial-gradient(circle at center, rgba(255,255,255,0.05) 0%, transparent 70%),
+                url("data:image/svg+xml,%3Csvg width='4' height='4' viewBox='0 0 4 4' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 3h1v1H1V3zm2-2h1v1H3V1z' fill='%23000000' fill-opacity='0.2' fill-rule='evenodd'/%3E%3C/svg%3E");
             height: 100vh;
             overflow: hidden;
             display: flex; flex-direction: column;
             color: white;
         }
 
-        /* --- LOBBY (Black Theme) --- */
+        /* --- LOBBY --- */
         #lobby {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.95); z-index: 9999;
+            background: #111; z-index: 9999;
             display: flex; align-items: center; justify-content: center;
         }
         .panel {
-            background: #e0e0e0; color: #111;
-            padding: 30px; border-radius: 4px;
-            width: 95%; max-width: 450px; text-align: center;
-            box-shadow: 0 20px 50px black; border: 2px solid #555;
+            background: #eee; color: #111;
+            padding: 30px; border-radius: 8px;
+            width: 95%; max-width: 480px; text-align: center;
+            box-shadow: 0 20px 60px black; border: 1px solid #444;
         }
-        .panel h1 { margin: 0 0 20px; text-transform: uppercase; font-weight: 900; letter-spacing: 2px; }
+        .panel h1 { margin: 0 0 20px; font-weight: 900; letter-spacing: 2px; color: #204060; }
         
         .inp {
             width: 100%; padding: 12px; margin: 10px 0;
-            border: 2px solid #999; border-radius: 2px;
+            border: 2px solid #ccc; border-radius: 4px;
             font-size: 18px; font-weight: bold; text-align: center; font-family: inherit;
         }
         
         .btn {
             width: 100%; padding: 15px; border: none; margin-top: 5px;
             font-size: 18px; font-weight: bold; text-transform: uppercase;
-            cursor: pointer; border-radius: 2px; transition: 0.1s;
+            cursor: pointer; border-radius: 4px; transition: 0.1s;
             color: white; box-shadow: 0 4px 0 rgba(0,0,0,0.3);
         }
         .btn:active { transform: translateY(3px); box-shadow: none; }
         .btn-create { background: #2e7d32; }
         .btn-join { background: #1565c0; }
 
-        .settings-row {
-            display: flex; gap: 10px; align-items: center; justify-content: center;
-            margin: 15px 0; font-size: 18px; font-weight: bold;
-        }
-        .chk { width: 20px; height: 20px; cursor: pointer; }
-
         .avatars { display: flex; gap: 10px; justify-content: center; margin-bottom: 15px; }
         .ava-opt {
-            width: 50px; height: 50px; border: 2px solid #999; cursor: pointer;
-            background-size: cover; border-radius: 2px;
+            width: 50px; height: 50px; border: 3px solid #ccc; cursor: pointer;
+            background-size: cover; border-radius: 8px; transition: 0.2s;
         }
-        .ava-opt.selected { border-color: #d32f2f; border-width: 4px; }
+        .ava-opt:hover { transform: scale(1.1); }
+        .ava-opt.selected { border-color: #d32f2f; transform: scale(1.1); }
 
-        /* --- GAME --- */
+        .opts { display: flex; gap: 20px; justify-content: center; margin: 15px 0; font-weight: bold; font-size: 18px; }
+        
+        /* --- GAME UI --- */
         #game { display: none; flex-direction: column; height: 100%; position: relative; }
 
         /* Chat Sidebar */
         .chat-sidebar {
-            position: absolute; top: 10px; left: 10px; bottom: 220px; width: 250px;
-            display: flex; flex-direction: column; pointer-events: none; z-index: 50;
+            position: absolute; top: 10px; left: 10px; bottom: 240px; width: 260px;
+            display: flex; flex-direction: column; pointer-events: none; z-index: 200;
         }
         .chat-log {
             flex: 1; overflow-y: auto; display: flex; flex-direction: column; justify-content: flex-end;
             margin-bottom: 5px; text-shadow: 1px 1px 2px black;
-            mask-image: linear-gradient(to top, black 80%, transparent 100%);
+            mask-image: linear-gradient(to top, black 85%, transparent 100%);
         }
         .chat-msg {
-            background: rgba(0,0,0,0.6); padding: 4px 8px; margin-bottom: 4px;
-            border-radius: 2px; color: #fff; font-size: 14px;
+            background: rgba(0,0,0,0.7); padding: 6px 10px; margin-bottom: 5px;
+            border-radius: 6px; color: #fff; font-size: 14px;
             pointer-events: auto; align-self: flex-start;
-            border-left: 3px solid #999;
+            display: flex; align-items: center; gap: 8px;
+            border: 1px solid rgba(255,255,255,0.1);
         }
-        .chat-msg.sys { border-left-color: #ffeb3b; font-style: italic; color: #ffeb3b; }
-        .chat-msg b { color: #4fc3f7; margin-right: 5px; }
+        .chat-msg.me { align-self: flex-end; background: rgba(20, 100, 160, 0.8); }
+        .chat-ava { width: 24px; height: 24px; border-radius: 4px; background: #fff; }
+        
         .chat-inp-row { display: flex; pointer-events: auto; }
-        #chat-in { flex: 1; background: rgba(0,0,0,0.5); border: 1px solid #555; color: white; padding: 5px; }
-        #chat-send { width: 40px; background: #333; color: white; border: 1px solid #555; cursor: pointer; }
+        #chat-in { flex: 1; background: rgba(0,0,0,0.6); border: 1px solid #777; color: white; padding: 8px; border-radius: 4px 0 0 4px; }
+        #chat-send { width: 40px; background: #444; color: white; border: 1px solid #777; cursor: pointer; border-radius: 0 4px 4px 0; }
 
         /* Opponents */
-        .opponents-row { height: 140px; display: flex; justify-content: center; gap: 20px; padding-top: 10px; }
-        .player-wrap { position: relative; width: 100px; display: flex; flex-direction: column; align-items: center; }
+        .opponents-row { height: 150px; display: flex; justify-content: center; gap: 40px; padding-top: 15px; }
+        .player-wrap { position: relative; display: flex; flex-direction: column; align-items: center; width: 120px; }
         
-        /* Timer SVG */
+        /* Timer SVG (Rounded Rect) */
         .timer-svg {
-            position: absolute; top: -5px; left: 50%; transform: translateX(-50%) rotate(-90deg);
+            position: absolute; top: -5px; left: 50%; transform: translateX(-50%);
             width: 70px; height: 70px; pointer-events: none; z-index: 5;
         }
-        .timer-circle {
+        .timer-path {
             fill: none; stroke: var(--accent); stroke-width: 4;
-            stroke-dasharray: 200; stroke-dashoffset: 200;
+            stroke-dasharray: 240; stroke-dashoffset: 240; /* Approx perimeter */
             transition: stroke-dashoffset 1s linear;
         }
 
-        .avatar { width: 60px; height: 60px; background: #444; border: 2px solid #fff; border-radius: 4px; z-index: 6; object-fit: cover; }
-        .p-name { font-size: 14px; font-weight: bold; margin-top: 5px; text-shadow: 1px 1px 2px black; text-align: center;}
-        .p-hand { display: flex; margin-top: 5px; height: 30px; }
-        .card-tiny { width: 20px; height: 30px; background: white; border: 1px solid #000; margin-left: -10px; border-radius: 2px; }
+        .avatar { 
+            width: 60px; height: 60px; background: #444; border: 2px solid #fff; 
+            border-radius: 12px; z-index: 6; object-fit: cover; box-shadow: 0 4px 8px rgba(0,0,0,0.5);
+        }
+        .p-name { font-size: 14px; font-weight: bold; margin-top: 5px; text-shadow: 1px 1px 2px black; }
+        
+        /* Opponent Hand (Stack) */
+        .p-hand { position: relative; width: 60px; height: 40px; margin-top: 5px; }
+        .card-tiny {
+            width: 30px; height: 45px; background-image: url('https://deckofcardsapi.com/static/img/back.png');
+            background-size: cover; border-radius: 3px; border: 1px solid #fff;
+            position: absolute; box-shadow: 1px 1px 3px rgba(0,0,0,0.5);
+        }
 
         /* Table */
         .table-area { flex: 1; position: relative; display: flex; justify-content: center; align-items: center; }
+        
         .deck-pos { position: absolute; left: 20px; top: 50%; transform: translateY(-50%); width: var(--card-w); height: var(--card-h); }
-        .trump { position: absolute; top: 0; left: 20px; transform: rotate(90deg); z-index: 1; }
-        .deck-top { position: absolute; top: 0; left: 0; z-index: 2; }
-        .deck-count { position: absolute; top: -25px; left: 0; width: 100%; text-align: center; font-weight: bold; font-size: 14px; text-shadow: 1px 1px 2px black; }
+        .bito-pos { position: absolute; right: 20px; top: 50%; transform: translateY(-50%); width: var(--card-w); height: var(--card-h); opacity: 0.7; }
+        
+        .trump { position: absolute; top: 10px; left: 20px; transform: rotate(90deg); z-index: 1; }
+        /* Визуальная стопка колоды */
+        .deck-stack-card { 
+            position: absolute; width: 100%; height: 100%; 
+            background-image: url('https://deckofcardsapi.com/static/img/back.png'); background-size: cover;
+            border-radius: var(--radius); border: 1px solid #ccc; 
+        }
 
-        .slots-wrap { display: flex; gap: 15px; padding: 0 20px; align-items: center; perspective: 1000px; }
+        .slots-wrap { display: flex; gap: 15px; padding: 0 20px; align-items: center; perspective: 1000px; z-index: 10; }
         .slot { width: var(--card-w); height: var(--card-h); position: relative; }
         
+        /* Cards */
         .card {
             width: var(--card-w); height: var(--card-h);
             border-radius: var(--radius);
             background-color: #fff; background-size: 100% 100%;
             position: absolute;
-            box-shadow: 0 5px 10px rgba(0,0,0,0.5);
-            transition: transform 0.3s, left 0.3s, top 0.3s;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.4);
+            /* Анимация полета */
+            transition: all 0.5s cubic-bezier(0.19, 1, 0.22, 1);
         }
         .card-att { top: 0; left: 0; z-index: 10; }
-        .card-def { top: 20px; left: 20px; z-index: 20; transform: rotate(10deg); }
+        .card-def { top: 25px; left: 25px; z-index: 20; transform: rotate(15deg); }
         .card-back { background-image: url('https://deckofcardsapi.com/static/img/back.png'); }
 
         /* My Hand */
-        .my-zone { height: 200px; display: flex; justify-content: center; align-items: flex-end; padding-bottom: 20px; position: relative; }
+        .my-zone { height: 220px; display: flex; justify-content: center; align-items: flex-end; padding-bottom: 20px; position: relative; }
         .my-hand-wrap { display: flex; align-items: flex-end; }
-        .my-card { width: 50px; height: var(--card-h); position: relative; transition: width 0.2s; cursor: pointer; }
-        .my-card:hover { width: 70px; }
+        .my-card { width: 55px; height: var(--card-h); position: relative; transition: width 0.2s; cursor: pointer; }
+        .my-card:hover { width: 80px; }
         .my-card:last-child { width: var(--card-w); }
-        .my-card .card { position: absolute; bottom: 0; left: 0; transition: bottom 0.2s; }
-        .my-card:hover .card { bottom: 30px; z-index: 100; }
-        .my-card.sel .card { bottom: 50px; box-shadow: 0 0 0 3px #ffeb3b; z-index: 101; }
+        
+        .my-card .card { position: absolute; bottom: 0; left: 0; transition: bottom 0.2s; transform: none !important; }
+        .my-card:hover .card { bottom: 40px; z-index: 100; }
+        .my-card.sel .card { bottom: 60px; box-shadow: 0 0 0 4px #ffeb3b; z-index: 101; }
+
+        /* Flying Card (Animation Helper) */
+        .fly-card {
+            position: fixed; z-index: 9999; pointer-events: none;
+            width: var(--card-w); height: var(--card-h);
+            background-size: 100% 100%; border-radius: var(--radius);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            transition: all 0.6s cubic-bezier(0.19, 1, 0.22, 1);
+        }
 
         /* Controls */
-        .controls { position: absolute; right: 20px; bottom: 220px; display: flex; flex-direction: column; align-items: flex-end; gap: 10px; }
-        .status-badge { background: rgba(0,0,0,0.7); padding: 10px 20px; border-left: 5px solid #fff; font-size: 16px; font-weight: bold; box-shadow: 0 4px 6px black; }
-        .act-btn { border: none; padding: 15px 40px; font-size: 20px; font-weight: bold; text-transform: uppercase; cursor: pointer; color: white; box-shadow: 0 5px 15px rgba(0,0,0,0.5); border-radius: 2px; display: none; }
+        .controls { position: absolute; right: 20px; bottom: 250px; display: flex; flex-direction: column; align-items: flex-end; gap: 10px; z-index: 100; }
+        .status-badge { background: rgba(0,0,0,0.8); padding: 12px 25px; border-left: 6px solid #fff; font-size: 18px; font-weight: bold; box-shadow: 0 4px 6px black; }
+        .act-btn { border: none; padding: 16px 45px; font-size: 22px; font-weight: 900; text-transform: uppercase; cursor: pointer; color: white; box-shadow: 0 6px 20px rgba(0,0,0,0.6); border-radius: 4px; display: none; }
         .btn-take { background: #e65100; }
         .btn-bito { background: #b71c1c; }
 
         @media (max-width: 800px) {
             :root { --card-w: 80px; --card-h: 116px; }
-            .opponents-row { height: 110px; }
-            .my-zone { height: 150px; }
-            .controls { bottom: 160px; }
-            .chat-sidebar { display: none; }
-            .my-card { width: 30px; }
-            .my-card:hover { width: 45px; }
+            .opponents-row { height: 120px; gap: 10px; }
+            .my-zone { height: 160px; }
+            .controls { bottom: 170px; }
+            .chat-sidebar { display: none; } 
+            .my-card { width: 35px; } .my-card:hover { width: 50px; }
+            .panel { width: 95%; padding: 20px; }
         }
     </style>
 </head>
@@ -174,29 +204,31 @@
     <div id="lobby">
         <div class="panel" id="p-setup">
             <h1>DURAK PRO</h1>
+            
             <div class="avatars" id="ava-list"></div>
-            <input type="text" id="p-name" class="inp" placeholder="ТВОЙ НИК" value="Игрок">
+            <input type="text" id="p-name" class="inp" placeholder="ВАШ НИК" value="Игрок">
 
-            <div class="settings-row">
+            <div class="opts">
                 <label><input type="radio" name="mode" value="2" checked> 1x1</label>
-                <label><input type="radio" name="mode" value="3"> 1x1x1</label>
+                <label><input type="radio" name="mode" value="3"> 3 Игрока</label>
             </div>
-            <div class="settings-row">
-                <input type="checkbox" id="chk-transfer" class="chk">
-                <label for="chk-transfer">Переводной</label>
+            <div class="opts">
+                <label style="cursor:pointer; display:flex; align-items:center; gap:5px;">
+                    <input type="checkbox" id="chk-transfer" style="width:20px; height:20px;"> Переводной
+                </label>
             </div>
 
             <button class="btn btn-create" onclick="Lobby.create()">Создать стол</button>
             <div style="margin:15px; color:#555; font-weight:bold;">- ИЛИ -</div>
-            <input type="text" id="join-id" class="inp" placeholder="Вставь ID стола">
-            <button class="btn btn-join" onclick="Lobby.join()">Присоединиться</button>
+            <input type="text" id="join-id" class="inp" placeholder="Вставьте ID">
+            <button class="btn btn-join" onclick="Lobby.join()">Войти</button>
         </div>
 
         <div class="panel" id="p-wait" style="display:none;">
-            <h2>Ожидание...</h2>
-            <p>ID для друзей:</p>
+            <h2>Комната создана</h2>
+            <p>Скопируйте ID:</p>
             <input type="text" id="host-id" class="inp" style="background:#eee;" readonly onclick="this.select()">
-            <p id="wait-msg" style="color:#d32f2f; font-weight:bold;">1/2</p>
+            <p id="wait-msg" style="color:#d32f2f; font-weight:bold; font-size:20px;">1/2</p>
             <div style="font-size:30px; animation:spin 1s infinite linear;">↻</div>
             <style>@keyframes spin { 100% {transform:rotate(360deg);} }</style>
         </div>
@@ -207,7 +239,7 @@
         <div class="chat-sidebar">
             <div class="chat-log" id="chat-log"></div>
             <div class="chat-inp-row">
-                <input type="text" id="chat-in" placeholder="Чат..." autocomplete="off">
+                <input type="text" id="chat-in" placeholder="Сообщение..." autocomplete="off">
                 <button id="chat-send" onclick="Game.sendChat()">></button>
             </div>
         </div>
@@ -215,29 +247,38 @@
         <div class="opponents-row" id="opponents-area"></div>
 
         <div class="table-area">
+            <!-- Deck -->
             <div class="deck-pos">
-                <div class="deck-count" id="deck-n">36</div>
                 <div id="trump-slot"></div>
-                <div id="deck-slot" class="card card-back deck-top"></div>
+                <div id="deck-visual" style="position:absolute; top:0; left:0; width:100%; height:100%;"></div>
+            </div>
+            
+            <!-- Bito Pile -->
+            <div class="bito-pos" id="bito-visual">
+                 <div style="color:rgba(255,255,255,0.2); font-weight:bold; text-align:center; padding-top:40%;">БИТО</div>
             </div>
 
             <div class="slots-wrap" id="slots-area"></div>
 
             <div class="controls">
-                <div class="status-badge" id="status-txt">Загрузка...</div>
+                <div class="status-badge" id="status-txt">...</div>
                 <button class="act-btn btn-bito" id="btn-bito" onclick="Game.act('BITO')">БИТО</button>
                 <button class="act-btn btn-take" id="btn-take" onclick="Game.act('TAKE')">ВЗЯТЬ</button>
             </div>
         </div>
 
         <div class="my-zone">
-            <div class="player-wrap" style="position:absolute; bottom:10px; left:10px; width:auto; flex-direction:row; gap:10px;">
+            <div class="player-wrap" style="position:absolute; bottom:10px; left:10px; width:auto; flex-direction:row; gap:15px;">
                 <div style="position:relative;">
                     <img id="my-ava" class="avatar" src="">
-                    <svg class="timer-svg"><circle class="timer-circle" id="my-timer" cx="35" cy="35" r="32"></circle></svg>
+                    <!-- Rounded Rect SVG for Timer -->
+                    <svg class="timer-svg" viewBox="0 0 70 70">
+                        <rect class="timer-path" id="my-timer" x="2" y="2" width="66" height="66" rx="12" ry="12"></rect>
+                    </svg>
                 </div>
                 <div style="text-align:left;">
-                    <div style="font-weight:bold; font-size:18px;">ВЫ</div>
+                    <div style="font-weight:bold; font-size:20px;">ВЫ</div>
+                    <div style="font-size:12px; color:#aaa;" id="my-cards-count">6 карт</div>
                 </div>
             </div>
             <div class="my-hand-wrap" id="my-hand"></div>
@@ -249,6 +290,7 @@
         const SUITS = ['S','C','H','D'];
         const RANKS = ['6','7','8','9','0','J','Q','K','A'];
         
+        // --- LOGIC ---
         class Engine {
             constructor(hName, hAva, mode, transfer) {
                 this.mode = mode;
@@ -257,6 +299,7 @@
                 this.deck = [];
                 this.trump = null;
                 this.field = [];
+                this.bitoCount = 0;
                 this.turn = 0;
                 this.startTime = 0;
                 this.state = 'lobby';
@@ -295,7 +338,6 @@
             }
 
             next(off=1) { return (this.turn + off) % this.mode; }
-            
             beat(a, d) {
                 if(a.s===d.s) return RANKS.indexOf(d.r) > RANKS.indexOf(a.r);
                 return d.s === this.trump.s;
@@ -305,25 +347,41 @@
                 if(this.state !== 'game') return;
                 const p = this.players[pidx];
 
+                // --- ATTACK & TRANSFER ---
                 if(type === 'ATTACK') {
                     const isAttacker = (pidx === this.turn);
-                    const isTransferer = (this.transfer && pidx === this.next() && this.field.every(s => !s.def));
+                    // Transfer condition: It is the defender's turn to act (conceptually), rank matches, field has no defs
+                    const isTransferer = (this.transfer && pidx === this.next() && this.field.length > 0 && this.field.every(s => !s.def));
+                    
                     if(!isAttacker && !isTransferer) return;
+
                     const c = p.hand[d.i];
+
+                    // Check Rank Match
                     if(this.field.length > 0) {
                         const ranks = new Set(this.field.flatMap(x => [x.att.r, x.def?.r].filter(Boolean)));
                         if(!ranks.has(c.r)) return;
                     }
+
+                    // Check Limits
                     let defIdx = this.next();
-                    if(isTransferer) defIdx = (pidx + 1) % this.mode;
+                    if(isTransferer) defIdx = (pidx + 1) % this.mode; // Target is next of transferer
+                    
                     const defP = this.players[defIdx];
                     const slotsFree = this.field.filter(x=>!x.def).length;
-                    if(slotsFree >= defP.hand.length) return;
+                    
+                    if(slotsFree + 1 > defP.hand.length) return; // +1 because we are adding a card
                     if(this.field.length >= 6) return;
+
                     p.hand.splice(d.i, 1);
-                    this.field.push({att: c, def: null, from: pidx});
-                    if(isTransferer) this.changeTurn(pidx);
-                    else this.startTime = Date.now();
+                    this.field.push({att: c, def: null, from: pidx}); // from is useful for animations
+
+                    if(isTransferer) {
+                        this.changeTurn(pidx); // Transferer becomes attacker
+                    } else {
+                        // Just a regular attack, refresh timer
+                        this.startTime = Date.now();
+                    }
                     return true;
                 }
 
@@ -342,6 +400,7 @@
                 if(type === 'BITO') {
                     if(pidx !== this.turn) return;
                     if(this.field.length===0 || this.field.some(x=>!x.def)) return;
+                    this.bitoCount += (this.field.length * 2);
                     this.field = [];
                     this.refill();
                     this.changeTurn(this.next());
@@ -356,6 +415,7 @@
                     });
                     this.field = [];
                     this.refill(true);
+                    
                     let nextTurn = this.next(2);
                     if(this.mode===2) nextTurn = this.next(1);
                     this.changeTurn(nextTurn);
@@ -381,6 +441,7 @@
                     d: this.deck.length,
                     tr: this.trump,
                     f: this.field,
+                    bc: this.bitoCount,
                     t: this.turn,
                     tm: this.startTime,
                     ps: this.players.map(p => ({id:p.id, name:p.name, ava:p.ava, cnt:p.hand.length})),
@@ -389,6 +450,7 @@
             }
         }
 
+        // --- CLIENT ---
         const Lobby = {
             ava: 1,
             init() {
@@ -422,6 +484,7 @@
         const Game = {
             role: null, eng: null, peer: null, conns: [], conn: null,
             myId: null, st: null, hand: [], sel: null,
+            prevFieldLen: 0, // For animations tracking
 
             initHost(n, a, m, t) {
                 this.role = 'host';
@@ -437,7 +500,7 @@
                     c.on('data', d => {
                         if(d.t==='J') {
                             if(this.eng.addPlayer(c.peer, d.n, d.a)) {
-                                this.bc({t:'CHAT', n:'INFO', m:`${d.n} вошел`, s:1});
+                                this.bc({t:'C', n:'INFO', m:`${d.n} вошел`, s:1});
                                 document.getElementById('wait-msg').innerText = `${this.eng.players.length}/${this.eng.mode}`;
                                 if(this.eng.players.length === this.eng.mode) {
                                     this.eng.start();
@@ -484,11 +547,9 @@
                 this.st = snap; this.hand = this.eng.players[0].hand; this.myId = 'host';
                 this.draw();
                 this.conns.forEach(c => {
-                    // FIX: Check if player actually exists before syncing hand
                     const p = this.eng.players.find(x=>x.id===c.peer);
-                    if(p) {
-                        c.send({t:'S', s:snap, h:p.hand, mid:c.peer});
-                    }
+                    // Safe Check: Only send if player exists
+                    if(p) c.send({t:'S', s:snap, h:p.hand, mid:c.peer});
                 });
             },
 
@@ -505,32 +566,62 @@
                 const val = i.value.trim();
                 if(!val) return;
                 
+                // Get Name
                 let name = 'Я';
                 if(this.role==='host' && this.eng) name = this.eng.players[0].name;
+                // Clients send to host to resolve name
                 
                 if(this.role==='host') {
-                    const msg = {t:'C', n:name, m:val};
+                    const msg = {t:'C', n:name, m:val, id:this.myId, a:this.eng.players[0].ava};
                     this.addChat(msg); this.bc(msg);
                 } else {
-                    this.conn.send({t:'C', n:'...', m:val}); 
+                    this.conn.send({t:'C', m:val, id:this.myId}); // Host will resolve Name/Ava
                 }
                 i.value = '';
             },
-            bc(d) { this.conns.forEach(c=>c.send(d)); if(d.t==='C') this.addChat(d); },
+
+            bc(d) {
+                // If it's a client chat coming to host, resolve details
+                if(d.t==='C' && !d.n && this.eng) {
+                    const p = this.eng.players.find(x=>x.id === d.id); // d.id sent from client
+                    if(p) { d.n = p.name; d.a = p.ava; }
+                    else d.n = '???';
+                }
+                this.conns.forEach(c=>c.send(d)); 
+                if(d.t==='C') this.addChat(d); 
+            },
+
             addChat(d) {
                 const log = document.getElementById('chat-log');
                 const el = document.createElement('div');
-                let isMe = false;
-                if(this.st && this.st.ps) {
-                    const me = this.st.ps.find(p=>p.id===this.myId);
-                    if(me && d.n === me.name) isMe = true;
-                    if(!me && this.role==='host' && d.n === this.eng.players[0].name) isMe = true;
-                }
+                const isMe = (d.id === this.myId) || (this.role==='host' && d.n === this.eng.players[0].name);
+                
                 el.className = 'chat-msg' + (d.s ? ' sys' : (isMe ? ' me' : ''));
                 if(d.s) el.innerText = d.m;
-                else el.innerHTML = `<b>${d.n}:</b> ${d.m}`;
+                else {
+                    const avaUrl = d.a ? `https://robohash.org/${d.a}.png?set=set4` : 'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=';
+                    el.innerHTML = `<img src="${avaUrl}" class="chat-ava"><b>${d.n}:</b> ${d.m}`;
+                }
                 log.appendChild(el);
                 log.scrollTop = log.scrollHeight;
+            },
+
+            // ANIMATION HELPERS
+            animateFly(startRect, endRect, imgUrl) {
+                const el = document.createElement('div');
+                el.className = 'fly-card';
+                el.style.backgroundImage = `url('${imgUrl}')`;
+                el.style.left = startRect.left + 'px';
+                el.style.top = startRect.top + 'px';
+                document.body.appendChild(el);
+                
+                // Force reflow
+                el.offsetHeight; 
+
+                el.style.left = endRect.left + 'px';
+                el.style.top = endRect.top + 'px';
+
+                setTimeout(() => el.remove(), 600);
             },
 
             draw() {
@@ -541,6 +632,7 @@
                 let myIdx = s.ps.findIndex(p=>p.id===this.myId);
                 if(myIdx===-1 && this.role==='host') myIdx=0;
 
+                // --- 1. OPPONENTS ---
                 const oppDiv = document.getElementById('opponents-area');
                 oppDiv.innerHTML = '';
                 for(let i=1; i<s.ps.length; i++) {
@@ -550,43 +642,90 @@
                     
                     const wrap = document.createElement('div');
                     wrap.className = 'player-wrap';
+                    wrap.id = `player-${idx}`; // For anim target
+                    
+                    // Stacked cards visual
+                    let cardsHtml = '';
+                    for(let c=0; c<p.cnt; c++) {
+                        cardsHtml += `<div class="card-tiny" style="left:${c*5}px; top:${-c*1}px;"></div>`;
+                    }
+                    
                     wrap.innerHTML = `
                         <div style="position:relative;">
                             <img src="https://robohash.org/${p.ava}.png?set=set4" class="avatar">
-                            <svg class="timer-svg" style="opacity:${isTurn?1:0}">
-                                <circle class="timer-circle" r="32" cx="35" cy="35"></circle>
+                            <svg class="timer-svg" style="opacity:${isTurn?1:0}" viewBox="0 0 70 70">
+                                <rect class="timer-path" x="2" y="2" width="66" height="66" rx="12"></rect>
                             </svg>
                         </div>
                         <div class="p-name">${p.name}</div>
-                        <div class="p-hand">${Array(p.cnt).fill('<div class="card-tiny"></div>').join('')}</div>
+                        <div class="p-hand">${cardsHtml}</div>
                     `;
-                    if(isTurn) this.animTimer(wrap.querySelector('circle'), s.tm);
+                    if(isTurn) this.animTimer(wrap.querySelector('.timer-path'), s.tm);
                     oppDiv.appendChild(wrap);
                 }
 
+                // --- 2. DECK & BITO ---
                 document.getElementById('deck-n').innerText = s.d;
-                document.getElementById('deck-slot').style.display = s.d>1?'block':'none';
+                const dSlot = document.getElementById('deck-visual');
+                dSlot.innerHTML = '';
+                // Visual stack for deck
+                if(s.d > 0) {
+                   const maxVis = Math.min(s.d, 5);
+                   for(let i=0; i<maxVis; i++) {
+                       dSlot.innerHTML += `<div class="deck-stack-card" style="top:${-i*2}px; left:${-i*1}px;"></div>`;
+                   }
+                } else dSlot.innerHTML = '';
+
                 const tph = document.getElementById('trump-slot'); tph.innerHTML='';
                 if(s.tr) tph.appendChild(this.mkC(s.tr, 'trump'));
 
-                const slDiv = document.getElementById('slots-area'); slDiv.innerHTML='';
+                // Bito stack visual
+                const bitoEl = document.getElementById('bito-visual');
+                // Simple stack based on count
+                if(s.bc > 0) {
+                     bitoEl.innerHTML = '';
+                     const cnt = Math.min(Math.ceil(s.bc/2), 6);
+                     for(let i=0; i<cnt; i++) {
+                        bitoEl.innerHTML += `<div class="deck-stack-card" style="transform:rotate(${Math.random()*20-10}deg); top:${-i*1}px;"></div>`;
+                     }
+                } else bitoEl.innerHTML = '<div style="color:rgba(255,255,255,0.2); font-weight:bold; text-align:center; padding-top:40%;">БИТО</div>';
+
+                // --- 3. TABLE SLOTS ---
+                const slDiv = document.getElementById('slots-area');
+                slDiv.innerHTML='';
+                
+                // Animation check: if a new card appeared compared to memory
+                const isNewCard = (s.f.length > this.prevFieldLen);
+                
                 s.f.forEach((slot, si) => {
                     const d = document.createElement('div'); d.className='slot';
-                    d.appendChild(this.mkC(slot.att, 'card-att'));
+                    
+                    // Attack Card
+                    const c1 = this.mkC(slot.att, 'card-att');
+                    d.appendChild(c1);
+                    
+                    // Animate newly added attack card?
+                    // Simplified: We just render. Real physics would require tracking IDs.
+
                     if(slot.def) d.appendChild(this.mkC(slot.def, 'card-def'));
-                    else if(s.t !== myIdx && this.sel!==null) {
-                        const defIdx = (s.t+1)%s.ps.length;
-                        if(myIdx === defIdx) {
+                    else {
+                        // Logic for Defender or Transferer
+                        const nextP = (s.t + 1) % s.ps.length;
+                        // Am I the defender?
+                        if(myIdx === nextP) {
                             d.style.boxShadow = "inset 0 0 20px #ff3d00"; d.style.cursor="pointer";
                             d.onclick = () => { this.act('DEFEND', {i:this.sel, s:si}); this.sel=null; };
                         }
                     }
                     slDiv.appendChild(d);
                 });
+                this.prevFieldLen = s.f.length;
 
+                // --- 4. MY HAND ---
                 const mh = document.getElementById('my-hand'); mh.innerHTML='';
                 const myInfo = s.ps[myIdx];
                 document.getElementById('my-ava').src = `https://robohash.org/${myInfo.ava}.png?set=set4`;
+                document.getElementById('my-cards-count').innerText = `${this.hand.length} карт`;
                 
                 const myTimer = document.getElementById('my-timer');
                 if(s.t === myIdx) {
@@ -594,23 +733,37 @@
                     this.animTimer(myTimer, s.tm);
                 } else myTimer.parentElement.style.opacity = 0;
 
+                // Logic to enable card clicking
+                // Enable if My Turn (Attack) OR I am next player & Transfer is possible
+                const isMyTurn = (s.t === myIdx);
+                const isTransferPossible = (myIdx === (s.t+1)%s.ps.length && s.f.length>0 && s.f.every(x=>!x.def));
+
                 this.hand.forEach((c,i) => {
                     const w = document.createElement('div'); w.className='my-card';
                     if(this.sel===i) w.classList.add('sel');
                     w.appendChild(this.mkC(c));
+                    
                     w.onclick = () => {
-                        if(s.t===myIdx) this.act('ATTACK', {i}); 
-                        else { this.sel = (this.sel===i)?null:i; this.draw(); }
+                        if(isMyTurn) {
+                            this.act('ATTACK', {i}); 
+                        } else if(isTransferPossible) {
+                             // Try to transfer
+                             this.act('ATTACK', {i});
+                        } else { 
+                            // Selection for defense
+                            this.sel = (this.sel===i)?null:i; this.draw(); 
+                        }
                     };
                     mh.appendChild(w);
                 });
 
+                // --- 5. STATUS ---
                 const bB = document.getElementById('btn-bito');
                 const bT = document.getElementById('btn-take');
                 const st = document.getElementById('status-txt');
                 bB.style.display='none'; bT.style.display='none';
 
-                if(s.t === myIdx) {
+                if(isMyTurn) {
                     st.innerText = "ВАШ ХОД"; st.style.borderLeftColor = "#2e7d32";
                     if(s.f.length>0 && s.f.every(x=>x.def)) bB.style.display='block';
                 } else {
@@ -618,7 +771,9 @@
                     if(myIdx === defIdx) {
                         st.innerText = "ОТБИВАЙТЕСЬ"; st.style.borderLeftColor = "#ff3d00";
                         if(s.f.some(x=>!x.def)) bT.style.display='block';
-                    } else st.innerText = `Ходит ${s.ps[s.t].name}`;
+                        // Hint for transfer
+                        if(isTransferPossible) st.innerText = "ОТБЕЙСЯ ИЛИ ПЕРЕВЕДИ";
+                    } else st.innerText = `ХОДИТ: ${s.ps[s.t].name}`;
                 }
             },
 
@@ -633,7 +788,7 @@
                 const dur = 30000;
                 const passed = Date.now() - start;
                 const pct = Math.max(0, (dur - passed) / dur);
-                const offset = 200 * (1 - pct);
+                const offset = 240 * (1 - pct);
                 el.style.strokeDashoffset = offset;
                 if(pct > 0) requestAnimationFrame(() => this.animTimer(el, start));
             }
