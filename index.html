@@ -3,13 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Tweeyer Web K</title>
+    <title>Tweeyer V5 Ultra</title>
     
-    <!-- Fonts (Inter & Icons) -->
+    <!-- Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
-    <!-- Tailwind & Vue & PeerJS -->
+    <!-- Emoji Picker Module -->
+    <script type="module" src="https://cdn.jsdelivr.net/npm/emoji-picker-element@^1/index.js"></script>
+
+    <!-- Libs -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <script src="https://unpkg.com/peerjs@1.4.7/dist/peerjs.min.js"></script>
@@ -22,250 +26,250 @@
                     fontFamily: { sans: ['Inter', 'sans-serif'] },
                     colors: {
                         tg: {
-                            bg: '#17212b',         // Main Dark BG
-                            sidebar: '#17212b',    // Sidebar Dark
-                            hover: '#202b36',      // Hover Item
-                            active: '#2b5278',     // Active Item
-                            bubbleSelf: '#8774e1', // Purple self message
-                            bubbleIn: '#182533',   // Incoming message
-                            text: '#f5f5f5',
-                            meta: '#8da2b5',
+                            bg: '#17212b',
+                            sidebar: '#17212b',
+                            panel: '#242f3d',
+                            hover: '#2b5278',
+                            self: '#766ac8', // Dark theme self bubble
+                            in: '#182533',   // Dark theme in bubble
+                            text: '#eef3f7',
+                            hint: '#7f91a4',
                             lightBg: '#ffffff',
-                            lightSidebar: '#ffffff',
-                            lightBubbleSelf: '#eeffde',
-                            lightBubbleIn: '#ffffff'
+                            lightPanel: '#ffffff',
+                            lightSelf: '#eeffde',
+                            lightIn: '#ffffff',
+                            blue: '#3390ec'
                         }
                     }
                 }
             }
         };
     </script>
+
     <style>
-        /* Telegram Pattern Background */
+        /* Telegram Dark Pattern */
         .chat-bg-dark {
             background-color: #0f0f0f;
-            background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM12 86c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm28-65c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm23-11c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-6 60c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm29 22c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zM32 63c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm57-13c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-9-21c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM60 91c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM35 41c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM12 60c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2z' fill='%239ca3af' fill-opacity='0.05' fill-rule='evenodd'/%3E%3C/svg%3E");
+            background-image: url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M20 20.5V18H0v-2h20v-2H0v-2h20v-2H0V8h20V6H0V4h20V2H0V0h22v20h2V0h2v20h2V0h2v20h2V0h2v20h2V0h2v20h2v2H22v-2h-2z' fill='%231d2a39' fill-opacity='0.1' fill-rule='evenodd'/%3E%3C/svg%3E");
         }
+        /* Telegram Light Pattern */
         .chat-bg-light {
             background-color: #8da6bd;
-            background-image: url("https://web.telegram.org/img/bg_0.png"); 
+            background-image: url("https://web.telegram.org/img/bg_0.png");
+            background-repeat: repeat;
         }
 
         /* Scrollbar */
-        ::-webkit-scrollbar { width: 4px; }
-        ::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.2); border-radius: 4px; }
-        .dark ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); }
+        ::-webkit-scrollbar { width: 5px; }
+        ::-webkit-scrollbar-thumb { background: rgba(127, 145, 164, 0.4); border-radius: 3px; }
+        .dark ::-webkit-scrollbar-track { background: #17212b; }
 
-        /* Animations */
-        .msg-enter-active, .msg-leave-active { transition: all 0.2s ease; }
-        .msg-enter-from { opacity: 0; transform: translateY(10px); }
-        .slide-enter-active, .slide-leave-active { transition: transform 0.3s ease; }
+        /* Transitions */
+        .slide-enter-active, .slide-leave-active { transition: transform 0.25s cubic-bezier(0.25, 0.8, 0.5, 1); }
         .slide-enter-from, .slide-leave-to { transform: translateX(-100%); }
+        
+        .fade-enter-active, .fade-leave-active { transition: opacity 0.2s; }
+        .fade-enter-from, .fade-leave-to { opacity: 0; }
+
+        .pop-enter-active { transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        .pop-enter-from { opacity: 0; transform: scale(0.8); }
+
+        /* Emoji Picker Styling */
+        emoji-picker {
+            width: 100%;
+            height: 300px;
+            --background: #ffffff;
+            --border-color: #e5e7eb;
+        }
+        .dark emoji-picker {
+            --background: #242f3d;
+            --border-color: #17212b;
+            --color: #ffffff;
+        }
     </style>
 </head>
-<body class="bg-white dark:bg-tg-bg text-gray-900 dark:text-tg-text h-[100dvh] w-screen overflow-hidden">
+<body class="bg-white dark:bg-tg-bg text-gray-900 dark:text-tg-text h-[100dvh] w-screen overflow-hidden text-[15px]">
 
-<div id="app" class="h-full flex relative font-sans" @paste="handlePaste">
+<div id="app" class="h-full flex relative font-sans" @paste="handlePaste" @click="unlockAudio">
 
     <!-- ================= SETUP SCREEN ================= -->
     <div v-if="!user.setupComplete" class="absolute inset-0 z-[60] bg-white dark:bg-[#1c242d] flex items-center justify-center p-4">
-        <div class="max-w-xs w-full text-center">
-            <div class="w-32 h-32 mx-auto mb-6 bg-[#8774e1] rounded-full flex items-center justify-center text-5xl text-white shadow-2xl">
-                <i class="fa-regular fa-paper-plane"></i>
+        <div class="w-full max-w-sm text-center">
+            <div class="w-32 h-32 mx-auto mb-6 bg-tg-blue rounded-full flex items-center justify-center shadow-2xl shadow-blue-500/20">
+                <i class="fa-brands fa-telegram text-6xl text-white"></i>
             </div>
-            <h1 class="text-2xl font-bold mb-2">Tweeyer Web</h1>
-            <p class="text-gray-500 mb-8 text-sm">Welcome to the free P2P network.</p>
+            <h1 class="text-2xl font-bold mb-2">Tweeyer V5</h1>
+            <p class="text-tg-hint mb-8">Secure P2P Messaging</p>
 
-            <div class="space-y-4">
-                <div class="relative w-24 h-24 mx-auto group cursor-pointer" @click="$refs.avaInput.click()">
-                    <img :src="tempAvatar || defaultAvatar" class="w-full h-full rounded-full object-cover shadow-md border-2 border-[#8774e1]">
+            <div class="space-y-5">
+                <div class="relative w-28 h-28 mx-auto group cursor-pointer" @click="$refs.avaInput.click()">
+                    <img :src="tempAvatar || defaultAvatar" class="w-full h-full rounded-full object-cover shadow-lg border-2 border-tg-blue">
                     <div class="absolute inset-0 bg-black/40 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition text-white">
-                        <i class="fa-solid fa-camera"></i>
+                        <i class="fa-solid fa-camera text-2xl"></i>
                     </div>
                 </div>
                 <input type="file" ref="avaInput" class="hidden" accept="image/*" @change="onAvatarChange">
 
-                <input v-model="tempName" placeholder="Your Name" class="w-full bg-gray-100 dark:bg-[#242f3d] px-4 py-3 rounded-xl outline-none focus:ring-2 focus:ring-[#8774e1] text-center dark:text-white transition">
+                <input v-model="tempName" placeholder="Your Name" class="w-full bg-gray-100 dark:bg-tg-panel px-5 py-4 rounded-xl outline-none focus:ring-2 focus:ring-tg-blue text-center dark:text-white transition">
+                <input v-model="tempBio" placeholder="Bio (Optional)" class="w-full bg-transparent border-b border-gray-300 dark:border-gray-700 px-2 py-2 outline-none text-center text-sm dark:text-gray-400">
                 
-                <button @click="finishSetup" :disabled="!tempName" class="w-full bg-[#8774e1] text-white py-3 rounded-xl font-bold hover:bg-[#6f5ec0] transition disabled:opacity-50">
-                    Start Messaging
+                <button @click="finishSetup" :disabled="!tempName" class="w-full bg-tg-blue text-white py-4 rounded-xl font-bold hover:bg-blue-600 transition shadow-lg shadow-blue-500/30 disabled:opacity-50">
+                    START MESSAGING
                 </button>
             </div>
         </div>
     </div>
 
-    <!-- ================= LEFT SIDEBAR (CHATS) ================= -->
-    <aside class="w-full md:w-96 bg-gray-50 dark:bg-tg-sidebar border-r border-gray-200 dark:border-gray-800 flex flex-col z-20 absolute md:relative h-full transition-transform duration-300"
+    <!-- ================= LEFT SIDEBAR ================= -->
+    <aside class="w-full md:w-[400px] bg-white dark:bg-tg-sidebar border-r border-gray-200 dark:border-black/20 flex flex-col z-20 absolute md:relative h-full transition-transform duration-300"
            :class="mobileView === 'chat' ? '-translate-x-full md:translate-x-0' : 'translate-x-0'">
         
-        <!-- Header / Search -->
-        <div class="h-14 px-3 flex items-center gap-3 shrink-0">
-            <button @click="ui.showProfile = true" class="w-10 h-10 rounded-full hover:bg-gray-200 dark:hover:bg-white/10 flex items-center justify-center text-gray-500 dark:text-gray-400">
-                <i class="fa-solid fa-bars"></i>
+        <!-- Header -->
+        <div class="h-16 px-4 flex items-center gap-4 shrink-0">
+            <button @click="ui.showDrawer = true" class="text-gray-500 dark:text-gray-400 hover:text-tg-blue transition">
+                <i class="fa-solid fa-bars text-xl"></i>
             </button>
-            <div class="flex-1 bg-gray-200 dark:bg-[#242f3d] rounded-full h-9 flex items-center px-4 text-sm text-gray-500">
-                <i class="fa-solid fa-magnifying-glass mr-3"></i>
-                <span>Search</span>
+            <div class="flex-1 relative">
+                <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-sm"></i>
+                <input placeholder="Search" class="w-full bg-gray-100 dark:bg-tg-panel rounded-full h-10 pl-10 pr-4 text-sm outline-none dark:text-white focus:bg-white dark:focus:bg-[#2b3949] border border-transparent focus:border-tg-blue transition">
             </div>
         </div>
 
-        <!-- Connection Panel (Top of list) -->
-        <div class="px-2 pb-2">
-            <div class="bg-white dark:bg-[#242f3d] rounded-lg p-3 shadow-sm mb-2">
-                <div class="flex items-center justify-between mb-2">
-                    <span class="text-xs font-bold text-[#8774e1] uppercase">My ID</span>
-                    <button @click="copyId" class="text-xs text-gray-400 hover:text-white"><i class="fa-regular fa-copy"></i></button>
+        <!-- Connection Widget -->
+        <div class="px-3 pb-3">
+            <div class="bg-tg-blue/10 dark:bg-tg-panel rounded-lg p-3 border border-tg-blue/20">
+                <div class="flex justify-between items-center mb-2">
+                    <span class="text-xs font-bold text-tg-blue uppercase tracking-wide">My ID</span>
+                    <button @click="copyId" class="text-tg-blue hover:underline text-xs">Copy</button>
                 </div>
-                <div class="text-xs font-mono break-all text-gray-600 dark:text-gray-300 select-all cursor-pointer" @click="copyId">
-                    {{ myPeerId || 'Connecting...' }}
+                <div class="text-xs font-mono text-gray-600 dark:text-gray-300 break-all select-all mb-3">{{ myPeerId || 'Connecting...' }}</div>
+                
+                <div class="flex gap-2">
+                    <input v-model="targetId" placeholder="Paste ID here..." class="flex-1 bg-white dark:bg-[#17212b] rounded px-3 py-2 text-sm outline-none dark:text-white border dark:border-black/20 focus:border-tg-blue">
+                    <button @click="connect" :disabled="!isNetReady" class="bg-tg-blue text-white w-10 rounded flex items-center justify-center hover:bg-blue-600 transition disabled:opacity-50">
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </button>
                 </div>
-            </div>
-            
-            <div class="flex gap-2">
-                <input v-model="targetId" placeholder="Paste Friend's ID" class="flex-1 bg-white dark:bg-[#242f3d] rounded-lg px-3 py-2 text-sm outline-none dark:text-white border border-transparent focus:border-[#8774e1]">
-                <button @click="connect" :disabled="!isNetReady" class="bg-[#8774e1] text-white w-10 rounded-lg flex items-center justify-center hover:bg-[#6f5ec0] disabled:opacity-50">
-                    <i class="fa-solid fa-arrow-right"></i>
-                </button>
             </div>
         </div>
 
         <!-- Chat List -->
         <div class="flex-1 overflow-y-auto">
-            <!-- Active Chat Item -->
-            <div v-if="isConnected || savedChats.length > 0" 
-                 class="px-2 py-2 hover:bg-gray-100 dark:hover:bg-[#2b5278]/20 cursor-pointer transition flex items-center gap-3"
-                 :class="{'bg-[#3390ec] dark:bg-[#2b5278] text-white': isConnected}"
-                 @click="mobileView = 'chat'">
-                
+            <div v-if="isConnected" @click="mobileView = 'chat'" class="px-3 py-3 hover:bg-gray-100 dark:hover:bg-tg-panel cursor-pointer flex gap-3 transition bg-tg-blue dark:bg-tg-hover text-white">
                 <div class="relative">
-                    <img :src="partner.avatar || defaultAvatar" class="w-12 h-12 rounded-full object-cover bg-[#242f3d]">
-                    <div v-if="isConnected" class="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-white dark:border-[#242f3d] rounded-full"></div>
+                    <img :src="partner.avatar || defaultAvatar" class="w-12 h-12 rounded-full object-cover border border-white/10">
+                    <div class="absolute bottom-0 right-0 w-3.5 h-3.5 bg-green-500 border-2 border-white dark:border-tg-sidebar rounded-full"></div>
                 </div>
-                
-                <div class="flex-1 min-w-0 border-b border-transparent pb-1">
-                    <div class="flex justify-between items-center">
-                        <h3 class="font-semibold text-sm truncate">{{ partner.name || 'Saved Messages' }}</h3>
-                        <span class="text-xs opacity-60">{{ lastMsgTime }}</span>
+                <div class="flex-1 min-w-0 overflow-hidden">
+                    <div class="flex justify-between items-center mb-0.5">
+                        <h3 class="font-semibold truncate text-[15px]">{{ partner.name || 'User' }}</h3>
+                        <span class="text-xs opacity-70">{{ lastMsgTime }}</span>
                     </div>
-                    <p class="text-sm opacity-60 truncate flex items-center gap-1">
-                        <span v-if="lastMsg && lastMsg.sender === 'me'" class="text-[#8774e1] dark:text-[#a290fc]">You:</span>
-                        {{ lastMsgPreview }}
-                    </p>
+                    <p class="text-sm opacity-80 truncate">{{ lastMsgPreview }}</p>
                 </div>
             </div>
-            
-            <!-- Empty State -->
-            <div v-if="!isConnected && savedChats.length === 0" class="text-center mt-10 text-gray-400 text-xs">
-                Enter an ID above to start chatting.
+            <div v-else class="text-center mt-20 text-tg-hint text-sm">
+                <i class="fa-regular fa-paper-plane text-4xl mb-3 opacity-50"></i>
+                <p>Waiting for connection...</p>
             </div>
         </div>
     </aside>
 
-    <!-- ================= PROFILE DRAWER (Slide over) ================= -->
+    <!-- ================= SETTINGS DRAWER ================= -->
     <transition name="slide">
-        <div v-if="ui.showProfile" class="absolute inset-y-0 left-0 w-80 bg-white dark:bg-[#17212b] z-50 shadow-2xl flex flex-col">
-            <div class="h-14 flex items-center px-4 gap-4 border-b dark:border-black/20">
-                <button @click="ui.showProfile = false" class="text-gray-500"><i class="fa-solid fa-arrow-left"></i></button>
-                <span class="font-semibold">Profile</span>
-            </div>
-            <div class="p-6 text-center">
-                <div class="relative w-28 h-28 mx-auto mb-4 group cursor-pointer" @click="$refs.editAva.click()">
-                    <img :src="user.avatar || defaultAvatar" class="w-full h-full rounded-full object-cover">
-                    <div class="absolute inset-0 bg-black/50 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 text-white transition">
-                        <i class="fa-solid fa-pen"></i>
+        <div v-if="ui.showDrawer" class="absolute inset-y-0 left-0 w-80 bg-white dark:bg-tg-sidebar z-50 shadow-2xl flex flex-col border-r border-gray-200 dark:border-black/20">
+            <div class="h-28 bg-tg-panel p-6 flex flex-col justify-end relative">
+                <div class="flex items-center gap-4">
+                    <img :src="user.avatar || defaultAvatar" class="w-16 h-16 rounded-full object-cover border-2 border-tg-blue cursor-pointer" @click="$refs.editAva.click()">
+                    <div>
+                        <div class="font-bold text-white text-lg">{{ user.name }}</div>
+                        <div class="text-sm text-gray-400">Online</div>
                     </div>
                 </div>
                 <input type="file" ref="editAva" class="hidden" accept="image/*" @change="onAvatarChange">
-                
-                <input v-model="user.name" @blur="saveUser" class="text-xl font-bold text-center bg-transparent outline-none border-b border-transparent focus:border-[#8774e1] w-full mb-1 dark:text-white" placeholder="Name">
-                <input v-model="user.bio" @blur="saveUser" class="text-sm text-gray-500 text-center bg-transparent outline-none w-full" placeholder="Add a bio...">
-            </div>
-
-            <div class="mt-4 px-2 space-y-1">
-                <div class="p-3 hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg flex items-center gap-4 cursor-pointer" @click="toggleTheme">
-                    <i class="fa-solid fa-moon text-gray-400 w-6"></i>
-                    <span>Dark Mode</span>
-                    <div class="ml-auto w-8 h-4 bg-gray-300 rounded-full relative" :class="{'bg-[#8774e1]': theme==='dark'}">
-                        <div class="w-4 h-4 bg-white rounded-full shadow transition-all" :class="{'translate-x-4': theme==='dark'}"></div>
-                    </div>
-                </div>
-                <div @click="clearData" class="p-3 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg flex items-center gap-4 cursor-pointer text-red-500">
-                    <i class="fa-solid fa-trash w-6"></i>
-                    <span>Log Out</span>
-                </div>
             </div>
             
-            <div class="mt-auto p-4 text-center text-xs text-gray-500">
-                Tweeyer for Web <br> v4.0.1
+            <div class="p-2 space-y-1 mt-2">
+                 <div class="p-3 hover:bg-gray-100 dark:hover:bg-tg-panel rounded-lg cursor-pointer flex items-center gap-4 transition" @click="ui.showDrawer = false">
+                    <i class="fa-solid fa-arrow-left text-gray-400 w-6"></i> Back
+                </div>
+                <div class="p-3 hover:bg-gray-100 dark:hover:bg-tg-panel rounded-lg cursor-pointer flex items-center gap-4 transition" @click="toggleTheme">
+                    <i class="fa-solid text-gray-400 w-6" :class="theme === 'dark' ? 'fa-sun' : 'fa-moon'"></i> 
+                    <span>{{ theme === 'dark' ? 'Light Mode' : 'Dark Mode' }}</span>
+                </div>
+                <div class="p-3 hover:bg-red-50 dark:hover:bg-red-900/10 rounded-lg cursor-pointer flex items-center gap-4 transition text-red-500" @click="clearData">
+                    <i class="fa-solid fa-power-off w-6"></i> Log Out
+                </div>
             </div>
+            <div class="mt-auto p-4 text-center text-xs text-tg-hint">Tweeyer v5.0 Ultra</div>
         </div>
     </transition>
 
-    <!-- ================= MAIN CHAT AREA ================= -->
-    <main class="flex-1 flex flex-col h-full relative" 
+    <!-- ================= MAIN CHAT ================= -->
+    <main class="flex-1 flex flex-col h-full relative transition-colors duration-300"
           :class="theme === 'dark' ? 'chat-bg-dark' : 'chat-bg-light', mobileView === 'sidebar' ? 'translate-x-full md:translate-x-0 hidden md:flex' : 'translate-x-0'">
         
-        <!-- Header -->
-        <header class="h-14 bg-white dark:bg-[#17212b] flex items-center justify-between px-4 shrink-0 shadow-sm cursor-pointer border-b dark:border-black/10 z-10">
-            <div class="flex items-center gap-4" @click="mobileView = 'sidebar'">
-                <button class="md:hidden text-gray-500"><i class="fa-solid fa-arrow-left"></i></button>
+        <!-- Chat Header -->
+        <header class="h-16 bg-white dark:bg-tg-sidebar flex items-center justify-between px-4 shrink-0 shadow-sm border-b dark:border-black/10 z-10 cursor-pointer" @click="viewProfile">
+            <div class="flex items-center gap-4">
+                <button @click.stop="mobileView = 'sidebar'" class="md:hidden text-gray-500"><i class="fa-solid fa-arrow-left"></i></button>
                 <div class="flex items-center gap-3">
-                    <img :src="partner.avatar || defaultAvatar" class="w-9 h-9 rounded-full object-cover bg-gray-300">
+                    <img :src="partner.avatar || defaultAvatar" class="w-10 h-10 rounded-full object-cover bg-gray-300">
                     <div>
-                        <h3 class="font-bold text-sm leading-tight dark:text-white">{{ partner.name || 'Chat' }}</h3>
-                        <p class="text-xs text-[#8774e1]">{{ isConnected ? 'online' : 'last seen recently' }}</p>
+                        <h3 class="font-bold text-[15px] dark:text-white leading-tight">{{ partner.name || 'Chat' }}</h3>
+                        <p class="text-xs text-tg-blue" v-if="isConnected">online</p>
+                        <p class="text-xs text-gray-400" v-else>waiting...</p>
                     </div>
                 </div>
             </div>
-            <div class="flex items-center gap-4 text-gray-500">
-                <button v-if="isConnected" @click="startCall" class="hover:text-[#8774e1] transition"><i class="fa-solid fa-phone"></i></button>
-                <button class="hover:text-[#8774e1] transition"><i class="fa-solid fa-ellipsis-vertical"></i></button>
+            <div class="flex items-center gap-5 text-gray-400">
+                <button v-if="isConnected" @click.stop="startCall" class="hover:text-tg-blue transition"><i class="fa-solid fa-phone text-lg"></i></button>
+                <button class="hover:text-tg-blue transition"><i class="fa-solid fa-ellipsis-vertical text-lg"></i></button>
             </div>
         </header>
 
-        <!-- Messages -->
-        <div ref="chatBox" class="flex-1 overflow-y-auto p-2 md:p-4 flex flex-col gap-2">
-            <transition-group name="msg">
-                <div v-for="msg in messages" :key="msg.id" class="flex flex-col max-w-[85%] md:max-w-[65%]" :class="msg.sender === 'me' ? 'self-end items-end' : 'self-start items-start'">
+        <!-- Messages List -->
+        <div ref="chatBox" class="flex-1 overflow-y-auto p-2 md:p-4 flex flex-col gap-1.5">
+            <transition-group name="pop">
+                <div v-for="msg in messages" :key="msg.id" class="flex flex-col max-w-[85%] md:max-w-[70%]" :class="msg.sender === 'me' ? 'self-end items-end' : 'self-start items-start', msg.type === 'system' ? 'self-center items-center max-w-full' : ''">
                     
-                    <div class="relative px-3 py-2 rounded-2xl shadow-sm text-[15px] leading-snug group"
+                    <!-- System Message -->
+                    <div v-if="msg.type === 'system'" class="bg-black/20 dark:bg-black/40 text-white text-xs px-3 py-1 rounded-full my-2 font-medium backdrop-blur-sm">
+                        {{ msg.content }}
+                    </div>
+
+                    <!-- Bubble -->
+                    <div v-else class="relative px-3 py-1.5 rounded-2xl shadow-sm text-[15px] leading-snug group"
                          :class="getMessageClass(msg)">
                         
-                        <!-- Image/Video -->
+                        <!-- Media Types -->
                         <div v-if="msg.type === 'image'" class="mb-1 rounded-lg overflow-hidden cursor-zoom-in" @click="zoomImg = msg.content">
-                            <img :src="msg.content" class="max-w-full max-h-[350px] object-cover">
+                            <img :src="msg.content" class="max-w-full max-h-[400px] object-cover">
                         </div>
                         <div v-if="msg.type === 'video'" class="mb-1 rounded-lg overflow-hidden">
-                            <video :src="msg.content" controls class="max-w-full max-h-[350px]"></video>
+                            <video :src="msg.content" controls class="max-w-full max-h-[400px]"></video>
                         </div>
+                        <div v-if="msg.type === 'text'" class="whitespace-pre-wrap break-words min-w-[20px] pt-1">{{ msg.content }}</div>
 
-                        <!-- Sticker -->
-                        <div v-if="msg.type === 'sticker'" class="bg-transparent shadow-none p-0">
-                            <img :src="msg.content" class="w-32 h-32 object-contain">
-                        </div>
-                        
-                        <!-- Text -->
-                        <div v-if="msg.type === 'text'" class="whitespace-pre-wrap break-words min-w-[20px]">{{ msg.content }}</div>
-
-                        <!-- Voice -->
-                        <div v-if="msg.type === 'voice'" class="flex items-center gap-2 min-w-[180px]">
-                            <button @click="playVoice(msg.id)" class="w-8 h-8 rounded-full bg-black/10 dark:bg-white/20 flex items-center justify-center flex-shrink-0">
-                                <i class="fa-solid text-xs" :class="playingVoice === msg.id ? 'fa-pause' : 'fa-play'"></i>
+                        <!-- Voice Player -->
+                        <div v-if="msg.type === 'voice'" class="flex items-center gap-3 pr-2 py-1 min-w-[200px]">
+                            <button @click="playVoice(msg.id)" class="w-10 h-10 rounded-full bg-black/10 dark:bg-white/20 flex items-center justify-center flex-shrink-0 hover:bg-black/20 transition">
+                                <i class="fa-solid text-sm" :class="playingVoice === msg.id ? 'fa-pause' : 'fa-play'"></i>
                             </button>
-                            <div class="flex flex-col flex-1">
-                                <div class="h-1 bg-black/10 dark:bg-white/20 rounded-full w-full mb-1">
-                                    <div class="h-full bg-white/80 rounded-full" :style="{width: playingVoice === msg.id ? '60%' : '0%'}"></div>
+                            <div class="flex flex-col flex-1 gap-1">
+                                <div class="h-1 bg-black/10 dark:bg-white/20 rounded-full w-full overflow-hidden">
+                                    <div class="h-full bg-white/80" :style="{width: playingVoice === msg.id ? '100%' : '0%', transition: 'width 10s linear'}"></div>
                                 </div>
-                                <span class="text-[10px] opacity-70">Voice Message</span>
+                                <span class="text-xs opacity-70 font-mono">Voice Message</span>
                             </div>
                             <audio :id="'aud-'+msg.id" :src="msg.content" @ended="playingVoice = null"></audio>
                         </div>
 
-                        <!-- Metadata -->
-                        <div class="float-right ml-3 mt-1 flex items-center gap-1 text-[11px] opacity-60 select-none align-bottom h-full pt-1" :class="{'text-white': msg.sender === 'me' && theme === 'dark'}">
+                        <!-- Meta -->
+                        <div class="float-right ml-2 mt-1 flex items-center gap-1 text-[11px] opacity-60 select-none align-bottom h-full pt-1" :class="{'text-green-500': msg.sender === 'me' && theme !== 'dark'}">
                             <span>{{ formatTime(msg.timestamp) }}</span>
                             <span v-if="msg.sender === 'me'">
-                                <i v-if="msg.status === 'read'" class="fa-solid fa-check-double text-[#4ade80]"></i> <!-- Green/Blue ticks -->
+                                <i v-if="msg.status === 'read'" class="fa-solid fa-check-double text-[#4ade80] dark:text-[#64d2ff]"></i>
                                 <i v-else class="fa-solid fa-check"></i>
                             </span>
                         </div>
@@ -274,82 +278,115 @@
             </transition-group>
         </div>
 
-        <!-- Input Area -->
-        <footer class="bg-white dark:bg-[#17212b] p-2 md:px-4 md:py-3 flex items-end gap-2 shrink-0 z-20">
-            <!-- Attach Menu -->
+        <!-- Input Footer -->
+        <footer class="bg-white dark:bg-tg-sidebar p-2 md:px-4 md:py-2 flex items-end gap-2 shrink-0 z-20 shadow-[0_-1px_5px_rgba(0,0,0,0.1)]">
             <div class="relative">
-                <button @click="ui.showAttach = !ui.showAttach" class="w-10 h-10 text-gray-400 hover:text-[#8774e1] transition"><i class="fa-solid fa-paperclip text-xl"></i></button>
-                <div v-if="ui.showAttach" class="absolute bottom-14 left-0 bg-white dark:bg-[#242f3d] shadow-xl rounded-xl p-2 w-48 flex flex-col gap-1 border dark:border-black/20 animate-fade-in-up">
-                    <button @click="$refs.fileInput.click(); ui.showAttach=false" class="flex items-center gap-3 px-3 py-2 hover:bg-gray-100 dark:hover:bg-black/20 rounded-lg text-sm transition">
-                        <i class="fa-regular fa-image text-blue-500 w-5"></i> Photo/Video
-                    </button>
-                    <button @click="sendSticker('https://cdn-icons-png.flaticon.com/512/742/742751.png'); ui.showAttach=false" class="flex items-center gap-3 px-3 py-2 hover:bg-gray-100 dark:hover:bg-black/20 rounded-lg text-sm transition">
-                        <i class="fa-solid fa-face-smile text-yellow-500 w-5"></i> Send Duck Sticker
+                <button @click="ui.showAttach = !ui.showAttach" class="w-10 h-10 text-gray-400 hover:text-tg-blue transition"><i class="fa-solid fa-paperclip text-xl"></i></button>
+                <div v-if="ui.showAttach" class="absolute bottom-14 left-0 bg-white dark:bg-tg-panel shadow-xl rounded-xl p-2 w-48 flex flex-col gap-1 border dark:border-black/20 animate-fade-in-up">
+                    <button @click="$refs.fileInput.click(); ui.showAttach=false" class="flex items-center gap-3 px-3 py-2 hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg text-sm transition dark:text-white">
+                        <i class="fa-regular fa-image text-blue-500 w-5"></i> Photo / Video
                     </button>
                 </div>
                 <input type="file" ref="fileInput" class="hidden" @change="handleFileSelect">
             </div>
 
-            <!-- Input -->
             <textarea 
                 v-model="inputMsg" 
                 @keydown.enter.prevent="sendText"
                 @focus="markRead"
                 rows="1" 
-                placeholder="Write a message..." 
-                class="flex-1 bg-white dark:bg-[#17212b] text-base px-2 py-2 outline-none resize-none max-h-40 placeholder-gray-400 dark:text-white"
+                placeholder="Message" 
+                class="flex-1 bg-white dark:bg-[#17212b] text-[15px] px-2 py-2.5 outline-none resize-none max-h-40 placeholder-gray-400 dark:text-white"
             ></textarea>
 
-            <!-- Emoji Btn -->
-            <button class="w-10 h-10 text-gray-400 hover:text-yellow-500 transition" @click="inputMsg += '😂'"><i class="fa-regular fa-face-smile text-xl"></i></button>
+            <div class="relative">
+                <button class="w-10 h-10 text-gray-400 hover:text-yellow-500 transition" @click="ui.showEmoji = !ui.showEmoji">
+                    <i class="fa-regular fa-face-smile text-xl"></i>
+                </button>
+                <div v-if="ui.showEmoji" class="absolute bottom-14 right-0 z-50 shadow-2xl rounded-xl overflow-hidden border dark:border-black/20">
+                    <emoji-picker @emoji-click="onEmojiSelect" class="dark:dark"></emoji-picker>
+                </div>
+            </div>
 
-            <!-- Mic / Send -->
             <div class="w-12 h-12 flex items-center justify-center">
-                <transition name="fade" mode="out-in">
-                    <button v-if="inputMsg.trim()" @click="sendText" class="w-10 h-10 rounded-full bg-[#8774e1] text-white hover:scale-110 transition shadow-lg flex items-center justify-center">
+                <transition name="pop" mode="out-in">
+                    <button v-if="inputMsg.trim()" @click="sendText" class="w-10 h-10 rounded-full bg-tg-blue text-white hover:bg-blue-600 transition shadow-lg flex items-center justify-center">
                         <i class="fa-solid fa-paper-plane"></i>
                     </button>
                     <button v-else 
                         @mousedown="startRec" @mouseup="stopRec" @touchstart.prevent="startRec" @touchend.prevent="stopRec"
                         class="w-10 h-10 rounded-full hover:bg-gray-100 dark:hover:bg-white/10 text-gray-500 transition flex items-center justify-center"
-                        :class="{'bg-red-500 text-white animate-pulse': isRecording}">
-                        <i class="fa-solid" :class="isRecording ? 'fa-square' : 'fa-microphone'"></i>
+                        :class="{'bg-red-500 text-white animate-pulse shadow-red-500/50 shadow-lg': isRecording}">
+                        <i class="fa-solid" :class="isRecording ? 'fa-stop' : 'fa-microphone'"></i>
                     </button>
                 </transition>
             </div>
         </footer>
 
-        <!-- RECORDING OVERLAY -->
-        <div v-if="isRecording" class="absolute bottom-24 left-1/2 -translate-x-1/2 bg-[#17212b] text-white px-6 py-3 rounded-full shadow-2xl flex items-center gap-4 z-30 border border-white/10">
-            <div class="w-3 h-3 bg-red-500 rounded-full animate-pulse"></div>
-            <span class="font-mono">{{ recTime }}</span>
-            <span class="text-sm opacity-50">Release to send</span>
+        <!-- Rec Overlay -->
+        <div v-if="isRecording" class="absolute bottom-24 left-1/2 -translate-x-1/2 bg-tg-panel text-white px-6 py-3 rounded-full shadow-2xl flex items-center gap-4 z-30 border border-white/10">
+            <div class="w-2.5 h-2.5 bg-red-500 rounded-full animate-pulse"></div>
+            <span class="font-mono text-lg">{{ recTime }}</span>
         </div>
 
-        <!-- CALL OVERLAY -->
-        <div v-if="call.active || call.incoming" class="fixed inset-0 z-[100] bg-[#0f0f0f]/90 backdrop-blur-xl flex flex-col items-center justify-center text-white">
-            <div class="w-32 h-32 rounded-full overflow-hidden mb-6 border-4 border-white/10 shadow-2xl relative">
-                 <div v-if="call.incoming" class="absolute inset-0 bg-[#8774e1] opacity-50 animate-ping"></div>
-                 <img :src="partner.avatar || defaultAvatar" class="w-full h-full object-cover relative z-10">
+        <!-- Call Screen -->
+        <div v-if="call.active || call.incoming" class="fixed inset-0 z-[100] bg-[#1a2025] flex flex-col items-center justify-center text-white">
+            <div class="absolute inset-0 overflow-hidden opacity-30 blur-3xl">
+                 <img :src="partner.avatar || defaultAvatar" class="w-full h-full object-cover">
             </div>
-            <h2 class="text-3xl font-bold mb-2">{{ partner.name }}</h2>
-            <p class="text-[#8774e1] mb-12 animate-pulse">{{ call.statusText }}</p>
+            
+            <div class="relative z-10 flex flex-col items-center w-full max-w-md">
+                <div class="w-32 h-32 rounded-full overflow-hidden mb-6 border-4 border-white/5 shadow-2xl relative">
+                     <div v-if="call.incoming" class="absolute inset-0 bg-green-500 opacity-30 animate-ping"></div>
+                     <img :src="partner.avatar || defaultAvatar" class="w-full h-full object-cover relative z-10">
+                </div>
+                <h2 class="text-3xl font-bold mb-2">{{ partner.name }}</h2>
+                <p class="text-gray-400 mb-20 animate-pulse text-lg">{{ call.statusText }}</p>
 
-            <div class="flex gap-10">
-                <button v-if="call.incoming" @click="answerCall" class="w-20 h-20 bg-green-500 rounded-full flex items-center justify-center text-3xl shadow-lg hover:scale-110 transition">
-                    <i class="fa-solid fa-phone"></i>
-                </button>
-                <button @click="endCall" class="w-20 h-20 bg-red-500 rounded-full flex items-center justify-center text-3xl shadow-lg hover:scale-110 transition">
-                    <i class="fa-solid fa-phone-slash"></i>
-                </button>
+                <div class="flex gap-16 items-center">
+                    <button v-if="call.incoming" @click="answerCall" class="w-20 h-20 bg-green-500 rounded-full flex items-center justify-center text-3xl shadow-lg hover:scale-110 transition">
+                        <i class="fa-solid fa-phone"></i>
+                    </button>
+                    <button @click="endCall" class="w-20 h-20 bg-red-500 rounded-full flex items-center justify-center text-3xl shadow-lg hover:scale-110 transition">
+                        <i class="fa-solid fa-phone-slash"></i>
+                    </button>
+                </div>
             </div>
             <audio ref="remoteAudio" autoplay class="hidden"></audio>
         </div>
+
+        <!-- Profile Modal -->
+        <transition name="pop">
+            <div v-if="ui.viewProfile" class="fixed inset-0 z-[80] bg-black/60 flex items-center justify-center p-4 backdrop-blur-sm" @click="ui.viewProfile = false">
+                <div class="bg-white dark:bg-tg-panel rounded-2xl w-full max-w-sm overflow-hidden shadow-2xl" @click.stop>
+                    <div class="h-64 relative">
+                        <img :src="partner.avatar || defaultAvatar" class="w-full h-full object-cover">
+                        <button class="absolute top-4 left-4 bg-black/40 text-white w-8 h-8 rounded-full flex items-center justify-center backdrop-blur-md" @click="ui.viewProfile = false"><i class="fa-solid fa-times"></i></button>
+                    </div>
+                    <div class="p-6">
+                        <h2 class="text-2xl font-bold dark:text-white mb-1">{{ partner.name }}</h2>
+                        <p class="text-tg-blue text-sm mb-4">{{ isConnected ? 'Online' : 'Last seen recently' }}</p>
+                        
+                        <div class="space-y-4">
+                            <div>
+                                <p class="text-tg-hint text-xs uppercase font-bold mb-1">Bio</p>
+                                <p class="dark:text-gray-200 text-[15px]">{{ partner.bio || 'No bio available.' }}</p>
+                            </div>
+                            <div>
+                                <p class="text-tg-hint text-xs uppercase font-bold mb-1">Username / ID</p>
+                                <p class="text-tg-blue text-[15px] font-mono cursor-pointer select-all">@{{ targetId || 'unknown' }}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </transition>
+
     </main>
 
-    <!-- ZOOM -->
-    <div v-if="zoomImg" @click="zoomImg = null" class="fixed inset-0 z-[200] bg-black/95 flex items-center justify-center cursor-zoom-out p-4">
-        <img :src="zoomImg" class="max-w-full max-h-full rounded-lg shadow-2xl">
+    <!-- Zoom -->
+    <div v-if="zoomImg" @click="zoomImg = null" class="fixed inset-0 z-[200] bg-black/95 flex items-center justify-center cursor-zoom-out p-2">
+        <img :src="zoomImg" class="max-w-full max-h-full rounded-lg shadow-2xl object-contain">
     </div>
 
 </div>
@@ -357,10 +394,17 @@
 <script>
     const { createApp, ref, reactive, onMounted, computed, watch, nextTick } = Vue;
 
+    // --- SOUNDS (Encoded Base64 for single-file portability) ---
+    // Short beep for sent, tri-tone for received, simple ringtone
+    const AUDIO_SRC = {
+        sent: "data:audio/mp3;base64,SUQzBAAAAAAAI1RTSXMAAAAPAAADTGF2ZjU4LjI5LjEwMAAAAAAAAAAAAAAA//uQZAAAAAAAALAAAAAABAAJAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA//uQZAAAAAAAALAAAAAABAAJAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA", // Placeholder for size. In real code use tiny mp3
+        // Since I cannot provide 100kb Base64 strings here without hitting limits, we will use AudioContext synthesis for High Quality feel.
+    };
+
     createApp({
         setup() {
             // STATE
-            const ui = reactive({ showProfile: false, showAttach: false });
+            const ui = reactive({ showDrawer: false, showAttach: false, showEmoji: false, viewProfile: false });
             const myPeerId = ref('');
             const targetId = ref('');
             const isNetReady = ref(false);
@@ -369,10 +413,9 @@
             const inputMsg = ref('');
             const theme = ref('dark');
             const messages = ref([]);
-            const savedChats = ref([]); // Simple array for persistence visualization
             
             const user = reactive({ name: '', avatar: '', bio: '', setupComplete: false });
-            const partner = reactive({ name: '', avatar: '' });
+            const partner = reactive({ name: '', avatar: '', bio: '' });
             
             // Media
             const isRecording = ref(false);
@@ -389,53 +432,62 @@
             let callObj = null;
             let localStream = null;
             let recTimerInt = null;
+            let callTimerInt = null;
+            let callSeconds = 0;
 
-            // Defaults
+            const tempName = ref('');
+            const tempBio = ref('');
+            const tempAvatar = ref('');
             const defaultAvatar = "https://cdn-icons-png.flaticon.com/512/847/847969.png";
 
-            // --- Lifecycle ---
-            onMounted(() => {
-                const u = localStorage.getItem('tw_k_user');
-                if(u) Object.assign(user, JSON.parse(u));
+            // --- AUDIO ENGINE ---
+            const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            const unlockAudio = () => { if(audioCtx.state === 'suspended') audioCtx.resume(); };
+            
+            const playSound = (type) => {
+                unlockAudio();
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain); gain.connect(audioCtx.destination);
                 
-                const msgs = localStorage.getItem('tw_k_msgs');
-                if(msgs) messages.value = JSON.parse(msgs);
-                
-                const th = localStorage.getItem('tw_k_theme');
-                if(th) setTheme(th);
-                else setTheme('dark');
+                if (type === 'sent') {
+                    // "Pop" sound
+                    osc.frequency.setValueAtTime(800, audioCtx.currentTime);
+                    osc.frequency.exponentialRampToValueAtTime(1200, audioCtx.currentTime + 0.05);
+                    gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.05);
+                    osc.start(); osc.stop(audioCtx.currentTime + 0.05);
+                } else if (type === 'in') {
+                    // "Tring" sound
+                    osc.frequency.setValueAtTime(600, audioCtx.currentTime);
+                    osc.frequency.exponentialRampToValueAtTime(400, audioCtx.currentTime + 0.2);
+                    gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.2);
+                    osc.start(); osc.stop(audioCtx.currentTime + 0.2);
+                }
+            };
+            // Ringer loop handled via setInterval/Oscillator if needed, simplified for strict file size.
 
+            // --- LIFECYCLE ---
+            onMounted(() => {
+                const u = localStorage.getItem('tw_v5_user');
+                if(u) Object.assign(user, JSON.parse(u));
+                const msgs = localStorage.getItem('tw_v5_msgs');
+                if(msgs) messages.value = JSON.parse(msgs);
+                const th = localStorage.getItem('tw_v5_theme');
+                if(th) setTheme(th);
                 if(user.setupComplete) initPeer();
             });
 
             watch(messages, (val) => {
-                localStorage.setItem('tw_k_msgs', JSON.stringify(val));
+                localStorage.setItem('tw_v5_msgs', JSON.stringify(val));
                 if(val.length > 0) scrollToBottom();
             }, { deep: true });
 
-            // --- Paste Handler ---
-            const handlePaste = (e) => {
-                const items = (e.clipboardData || e.originalEvent.clipboardData).items;
-                for (let index in items) {
-                    const item = items[index];
-                    if (item.kind === 'file') {
-                        const blob = item.getAsFile();
-                        const reader = new FileReader();
-                        reader.onload = (ev) => sendMedia('image', ev.target.result);
-                        reader.readAsDataURL(blob);
-                    }
-                }
-            };
-
-            // --- PeerJS ---
+            // --- PEER JS ---
             const initPeer = () => {
                 peer = new Peer(null, { config: { iceServers: [{ urls: 'stun:stun1.l.google.com:19302' }] } });
-                
-                peer.on('open', (id) => {
-                    myPeerId.value = id;
-                    isNetReady.value = true;
-                });
-
+                peer.on('open', (id) => { myPeerId.value = id; isNetReady.value = true; });
                 peer.on('connection', (c) => setupConn(c));
                 peer.on('call', (c) => handleIncomingCall(c));
             };
@@ -451,63 +503,71 @@
                 conn.on('open', () => {
                     isConnected.value = true;
                     mobileView.value = 'chat';
-                    conn.send({ type: 'handshake', payload: { name: user.name, avatar: user.avatar } });
-                    // Mark sent messages as read if partner connects
+                    conn.send({ type: 'handshake', payload: { name: user.name, avatar: user.avatar, bio: user.bio } });
+                    // Mark sent as read
                     messages.value.forEach(m => { if(m.status === 'sent') m.status = 'read'; });
                 });
-                
                 conn.on('data', (data) => {
                     if(data.type === 'handshake') {
                         partner.name = data.payload.name;
                         partner.avatar = data.payload.avatar;
-                    } else if(data.type === 'read_ack') {
+                        partner.bio = data.payload.bio;
+                    } else if (data.type === 'read_ack') {
                         messages.value.forEach(m => { if(m.sender === 'me') m.status = 'read'; });
                     } else {
-                        // Receive Message
                         messages.value.push({ ...data, sender: 'partner', status: 'read' });
-                        playSound('pop');
-                        // Auto Ack
+                        playSound('in');
                         if(mobileView.value === 'chat') conn.send({ type: 'read_ack' });
                     }
                 });
-
                 conn.on('close', () => isConnected.value = false);
             };
 
-            // --- Messaging ---
+            // --- MESSAGING ---
             const sendText = () => {
                 if(!inputMsg.value.trim() || !isConnected.value) return;
-                const msg = { id: Date.now(), type: 'text', content: inputMsg.value, timestamp: Date.now() };
-                dispatch(msg);
+                dispatch({ id: Date.now(), type: 'text', content: inputMsg.value, timestamp: Date.now() });
                 inputMsg.value = '';
-            };
-
-            const sendMedia = (type, content) => {
-                if(!isConnected.value) return;
-                const msg = { id: Date.now(), type, content, timestamp: Date.now() };
-                dispatch(msg);
-            };
-
-            const sendSticker = (url) => sendMedia('sticker', url);
-
-            const handleFileSelect = (e) => {
-                const f = e.target.files[0];
-                if(!f) return;
-                const reader = new FileReader();
-                reader.onload = (ev) => {
-                    const type = f.type.startsWith('video') ? 'video' : 'image';
-                    sendMedia(type, ev.target.result);
-                };
-                reader.readAsDataURL(f);
+                ui.showEmoji = false;
             };
 
             const dispatch = (msg) => {
                 conn.send(msg);
                 messages.value.push({ ...msg, sender: 'me', status: 'sent' });
                 playSound('sent');
+                scrollToBottom();
             };
 
-            // --- Voice ---
+            const handleFileSelect = (e) => {
+                const f = e.target.files[0];
+                if(!f) return;
+                if(f.size > 15 * 1024 * 1024) return alert("File too large for P2P (Max 15MB).");
+                const reader = new FileReader();
+                reader.onload = (ev) => {
+                    const type = f.type.startsWith('video') ? 'video' : 'image';
+                    dispatch({ id: Date.now(), type, content: ev.target.result, timestamp: Date.now() });
+                };
+                reader.readAsDataURL(f);
+            };
+
+            const handlePaste = (e) => {
+                const items = (e.clipboardData || e.originalEvent.clipboardData).items;
+                for (let index in items) {
+                    const item = items[index];
+                    if (item.kind === 'file') {
+                        const blob = item.getAsFile();
+                        const reader = new FileReader();
+                        reader.onload = (ev) => dispatch({ id: Date.now(), type: 'image', content: ev.target.result, timestamp: Date.now() });
+                        reader.readAsDataURL(blob);
+                    }
+                }
+            };
+
+            const onEmojiSelect = (e) => {
+                inputMsg.value += e.detail.unicode;
+            };
+
+            // --- VOICE ---
             const startRec = async () => {
                 if(!isConnected.value) return;
                 try {
@@ -522,13 +582,12 @@
                         const s = (sec%60).toString().padStart(2,'0');
                         recTime.value = `${m}:${s}`;
                     }, 1000);
-
                     mediaRecorder.ondataavailable = e => chunks.push(e.data);
                     mediaRecorder.onstop = () => {
                         const blob = new Blob(chunks, { type: 'audio/webm' });
                         const reader = new FileReader();
                         reader.readAsDataURL(blob);
-                        reader.onloadend = () => sendMedia('voice', reader.result);
+                        reader.onloadend = () => dispatch({ id: Date.now(), type: 'voice', content: reader.result, timestamp: Date.now() });
                         stream.getTracks().forEach(t => t.stop());
                     };
                     mediaRecorder.start();
@@ -549,7 +608,6 @@
                 if(aud) {
                     if(playingVoice.value === id) { aud.pause(); playingVoice.value = null; }
                     else { 
-                        // stop others
                         document.querySelectorAll('audio').forEach(a => a.pause());
                         aud.play(); 
                         playingVoice.value = id; 
@@ -557,7 +615,7 @@
                 }
             };
 
-            // --- Calls ---
+            // --- CALLS ---
             const startCall = async () => {
                 if(!isConnected.value) return;
                 try {
@@ -566,13 +624,15 @@
                     setupCallEvents(callObj);
                     call.active = true;
                     call.statusText = 'Calling...';
+                    playSound('sent'); // reuse pop
                 } catch(e) { alert("Call Error"); }
             };
 
             const handleIncomingCall = (c) => {
                 call.incoming = true;
                 callObj = c;
-                call.statusText = 'Incoming Call...';
+                call.statusText = 'Incoming Audio Call';
+                playSound('in'); // reuse tring
             };
 
             const answerCall = async () => {
@@ -581,12 +641,18 @@
                 setupCallEvents(callObj);
                 call.incoming = false;
                 call.active = true;
+                callSeconds = 0;
+                callTimerInt = setInterval(() => {
+                    callSeconds++;
+                    const m = Math.floor(callSeconds/60).toString().padStart(2,'0');
+                    const s = (callSeconds%60).toString().padStart(2,'0');
+                    call.statusText = `${m}:${s}`;
+                }, 1000);
             };
 
             const setupCallEvents = (c) => {
                 c.on('stream', (remoteStream) => {
-                    call.statusText = 'Connected';
-                    const aud = document.querySelector('audio.hidden'); // refs work weird in if blocks
+                    const aud = document.querySelector('audio.hidden');
                     if(aud) { aud.srcObject = remoteStream; aud.play(); }
                 });
                 c.on('close', endCall);
@@ -595,93 +661,89 @@
             const endCall = () => {
                 if(callObj) callObj.close();
                 if(localStream) localStream.getTracks().forEach(t => t.stop());
+                
+                // Add System Message
+                if(call.active && !call.incoming) {
+                    const m = Math.floor(callSeconds/60).toString().padStart(2,'0');
+                    const s = (callSeconds%60).toString().padStart(2,'0');
+                    const duration = callSeconds > 0 ? `${m}:${s}` : 'Cancelled';
+                    messages.value.push({ id: Date.now(), type: 'system', content: `Call ended (${duration})` });
+                }
+
                 call.active = false;
                 call.incoming = false;
+                clearInterval(callTimerInt);
+                callSeconds = 0;
             };
 
-            // --- Utilities ---
-            const markRead = () => {
-                if(isConnected.value) conn.send({ type: 'read_ack' });
+            // --- UTILS ---
+            const finishSetup = () => {
+                user.name = tempName.value;
+                user.bio = tempBio.value;
+                user.avatar = tempAvatar.value;
+                user.setupComplete = true;
+                localStorage.setItem('tw_v5_user', JSON.stringify(user));
+                initPeer();
             };
-            
-            const copyId = () => navigator.clipboard.writeText(myPeerId.value);
-            
-            const formatTime = (ts) => new Date(ts).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
-            
-            const scrollToBottom = () => nextTick(() => { 
-                const el = document.querySelector('div[class*="overflow-y-auto"]'); 
-                if(el) el.scrollTop = el.scrollHeight; 
-            });
-
-            const playSound = (type) => {
-                const ctx = new (window.AudioContext||window.webkitAudioContext)();
-                const o = ctx.createOscillator();
-                const g = ctx.createGain();
-                o.connect(g); g.connect(ctx.destination);
-                if(type === 'sent') { o.frequency.value = 600; o.start(); o.stop(ctx.currentTime+0.1); }
-                else { o.frequency.value = 400; o.start(); o.stop(ctx.currentTime+0.1); }
-            };
-
-            const getMessageClass = (msg) => {
-                if(msg.type === 'sticker') return 'bg-transparent shadow-none';
-                if(theme.value === 'dark') {
-                    return msg.sender === 'me' ? 'bg-tg-bubbleSelf text-white rounded-br-none' : 'bg-tg-bubbleIn text-white rounded-bl-none';
-                } else {
-                    return msg.sender === 'me' ? 'bg-tg-lightBubbleSelf text-black rounded-br-none' : 'bg-tg-lightBubbleIn text-black rounded-bl-none';
-                }
-            };
-
-            // Profile & Setup
             const onAvatarChange = (e) => {
                 const f = e.target.files[0];
                 if(f) {
                     const r = new FileReader();
                     r.onload = (ev) => {
                         if(!user.setupComplete) tempAvatar.value = ev.target.result;
-                        else { user.avatar = ev.target.result; saveUser(); }
+                        else { user.avatar = ev.target.result; localStorage.setItem('tw_v5_user', JSON.stringify(user)); }
                     };
                     r.readAsDataURL(f);
                 }
             };
-            const finishSetup = () => {
-                user.name = tempName.value;
-                user.avatar = tempAvatar.value;
-                user.setupComplete = true;
-                saveUser();
-                initPeer();
-            };
-            const saveUser = () => localStorage.setItem('tw_k_user', JSON.stringify(user));
-            const clearData = () => { localStorage.clear(); location.reload(); };
-            const tempAvatar = ref('');
-            const tempName = ref('');
-
-            // Computed
-            const lastMsg = computed(() => messages.value[messages.value.length-1]);
-            const lastMsgTime = computed(() => lastMsg.value ? formatTime(lastMsg.value.timestamp) : '');
-            const lastMsgPreview = computed(() => {
-                if(!lastMsg.value) return '';
-                if(lastMsg.value.type === 'image') return 'Photo';
-                if(lastMsg.value.type === 'voice') return 'Voice Message';
-                if(lastMsg.value.type === 'sticker') return 'Sticker';
-                return lastMsg.value.content;
-            });
+            const copyId = () => navigator.clipboard.writeText(myPeerId.value);
+            const markRead = () => { if(isConnected.value) conn.send({ type: 'read_ack' }); };
+            const scrollToBottom = () => nextTick(() => { const el = document.querySelector('div[class*="overflow-y-auto"]'); if(el) el.scrollTop = el.scrollHeight; });
+            const formatTime = (ts) => new Date(ts).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+            
             const toggleTheme = () => setTheme(theme.value === 'dark' ? 'light' : 'dark');
             const setTheme = (t) => {
                 theme.value = t;
-                localStorage.setItem('tw_k_theme', t);
+                localStorage.setItem('tw_v5_theme', t);
                 if(t==='dark') document.documentElement.classList.add('dark');
                 else document.documentElement.classList.remove('dark');
             };
 
+            const getMessageClass = (msg) => {
+                if(theme.value === 'dark') {
+                    return msg.sender === 'me' ? 'bg-tg-self text-white rounded-br-none' : 'bg-tg-in text-white rounded-bl-none';
+                } else {
+                    return msg.sender === 'me' ? 'bg-tg-lightSelf text-black rounded-br-none' : 'bg-tg-lightIn text-black rounded-bl-none';
+                }
+            };
+
+            const viewProfile = () => {
+                if(partner.name) ui.viewProfile = true;
+            };
+            
+            const lastMsg = computed(() => messages.value[messages.value.length-1]);
+            const lastMsgTime = computed(() => lastMsg.value ? formatTime(lastMsg.value.timestamp) : '');
+            const lastMsgPreview = computed(() => {
+                if(!lastMsg.value) return '';
+                if(lastMsg.value.type === 'system') return 'Call ended';
+                if(lastMsg.value.type === 'image') return 'Photo';
+                if(lastMsg.value.type === 'video') return 'Video';
+                if(lastMsg.value.type === 'voice') return 'Voice Message';
+                return lastMsg.value.content;
+            });
+
+            const clearData = () => { if(confirm("Clear data?")) { localStorage.clear(); location.reload(); } };
+
             return {
                 ui, user, partner, messages, inputMsg, mobileView, theme,
-                myPeerId, targetId, isNetReady, isConnected, savedChats,
-                tempName, tempAvatar, defaultAvatar,
+                myPeerId, targetId, isNetReady, isConnected,
+                tempName, tempBio, tempAvatar, defaultAvatar,
                 isRecording, recTime, playingVoice, zoomImg, call,
                 handlePaste, handleFileSelect, startRec, stopRec, playVoice,
-                connect, sendText, sendSticker, startCall, answerCall, endCall,
-                onAvatarChange, finishSetup, saveUser, clearData, copyId, formatTime, markRead,
-                getMessageClass, toggleTheme, lastMsg, lastMsgTime, lastMsgPreview
+                connect, sendText, startCall, answerCall, endCall,
+                onAvatarChange, finishSetup, copyId, formatTime, markRead,
+                getMessageClass, toggleTheme, onEmojiSelect, viewProfile,
+                lastMsgTime, lastMsgPreview, clearData, unlockAudio
             };
         }
     }).mount('#app');
