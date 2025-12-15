@@ -2,14 +2,11 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tweeyer Ultimate | Calls & History</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Tweeyer | Stable Build</title>
     
-    <!-- Fonts & Icons -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
-    <!-- Libraries -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <script src="https://unpkg.com/peerjs@1.4.7/dist/peerjs.min.js"></script>
@@ -21,755 +18,487 @@
                 extend: {
                     fontFamily: { sans: ['Inter', 'sans-serif'] },
                     colors: {
-                        tg: {
-                            blue: '#3390ec',
-                            bg: '#ffffff',
-                            chat: '#f4f4f5',
-                            self: '#eeffde',
-                            dark: '#212121',
-                            darkChat: '#0f0f0f',
-                            darkSelf: '#3390ec'
-                        }
+                        tg: { blue: '#3390ec', chat: '#f4f4f5', self: '#eeffde' }
                     }
                 }
             }
         };
     </script>
-
     <style>
-        /* Telegram-like Scrollbar */
-        ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: #c1c1c1; border-radius: 3px; }
-        .dark ::-webkit-scrollbar-thumb { background: #555; }
-        
-        /* Animations */
-        .fade-enter-active, .fade-leave-active { transition: opacity 0.2s ease; }
-        .fade-enter-from, .fade-leave-to { opacity: 0; }
-        
-        .slide-up-enter-active { transition: all 0.3s ease-out; }
-        .slide-up-enter-from { transform: translateY(100%); opacity: 0; }
-        
-        /* Call Pulse */
-        .pulse-ring {
-            box-shadow: 0 0 0 0 rgba(51, 144, 236, 0.7);
-            animation: pulse-blue 2s infinite;
-        }
-        @keyframes pulse-blue {
-            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(51, 144, 236, 0.7); }
-            70% { transform: scale(1); box-shadow: 0 0 0 20px rgba(51, 144, 236, 0); }
-            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(51, 144, 236, 0); }
-        }
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-thumb { background: #bbb; border-radius: 2px; }
+        .dark ::-webkit-scrollbar-thumb { background: #444; }
     </style>
 </head>
-<body class="antialiased text-gray-800 bg-white dark:bg-[#212121] dark:text-gray-200 h-screen w-screen overflow-hidden selection:bg-tg-blue selection:text-white">
+<body class="bg-white dark:bg-[#1a1a1a] text-gray-800 dark:text-gray-200 h-[100dvh] w-screen overflow-hidden text-sm md:text-base">
 
-<div id="app" class="h-full flex relative">
+<div id="app" class="h-full flex flex-col md:flex-row relative">
 
-    <!-- ==================== SOUNDS (Base64) ==================== -->
-    <!-- Sound logic is handled in JS, placeholders here -->
-
-    <!-- ==================== CALL MODAL (OVERLAY) ==================== -->
-    <transition name="fade">
-        <div v-if="call.incoming || call.active || call.calling" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex flex-col items-center justify-center">
-            
-            <div class="text-center text-white mb-8">
-                <div class="w-32 h-32 rounded-full overflow-hidden border-4 border-white/20 mx-auto mb-4 relative" :class="{'pulse-ring': call.incoming || call.calling}">
-                    <img :src="partner.avatar || defaultAvatar" class="w-full h-full object-cover">
-                </div>
-                <h2 class="text-3xl font-light">{{ partner.name || 'Unknown' }}</h2>
-                <p class="text-white/60 mt-2 animate-pulse">
-                    {{ call.incoming ? 'Входящий звонок...' : (call.active ? formatCallTime : 'Вызов...') }}
-                </p>
-            </div>
-
-            <div class="flex gap-8 items-center">
-                <!-- Answer Button (Only if incoming) -->
-                <button v-if="call.incoming" @click="answerCall" class="w-16 h-16 rounded-full bg-green-500 hover:bg-green-400 flex items-center justify-center text-white text-2xl transition transform hover:scale-110 shadow-lg shadow-green-500/50">
-                    <i class="fa-solid fa-phone"></i>
-                </button>
-
-                <!-- Hangup Button -->
-                <button @click="endCall" class="w-16 h-16 rounded-full bg-red-500 hover:bg-red-400 flex items-center justify-center text-white text-2xl transition transform hover:scale-110 shadow-lg shadow-red-500/50">
-                    <i class="fa-solid fa-phone-slash"></i>
-                </button>
-
-                <!-- Mute Toggle (Only if active) -->
-                <button v-if="call.active" @click="toggleMute" class="w-12 h-12 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition">
-                    <i class="fa-solid" :class="call.muted ? 'fa-microphone-slash text-red-400' : 'fa-microphone'"></i>
-                </button>
-            </div>
-            
-            <!-- Hidden Audio Element for Stream -->
-            <audio ref="remoteAudio" autoplay></audio>
+    <!-- DEBUG CONSOLE (Hidden by default) -->
+    <div v-if="ui.showDebug" class="fixed top-0 left-0 w-full h-1/3 bg-black/90 text-green-400 font-mono text-xs p-4 z-[9999] overflow-y-auto border-b border-green-500">
+        <div class="flex justify-between mb-2 sticky top-0 bg-black/90 pb-2 border-b border-white/20">
+            <h3 class="font-bold">SYSTEM LOGS</h3>
+            <button @click="ui.showDebug = false" class="text-white">CLOSE [X]</button>
         </div>
-    </transition>
-
-    <!-- ==================== SETUP SCREEN ==================== -->
-    <div v-if="!user.setupComplete" class="absolute inset-0 z-40 bg-white dark:bg-[#212121] flex items-center justify-center p-4">
-        <div class="max-w-sm w-full text-center">
-            <div class="w-24 h-24 bg-tg-blue rounded-full mx-auto mb-6 flex items-center justify-center text-white text-4xl shadow-xl shadow-blue-500/30">
-                <i class="fa-regular fa-paper-plane"></i>
-            </div>
-            <h1 class="text-2xl font-bold mb-2">Tweeyer</h1>
-            <p class="text-gray-500 dark:text-gray-400 mb-8 text-sm">Безопасный P2P мессенджер</p>
-            
-            <div class="relative w-24 h-24 mx-auto mb-6 group cursor-pointer" @click="$refs.avatarInput.click()">
-                <img :src="tempAvatar || defaultAvatar" class="w-full h-full rounded-full object-cover border-2 border-gray-200 dark:border-gray-700">
-                <div class="absolute inset-0 bg-black/40 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition">
-                    <i class="fa-solid fa-camera text-white"></i>
-                </div>
-            </div>
-            <input type="file" ref="avatarInput" @change="handleAvatarUpload" accept="image/*" class="hidden">
-
-            <input v-model="tempName" type="text" placeholder="Ваше имя" class="w-full px-4 py-3 bg-gray-100 dark:bg-black/20 rounded-xl mb-4 text-center focus:outline-none focus:ring-2 focus:ring-tg-blue transition">
-            
-            <button @click="finishSetup" :disabled="!tempName" class="w-full bg-tg-blue text-white py-3 rounded-xl font-medium hover:bg-blue-600 transition shadow-lg shadow-blue-500/20 disabled:opacity-50">
-                Начать общение
-            </button>
+        <div v-for="(log, i) in logs" :key="i" class="mb-1">
+            <span class="opacity-50">[{{ log.time }}]</span> 
+            <span :class="{'text-red-500 font-bold': log.type === 'error', 'text-yellow-400': log.type === 'warn'}">{{ log.msg }}</span>
         </div>
     </div>
 
-    <!-- ==================== LEFT SIDEBAR ==================== -->
-    <aside class="w-full md:w-80 bg-white dark:bg-[#212121] border-r border-gray-200 dark:border-gray-800 flex flex-col z-20 absolute md:relative h-full transition-transform duration-300" :class="mobileView === 'chat' ? '-translate-x-full md:translate-x-0' : 'translate-x-0'">
+    <!-- ONBOARDING -->
+    <div v-if="!user.setupComplete" class="absolute inset-0 z-50 bg-white dark:bg-[#1a1a1a] flex items-center justify-center p-4">
+        <div class="w-full max-w-sm text-center">
+            <div class="w-20 h-20 bg-tg-blue rounded-full mx-auto mb-4 flex items-center justify-center text-white text-3xl shadow-lg shadow-blue-500/30">
+                <i class="fa-regular fa-paper-plane"></i>
+            </div>
+            <h1 class="text-xl font-bold mb-6">Tweeyer Setup</h1>
+            
+            <div class="relative w-20 h-20 mx-auto mb-4" @click="$refs.avaInput.click()">
+                <img :src="tempAvatar || defaultAvatar" class="w-full h-full rounded-full object-cover border-2 border-gray-200">
+                <div class="absolute bottom-0 right-0 bg-tg-blue text-white w-6 h-6 rounded-full flex items-center justify-center text-xs border border-white">
+                    <i class="fa-solid fa-camera"></i>
+                </div>
+            </div>
+            <input type="file" ref="avaInput" @change="handleAvatar" accept="image/*" class="hidden">
+
+            <input v-model="tempName" placeholder="Твое имя" class="w-full p-3 bg-gray-100 dark:bg-[#2c2c2c] rounded-xl mb-4 text-center outline-none focus:ring-2 focus:ring-tg-blue">
+            <button @click="finishSetup" :disabled="!tempName" class="w-full bg-tg-blue text-white py-3 rounded-xl font-bold disabled:opacity-50">Начать</button>
+        </div>
+    </div>
+
+    <!-- SIDEBAR -->
+    <aside class="w-full md:w-80 bg-white dark:bg-[#212121] border-r dark:border-[#2f2f2f] flex flex-col z-20 absolute md:relative h-full transition-transform duration-300" 
+           :class="mobileView === 'chat' ? '-translate-x-full md:translate-x-0' : 'translate-x-0'">
         
-        <!-- Header -->
-        <div class="p-4 flex items-center justify-between">
-            <div class="flex items-center gap-3 cursor-pointer" @click="ui.showSettings = !ui.showSettings">
+        <div class="p-4 border-b dark:border-[#2f2f2f] flex items-center justify-between">
+            <div class="flex items-center gap-3">
                 <img :src="user.avatar || defaultAvatar" class="w-10 h-10 rounded-full object-cover">
                 <div>
-                    <h3 class="font-semibold text-sm">{{ user.name }}</h3>
-                    <p class="text-xs" :class="serverConnected ? 'text-green-500' : 'text-red-500'">{{ serverConnected ? 'Online' : 'Reconnecting...' }}</p>
+                    <div class="font-bold leading-tight">{{ user.name }}</div>
+                    <div class="text-xs font-mono opacity-60 flex items-center gap-1">
+                        <span class="w-2 h-2 rounded-full" :class="peerId ? 'bg-green-500' : 'bg-red-500'"></span>
+                        {{ statusText }}
+                    </div>
                 </div>
             </div>
-            <button @click="toggleTheme" class="w-8 h-8 rounded-full hover:bg-gray-100 dark:hover:bg-white/10 flex items-center justify-center transition">
-                <i class="fa-solid" :class="settings.theme === 'dark' ? 'fa-sun' : 'fa-moon'"></i>
-            </button>
-        </div>
-
-        <!-- Connection Panel -->
-        <div class="px-4 pb-4">
-            <div class="bg-gray-50 dark:bg-[#2c2c2c] p-3 rounded-xl mb-3">
-                <p class="text-xs text-gray-400 uppercase font-bold mb-1">Мой ID</p>
-                <div class="flex items-center gap-2">
-                    <code class="flex-1 text-xs truncate bg-transparent font-mono select-all">{{ myPeerId || 'Generating...' }}</code>
-                    <button @click="copyId" class="text-tg-blue hover:text-blue-400"><i class="fa-regular fa-copy"></i></button>
-                </div>
-            </div>
-
             <div class="flex gap-2">
-                <input v-model="targetId" placeholder="ID Друга" class="flex-1 bg-gray-100 dark:bg-[#2c2c2c] px-3 py-2 rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-tg-blue">
-                <button @click="connectToPeer" class="bg-tg-blue text-white w-10 h-10 rounded-lg hover:bg-blue-600 flex items-center justify-center transition">
-                    <i class="fa-solid fa-arrow-right"></i>
+                <button @click="ui.showDebug = !ui.showDebug" class="w-8 h-8 rounded-full bg-gray-100 dark:bg-white/10 flex items-center justify-center">
+                    <i class="fa-solid fa-bug text-xs"></i>
+                </button>
+                <button @click="toggleTheme" class="w-8 h-8 rounded-full bg-gray-100 dark:bg-white/10 flex items-center justify-center">
+                    <i class="fa-solid" :class="theme === 'dark' ? 'fa-sun' : 'fa-moon'"></i>
                 </button>
             </div>
         </div>
 
-        <!-- Chat List (History) -->
-        <div class="flex-1 overflow-y-auto px-2">
-            <div v-if="isConnected" class="p-2 bg-tg-blue/10 dark:bg-tg-blue/20 rounded-xl mb-2 cursor-pointer border-l-4 border-tg-blue">
-                <div class="flex items-center gap-3">
-                    <img :src="partner.avatar || defaultAvatar" class="w-10 h-10 rounded-full bg-white">
-                    <div class="flex-1 min-w-0">
-                        <h4 class="font-medium text-sm truncate">{{ partner.name || 'Собеседник' }}</h4>
-                        <p class="text-xs text-tg-blue truncate">Сейчас подключен</p>
-                    </div>
-                    <button @click="startCall" class="w-8 h-8 rounded-full bg-tg-blue text-white flex items-center justify-center shadow hover:bg-blue-600">
-                        <i class="fa-solid fa-phone text-xs"></i>
-                    </button>
-                </div>
+        <div class="p-4 bg-gray-50 dark:bg-[#1a1a1a]">
+            <label class="text-xs font-bold uppercase text-gray-400 block mb-1">Мой ID (Кидай другу)</label>
+            <div class="flex bg-white dark:bg-[#2c2c2c] p-2 rounded border dark:border-[#3a3a3a] mb-4">
+                <input readonly :value="peerId" class="flex-1 bg-transparent text-xs font-mono outline-none text-tg-blue" @click="copyId">
+                <i class="fa-regular fa-copy text-gray-400 cursor-pointer hover:text-tg-blue" @click="copyId"></i>
             </div>
-            
-            <div v-else class="text-center mt-10 text-gray-400 text-sm px-6">
-                <i class="fa-solid fa-earth-americas text-4xl mb-3 opacity-30"></i>
-                <p>Введите ID друга сверху, чтобы начать чат.</p>
+
+            <label class="text-xs font-bold uppercase text-gray-400 block mb-1">ID Друга</label>
+            <div class="flex gap-2">
+                <input v-model="targetId" placeholder="Вставь ID сюда..." class="flex-1 bg-white dark:bg-[#2c2c2c] p-2 rounded border dark:border-[#3a3a3a] outline-none text-sm font-mono">
+                <button @click="connect" :disabled="!peerId || connecting" class="bg-tg-blue text-white px-3 rounded hover:bg-blue-600 disabled:opacity-50">
+                    <i class="fa-solid" :class="connecting ? 'fa-spinner fa-spin' : 'fa-link'"></i>
+                </button>
+            </div>
+            <div v-if="connError" class="mt-2 text-xs text-red-500 font-bold bg-red-100 p-2 rounded">
+                {{ connError }}
             </div>
         </div>
-        
-        <div class="p-4 text-xs text-center text-gray-400 border-t border-gray-100 dark:border-gray-800">
-            Tweeyer v2.0 Ultimate <br>
-            <button @click="clearAll" class="text-red-400 hover:underline mt-1">Сбросить данные</button>
+
+        <div class="flex-1 overflow-y-auto p-2">
+            <div v-if="connection && connection.open" class="p-3 bg-tg-blue/10 rounded-xl border-l-4 border-tg-blue cursor-pointer" @click="mobileView = 'chat'">
+                <div class="flex justify-between items-center">
+                    <span class="font-bold">{{ partner.name || 'Собеседник' }}</span>
+                    <span class="text-xs text-green-600 font-bold">ONLINE</span>
+                </div>
+                <div class="text-xs text-gray-500 truncate mt-1">Нажмите, чтобы открыть чат</div>
+            </div>
+            <div v-else class="text-center mt-10 opacity-40">
+                <i class="fa-solid fa-users-slash text-3xl mb-2"></i>
+                <p class="text-xs">Нет подключений</p>
+            </div>
         </div>
     </aside>
 
-    <!-- ==================== MAIN CHAT ==================== -->
-    <main class="flex-1 flex flex-col h-full bg-[#8e8e93]/10 dark:bg-[#0f0f0f] relative w-full" :class="mobileView === 'sidebar' ? 'translate-x-full md:translate-x-0 hidden md:flex' : 'translate-x-0'">
+    <!-- CHAT AREA -->
+    <main class="flex-1 flex flex-col bg-[#eef2f5] dark:bg-[#0f0f0f] relative w-full h-full" 
+          :class="mobileView === 'sidebar' ? 'translate-x-full md:translate-x-0 hidden md:flex' : 'translate-x-0'">
         
-        <!-- Chat Header -->
-        <header class="h-16 bg-white dark:bg-[#212121] flex items-center justify-between px-4 border-b border-gray-200 dark:border-gray-800 shadow-sm z-10">
+        <!-- Header -->
+        <header class="h-14 bg-white dark:bg-[#212121] border-b dark:border-[#2f2f2f] flex items-center px-4 gap-3 z-10 shadow-sm">
+            <button @click="mobileView = 'sidebar'" class="md:hidden text-gray-500"><i class="fa-solid fa-arrow-left"></i></button>
             <div class="flex items-center gap-3">
-                <button @click="mobileView = 'sidebar'" class="md:hidden text-gray-500">
-                    <i class="fa-solid fa-arrow-left text-xl"></i>
-                </button>
-                <div class="flex items-center gap-3" v-if="isConnected">
-                    <img :src="partner.avatar || defaultAvatar" class="w-10 h-10 rounded-full object-cover bg-gray-200">
-                    <div>
-                        <h3 class="font-semibold text-sm leading-tight">{{ partner.name || 'Unknown' }}</h3>
-                        <span class="text-xs text-green-500">В сети</span>
+                <div class="w-9 h-9 rounded-full bg-gray-300 overflow-hidden">
+                    <img v-if="partner.avatar" :src="partner.avatar" class="w-full h-full object-cover">
+                </div>
+                <div>
+                    <div class="font-bold text-sm">{{ partner.name || 'Ожидание...' }}</div>
+                    <div class="text-xs" :class="connection && connection.open ? 'text-green-500' : 'text-gray-400'">
+                        {{ connection && connection.open ? 'В сети' : 'Не подключено' }}
                     </div>
                 </div>
-                <div v-else class="flex items-center gap-2 opacity-50">
-                    <div class="w-8 h-8 rounded-full bg-gray-300 animate-pulse"></div>
-                    <span class="text-sm">Ожидание...</span>
-                </div>
             </div>
-
-            <div class="flex items-center gap-4">
-                <button v-if="isConnected" @click="startCall" class="text-tg-blue hover:text-blue-600 transition" title="Voice Call">
-                    <i class="fa-solid fa-phone text-xl"></i>
-                </button>
-                <button class="text-gray-400 hover:text-gray-600">
-                    <i class="fa-solid fa-ellipsis-vertical text-xl"></i>
-                </button>
+            <div class="ml-auto flex gap-4">
+                <button v-if="connection && connection.open" @click="callUser" class="text-tg-blue hover:scale-110 transition"><i class="fa-solid fa-phone"></i></button>
             </div>
         </header>
 
-        <!-- Messages Area -->
-        <div ref="chatContainer" class="flex-1 overflow-y-auto p-4 space-y-2 bg-[url('https://web.telegram.org/img/bg_0.png')] bg-repeat dark:bg-none bg-fixed">
-            <div v-for="(msg, idx) in messages" :key="idx" class="flex flex-col" :class="msg.sender === 'me' ? 'items-end' : 'items-start'">
-                
-                <div class="max-w-[75%] min-w-[60px] relative group shadow-sm rounded-2xl px-3 py-2 text-sm md:text-[15px] leading-relaxed break-words"
-                     :class="msg.sender === 'me' 
-                        ? 'bg-[#eeffde] dark:bg-tg-blue text-black dark:text-white rounded-br-none' 
-                        : 'bg-white dark:bg-[#212121] text-black dark:text-gray-100 rounded-bl-none'">
+        <!-- Messages -->
+        <div ref="chatBox" class="flex-1 overflow-y-auto p-4 space-y-2">
+            <div v-for="(msg, i) in messages" :key="i" class="flex flex-col" :class="msg.sender === 'me' ? 'items-end' : 'items-start'">
+                <div class="max-w-[75%] px-3 py-2 rounded-lg text-sm shadow-sm break-words relative group"
+                     :class="msg.sender === 'me' ? 'bg-[#eeffde] dark:bg-tg-blue dark:text-white rounded-br-none' : 'bg-white dark:bg-[#212121] rounded-bl-none'">
                     
-                    <!-- Text -->
-                    <p v-if="msg.type === 'text'" class="whitespace-pre-wrap">{{ msg.content }}</p>
-
-                    <!-- Image -->
-                    <div v-if="msg.type === 'image'" class="rounded-lg overflow-hidden mt-1 mb-1">
-                        <img :src="msg.content" class="max-w-full max-h-72 object-cover cursor-pointer" @click="ui.zoomed = msg.content">
+                    <p v-if="msg.type === 'text'">{{ msg.content }}</p>
+                    <img v-if="msg.type === 'image'" :src="msg.content" class="rounded max-h-60 max-w-full cursor-pointer" @click="openZoom(msg.content)">
+                    
+                    <div v-if="msg.type === 'voice'" class="flex items-center gap-2 min-w-[150px]">
+                         <button @click="playAudio(msg.content)" class="w-6 h-6 rounded-full bg-black/10 flex items-center justify-center"><i class="fa-solid fa-play text-xs"></i></button>
+                         <div class="h-1 flex-1 bg-black/10 rounded-full"></div>
                     </div>
 
-                    <!-- Voice -->
-                    <div v-if="msg.type === 'voice'" class="flex items-center gap-2 pr-2 py-1">
-                        <div class="w-8 h-8 rounded-full bg-black/10 flex items-center justify-center">
-                            <i class="fa-solid fa-play text-xs"></i>
-                        </div>
-                        <audio controls :src="msg.content" class="h-8 w-48 opacity-90"></audio>
-                    </div>
-
-                    <!-- File -->
-                    <div v-if="msg.type === 'file'" class="flex items-center gap-3 p-1">
-                        <div class="w-10 h-10 bg-black/5 rounded-lg flex items-center justify-center text-xl text-tg-blue">
-                            <i class="fa-solid fa-file-arrow-down"></i>
-                        </div>
-                        <div class="overflow-hidden">
-                            <p class="text-xs font-bold truncate w-32">{{ msg.meta.name }}</p>
-                            <a :href="msg.content" :download="msg.meta.name" class="text-xs text-tg-blue hover:underline">Скачать</a>
-                        </div>
-                    </div>
-
-                    <div class="text-[10px] text-right mt-1 opacity-50 select-none" :class="msg.sender === 'me' ? 'text-green-900 dark:text-white' : 'text-gray-500'">
-                        {{ new Date(msg.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) }}
-                        <i v-if="msg.sender === 'me'" class="fa-solid fa-check ml-1"></i>
-                    </div>
+                    <div class="text-[10px] text-right mt-1 opacity-50">{{ formatTime(msg.timestamp) }}</div>
                 </div>
             </div>
         </div>
 
-        <!-- Input Area -->
-        <footer class="bg-white dark:bg-[#212121] p-2 md:p-4 flex items-end gap-2 border-t border-gray-200 dark:border-gray-800 z-20">
-            <input type="file" ref="fileInput" class="hidden" @change="e => sendFile(e, 'file')">
-            <input type="file" ref="imgInput" class="hidden" accept="image/*" @change="e => sendFile(e, 'image')">
-
-            <div class="relative group">
-                <button class="w-10 h-10 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition">
-                    <i class="fa-solid fa-paperclip text-xl"></i>
-                </button>
-                <!-- Tooltip menu for attachments -->
-                <div class="absolute bottom-12 left-0 bg-white dark:bg-[#2c2c2c] shadow-xl rounded-xl p-2 hidden group-hover:flex flex-col gap-1 w-32 border border-gray-100 dark:border-gray-700">
-                    <button @click="$refs.imgInput.click()" class="flex items-center gap-3 px-3 py-2 hover:bg-gray-100 dark:hover:bg-white/10 rounded-lg text-sm text-left">
-                        <i class="fa-regular fa-image text-blue-500"></i> Фото
-                    </button>
-                    <button @click="$refs.fileInput.click()" class="flex items-center gap-3 px-3 py-2 hover:bg-gray-100 dark:hover:bg-white/10 rounded-lg text-sm text-left">
-                        <i class="fa-regular fa-file text-orange-500"></i> Файл
-                    </button>
+        <!-- Input -->
+        <footer class="bg-white dark:bg-[#212121] p-2 flex items-end gap-2 border-t dark:border-[#2f2f2f]">
+             <div class="relative">
+                <button @click="ui.showAttach = !ui.showAttach" class="w-10 h-10 text-gray-400 hover:text-tg-blue"><i class="fa-solid fa-paperclip"></i></button>
+                <div v-if="ui.showAttach" class="absolute bottom-12 left-0 bg-white dark:bg-[#333] shadow-xl border dark:border-[#444] rounded-lg p-2 flex flex-col gap-2 w-32">
+                    <button @click="$refs.imgInput.click(); ui.showAttach=false" class="text-left px-2 py-1 hover:bg-gray-100 dark:hover:bg-white/10 rounded"><i class="fa-regular fa-image mr-2"></i>Фото</button>
                 </div>
+                <input type="file" ref="imgInput" class="hidden" accept="image/*" @change="sendImage">
             </div>
 
-            <textarea 
-                v-model="inputMsg" 
-                @keydown.enter.prevent="sendMessage"
-                placeholder="Написать сообщение..." 
-                rows="1"
-                class="flex-1 bg-gray-100 dark:bg-black/20 text-sm p-3 rounded-2xl resize-none max-h-32 focus:outline-none focus:ring-1 focus:ring-tg-blue transition scrollbar-hide"
-            ></textarea>
-
-            <div v-if="inputMsg.trim()">
-                <button @click="sendMessage" class="w-10 h-10 rounded-full bg-tg-blue text-white flex items-center justify-center hover:bg-blue-600 transition transform hover:scale-110">
-                    <i class="fa-solid fa-paper-plane"></i>
-                </button>
-            </div>
-            <div v-else>
-                <button 
-                    @mousedown="startRecording" 
-                    @mouseup="stopRecording"
-                    @mouseleave="cancelRecording"
-                    @touchstart.prevent="startRecording"
-                    @touchend.prevent="stopRecording"
-                    class="w-10 h-10 rounded-full flex items-center justify-center transition"
-                    :class="ui.recording ? 'bg-red-500 text-white scale-110 shadow-lg shadow-red-500/40' : 'text-gray-400 hover:text-gray-600 hover:bg-gray-100 dark:hover:bg-white/10'"
-                >
-                    <i class="fa-solid" :class="ui.recording ? 'fa-stop' : 'fa-microphone text-xl'"></i>
-                </button>
-            </div>
+            <textarea v-model="text" @keydown.enter.prevent="sendText" rows="1" placeholder="Сообщение..." class="flex-1 bg-gray-100 dark:bg-[#2c2c2c] rounded-2xl px-4 py-2.5 outline-none resize-none max-h-32"></textarea>
+            
+            <button v-if="text.trim()" @click="sendText" class="w-10 h-10 rounded-full bg-tg-blue text-white flex items-center justify-center hover:bg-blue-600 transition">
+                <i class="fa-solid fa-paper-plane"></i>
+            </button>
+            <button v-else @mousedown="startRec" @mouseup="stopRec" @touchstart.prevent="startRec" @touchend.prevent="stopRec" class="w-10 h-10 rounded-full flex items-center justify-center transition" :class="recording ? 'bg-red-500 text-white animate-pulse' : 'text-gray-400 hover:bg-gray-100'">
+                <i class="fa-solid fa-microphone"></i>
+            </button>
         </footer>
 
-        <!-- Recording Indicator -->
-        <div v-if="ui.recording" class="absolute bottom-20 left-1/2 -translate-x-1/2 bg-red-500 text-white px-4 py-1 rounded-full text-xs font-bold animate-pulse shadow-lg">
-            Recording... {{ ui.recordTime }}s
+        <!-- Call Overlay -->
+        <div v-if="callState.active || callState.incoming" class="absolute inset-0 z-50 bg-black/90 flex flex-col items-center justify-center text-white">
+            <div class="w-24 h-24 rounded-full overflow-hidden mb-4 border-4 border-white/20 animate-pulse">
+                <img :src="partner.avatar || defaultAvatar" class="w-full h-full object-cover">
+            </div>
+            <h2 class="text-2xl font-bold mb-2">{{ partner.name }}</h2>
+            <p class="mb-8 opacity-70">{{ callState.incoming ? 'Входящий звонок...' : 'Разговор...' }}</p>
+            <div class="flex gap-8">
+                <button v-if="callState.incoming" @click="answerCall" class="w-16 h-16 rounded-full bg-green-500 flex items-center justify-center text-2xl"><i class="fa-solid fa-phone"></i></button>
+                <button @click="endCall" class="w-16 h-16 rounded-full bg-red-500 flex items-center justify-center text-2xl"><i class="fa-solid fa-phone-slash"></i></button>
+            </div>
         </div>
-
     </main>
 
-    <!-- Image Zoom Modal -->
-    <div v-if="ui.zoomed" @click="ui.zoomed = null" class="fixed inset-0 z-[60] bg-black/90 flex items-center justify-center p-4 cursor-zoom-out">
-        <img :src="ui.zoomed" class="max-w-full max-h-full rounded-lg shadow-2xl">
+    <!-- Zoom Image -->
+    <div v-if="zoomImg" @click="zoomImg = null" class="fixed inset-0 z-[100] bg-black/95 flex items-center justify-center p-2">
+        <img :src="zoomImg" class="max-w-full max-h-full rounded">
     </div>
 
 </div>
 
 <script>
-    const { createApp, ref, reactive, onMounted, nextTick, watch } = Vue;
+const { createApp, reactive, ref, onMounted, nextTick, watch } = Vue;
 
-    // --- SOUNDS ASSETS (Short Base64) ---
-    const SOUNDS = {
-        sent: new Audio("data:audio/mp3;base64,SUQzBAAAAAAAI1RTSXMAAAAPAAADTGF2ZjU4LjI5LjEwMAAAAAAAAAAAAAAA//uQZAAAAAAAALAAAAAABAAJAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA//uQZAAAAAAAALAAAAAABAAJAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"), // Placeholder empty, replace if needed or keep silent
-        received: new Audio("data:audio/wav;base64,UklGRl9vT19XQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YT"), // Short pop
-        ringtone: new Audio("data:audio/wav;base64,UklGRiYAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQAAAAA=") // Simple loop
-    };
-    
-    // Better sounds placeholders (Simple beeps generated)
-    // Using a function to generate beep for simplicity and size
-    const playBeep = (freq = 440, type = 'sine', duration = 100) => {
-        const ctx = new (window.AudioContext || window.webkitAudioContext)();
-        const osc = ctx.createOscillator();
-        const gain = ctx.createGain();
-        osc.type = type;
-        osc.frequency.value = freq;
-        osc.connect(gain);
-        gain.connect(ctx.destination);
-        osc.start();
-        gain.gain.exponentialRampToValueAtTime(0.00001, ctx.currentTime + duration/1000);
-        setTimeout(() => osc.stop(), duration);
-    };
+createApp({
+    setup() {
+        // STATE
+        const logs = ref([]);
+        const log = (msg, type='info') => {
+            console.log(`[${type.toUpperCase()}] ${msg}`);
+            logs.value.unshift({ time: new Date().toLocaleTimeString(), msg, type });
+        };
 
-    const playRingtone = () => {
-        // Pseudo ringtone loop
-        if(window.ringInterval) return;
-        window.ringInterval = setInterval(() => {
-            playBeep(880, 'sine', 300);
-            setTimeout(() => playBeep(660, 'sine', 300), 400);
-        }, 2000);
-    };
+        const user = reactive({ name: '', avatar: '', setupComplete: false });
+        const partner = reactive({ name: '', avatar: '' });
+        const messages = ref([]);
+        const text = ref('');
+        const peerId = ref('');
+        const targetId = ref('');
+        const mobileView = ref('sidebar');
+        const theme = ref('light');
+        const connecting = ref(false);
+        const connError = ref('');
+        
+        const ui = reactive({ showDebug: false, showAttach: false });
+        const callState = reactive({ active: false, incoming: false, stream: null, callObj: null });
+        const recording = ref(false);
+        
+        // Temp vars
+        const tempName = ref('');
+        const tempAvatar = ref('');
+        const defaultAvatar = 'https://cdn-icons-png.flaticon.com/512/149/149071.png';
+        const zoomImg = ref(null);
 
-    const stopRingtone = () => {
-        if(window.ringInterval) {
-            clearInterval(window.ringInterval);
-            window.ringInterval = null;
-        }
-    };
+        // Core Objects
+        let peer = null;
+        let connection = null;
+        let mediaRecorder = null;
+        let audioChunks = [];
 
-    createApp({
-        setup() {
-            // State
-            const user = reactive({ name: '', avatar: '', setupComplete: false });
-            const partner = reactive({ id: '', name: '', avatar: '' });
-            const messages = ref([]);
-            const inputMsg = ref('');
-            const myPeerId = ref('');
-            const targetId = ref('');
-            const serverConnected = ref(false);
-            const mobileView = ref('sidebar');
-            const connection = ref(null);
-            const peer = ref(null);
-
-            // Call State
-            const call = reactive({
-                active: false,
-                incoming: false,
-                calling: false,
-                muted: false,
-                obj: null,
-                stream: null,
-                startTime: null
-            });
-            const formatCallTime = ref('00:00');
-            let callTimerInterval = null;
-
-            const ui = reactive({
-                showSettings: false,
-                recording: false,
-                recordTime: 0,
-                zoomed: null
-            });
-
-            const settings = reactive({ theme: 'light' });
-            
-            const tempName = ref('');
-            const tempAvatar = ref('');
-            const defaultAvatar = 'https://cdn-icons-png.flaticon.com/512/847/847969.png';
-
-            // Recorder refs
-            let mediaRecorder = null;
-            let audioChunks = [];
-            let recInterval = null;
-
-            // --- Lifecycle ---
-            onMounted(() => {
-                const savedUser = localStorage.getItem('tweeyer_user');
-                const savedTheme = localStorage.getItem('tweeyer_theme');
-                const savedMsgs = localStorage.getItem('tweeyer_msgs');
-
-                if (savedTheme) {
-                    settings.theme = savedTheme;
-                    if(savedTheme === 'dark') document.documentElement.classList.add('dark');
-                }
-                
-                if (savedMsgs) {
-                    messages.value = JSON.parse(savedMsgs);
-                }
-
-                if (savedUser) {
-                    const u = JSON.parse(savedUser);
-                    user.name = u.name;
-                    user.avatar = u.avatar;
-                    user.setupComplete = true;
-                    initPeer(localStorage.getItem('tweeyer_pid'));
-                }
-            });
-
-            // Save messages on change
-            watch(messages, (newVal) => {
-                localStorage.setItem('tweeyer_msgs', JSON.stringify(newVal));
-            }, { deep: true });
-
-            // --- Setup ---
-            const handleAvatarUpload = (e) => {
-                const file = e.target.files[0];
-                if (!file) return;
-                const reader = new FileReader();
-                reader.onload = (evt) => {
-                    if(!user.setupComplete) tempAvatar.value = evt.target.result;
-                    else {
-                        user.avatar = evt.target.result;
-                        saveUser();
-                        sendInfo();
-                    }
-                };
-                reader.readAsDataURL(file);
-            };
-
-            const finishSetup = () => {
-                user.name = tempName.value;
-                user.avatar = tempAvatar.value || defaultAvatar;
-                user.setupComplete = true;
-                saveUser();
+        // --- INITIALIZATION ---
+        onMounted(() => {
+            // Load LocalStorage
+            const u = localStorage.getItem('tw_user');
+            if(u) {
+                Object.assign(user, JSON.parse(u));
                 initPeer();
-            };
+            }
+            const t = localStorage.getItem('tw_theme');
+            if(t) setTheme(t);
+            const m = localStorage.getItem('tw_msgs');
+            if(m) messages.value = JSON.parse(m);
+        });
 
-            const saveUser = () => {
-                localStorage.setItem('tweeyer_user', JSON.stringify(user));
-            };
+        watch(messages, (val) => localStorage.setItem('tw_msgs', JSON.stringify(val)), { deep: true });
 
-            const toggleTheme = () => {
-                settings.theme = settings.theme === 'dark' ? 'light' : 'dark';
-                document.documentElement.classList.toggle('dark');
-                localStorage.setItem('tweeyer_theme', settings.theme);
-            };
-
-            const clearAll = () => {
-                if(confirm("Удалить профиль и историю?")) {
-                    localStorage.clear();
-                    location.reload();
+        // --- PEER JS LOGIC (ROBUST) ---
+        const initPeer = () => {
+            log("Initializing PeerJS...");
+            // Use public Google STUN servers for better NAT traversal
+            const config = {
+                debug: 1,
+                config: {
+                    iceServers: [
+                        { urls: 'stun:stun1.l.google.com:19302' },
+                        { urls: 'stun:stun2.l.google.com:19302' }
+                    ]
                 }
             };
 
-            // --- Peer Logic ---
-            const initPeer = (savedId = null) => {
-                // Try to reuse ID if provided, otherwise generate random
-                peer.value = new Peer(savedId, {
-                    debug: 1,
-                    config: {
-                        iceServers: [
-                            { urls: 'stun:stun1.l.google.com:19302' },
-                            { urls: 'stun:stun2.l.google.com:19302' }
-                        ]
-                    }
-                });
+            // Create new Peer (Random ID to avoid collisions)
+            peer = new Peer(null, config);
 
-                peer.value.on('open', (id) => {
-                    myPeerId.value = id;
-                    localStorage.setItem('tweeyer_pid', id);
-                    serverConnected.value = true;
-                });
+            peer.on('open', (id) => {
+                log(`My ID generated: ${id}`);
+                peerId.value = id;
+            });
 
-                peer.value.on('error', (err) => {
-                    console.log(err);
-                    if(err.type === 'unavailable-id') {
-                        // If saved ID is taken, init without ID
-                        initPeer(null); 
-                    } else {
-                        serverConnected.value = false;
-                    }
-                });
+            peer.on('connection', (conn) => {
+                log(`Incoming connection from: ${conn.peer}`);
+                handleConn(conn);
+            });
 
-                // Incoming Data Connection
-                peer.value.on('connection', (conn) => {
-                    setupConnection(conn);
-                });
+            peer.on('call', (call) => {
+                log("Incoming Call...");
+                callState.incoming = true;
+                callState.callObj = call;
+            });
 
-                // Incoming Call
-                peer.value.on('call', (incomingCall) => {
-                    call.incoming = true;
-                    call.obj = incomingCall;
-                    playRingtone();
-                });
-            };
+            peer.on('error', (err) => {
+                log(`Peer Error: ${err.type}`, 'error');
+                if(err.type === 'peer-unavailable') connError.value = "Пользователь не найден (он оффлайн или неверный ID)";
+                if(err.type === 'network') connError.value = "Проблема с сетью/интернетом";
+                connecting.value = false;
+            });
 
-            const connectToPeer = () => {
-                if(!targetId.value) return;
-                const conn = peer.value.connect(targetId.value);
-                setupConnection(conn);
-            };
+            peer.on('disconnected', () => {
+                log("Disconnected from Signaling Server. Reconnecting...", 'warn');
+                peer.reconnect();
+            });
+        };
 
-            const setupConnection = (conn) => {
-                connection.value = conn;
+        const connect = () => {
+            if(!targetId.value) return;
+            connError.value = '';
+            connecting.value = true;
+            log(`Attempting to connect to ${targetId.value.trim()}...`);
+            
+            const conn = peer.connect(targetId.value.trim(), {
+                reliable: true,
+                serialization: 'json' // More stable for simple data
+            });
+
+            handleConn(conn);
+        };
+
+        const handleConn = (conn) => {
+            connection = conn;
+            
+            conn.on('open', () => {
+                log("Connection ESTABLISHED!", 'success');
+                connecting.value = false;
+                connError.value = '';
+                mobileView.value = 'chat';
                 
-                conn.on('open', () => {
-                    sendInfo();
-                    mobileView.value = 'chat';
-                });
+                // Send my info
+                conn.send({ type: 'info', payload: { name: user.name, avatar: user.avatar } });
+            });
 
-                conn.on('data', (data) => {
-                    if (data.type === 'info') {
-                        partner.name = data.payload.name;
-                        partner.avatar = data.payload.avatar;
-                    } else {
-                        messages.value.push({
-                            sender: 'partner',
-                            type: data.type,
-                            content: data.payload,
-                            meta: data.meta,
-                            timestamp: Date.now()
-                        });
-                        playBeep(600, 'sine', 100); // Receive sound
-                        scrollToBottom();
-                    }
-                });
-                
-                conn.on('close', () => {
-                    connection.value = null;
-                });
-            };
-
-            const sendInfo = () => {
-                if(connection.value && connection.value.open) {
-                    connection.value.send({ type: 'info', payload: { name: user.name, avatar: user.avatar } });
+            conn.on('data', (data) => {
+                if(data.type === 'info') {
+                    partner.name = data.payload.name;
+                    partner.avatar = data.payload.avatar;
+                } else {
+                    messages.value.push({ ...data, sender: 'partner' });
+                    scrollToBottom();
                 }
-            };
+            });
 
-            const isConnected = Vue.computed(() => connection.value && connection.value.open);
+            conn.on('close', () => {
+                log("Connection Closed", 'warn');
+                connection = null;
+            });
 
-            // --- Messaging ---
-            const sendMessage = () => {
-                if (!inputMsg.value.trim() || !isConnected.value) return;
-                
-                const msg = {
-                    type: 'text',
-                    payload: inputMsg.value,
-                    meta: {},
-                    timestamp: Date.now()
-                };
+            conn.on('error', (err) => {
+                log(`Connection Error: ${err}`, 'error');
+                connError.value = "Ошибка соединения";
+                connecting.value = false;
+            });
+        };
 
-                connection.value.send(msg);
-                messages.value.push({ ...msg, content: msg.payload, sender: 'me' });
-                inputMsg.value = '';
-                playBeep(800, 'sine', 50); // Sent sound
+        // --- MESSAGING ---
+        const sendText = () => {
+            if(!text.value.trim() || !connection) return;
+            const msg = { type: 'text', content: text.value, timestamp: Date.now() };
+            connection.send(msg);
+            messages.value.push({ ...msg, sender: 'me' });
+            text.value = '';
+            scrollToBottom();
+        };
+
+        const sendImage = (e) => {
+            const file = e.target.files[0];
+            if(!file || !connection) return;
+            const reader = new FileReader();
+            reader.onload = (evt) => {
+                const msg = { type: 'image', content: evt.target.result, timestamp: Date.now() };
+                connection.send(msg);
+                messages.value.push({ ...msg, sender: 'me' });
                 scrollToBottom();
             };
+            reader.readAsDataURL(file);
+        };
 
-            const sendFile = (e, type) => {
-                const file = e.target.files[0];
-                if (!file || !isConnected.value) return;
+        // --- CALLS ---
+        const callUser = async () => {
+            if(!connection) return;
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                callState.stream = stream;
+                const call = peer.call(connection.peer, stream);
+                callState.callObj = call;
+                callState.active = true;
                 
-                const reader = new FileReader();
-                reader.onload = (evt) => {
-                    const msg = {
-                        type: type,
-                        payload: evt.target.result,
-                        meta: { name: file.name },
-                        timestamp: Date.now()
+                call.on('stream', (remoteStream) => playStream(remoteStream));
+                call.on('close', endCall);
+            } catch(e) { log("Mic Error: " + e, 'error'); alert("Нужен доступ к микрофону!"); }
+        };
+
+        const answerCall = async () => {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                callState.stream = stream;
+                callState.callObj.answer(stream);
+                callState.incoming = false;
+                callState.active = true;
+                
+                callState.callObj.on('stream', (remoteStream) => playStream(remoteStream));
+                callState.callObj.on('close', endCall);
+            } catch(e) { log("Mic Error: " + e, 'error'); }
+        };
+
+        const endCall = () => {
+            if(callState.callObj) callState.callObj.close();
+            if(callState.stream) callState.stream.getTracks().forEach(t => t.stop());
+            callState.active = false;
+            callState.incoming = false;
+        };
+
+        const playStream = (stream) => {
+            const audio = new Audio();
+            audio.srcObject = stream;
+            audio.play();
+        };
+
+        // --- VOICE MSG ---
+        const startRec = async () => {
+            if(!connection) return;
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                mediaRecorder = new MediaRecorder(stream);
+                audioChunks = [];
+                recording.value = true;
+                mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
+                mediaRecorder.onstop = () => {
+                    const blob = new Blob(audioChunks);
+                    const reader = new FileReader();
+                    reader.readAsDataURL(blob);
+                    reader.onloadend = () => {
+                        const msg = { type: 'voice', content: reader.result, timestamp: Date.now() };
+                        connection.send(msg);
+                        messages.value.push({ ...msg, sender: 'me' });
+                        scrollToBottom();
                     };
-                    connection.value.send(msg);
-                    messages.value.push({ ...msg, content: msg.payload, sender: 'me' });
-                    scrollToBottom();
+                    stream.getTracks().forEach(t => t.stop());
                 };
-                reader.readAsDataURL(file);
-                e.target.value = '';
-            };
+                mediaRecorder.start();
+            } catch(e) { alert("Mic required"); }
+        };
 
-            // --- Calls ---
-            const startCall = async () => {
-                if(!isConnected.value) return;
-                try {
-                    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                    call.stream = stream;
-                    
-                    const outgoingCall = peer.value.call(connection.value.peer, stream);
-                    call.obj = outgoingCall;
-                    call.calling = true;
+        const stopRec = () => {
+            if(mediaRecorder && recording.value) {
+                mediaRecorder.stop();
+                recording.value = false;
+            }
+        };
 
-                    outgoingCall.on('stream', (remoteStream) => {
-                        handleRemoteStream(remoteStream);
-                    });
-                    
-                    outgoingCall.on('close', resetCall);
-                    outgoingCall.on('error', resetCall);
+        const playAudio = (b64) => new Audio(b64).play();
 
-                } catch (err) {
-                    alert("Ошибка микрофона: " + err);
-                }
-            };
+        // --- UTILS ---
+        const finishSetup = () => {
+            user.name = tempName.value;
+            user.avatar = tempAvatar.value;
+            user.setupComplete = true;
+            localStorage.setItem('tw_user', JSON.stringify(user));
+            initPeer();
+        };
+        const handleAvatar = (e) => {
+            const r = new FileReader();
+            r.onload = (ev) => tempAvatar.value = ev.target.result;
+            if(e.target.files[0]) r.readAsDataURL(e.target.files[0]);
+        };
+        const copyId = () => navigator.clipboard.writeText(peerId.value);
+        const scrollToBottom = () => nextTick(() => { 
+            const el = document.querySelector('main > div.overflow-y-auto');
+            if(el) el.scrollTop = el.scrollHeight; 
+        });
+        const formatTime = (ts) => new Date(ts).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+        const toggleTheme = () => setTheme(theme.value === 'dark' ? 'light' : 'dark');
+        const setTheme = (t) => {
+            theme.value = t;
+            localStorage.setItem('tw_theme', t);
+            if(t==='dark') document.documentElement.classList.add('dark');
+            else document.documentElement.classList.remove('dark');
+        };
+        const openZoom = (src) => zoomImg.value = src;
+        const statusText = Vue.computed(() => {
+            if(!peerId.value) return 'Connecting to server...';
+            return 'Server OK';
+        });
 
-            const answerCall = async () => {
-                stopRingtone();
-                try {
-                    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                    call.stream = stream;
-                    call.obj.answer(stream);
-                    
-                    call.incoming = false;
-                    call.active = true;
-                    call.startTime = Date.now();
-                    
-                    call.obj.on('stream', (remoteStream) => {
-                        handleRemoteStream(remoteStream);
-                    });
-                    
-                    call.obj.on('close', resetCall);
-                    
-                    // Timer
-                    callTimerInterval = setInterval(() => {
-                        const diff = Math.floor((Date.now() - call.startTime) / 1000);
-                        const m = Math.floor(diff / 60).toString().padStart(2, '0');
-                        const s = (diff % 60).toString().padStart(2, '0');
-                        formatCallTime.value = `${m}:${s}`;
-                    }, 1000);
-
-                } catch (err) {
-                    console.error(err);
-                    resetCall();
-                }
-            };
-
-            const handleRemoteStream = (remoteStream) => {
-                call.active = true;
-                call.calling = false;
-                const audioEl = document.querySelector('audio'); // Simplification for Vue refs inside modal
-                // Or better:
-                const tempAudio = new Audio();
-                tempAudio.srcObject = remoteStream;
-                tempAudio.play();
-            };
-
-            const endCall = () => {
-                if(call.obj) call.obj.close();
-                resetCall();
-            };
-
-            const resetCall = () => {
-                stopRingtone();
-                if(call.stream) call.stream.getTracks().forEach(t => t.stop());
-                call.active = false;
-                call.incoming = false;
-                call.calling = false;
-                call.obj = null;
-                call.stream = null;
-                clearInterval(callTimerInterval);
-                formatCallTime.value = '00:00';
-            };
-
-            const toggleMute = () => {
-                if(call.stream) {
-                    const audioTrack = call.stream.getAudioTracks()[0];
-                    audioTrack.enabled = !audioTrack.enabled;
-                    call.muted = !audioTrack.enabled;
-                }
-            };
-
-            // --- Voice Messages ---
-            const startRecording = async () => {
-                if(!isConnected.value) return;
-                try {
-                    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                    mediaRecorder = new MediaRecorder(stream);
-                    audioChunks = [];
-                    ui.recording = true;
-                    ui.recordTime = 0;
-                    
-                    recInterval = setInterval(() => ui.recordTime++, 1000);
-
-                    mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
-                    mediaRecorder.onstop = () => {
-                        const blob = new Blob(audioChunks, { type: 'audio/mp3' }); // webm/mp3
-                        const reader = new FileReader();
-                        reader.readAsDataURL(blob);
-                        reader.onloadend = () => {
-                            const base64 = reader.result;
-                            const msg = { type: 'voice', payload: base64, meta: {}, timestamp: Date.now() };
-                            connection.value.send(msg);
-                            messages.value.push({ ...msg, content: base64, sender: 'me' });
-                            scrollToBottom();
-                        };
-                        stream.getTracks().forEach(t => t.stop());
-                    };
-                    mediaRecorder.start();
-                } catch(e) { console.error(e); }
-            };
-
-            const stopRecording = () => {
-                if(mediaRecorder && ui.recording) {
-                    mediaRecorder.stop();
-                    clearInterval(recInterval);
-                    ui.recording = false;
-                }
-            };
-
-            const cancelRecording = () => {
-                if(mediaRecorder && ui.recording) {
-                    mediaRecorder.stop();
-                    // Prevent saving logic by clearing chunks or checking flag, simplified here
-                    clearInterval(recInterval);
-                    ui.recording = false;
-                }
-            };
-
-            // --- Utils ---
-            const scrollToBottom = () => {
-                nextTick(() => {
-                    const container = document.querySelector('main > div.overflow-y-auto');
-                    if(container) container.scrollTop = container.scrollHeight;
-                });
-            };
-
-            const copyId = () => navigator.clipboard.writeText(myPeerId.value);
-
-            return {
-                user, partner, messages, inputMsg,
-                myPeerId, targetId, serverConnected, isConnected,
-                ui, settings, mobileView,
-                call, formatCallTime,
-                tempName, tempAvatar, defaultAvatar,
-                finishSetup, handleAvatarUpload,
-                connectToPeer, sendMessage, sendFile, copyId,
-                startRecording, stopRecording, cancelRecording,
-                startCall, answerCall, endCall, toggleMute,
-                toggleTheme, clearAll
-            };
-        }
-    }).mount('#app');
+        return {
+            user, partner, messages, text, peerId, targetId, mobileView, theme, 
+            logs, ui, connecting, connError, callState, recording, zoomImg,
+            tempName, tempAvatar, defaultAvatar, statusText,
+            finishSetup, handleAvatar, copyId, connect, sendText, sendImage,
+            startRec, stopRec, playAudio, callUser, answerCall, endCall,
+            formatTime, toggleTheme, openZoom
+        };
+    }
+}).mount('#app');
 </script>
 </body>
 </html>
