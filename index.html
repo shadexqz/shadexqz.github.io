@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tweeyer | Secure P2P Messenger</title>
+    <title>Tweeyer | Stable P2P Messenger</title>
     
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -88,9 +88,9 @@
             </div>
             <div class="flex-1 min-w-0">
                 <h3 class="font-semibold truncate">{{ user.name }}</h3>
-                <div class="flex items-center gap-2 text-xs text-slate-500">
-                    <span class="w-2 h-2 rounded-full" :class="isConnected ? 'bg-green-500' : 'bg-red-500'"></span>
-                    {{ isConnected ? t('online') : t('offline') }}
+                <div class="flex items-center gap-2 text-xs">
+                    <span class="w-2 h-2 rounded-full" :class="serverConnected ? 'bg-green-500' : 'bg-red-500'"></span>
+                    <span :class="serverConnected ? 'text-green-600' : 'text-red-500'">{{ serverConnected ? t('server_ok') : t('server_err') }}</span>
                 </div>
             </div>
             <button @click="toggleTheme" class="w-8 h-8 rounded-full flex items-center justify-center hover:bg-slate-200 dark:hover:bg-slate-700 transition">
@@ -99,6 +99,15 @@
         </div>
 
         <div class="p-4 flex-1 overflow-y-auto">
+            <!-- ERROR BANNER -->
+            <div v-if="ui.errorMsg" class="mb-4 p-3 bg-red-100 border border-red-200 text-red-700 text-xs rounded-lg flex items-start gap-2">
+                <i class="fa-solid fa-circle-exclamation mt-0.5"></i>
+                <div class="flex-1">
+                    {{ ui.errorMsg }}
+                    <button @click="ui.errorMsg = ''" class="block mt-1 underline font-bold">Dismiss</button>
+                </div>
+            </div>
+
             <div class="mb-6 p-4 bg-white dark:bg-[#2C2C2E] rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
                 <label class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 block">{{ t('my_id') }}</label>
                 <div class="flex items-center gap-2 bg-slate-50 dark:bg-black/20 p-2 rounded-lg border border-slate-200 dark:border-slate-600">
@@ -113,7 +122,7 @@
                 <label class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 block">{{ t('connect_to') }}</label>
                 <div class="flex gap-2">
                     <input v-model="targetId" type="text" :placeholder="t('enter_id')" class="flex-1 px-3 py-2 text-sm rounded-lg bg-white dark:bg-[#2C2C2E] border border-slate-200 dark:border-slate-600 focus:border-brand-light outline-none">
-                    <button @click="connectToPeer" :disabled="!myPeerId || isConnected || !targetId" class="bg-slate-900 dark:bg-white text-white dark:text-black px-4 rounded-lg text-sm font-medium disabled:opacity-50">
+                    <button @click="connectToPeer" :disabled="!serverConnected || isConnected || !targetId" class="bg-slate-900 dark:bg-white text-white dark:text-black px-4 rounded-lg text-sm font-medium disabled:opacity-50">
                         <i class="fa-solid fa-link"></i>
                     </button>
                 </div>
@@ -210,7 +219,6 @@
             </div>
             
             <div v-else class="flex items-end gap-2 relative">
-                <!-- File Inputs with CORRECTED HANDLERS -->
                 <input type="file" ref="imageInput" accept="image/*" class="hidden" @change="sendFile($event, 'image')">
                 <input type="file" ref="fileInput" class="hidden" @change="sendFile($event, 'file')">
 
@@ -257,14 +265,12 @@
                         <i class="fa-solid" :class="ui.isRecording ? 'fa-stop' : 'fa-microphone'"></i>
                     </button>
                 </div>
-
             </div>
             
             <div v-if="ui.isRecording" class="absolute bottom-20 left-1/2 -translate-x-1/2 bg-red-500 text-white px-4 py-2 rounded-full shadow-lg text-xs font-bold animate-pulse">
                 Recording... {{ ui.recordingTime }}s
             </div>
         </footer>
-
     </main>
     
     <div v-if="ui.zoomedImage" @click="ui.zoomedImage = null" class="fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-4">
@@ -286,6 +292,7 @@
             const mobileView = ref('sidebar');
             const inputMessage = ref('');
             const messages = ref([]);
+            const serverConnected = ref(false);
             
             const defaultAvatar = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23cbd5e1'%3E%3Cpath d='M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z'/%3E%3C/svg%3E";
 
@@ -311,7 +318,8 @@
                 showAttachments: false,
                 isRecording: false,
                 recordingTime: 0,
-                zoomedImage: null
+                zoomedImage: null,
+                errorMsg: ''
             });
 
             // Onboarding Vars
@@ -332,9 +340,9 @@
                     nickname: "Display Name",
                     start_messaging: "Start Messaging",
                     my_id: "My Secure ID",
-                    generating: "Generating...",
+                    generating: "Connecting...",
                     connect_to: "Connect to Friend",
-                    enter_id: "Paste ID here...",
+                    enter_id: "Paste Friend's ID",
                     online: "Online",
                     offline: "Offline",
                     reset_app: "Reset Application",
@@ -346,7 +354,8 @@
                     photo: "Photo",
                     file: "File",
                     download: "Download",
-                    edit_profile: "Edit Profile"
+                    server_ok: "Server Connected",
+                    server_err: "Server Disconnected"
                 },
                 ru: {
                     welcome_title: "Настройка профиля",
@@ -354,9 +363,9 @@
                     nickname: "Имя",
                     start_messaging: "Начать общение",
                     my_id: "Мой ID",
-                    generating: "Генерация...",
+                    generating: "Подключение...",
                     connect_to: "Подключиться к другу",
-                    enter_id: "Вставьте ID сюда...",
+                    enter_id: "ID друга",
                     online: "В сети",
                     offline: "Не в сети",
                     reset_app: "Сбросить настройки",
@@ -368,7 +377,8 @@
                     photo: "Фото",
                     file: "Файл",
                     download: "Скачать",
-                    edit_profile: "Ред. профиль"
+                    server_ok: "Сервер: ОК",
+                    server_err: "Нет связи с сервером"
                 }
             };
 
@@ -454,11 +464,17 @@
                 initPeer();
             };
 
-            // --- PeerJS Core ---
+            // --- PeerJS Core (FIXED) ---
             const initPeer = () => {
-                // ADDED GOOGLE STUN SERVERS FOR BETTER CONNECTIVITY
+                // Destroy old instance if exists
+                if(peer.value) {
+                    peer.value.destroy();
+                }
+
+                ui.errorMsg = '';
+                
                 peer.value = new Peer(null, {
-                    debug: 2,
+                    debug: 1,
                     config: {
                         iceServers: [
                             { urls: 'stun:stun.l.google.com:19302' },
@@ -468,30 +484,61 @@
                 });
 
                 peer.value.on('open', (id) => {
+                    console.log('My ID:', id);
                     myPeerId.value = id;
+                    serverConnected.value = true;
                 });
 
                 peer.value.on('connection', (conn) => {
                     handleConnection(conn);
                 });
 
+                peer.value.on('disconnected', () => {
+                    serverConnected.value = false;
+                    // Attempt Reconnect
+                    setTimeout(() => {
+                        if(peer.value && !peer.value.destroyed) {
+                            peer.value.reconnect();
+                        }
+                    }, 3000);
+                });
+
                 peer.value.on('error', (err) => {
                     console.error("Peer Error:", err);
-                    alert("Connection Error: " + err.type);
+                    serverConnected.value = false;
+
+                    if (err.type === 'peer-unavailable') {
+                        ui.errorMsg = `User ${targetId.value} not found. They may be offline or have a new ID. Ask them to refresh.`;
+                    } else if (err.type === 'network') {
+                        ui.errorMsg = "Network error. Checking connection...";
+                    } else {
+                        ui.errorMsg = `Connection Error: ${err.type}`;
+                    }
                 });
             };
 
             const connectToPeer = () => {
-                if (!targetId.value) return;
-                const conn = peer.value.connect(targetId.value);
+                if (!targetId.value.trim()) return;
+                
+                // Close existing connection cleanly
+                if (connection.value) {
+                    connection.value.close();
+                }
+
+                ui.errorMsg = ''; // Clear previous errors
+                const conn = peer.value.connect(targetId.value.trim(), {
+                    reliable: true
+                });
+
                 handleConnection(conn);
             };
 
             const handleConnection = (conn) => {
-                if (connection.value) connection.value.close();
                 connection.value = conn;
 
+                // Wait for open to ensure validity
                 connection.value.on('open', () => {
+                    ui.errorMsg = '';
                     sendInfo();
                     mobileView.value = 'chat';
                 });
@@ -504,12 +551,17 @@
                     connection.value = null;
                     partner.name = '';
                     partner.avatar = '';
-                    alert('Peer disconnected');
+                    ui.errorMsg = "Peer disconnected.";
+                });
+
+                connection.value.on('error', (err) => {
+                    console.error("Connection Error", err);
+                    ui.errorMsg = "Connection failed.";
                 });
             };
 
             const sendInfo = () => {
-                if (!connection.value) return;
+                if (!connection.value || !connection.value.open) return;
                 connection.value.send({
                     type: 'info',
                     payload: { name: user.name, avatar: user.avatar }
@@ -574,7 +626,7 @@
             // --- Voice Recording ---
             const startRecording = async () => {
                 if(!navigator.mediaDevices) {
-                    alert("Microphone access not supported (Requires HTTPS or localhost)");
+                    ui.errorMsg = "Mic access requires HTTPS.";
                     return;
                 }
                 try {
@@ -614,7 +666,7 @@
 
                 } catch (err) {
                     console.error("Mic Error", err);
-                    alert("Microphone access denied.");
+                    ui.errorMsg = "Microphone access denied.";
                 }
             };
 
@@ -646,7 +698,9 @@
             };
 
             const copyId = () => {
-                navigator.clipboard.writeText(myPeerId.value);
+                if(myPeerId.value) {
+                    navigator.clipboard.writeText(myPeerId.value);
+                }
             };
 
             const formatTime = (ts) => {
@@ -669,7 +723,7 @@
             return {
                 user, partner, settings, ui, messages,
                 myPeerId, targetId, inputMessage,
-                mobileView, isConnected,
+                mobileView, isConnected, serverConnected,
                 tempName, tempAvatar,
                 defaultAvatar,
                 translations, t,
