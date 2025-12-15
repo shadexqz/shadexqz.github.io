@@ -3,28 +3,27 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Дурак Онлайн</title>
+    <title>Дурак для друзей</title>
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700;900&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Roboto+Condensed:wght@400;700;900&display=swap');
 
         :root {
             --card-w: 110px;
             --card-h: 155px;
-            --radius: 4px; /* Убрал сильные скругления */
-            --accent: #2c3e50;
-            --btn-bg: #34495e;
-            --highlight: #f1c40f;
+            --radius: 8px;
+            --accent: #ff9100;
         }
 
         * { box-sizing: border-box; user-select: none; -webkit-tap-highlight-color: transparent; outline: none; }
         
         body {
             margin: 0;
-            font-family: 'Roboto', sans-serif;
-            background-color: #202c39;
-            background-image: radial-gradient(circle at 50% 50%, #2c3e50 0%, #1a1a1a 100%);
+            font-family: 'Roboto Condensed', sans-serif;
+            background-color: #1a4c6d; /* Глубокий синий */
+            background-image: 
+                radial-gradient(circle at 50% 50%, rgba(255,255,255,0.05) 0%, rgba(0,0,0,0.5) 100%),
+                url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.08'/%3E%3C/svg%3E");
             height: 100vh;
             overflow: hidden;
             display: flex; flex-direction: column;
@@ -41,235 +40,220 @@
         /* --- LOBBY --- */
         #lobby {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.9);
+            background: rgba(0,0,0,0.85);
             z-index: 9999;
             display: flex; align-items: center; justify-content: center;
+            backdrop-filter: blur(8px);
             pointer-events: auto;
         }
         .panel {
-            background: #ecf0f1; color: #2c3e50;
-            padding: 30px; border-radius: 4px;
-            width: 95%; max-width: 400px; text-align: center;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            background: #eee; color: #222;
+            padding: 30px; border-radius: 12px;
+            width: 95%; max-width: 450px; text-align: center;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+            border: 1px solid #555;
         }
-        .panel h1 { margin: 0 0 20px; font-weight: 900; text-transform: uppercase; }
+        .panel h1 { margin: 0 0 20px; font-weight: 900; letter-spacing: 1px; color: #0d47a1; text-transform: uppercase; }
         
         .inp {
-            width: 100%; padding: 12px; margin: 10px 0;
-            border: 2px solid #bdc3c7; border-radius: 4px;
-            font-size: 16px; font-weight: bold; text-align: center;
-            background: #fff;
+            width: 100%; padding: 14px; margin: 10px 0;
+            border: 2px solid #ccc; border-radius: 6px;
+            font-size: 18px; font-weight: bold; text-align: center; font-family: inherit;
+            background: #fff; transition: 0.2s;
         }
+        .inp:focus { border-color: var(--accent); }
+        
         .btn {
-            width: 100%; padding: 14px; border: none; margin-top: 10px;
-            font-size: 16px; font-weight: bold; text-transform: uppercase;
-            cursor: pointer; border-radius: 4px; color: white;
-            transition: 0.2s;
+            width: 100%; padding: 16px; border: none; margin-top: 10px;
+            font-size: 18px; font-weight: 900; text-transform: uppercase;
+            cursor: pointer; border-radius: 6px; transition: transform 0.1s;
+            color: white; box-shadow: 0 5px 0 rgba(0,0,0,0.2);
         }
-        .btn:hover { opacity: 0.9; }
-        .btn-create { background: #27ae60; }
-        .btn-join { background: #2980b9; }
+        .btn:active { transform: translateY(3px); box-shadow: none; }
+        .btn-create { background: linear-gradient(to bottom, #43a047, #2e7d32); }
+        .btn-join { background: linear-gradient(to bottom, #1e88e5, #1565c0); }
 
         .avatars { display: flex; gap: 10px; justify-content: center; margin-bottom: 20px; }
         .ava-opt {
-            width: 50px; height: 50px; border: 2px solid #bdc3c7; cursor: pointer;
-            background-size: cover; border-radius: 4px;
-            background-color: #333;
+            width: 55px; height: 55px; border: 3px solid #ddd; cursor: pointer;
+            background-size: cover; border-radius: 10px;
+            background-color: #333; transition: 0.2s;
         }
-        .ava-opt.selected { border-color: #2980b9; transform: scale(1.1); box-shadow: 0 0 5px rgba(0,0,0,0.5); }
+        .ava-opt:hover { transform: scale(1.1); }
+        .ava-opt.selected { border-color: var(--accent); transform: scale(1.15); box-shadow: 0 0 10px rgba(0,0,0,0.3); }
 
-        /* --- CHAT --- */
+        .opts { display: flex; gap: 20px; justify-content: center; margin: 15px 0; font-weight: bold; font-size: 18px; }
+
+        /* --- GAME UI --- */
+        #game { display: none; flex-direction: column; height: 100%; position: relative; overflow: hidden; }
+
         .chat-container {
-            position: absolute; bottom: 10px; right: 10px; width: 280px;
+            position: absolute; bottom: 20px; right: 20px; width: 300px;
             display: flex; flex-direction: column; align-items: flex-end;
             pointer-events: none; z-index: 2000;
         }
         .chat-log {
             max-height: 200px; width: 100%; display: flex; flex-direction: column;
-            justify-content: flex-end; margin-bottom: 5px; overflow: hidden; text-align: left;
-            background: rgba(0,0,0,0.6); padding: 5px; border-radius: 4px;
-            pointer-events: auto;
+            justify-content: flex-end; margin-bottom: 10px; overflow: hidden; text-align: right;
+            mask-image: linear-gradient(to top, black 80%, transparent 100%);
+            -webkit-mask-image: linear-gradient(to top, black 80%, transparent 100%);
         }
         .chat-msg {
-            padding: 2px 5px; font-size: 13px; color: #ecf0f1;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
+            background: rgba(0,0,0,0.4); padding: 5px 12px; margin-bottom: 4px;
+            border-radius: 8px; color: #fff; font-size: 14px; text-shadow: 1px 1px 2px black;
+            display: inline-block; align-self: flex-end; backdrop-filter: blur(2px);
+            border: 1px solid rgba(255,255,255,0.1);
         }
-        .chat-inp-row { display: flex; width: 100%; pointer-events: auto; gap: 0; }
-        #chat-in { flex: 1; background: rgba(0,0,0,0.8); border: 1px solid #555; color: white; padding: 8px; font-size: 13px; }
-        #chat-send { width: 40px; background: #2980b9; color: white; border: none; cursor: pointer; }
+        .chat-inp-row { display: flex; width: 100%; pointer-events: auto; gap: 5px; opacity: 0.6; transition: opacity 0.3s; }
+        .chat-inp-row:hover, .chat-inp-row:focus-within { opacity: 1; }
+        #chat-in { flex: 1; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.3); color: white; padding: 8px 12px; border-radius: 20px; font-size: 14px; text-align: right; }
+        #chat-send { width: 35px; height: 35px; border-radius: 50%; background: var(--accent); color: white; border: none; cursor: pointer; font-weight: bold; }
 
-        /* --- GAME UI --- */
-        #game { display: none; flex-direction: column; height: 100%; position: relative; overflow: hidden; }
+        /* --- OPPONENTS --- */
+        .opponents-row { height: 190px; display: flex; justify-content: center; padding-top: 15px; gap: 30px; z-index: 50; }
+        .player-wrap { position: relative; width: 100px; display: flex; flex-direction: column; align-items: center; }
+        .p-name { font-size: 14px; font-weight: bold; text-shadow: 0 2px 4px black; background: rgba(0,0,0,0.6); padding: 2px 10px; border-radius: 6px; margin-bottom: 5px; max-width: 120px; overflow: hidden; text-overflow: ellipsis; z-index: 12; border: 1px solid rgba(255,255,255,0.1); }
+        .avatar-box { position: relative; width: 64px; height: 64px; z-index: 10; }
+        .avatar { width: 100%; height: 100%; background: #222; border: 3px solid #ccc; border-radius: 12px; object-fit: cover; box-shadow: 0 5px 15px rgba(0,0,0,0.5); }
+        .avatar.turn { border-color: #4caf50; box-shadow: 0 0 0 4px #4caf50, 0 5px 20px black; }
+        
+        .timer-svg { position: absolute; top: -5px; left: -5px; width: 74px; height: 74px; pointer-events: none; z-index: 11; }
+        .timer-path { fill: none; stroke: #4caf50; stroke-width: 4; stroke-dasharray: 220; stroke-dashoffset: 220; transition: stroke-dashoffset 1s linear; }
 
-        .opponents-row { height: 160px; display: flex; justify-content: center; padding-top: 10px; gap: 20px; z-index: 50; }
-        .player-wrap { position: relative; width: 90px; display: flex; flex-direction: column; align-items: center; }
-        
-        .p-name { 
-            font-size: 12px; font-weight: bold; background: rgba(0,0,0,0.7); 
-            padding: 2px 8px; border-radius: 2px; margin-bottom: 5px; 
-            max-width: 100px; overflow: hidden; text-overflow: ellipsis; z-index: 12; 
-        }
-        
-        .avatar-box { position: relative; width: 60px; height: 60px; z-index: 10; }
-        .avatar { 
-            width: 100%; height: 100%; background: #2c3e50; border: 2px solid #555; 
-            border-radius: 4px; object-fit: cover; 
-        }
-        /* Убрал зеленый неон, сделал простую рамку хода */
-        .avatar.turn { border-color: #fff; } 
-        
-        .timer-svg { 
-            position: absolute; top: -5px; left: -5px; width: 70px; height: 70px; 
-            pointer-events: none; z-index: 11; transform: rotate(-90deg);
-        }
-        .timer-path { 
-            fill: none; stroke: #27ae60; stroke-width: 4; 
-            stroke-dasharray: 200; stroke-dashoffset: 0; 
-            transition: stroke 0.3s linear;
-        }
-
-        .p-hand-fan { position: absolute; top: 65px; left: 50%; width: 0; height: 0; z-index: 20; }
-        .opp-card { 
-            position: absolute; width: 40px; height: 55px; 
-            background-image: url('https://deckofcardsapi.com/static/img/back.png'); 
-            background-size: cover; border-radius: 2px; border: 1px solid #999; 
-            transform-origin: 50% 0%; left: -20px; 
-        }
+        .p-hand-fan { position: absolute; top: 50px; left: 50%; width: 0; height: 0; z-index: 20; }
+        .opp-card { position: absolute; width: 45px; height: 65px; background-image: url('https://deckofcardsapi.com/static/img/back.png'); background-size: cover; border-radius: 4px; border: 1px solid #ddd; box-shadow: -2px 2px 5px rgba(0,0,0,0.3); transform-origin: 50% 120%; left: -22px; }
+        .card-count-badge { position: absolute; top: 90px; background: #222; border: 1px solid #555; color: #fff; font-size: 12px; font-weight: bold; padding: 2px 6px; border-radius: 4px; z-index: 30; }
 
         /* --- TABLE --- */
         .table-area { flex: 1; position: relative; display: flex; justify-content: center; align-items: center; }
-        .deck-pos { position: absolute; left: 20px; top: 50%; transform: translateY(-50%); width: var(--card-w); height: var(--card-h); }
-        .trump-card { position: absolute; top: 15px; left: 30px; width: 100%; height: 100%; transform: rotate(90deg); z-index: 1; border-radius: var(--radius); box-shadow: 1px 1px 4px rgba(0,0,0,0.5); background-color: #fff; background-size: 100% 100%; }
-        .deck-top { position: absolute; top:0; left:0; width: 100%; height: 100%; background: url('https://deckofcardsapi.com/static/img/back.png') center/cover; border-radius: var(--radius); border: 1px solid #ccc; box-shadow: 2px 2px 5px rgba(0,0,0,0.5); z-index: 5; }
-        .deck-count { position: absolute; top: -30px; left: 0; width: 100%; text-align: center; font-weight: bold; font-size: 16px; background: rgba(0,0,0,0.5); border-radius: 2px; }
+        .deck-pos { position: absolute; left: 40px; top: 50%; transform: translateY(-50%); width: var(--card-w); height: var(--card-h); }
+        .trump-card { position: absolute; top: 20px; left: 35px; width: 100%; height: 100%; transform: rotate(90deg); z-index: 1; border-radius: var(--radius); box-shadow: 2px 2px 5px rgba(0,0,0,0.3); background-color: #fff; background-size: 100% 100%; }
+        .deck-top { position: absolute; top:0; left:0; width: 100%; height: 100%; background: url('https://deckofcardsapi.com/static/img/back.png') center/cover; border-radius: var(--radius); border: 2px solid #ccc; box-shadow: 4px 4px 10px rgba(0,0,0,0.5); z-index: 5; }
+        .deck-count { position: absolute; top: -35px; left: 0; width: 100%; text-align: center; font-weight: bold; text-shadow: 1px 1px 2px black; font-size: 18px; background: rgba(0,0,0,0.5); border-radius: 4px; padding: 2px 0; z-index: 10; }
 
-        .slots-wrap { display: flex; gap: 10px; justify-content: center; align-items: center; width: 100%; height: 100%; z-index: 10; }
-        .slot { width: var(--card-w); height: var(--card-h); position: relative; }
-        .slot.interactive { cursor: pointer; background: rgba(255,255,255,0.05); border-radius: var(--radius); }
-        .card-face { width: 100%; height: 100%; position: absolute; border-radius: var(--radius); background-color: #fff; background-size: 100% 100%; box-shadow: 0 2px 5px rgba(0,0,0,0.5); transition: transform 0.2s; }
+        .slots-wrap { display: flex; gap: 15px; justify-content: center; align-items: center; width: 100%; height: 100%; z-index: 10; }
+        .slot { width: var(--card-w); height: var(--card-h); position: relative; transition: 0.3s; }
+        .slot.interactive { cursor: pointer; }
+        .slot.interactive:hover { transform: scale(1.05); }
+        .card-face { width: 100%; height: 100%; position: absolute; border-radius: var(--radius); background-color: #fff; background-size: 100% 100%; box-shadow: 0 4px 10px rgba(0,0,0,0.4); transition: transform 0.4s cubic-bezier(0.19, 1, 0.22, 1); }
         .card-att { transform: rotate(-2deg); z-index: 5; }
-        .card-def { transform: rotate(10deg) translate(10px, 5px); z-index: 6; }
+        .card-def { transform: rotate(8deg) translate(10px, 10px); z-index: 6; }
 
         /* --- MY ZONE --- */
-        .my-zone { height: 240px; position: relative; display: flex; justify-content: center; align-items: flex-end; z-index: 100; padding-bottom: 10px; pointer-events: none; background: linear-gradient(to top, rgba(0,0,0,0.5), transparent); }
-        .my-info { position: absolute; bottom: 10px; left: 10px; display: flex; gap: 10px; align-items: center; pointer-events: auto; }
-        .my-ava-big { width: 60px; height: 60px; border-radius: 4px; border: 2px solid #ccc; background: #333; object-fit: cover; }
+        .my-zone { height: 260px; position: relative; display: flex; justify-content: center; align-items: flex-end; z-index: 100; padding-bottom: 10px; pointer-events: none; }
+        .my-info { position: absolute; bottom: 20px; left: 20px; display: flex; gap: 15px; align-items: center; pointer-events: auto; }
+        .my-ava-big { width: 70px; height: 70px; border-radius: 12px; border: 3px solid #fff; background: #333; object-fit: cover; box-shadow: 0 5px 15px rgba(0,0,0,0.6); }
         
-        .hand-container { position: relative; width: 100%; max-width: 900px; height: 160px; display: flex; justify-content: center; pointer-events: none; }
+        /* FIXED HAND CONTAINER */
+        .hand-container { position: relative; width: 100%; max-width: 900px; height: 180px; display: flex; justify-content: center; pointer-events: none; }
         
         .my-card-wrap {
             position: absolute; width: var(--card-w); height: var(--card-h);
             transform-origin: 50% 150%; 
-            transition: transform 0.2s, box-shadow 0.2s;
+            transition: transform 0.2s cubic-bezier(0.1, 0.7, 1.0, 0.1);
             cursor: pointer; bottom: 0;
             transform: translateX(var(--x)) translateY(var(--y)) rotate(var(--rot));
-            pointer-events: auto;
+            pointer-events: auto; /* IMPORTANT */
         }
-        .my-card-wrap:hover { z-index: 1000 !important; transform: translateX(var(--x)) translateY(-30px) rotate(var(--rot)) scale(1.05); }
-        
-        /* Строгая золотая обводка для выделения */
-        .my-card-wrap.selected { z-index: 999 !important; transform: translateX(var(--x)) translateY(-50px) rotate(var(--rot)); }
-        .my-card-wrap.selected .card-face { box-shadow: 0 0 0 3px #f1c40f; }
+        /* УЛУЧШЕННЫЙ ХОВЕР */
+        .my-card-wrap:hover { z-index: 1000 !important; transform: translateX(var(--x)) translateY(-40px) rotate(var(--rot)) scale(1.1); transition: transform 0.1s; }
+        .my-card-wrap.selected { z-index: 999 !important; transform: translateX(var(--x)) translateY(-60px) rotate(var(--rot)) scale(1.1); }
+        .my-card-wrap .card-face { box-shadow: 0 -5px 15px rgba(0,0,0,0.5); }
+        .my-card-wrap.selected .card-face { box-shadow: 0 0 0 4px #ffeb3b, 0 10px 30px black; }
 
-        /* Анимация ошибки (красное мигание) */
-        .error-flash .card-face { animation: errFlash 0.4s ease-in-out; }
-        @keyframes errFlash { 0%,100%{box-shadow: 0 0 0 0 red;} 50%{box-shadow: 0 0 10px 4px red;} }
+        /* SHAKE ANIMATION FOR INVALID MOVE */
+        .shake { animation: shake 0.4s ease-in-out; }
+        @keyframes shake { 0%, 100% {transform: translateX(0);} 25% {transform: translateX(-8px) rotate(-5deg);} 75% {transform: translateX(8px) rotate(5deg);} }
 
         /* --- CONTROLS --- */
-        .controls { position: absolute; right: 20px; bottom: 200px; display: flex; flex-direction: column; align-items: flex-end; gap: 10px; z-index: 150; pointer-events: auto; }
-        
-        .status-badge { 
-            background: #2c3e50; color: white; padding: 8px 20px; 
-            border-radius: 2px; font-size: 16px; font-weight: bold; 
-            border-left: 4px solid #999; box-shadow: 0 2px 5px rgba(0,0,0,0.5);
-        }
+        .controls { position: absolute; right: 20px; bottom: 220px; display: flex; flex-direction: column; align-items: flex-end; gap: 10px; z-index: 150; pointer-events: auto; }
+        .status-badge { background: rgba(0,0,0,0.85); color: white; padding: 10px 25px; border-radius: 30px; font-size: 18px; font-weight: bold; border: 2px solid rgba(255,255,255,0.2); backdrop-filter: blur(5px); text-shadow: 0 2px 2px black; box-shadow: 0 5px 15px rgba(0,0,0,0.4); }
+        .act-btn { border: none; padding: 15px 40px; font-size: 20px; font-weight: 900; text-transform: uppercase; cursor: pointer; color: white; border-radius: 50px; box-shadow: 0 5px 20px rgba(0,0,0,0.5); display: none; transition: transform 0.1s; }
+        .act-btn:active { transform: scale(0.95); }
+        .btn-take { background: linear-gradient(135deg, #ff9800, #f57c00); }
+        .btn-bito { background: linear-gradient(135deg, #d32f2f, #c62828); }
 
-        .act-btn { 
-            border: none; padding: 12px 30px; font-size: 18px; font-weight: bold; 
-            text-transform: uppercase; cursor: pointer; color: white; 
-            border-radius: 2px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); 
-            display: none; 
-        }
-        .act-btn:active { transform: translateY(2px); }
-        .btn-take { background: #e67e22; }
-        .btn-bito { background: #c0392b; }
+        .bubble { position: absolute; top: -40px; left: 50%; transform: translateX(-50%) scale(0); padding: 8px 16px; border-radius: 20px; font-weight: bold; color: white; white-space: nowrap; z-index: 100; font-size: 14px; box-shadow: 0 4px 10px rgba(0,0,0,0.4); animation: bubblePop 2s forwards; pointer-events: none; }
+        @keyframes bubblePop { 0% { transform: translateX(-50%) scale(0); opacity: 0; } 10% { transform: translateX(-50%) scale(1.1); opacity: 1; } 20% { transform: translateX(-50%) scale(1); } 80% { opacity: 1; transform: translateX(-50%) translateY(0); } 100% { opacity: 0; transform: translateX(-50%) translateY(-30px); } }
+        
+        .toast { position: fixed; top: 10%; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.9); color: white; padding: 15px 30px; border-radius: 50px; font-size: 20px; font-weight: bold; box-shadow: 0 10px 30px rgba(0,0,0,0.7); z-index: 5000; animation: fadeInOut 2.5s forwards; border: 1px solid #444; }
+        @keyframes fadeInOut { 0%{opacity:0;transform:translateX(-50%) translateY(-20px);} 15%{opacity:1;transform:translateX(-50%) translateY(0);} 85%{opacity:1;} 100%{opacity:0;} }
 
         @media (max-width: 800px) {
             :root { --card-w: 80px; --card-h: 112px; }
-            .opponents-row { height: 130px; gap: 5px; }
+            .opponents-row { height: 150px; gap: 10px; }
             .my-zone { height: 180px; }
-            .controls { bottom: 150px; right: 10px; }
-            .chat-container { width: 200px; bottom: 50px; }
+            .controls { bottom: 160px; right: 10px; }
+            .chat-container { width: 220px; bottom: 10px; right: 10px; }
+            .p-hand-fan { top: 45px; }
+            .my-card-wrap:hover { transform: translateX(var(--x)) translateY(-30px) rotate(var(--rot)) scale(1.15); }
         }
     </style>
 </head>
 <body>
     <div id="lobby">
         <div class="panel" id="p-setup">
-            <h1>Дурак Онлайн</h1>
+            <h1>Дурак для друзей</h1>
             <div class="avatars" id="ava-list"></div>
             <input type="text" id="p-name" class="inp" placeholder="Ваш ник" value="Игрок" maxlength="12">
-            <div style="margin: 10px 0; display:flex; justify-content:center; gap:15px;">
+            <div class="opts">
                 <label><input type="radio" name="mode" value="2" checked> 1x1</label>
                 <label><input type="radio" name="mode" value="3"> 3 Игрока</label>
                 <label><input type="radio" name="mode" value="4"> 4 Игрока</label>
             </div>
-            <div style="margin-bottom:15px;">
-                <label><input type="checkbox" id="chk-transfer"> Переводной</label>
+            <div class="opts" style="font-size:16px;">
+                <label style="cursor:pointer; display:flex; align-items:center; gap:5px;"><input type="checkbox" id="chk-transfer" style="width:18px; height:18px;"> Переводной</label>
             </div>
             <button class="btn btn-create" onclick="Lobby.create()">Создать стол</button>
-            <div style="margin:10px; color:#7f8c8d; font-size:14px;">— или —</div>
+            <div style="margin:10px; color:#999; font-weight:bold; font-size:14px;">— или —</div>
             <input type="text" id="join-id" class="inp" placeholder="ID комнаты">
             <button class="btn btn-join" onclick="Lobby.join()">Войти</button>
         </div>
         <div class="panel" id="p-wait" style="display:none;">
             <h2>Комната создана</h2>
-            <p>ID для друзей:</p>
+            <p>ID комнаты:</p>
             <input type="text" id="host-id" class="inp" style="background:#eee; font-family:monospace;" readonly onclick="this.select()">
-            <p id="wait-msg" style="color:#27ae60; font-weight:bold; font-size:24px;">1/2</p>
+            <p id="wait-msg" style="color:#d32f2f; font-weight:bold; font-size:24px;">1/2</p>
+            <div style="font-size:30px; animation:spin 1s infinite linear; color:#555;">↻</div>
+            <style>@keyframes spin { 100% {transform:rotate(360deg);} }</style>
         </div>
     </div>
 
     <div id="game">
         <div id="ui-layer"><div class="opponents-row" id="opponents-area"></div></div>
-        
+        <div class="chat-container">
+            <div class="chat-log" id="chat-log"></div>
+            <div class="chat-inp-row">
+                <input type="text" id="chat-in" placeholder="Сообщение..." autocomplete="off" maxlength="30">
+                <button id="chat-send" onclick="Game.sendChat()">➤</button>
+            </div>
+        </div>
         <div class="table-area">
             <div class="deck-pos">
                 <div class="deck-count" id="deck-n">36</div>
                 <div id="trump-slot"></div>
                 <div class="deck-top" id="deck-visual"></div>
             </div>
+            <div class="bito-pos" id="bito-visual" style="position:absolute; right:40px; opacity:0.3; font-weight:bold;"></div>
             <div class="slots-wrap" id="slots-area"></div>
             <div class="controls">
                 <div class="status-badge" id="status-txt">Подключение...</div>
                 <button class="act-btn btn-bito" id="btn-bito" onclick="Game.act('BITO')">БИТО</button>
-                <button class="act-btn btn-take" id="btn-take" onclick="Game.act('ВЗЯТЬ')">ВЗЯТЬ</button>
+                <button class="act-btn btn-take" id="btn-take" onclick="Game.act('TAKE')">ВЗЯТЬ</button>
             </div>
         </div>
-
         <div class="my-zone">
             <div class="my-info">
                 <div style="position:relative;">
                     <img id="my-ava" class="my-ava-big" src="">
-                    <svg class="timer-svg" viewBox="0 0 80 80">
-                        <!-- Ровный круг -->
-                        <circle class="timer-path" id="my-timer" cx="40" cy="40" r="36"></circle>
-                    </svg>
+                    <svg class="timer-svg" viewBox="0 0 74 74"><rect class="timer-path" id="my-timer" x="2" y="2" width="70" height="70" rx="12" ry="12"></rect></svg>
                 </div>
                 <div style="text-shadow: 1px 1px 2px black;">
-                    <div style="font-weight:bold; font-size:16px;">ВЫ</div>
-                    <div style="font-size:12px; opacity:0.8;" id="my-name-display">Игрок</div>
+                    <div style="font-weight:bold; font-size:20px;">ВЫ</div>
+                    <div style="font-size:14px; opacity:0.8;" id="my-name-display">Игрок</div>
                 </div>
             </div>
             <div class="hand-container" id="my-hand"></div>
-        </div>
-        
-        <div class="chat-container">
-            <div class="chat-log" id="chat-log"></div>
-            <div class="chat-inp-row">
-                <input type="text" id="chat-in" placeholder="Чат..." autocomplete="off" maxlength="30">
-                <button id="chat-send" onclick="Game.sendChat()"><i class="fas fa-paper-plane"></i></button>
-            </div>
         </div>
     </div>
 
@@ -277,16 +261,23 @@
         const IMG_API = (r,s) => `https://deckofcardsapi.com/static/img/${r}${s}.png`;
         const SUITS = ['S','C','H','D'];
         const RANKS = ['6','7','8','9','0','J','Q','K','A'];
-        const TURN_TIME = 30000; // 30 секунд на ход
-
-        // Звуки (минималистичные)
+        
+        // НОВЫЕ РАЗНЫЕ ЗВУКИ
         const Snd = {
             play(t) {
-                const a = new Audio();
-                if(t==='click') a.src='https://cdn.pixabay.com/audio/2022/03/15/audio_2c416e3427.mp3'; // Тихий клик
-                if(t==='err') a.src='https://cdn.pixabay.com/audio/2021/08/04/audio_0625c1539c.mp3'; // Ошибка
-                a.volume = 0.5;
-                a.play().catch(()=>{});
+                let u = '';
+                // Клик (Snap)
+                if(t==='click') u='data:audio/mp3;base64,SUQzBAAAAAAAI1RTU0UAAAAPAAADTGl2Y29kZXIgMS4wLjAA//uQZAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAASW5mbwAAAA8AAAAZAAACcQADBQoPEhQWGBwfIiQmKCsuMDM2ODs9QEJFRkdJS0xPUFJTVlleYWNlZmhqbG9xdHZ5fH6Ag4WHiYuOkJOVmJqcn6Gkp6qsrrG0tru+wMPEyMvO0NPU1tjc3+Lj5ufq7O/x9Pf5+//uQZAAABp1vXf0wAAjbrWv/pAAAEckm08w01Ikek218w01MAAAp5nJp8/7l63//+5at///5yab///85NMAAAAAAklN/////p5yab//+nmcmn//p5nJp//6ecmm//p5nJpgAAAAACS///+nnJpv//6ecmm//p5yab/+nnJpv/6ecmmAAAAAAJL///6ecmm//p5yab/+nnJpv/6ecmm//p5yacAAABFADwAAAAAAAAA//uQZAAACW0vW/zBwAk2pWu/mDgAAAAAiAAADAAA//uQZAAACW0vW/zBwAk2pWu/mDgAAAAAiAAADAAA//uQZAAACW0vW/zBwAk2pWu/mDgAAAAAiAAADAAA//uQZAAACW0vW/zBwAk2pWu/mDgAAAAAiAAADAAA//uQZAAACW0vW/zBwAk2pWu/mDgAAAAAiAAADAAA//uQZAAACW0vW/zBwAk2pWu/mDgAAAAAiAAADAAA//uQZAAACW0vW/zBwAk2pWu/mDgAAAAAiAAADAAA//uQZAAACW0vW/zBwAk2pWu/mDgAAAAAiAAADAAA//uQZAAACW0vW/zBwAk2pWu/mDgAAAAAiAAADAAA//uQZAAACW0vW/zBwAk2pWu/mDgAAAAAiAAADAAA';
+                // Карта (Slide)
+                if(t==='card') u='data:audio/mp3;base64,SUQzBAAAAAAAI1RTU0UAAAAPAAADTGl2Y29kZXIgMS4wLjAA//uQZAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAASW5mbwAAAA8AAAAZAAABsQAFBwoNEhcaHR8jKC0wNTo9QkVJTlFXYWZobG9zdnl9goaLjZKXnZ+iqK6xtri8wcfLztLX29/j5+vv8/f7//uQZAAABllvX/0wAAjLrWv/pAAAEckm08w01Ikek218w01MAAAp5nJp8/7l63//+5at///5yab///85NMAAAAAAklN/////p5yab//+nmcmn//p5nJp//6ecmm//p5yabAAAAAAJL///6ecmm//p5yab/+nnJpv/6ecmm//p5yabAAAAAAJL///6ecmm//p5yab/+nnJpv/6ecmm//p5yacAAABFADwAAAAAAAAA//uQZAAACVEvW/zBwAkyJWv/mDgAAAAAiAAADAAA//uQZAAACVEvW/zBwAkyJWv/mDgAAAAAiAAADAAA//uQZAAACVEvW/zBwAkyJWv/mDgAAAAAiAAADAAA//uQZAAACVEvW/zBwAkyJWv/mDgAAAAAiAAADAAA//uQZAAACVEvW/zBwAkyJWv/mDgAAAAAiAAADAAA//uQZAAACVEvW/zBwAkyJWv/mDgAAAAAiAAADAAA//uQZAAACVEvW/zBwAkyJWv/mDgAAAAAiAAADAAA//uQZAAACVEvW/zBwAkyJWv/mDgAAAAAiAAADAAA//uQZAAACVEvW/zBwAkyJWv/mDgAAAAAiAAADAAA//uQZAAACVEvW/zBwAkyJWv/mDgAAAAAiAAADAAA';
+                // Взять (Shuffle)
+                if(t==='take') u='https://cdn.pixabay.com/audio/2022/03/15/audio_2c416e3427.mp3';
+                // Бито (Thud)
+                if(t==='bito') u='https://cdn.pixabay.com/audio/2022/03/15/audio_7368815123.mp3';
+                // Победа
+                if(t==='win') u='https://cdn.pixabay.com/audio/2021/08/04/audio_12b0c7443c.mp3';
+
+                if(u) new Audio(u).play().catch(()=>{});
             }
         };
 
@@ -299,20 +290,23 @@
                 this.trump = null;
                 this.field = [];
                 this.turn = 0;
-                this.turnStart = 0; // Время начала хода
+                this.startTime = 0;
                 this.state = 'lobby';
                 this.win = null;
+                this.lastAction = null;
             }
-            
-            initDeck() {
+            addPlayer(id, name, ava) {
+                if(this.players.length >= this.mode) return false;
+                this.players.push({id, name, ava, hand:[]});
+                return true;
+            }
+            start() {
                 this.deck = [];
                 SUITS.forEach(s => RANKS.forEach(r => this.deck.push({r, s})));
                 this.deck.sort(() => Math.random() - 0.5);
                 this.players.forEach(p => p.hand = this.deck.splice(0,6));
                 this.trump = this.deck.pop();
                 this.deck.unshift(this.trump);
-                
-                // Кто первый (младший козырь)
                 let min=100, fp=0;
                 this.players.forEach((p,i) => {
                     p.hand.forEach(c => {
@@ -321,74 +315,38 @@
                 });
                 this.changeTurn(fp);
                 this.state = 'game';
+                this.lastAction = {type: 'START'};
             }
-
-            changeTurn(idx) { 
-                this.turn = idx; 
-                this.turnStart = Date.now(); 
-            }
-            
+            changeTurn(idx) { this.turn = idx; this.startTime = Date.now(); }
             next(off=1) { return (this.turn + off) % this.players.length; }
-            
             beat(a, d) {
                 if(a.s===d.s) return RANKS.indexOf(d.r) > RANKS.indexOf(a.r);
                 return d.s === this.trump.s;
             }
-
-            // Бот: проверяет время и ходит сам
-            checkTimer() {
-                if(this.state !== 'game' || this.win) return;
-                if(Date.now() - this.turnStart > TURN_TIME) {
-                    this.autoMove();
-                }
-            }
-
-            autoMove() {
-                const attacker = this.turn;
-                const defender = this.next();
-                
-                // Если стол пустой - бот должен атаковать
-                if(this.field.length === 0) {
-                    this.move(attacker, 'ATTACK', {i: 0}); // Кидает первую карту
-                    return;
-                }
-
-                // Если нужно отбиваться
-                const undefended = this.field.some(x => !x.def);
-                if(undefended) {
-                    // Если время вышло у того, кто должен бить (защитника)
-                    // (Упрощение: считаем, что таймер общий на действие)
-                    this.move(defender, 'TAKE');
-                } else {
-                    // Все отбито, атакующий тупит -> БИТО
-                    this.move(attacker, 'BITO');
-                }
-            }
-
             move(pidx, type, d) {
-                if(this.state !== 'game') return {success: false};
+                if(this.state !== 'game') return {success: false, reason: 'Игра не идет'};
                 const p = this.players[pidx];
 
                 if(type === 'ATTACK') {
                     const isAtt = (pidx === this.turn);
                     const isTrans = (this.transfer && pidx === this.next() && this.field.length > 0 && this.field.every(s => !s.def));
-                    if(!isAtt && !isTrans) return {success: false};
+                    if(!isAtt && !isTrans) return {success: false, reason: 'Не ваш ход'};
                     
                     const card = p.hand[d.i];
                     if(this.field.length > 0) {
                         const ranks = new Set(this.field.flatMap(x => [x.att.r, x.def?.r].filter(Boolean)));
-                        if(!ranks.has(card.r)) return {success: false, reason: 'badCard'};
+                        if(!ranks.has(card.r)) return {success: false, reason: 'Карта не подходит', badCard: true};
                     }
 
                     const defIdx = isTrans ? (pidx + 1) % this.players.length : this.next();
                     const defP = this.players[defIdx];
-                    if(this.field.filter(x=>!x.def).length + 1 > defP.hand.length) return {success: false};
-                    if(this.field.length >= 6) return {success: false};
+                    if(this.field.filter(x=>!x.def).length + 1 > defP.hand.length) return {success: false, reason: 'Много карт'};
+                    if(this.field.length >= 6) return {success: false, reason: 'Стол полон'};
 
                     p.hand.splice(d.i, 1);
-                    this.field.push({att: card, def: null});
-                    if(isTrans) { this.changeTurn(pidx); } 
-                    else { this.turnStart = Date.now(); } // Сброс таймера при ходе
+                    this.field.push({att: card, def: null, from: pidx});
+                    if(isTrans) { this.changeTurn(pidx); this.lastAction = {type: 'TRANSFER', p: pidx}; } 
+                    else { this.startTime = Date.now(); this.lastAction = {type: 'ATTACK', p: pidx}; }
                     return {success: true};
                 }
                 if(type === 'DEFEND') {
@@ -396,10 +354,10 @@
                     const slot = this.field[d.s];
                     if(!slot || slot.def) return {success: false};
                     const card = p.hand[d.i];
-                    if(!this.beat(slot.att, card)) return {success: false, reason: 'badCard'};
+                    if(!this.beat(slot.att, card)) return {success: false, reason: 'Слабая карта', badCard: true};
                     p.hand.splice(d.i, 1);
                     slot.def = card;
-                    this.turnStart = Date.now(); // Сброс таймера
+                    this.lastAction = {type: 'DEFEND', p: pidx};
                     return {success: true};
                 }
                 if(type === 'BITO') {
@@ -408,6 +366,7 @@
                     this.field = [];
                     this.refill();
                     this.changeTurn(this.next());
+                    this.lastAction = {type: 'BITO', p: pidx};
                     return {success: true};
                 }
                 if(type === 'TAKE') {
@@ -418,6 +377,7 @@
                     let n = this.next(2);
                     if(this.players.length===2) n = this.next(1);
                     this.changeTurn(n);
+                    this.lastAction = {type: 'TAKE', p: pidx};
                     return {success: true};
                 }
                 return {success: false};
@@ -434,9 +394,9 @@
             }
             dump() {
                 return {
-                    d: this.deck.length, tr: this.trump, f: this.field, t: this.turn, ts: this.turnStart,
+                    d: this.deck.length, tr: this.trump, f: this.field, t: this.turn, tm: this.startTime,
                     ps: this.players.map(p => ({id:p.id, name:p.name, ava:p.ava, cnt:p.hand.length})),
-                    win: this.win
+                    win: this.win, la: this.lastAction
                 };
             }
         }
@@ -448,21 +408,23 @@
                 [1,2,3,4,5].forEach(i => {
                     const d = document.createElement('div');
                     d.className = 'ava-opt' + (i===1?' selected':'');
-                    d.style.backgroundImage = `url('https://robohash.org/${i}.png?set=set3')`;
+                    d.style.backgroundImage = `url('https://robohash.org/${i}.png?set=set4')`;
                     d.onclick = () => { this.ava=i; Snd.play('click'); document.querySelectorAll('.ava-opt').forEach(x=>x.classList.remove('selected')); d.classList.add('selected'); };
                     el.appendChild(d);
                 });
             },
             create() {
+                Snd.play('click');
                 const n = document.getElementById('p-name').value || 'Игрок';
                 const m = document.querySelector('input[name="mode"]:checked').value;
                 const tr = document.getElementById('chk-transfer').checked;
                 Game.initHost(n, this.ava, m, tr);
             },
             join() {
+                Snd.play('click');
                 const n = document.getElementById('p-name').value || 'Игрок';
                 const id = document.getElementById('join-id').value;
-                if(!id) return alert('Введите ID');
+                if(!id) return Game.toast('Введите ID');
                 Game.initClient(n, this.ava, id);
             }
         };
@@ -478,15 +440,9 @@
                     document.getElementById('p-setup').style.display = 'none';
                     document.getElementById('p-wait').style.display = 'block';
                     document.getElementById('host-id').value = id;
-                    
-                    // Запуск цикла проверки таймера
-                    setInterval(() => {
-                        this.eng.checkTimer();
-                        this.sync();
-                    }, 1000);
                 });
                 this.peer.on('connection', c => {
-                    c.on('open', () => { this.conns.push(c); this.bc({t:'C', n:'INFO', m:'Подключение...'}); });
+                    c.on('open', () => { this.conns.push(c); this.bc({t:'C', n:'INFO', m:'Подключение...', s:1}); });
                     c.on('data', d => this.handleData(c, d));
                 });
             },
@@ -500,18 +456,19 @@
                         document.getElementById('p-setup').style.display = 'none';
                     });
                     this.conn.on('data', d => this.handleData(null, d));
+                    this.conn.on('close', () => { alert('Разрыв соединения'); location.reload(); });
                 });
             },
             handleData(c, d) {
                 if(d.t==='J' && this.role==='host') {
-                    if(this.eng.players.length < this.eng.mode) {
-                        this.eng.players.push({id:c.peer, name:d.n, ava:d.a, hand:[]});
+                    if(this.eng.addPlayer(c.peer, d.n, d.a)) {
                         document.getElementById('wait-msg').innerText = `${this.eng.players.length}/${this.eng.mode}`;
-                        this.bc({t:'C', n:'INFO', m:`${d.n} вошел`});
+                        this.bc({t:'C', n:'INFO', m:`${d.n} вошел`, s:1});
                         if(this.eng.players.length == this.eng.mode) {
-                            this.eng.initDeck();
+                            this.eng.start();
                             this.sync();
                             this.startGameUI();
+                            Snd.play('take'); // Sound of shuffling/deal
                         }
                     }
                 }
@@ -520,7 +477,9 @@
                     if(pIdx!==-1) {
                         const res = this.eng.move(pIdx, d.a, d.d);
                         if(res.success) this.sync();
-                        else if(res.reason==='badCard') c.send({t:'ERR_CARD', i:d.d.i});
+                        else if(res.badCard) {
+                            c.send({t:'ERR_CARD', i:d.d.i}); // Tell client to shake card
+                        }
                     }
                 }
                 if(d.t==='C') {
@@ -531,14 +490,26 @@
                     this.startGameUI();
                     this.st = d.s; this.hand = d.h; this.myId = d.mid;
                     this.draw();
+                    if(d.s.win) Snd.play('win');
+                    else if(d.s.la) {
+                        if(d.s.la.type==='BITO') Snd.play('bito');
+                        if(d.s.la.type==='ATTACK' || d.s.la.type==='DEFEND') Snd.play('card');
+                        if(d.s.la.type==='TAKE') Snd.play('take');
+                    }
                 }
-                if(d.t==='ERR_CARD') this.flashCard(d.i);
+                if(d.t==='ERR_CARD') this.shakeCard(d.i);
             },
             startGameUI() {
                 document.getElementById('lobby').style.display = 'none';
                 document.getElementById('game').style.display = 'flex';
             },
-            bc(d) { this.conns.forEach(c=>c.send(d)); },
+            bc(d) {
+                if(d.t==='C' && !d.n && this.eng) {
+                    const p = this.eng.players.find(x=>x.id === d.id);
+                    d.n = p ? p.name : '???';
+                }
+                this.conns.forEach(c=>c.send(d));
+            },
             sync() {
                 if(this.role!=='host') return;
                 const s = this.eng.dump();
@@ -552,44 +523,31 @@
             act(type, d={}) {
                 if(this.role==='host') {
                     const res = this.eng.move(0, type, d);
-                    if(res.success) this.sync();
-                    else if(res.reason==='badCard') this.flashCard(d.i);
+                    if(res.success) { Snd.play('click'); this.sync(); }
+                    else {
+                        if(res.badCard) this.shakeCard(d.i);
+                        // No text toast!
+                    }
                 } else {
+                    Snd.play('click');
                     this.conn.send({t:'A', a:type, d});
                 }
                 this.sel = null;
             },
-            flashCard(idx) {
-                Snd.play('err');
+            shakeCard(idx) {
                 const el = document.querySelectorAll('.my-card-wrap')[idx];
-                if(el) { el.classList.remove('error-flash'); void el.offsetWidth; el.classList.add('error-flash'); }
+                if(el) { el.classList.remove('shake'); void el.offsetWidth; el.classList.add('shake'); }
             },
             draw() {
                 const s = this.st;
                 if(!s) return;
                 const myIdx = s.ps.findIndex(p=>p.id===this.myId) > -1 ? s.ps.findIndex(p=>p.id===this.myId) : 0;
-                document.getElementById('my-ava').src = `https://robohash.org/${s.ps[myIdx].ava}.png?set=set3`;
+                document.getElementById('my-ava').src = `https://robohash.org/${s.ps[myIdx].ava}.png?set=set4`;
                 document.getElementById('my-name-display').innerText = s.ps[myIdx].name;
                 
-                // --- ЛОГИКА ТАЙМЕРА (SVG) ---
                 const myTimer = document.getElementById('my-timer');
-                const circLen = 226; // 2 * PI * 36
-                myTimer.style.strokeDasharray = circLen;
-                
-                if(s.t === myIdx) { 
-                    const passed = Date.now() - s.ts;
-                    const left = Math.max(0, TURN_TIME - passed);
-                    const offset = circLen * (1 - (left / TURN_TIME));
-                    myTimer.style.strokeDashoffset = offset;
-                    
-                    // Меняем цвет от зеленого к красному
-                    myTimer.style.stroke = left < 5000 ? '#e74c3c' : '#27ae60';
-                    myTimer.parentElement.style.opacity = 1;
-                    
-                    if(left > 0) requestAnimationFrame(()=>this.draw()); // Анимация
-                } else {
-                    myTimer.parentElement.style.opacity = 0;
-                }
+                if(s.t === myIdx) { this.animTimer(myTimer, s.tm); myTimer.parentElement.style.opacity = 1; }
+                else myTimer.parentElement.style.opacity = 0;
 
                 const oppDiv = document.getElementById('opponents-area');
                 oppDiv.innerHTML = '';
@@ -597,35 +555,29 @@
                     const idx = (myIdx + i) % s.ps.length;
                     const p = s.ps[idx];
                     const isTurn = (s.t === idx);
-                    
-                    // Колода противника без цифр
                     let fanHTML = '';
-                    if(p.cnt > 0) fanHTML = `<div class="opp-card"></div>`;
-                    if(p.cnt > 3) fanHTML += `<div class="opp-card" style="transform: rotate(5deg);"></div>`;
-
-                    // Таймер противника
-                    let timerSVG = '';
-                    if(isTurn) {
-                        const passed = Date.now() - s.ts;
-                        const left = Math.max(0, TURN_TIME - passed);
-                        const offset = 200 * (1 - (left / TURN_TIME));
-                        const color = left < 5000 ? '#e74c3c' : '#27ae60';
-                        timerSVG = `<svg class="timer-svg" viewBox="0 0 80 80"><circle class="timer-path" cx="40" cy="40" r="32" style="stroke-dashoffset:${offset}; stroke:${color};"></circle></svg>`;
+                    const cnt = Math.min(p.cnt, 36);
+                    for(let k=0; k<cnt; k++) {
+                        const spread = 12; const startRot = -(cnt-1)*spread/2; const rot = startRot + k*spread;
+                        fanHTML += `<div class="opp-card" style="transform: rotate(${rot}deg) translateY(${Math.abs(rot)*0.5}px);"></div>`;
                     }
-
-                    oppDiv.innerHTML += `
-                        <div class="player-wrap">
-                            <div class="p-name">${p.name}</div>
-                            <div class="avatar-box">
-                                <img src="https://robohash.org/${p.ava}.png?set=set3" class="avatar ${isTurn?'turn':''}">
-                                ${timerSVG}
-                            </div>
-                            <div class="p-hand-fan" style="top:70px;">${fanHTML}</div>
+                    const el = document.createElement('div');
+                    el.className = 'player-wrap';
+                    el.innerHTML = `
+                        <div class="p-name">${p.name}</div>
+                        <div class="avatar-box">
+                            <img src="https://robohash.org/${p.ava}.png?set=set4" class="avatar ${isTurn?'turn':''}">
+                            ${isTurn ? `<svg class="timer-svg" viewBox="0 0 74 74"><rect class="timer-path" id="t-${idx}" x="2" y="2" width="70" height="70" rx="12" ry="12"></rect></svg>` : ''}
                         </div>
+                        <div class="p-hand-fan">${fanHTML}</div>
+                        ${p.cnt>0 ? `<div class="card-count-badge">${p.cnt}</div>` : ''}
                     `;
+                    oppDiv.appendChild(el);
+                    if(isTurn) this.animTimer(document.getElementById(`t-${idx}`), s.tm);
+                    if(s.la && s.la.p === idx) this.showBubble(el, s.la.type);
                 }
 
-                document.getElementById('deck-n').innerText = s.d > 0 ? s.d : '';
+                document.getElementById('deck-n').innerText = s.d;
                 document.getElementById('deck-visual').style.display = s.d > 0 ? 'block' : 'none';
                 const tSlot = document.getElementById('trump-slot');
                 tSlot.innerHTML = '';
@@ -634,6 +586,8 @@
                     img.className = 'trump-card';
                     img.style.backgroundImage = `url('${IMG_API(s.tr.r, s.tr.s)}')`;
                     tSlot.appendChild(img);
+                } else if (s.tr) {
+                    tSlot.innerHTML = `<div style="position:absolute;top:0;left:0;opacity:0.3;font-size:40px;color:white;font-weight:bold;padding:10px;">${this.suitIcon(s.tr.s)}</div>`;
                 }
 
                 const slDiv = document.getElementById('slots-area');
@@ -662,14 +616,23 @@
 
                 const hDiv = document.getElementById('my-hand');
                 hDiv.innerHTML = '';
-                this.hand.forEach((c, i) => {
+                const myCards = this.hand;
+                const total = myCards.length;
+                const range = 60; // Wider range for more space
+                const step = total > 1 ? range / (total - 1) : 0;
+                const startDeg = -(range/2);
+
+                myCards.forEach((c, i) => {
+                    const rot = startDeg + (i * step);
+                    const yOff = Math.abs(rot) * 1.0; 
+                    const xOff = (i - (total-1)/2) * 35; // Increased spacing
+
                     const w = document.createElement('div');
                     w.className = 'my-card-wrap' + (this.sel===i ? ' selected' : '');
-                    const rot = (i - (this.hand.length-1)/2) * 5;
-                    const xOff = (i - (this.hand.length-1)/2) * 30;
                     w.style.setProperty('--rot', rot+'deg');
+                    w.style.setProperty('--y', yOff+'px');
                     w.style.setProperty('--x', xOff+'px');
-                    w.style.zIndex = i+10;
+                    w.style.zIndex = i + 10; // Basic layering
                     
                     const f = document.createElement('div');
                     f.className = 'card-face';
@@ -678,14 +641,15 @@
 
                     w.onclick = (e) => {
                         e.stopPropagation();
-                        Snd.play('click');
                         const isMyTurn = (s.t === myIdx);
                         const isTransfer = (this.eng?.transfer && myIdx===(s.t+1)%s.ps.length && s.f.length>0 && s.f.every(x=>!x.def));
                         
+                        // Если мой ход атаковать или переводить - клик сразу отправляет карту
                         if(isMyTurn || isTransfer) {
                             this.sel = i;
                             this.act('ATTACK', {i});
                         } else {
+                            // Если я защищаюсь - просто выделяем карту
                             this.sel = (this.sel===i) ? null : i;
                             this.draw();
                         }
@@ -699,41 +663,66 @@
                 bB.style.display = 'none'; bT.style.display = 'none';
 
                 if(s.win) {
-                    st.innerText = `${s.win} ВЫИГРАЛ`;
-                    st.style.borderLeftColor = "#f1c40f";
+                    st.innerText = `${s.win} ПОБЕДИЛ!`;
+                    st.style.background = "#d32f2f";
                 } else if (s.t === myIdx) {
                     st.innerText = "ВАШ ХОД";
-                    st.style.borderLeftColor = "#27ae60";
+                    st.style.borderColor = "#4caf50";
                     if(s.f.length>0 && s.f.every(x=>x.def)) bB.style.display = 'block';
                 } else {
                     const defIdx = (s.t+1)%s.ps.length;
                     if(myIdx === defIdx) {
-                        st.innerText = "ЗАЩИЩАЙТЕСЬ";
-                        st.style.borderLeftColor = "#e67e22";
+                        st.innerText = "ОТБИВАЙТЕСЬ";
+                        st.style.borderColor = "#ff9800";
                         if(s.f.some(x=>!x.def)) bT.style.display = 'block';
                     } else {
-                        st.innerText = `ХОДИТ: ${s.ps[s.t].name}`;
-                        st.style.borderLeftColor = "#999";
+                        st.innerText = `Ходит: ${s.ps[s.t].name}`;
+                        st.style.borderColor = "#fff";
                     }
                 }
+            },
+            animTimer(el, start) {
+                if(!el) return;
+                const dur = 45000;
+                const p = Math.max(0, (dur - (Date.now() - start)) / dur);
+                el.style.strokeDashoffset = 220 * (1 - p);
+                if(p>0) requestAnimationFrame(()=>this.animTimer(el,start));
+            },
+            showBubble(parent, type) {
+                const map = { 'ATTACK': 'Ходит', 'DEFEND': 'Бьет', 'BITO': 'Бито!', 'TAKE': 'Беру...', 'TRANSFER': 'Перевод!', 'START': 'Игра началась!' };
+                const b = document.createElement('div');
+                b.className = 'bubble';
+                b.style.background = (type==='TAKE')?'#f57c00':(type==='BITO'?'#d32f2f':'#43a047');
+                b.innerText = map[type] || type;
+                parent.appendChild(b);
+                setTimeout(()=>b.remove(), 2000);
+            },
+            toast(m) {
+                const t = document.createElement('div');
+                t.className = 'toast'; t.innerText = m;
+                document.body.appendChild(t);
+                setTimeout(()=>t.remove(), 3000);
             },
             sendChat() {
                 const inp = document.getElementById('chat-in');
                 const m = inp.value.trim();
                 if(!m) return;
-                let n = this.role==='host' ? this.eng.players[0].name : 'Я';
-                if(this.role === 'host') { const msg = {t:'C', n, m}; this.addChat(msg); this.bc(msg); } 
-                else { this.conn.send({t:'C', m}); }
+                let n = 'Я';
+                if(this.role==='host') n = this.eng.players[0].name;
+                if(this.role === 'host') { const msg = {t:'C', n, m, id:'host'}; this.addChat(msg); this.bc(msg); } 
+                else { this.conn.send({t:'C', m, id:this.myId}); }
                 inp.value = '';
             },
             addChat(d) {
                 const log = document.getElementById('chat-log');
                 const el = document.createElement('div');
                 el.className = 'chat-msg';
-                el.innerText = `${d.n}: ${d.m}`;
+                if(d.s) { el.style.color = '#ffeb3b'; el.innerHTML = `<i>${d.m}</i>`; } 
+                else { el.innerHTML = `<b>${d.n}:</b> ${d.m}`; }
                 log.appendChild(el);
-                log.scrollTop = log.scrollHeight;
-            }
+                while(log.children.length > 5) log.removeChild(log.firstChild);
+            },
+            suitIcon(s) { return {'S':'♠','C':'♣','H':'♥','D':'♦'}[s]; }
         };
 
         document.getElementById('chat-in').addEventListener('keydown', e=>{if(e.key==='Enter') Game.sendChat()});
