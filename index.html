@@ -498,7 +498,16 @@
                 // We use default public cloud. 
                 // Note: ID persistence on public cloud is not guaranteed without own server.
                 // We will try to retrieve last ID, but usually we just get a new one.
-                peer.value = new Peer(); 
+                peer.value = new Peer(null, {
+    debug: 2,
+    config: {
+        iceServers: [
+            { urls: 'stun:stun.l.google.com:19302' },
+            { urls: 'stun:stun1.l.google.com:19302' },
+            { urls: 'stun:stun2.l.google.com:19302' }
+        ]
+    }
+} 
 
                 peer.value.on('open', (id) => {
                     myPeerId.value = id;
