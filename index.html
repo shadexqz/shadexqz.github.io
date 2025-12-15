@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tweeyer | Secure P2P Messenger</title>
     
-    <!-- Fonts: Inter for Swiss Design -->
+    <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
@@ -27,7 +27,7 @@
                     }
                 }
             }
-        }
+        };
     </script>
 
     <!-- Vue 3 & PeerJS -->
@@ -35,23 +35,16 @@
     <script src="https://unpkg.com/peerjs@1.4.7/dist/peerjs.min.js"></script>
 
     <style>
-        /* Custom Scrollbar */
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 3px; }
         .dark ::-webkit-scrollbar-thumb { background: #475569; }
         
-        /* Audio Player Styling */
         audio::-webkit-media-controls-panel { background-color: #f1f5f9; }
         .dark audio::-webkit-media-controls-panel { background-color: #334155; }
         
-        /* Smooth Transitions */
         .fade-enter-active, .fade-leave-active { transition: opacity 0.3s ease; }
         .fade-enter-from, .fade-leave-to { opacity: 0; }
-        
-        /* Loader */
-        .loader { border: 3px solid #f3f3f3; border-top: 3px solid #3498db; border-radius: 50%; width: 20px; height: 20px; animation: spin 1s linear infinite; }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
 </head>
 <body class="antialiased text-slate-800 bg-white dark:bg-slate-850 dark:text-slate-200 transition-colors duration-300 overflow-hidden">
@@ -64,15 +57,11 @@
             <h1 class="text-2xl font-semibold mb-2">{{ t('welcome_title') }}</h1>
             <p class="text-slate-500 text-sm mb-6">{{ t('welcome_sub') }}</p>
             
-            <!-- Avatar Upload -->
             <div class="flex justify-center mb-6 relative group cursor-pointer" @click="$refs.avatarInput.click()">
                 <div class="w-24 h-24 rounded-full overflow-hidden border-2 border-slate-200 dark:border-slate-600 bg-slate-200 relative">
                     <img v-if="tempAvatar" :src="tempAvatar" class="w-full h-full object-cover">
                     <div v-else class="flex items-center justify-center h-full text-slate-400 text-3xl">
                         <i class="fa-solid fa-camera"></i>
-                    </div>
-                    <div class="absolute inset-0 bg-black/30 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                        <i class="fa-solid fa-pen text-white"></i>
                     </div>
                 </div>
                 <input type="file" ref="avatarInput" @change="handleAvatarUpload" accept="image/*" class="hidden">
@@ -93,7 +82,6 @@
     <!-- ==================== SIDEBAR ==================== -->
     <aside class="w-full md:w-80 flex-shrink-0 bg-slate-50 dark:bg-[#161618] border-r border-slate-200 dark:border-slate-700 flex flex-col h-full z-10" :class="{'hidden md:flex': mobileView === 'chat'}">
         
-        <!-- My Profile Header -->
         <div class="p-4 border-b border-slate-200 dark:border-slate-700 flex items-center gap-3">
             <div class="w-10 h-10 rounded-full bg-slate-300 overflow-hidden cursor-pointer hover:opacity-80 transition" @click="ui.showEditProfile = true">
                 <img :src="user.avatar || defaultAvatar" class="w-full h-full object-cover">
@@ -110,10 +98,7 @@
             </button>
         </div>
 
-        <!-- Connection Panel -->
         <div class="p-4 flex-1 overflow-y-auto">
-            
-            <!-- My ID -->
             <div class="mb-6 p-4 bg-white dark:bg-[#2C2C2E] rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
                 <label class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 block">{{ t('my_id') }}</label>
                 <div class="flex items-center gap-2 bg-slate-50 dark:bg-black/20 p-2 rounded-lg border border-slate-200 dark:border-slate-600">
@@ -124,7 +109,6 @@
                 </div>
             </div>
 
-            <!-- Connect To -->
             <div class="mb-6">
                 <label class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 block">{{ t('connect_to') }}</label>
                 <div class="flex gap-2">
@@ -137,7 +121,6 @@
 
             <div class="border-t border-slate-200 dark:border-slate-700 my-4"></div>
 
-            <!-- Settings -->
             <div class="space-y-3">
                 <button @click="toggleLang" class="flex items-center gap-3 w-full p-2 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700 transition">
                     <div class="w-8 h-8 rounded-full bg-brand-light/10 text-brand-light flex items-center justify-center">
@@ -159,7 +142,6 @@
     <!-- ==================== CHAT AREA ==================== -->
     <main class="flex-1 flex flex-col bg-white dark:bg-[#000000] h-full" :class="{'hidden md:flex': mobileView === 'sidebar'}">
         
-        <!-- Header -->
         <header class="h-16 flex-shrink-0 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between px-4 md:px-6">
             <div class="flex items-center gap-3">
                 <button @click="mobileView = 'sidebar'" class="md:hidden text-slate-500 mr-2">
@@ -182,7 +164,6 @@
             </div>
         </header>
 
-        <!-- Messages List -->
         <div ref="chatContainer" class="flex-1 overflow-y-auto p-4 md:p-6 space-y-6">
             <div v-if="messages.length === 0" class="h-full flex flex-col items-center justify-center text-slate-300 dark:text-slate-700">
                 <i class="fa-regular fa-comments text-6xl mb-4"></i>
@@ -190,30 +171,22 @@
             </div>
 
             <div v-for="(msg, idx) in messages" :key="idx" class="flex flex-col max-w-[85%] md:max-w-[70%]" :class="msg.sender === 'me' ? 'self-end items-end' : 'self-start items-start'">
-                
-                <!-- Bubble -->
                 <div class="relative px-4 py-2 rounded-2xl shadow-sm overflow-hidden"
                      :class="msg.sender === 'me' 
                         ? 'bg-brand-light text-white rounded-br-none' 
                         : 'bg-slate-100 dark:bg-[#2C2C2E] text-slate-800 dark:text-slate-200 rounded-bl-none'">
                     
-                    <!-- Text -->
                     <p v-if="msg.type === 'text'" class="text-sm md:text-base whitespace-pre-wrap">{{ msg.content }}</p>
                     
-                    <!-- Image -->
-                    <div v-if="msg.type === 'image'" class="rounded-lg overflow-hidden my-1">
+                    <div v-if="msg.type === 'image'" class="rounded-lg overflow-hidden my-1 cursor-pointer">
                         <img :src="msg.content" class="max-w-full max-h-64 object-cover" @click="openImage(msg.content)">
                     </div>
 
-                    <!-- Voice -->
                     <div v-if="msg.type === 'voice'" class="flex items-center gap-3 min-w-[200px]">
-                        <button class="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center hover:bg-white/30 transition">
-                            <i class="fa-solid fa-play text-xs"></i>
-                        </button>
+                        <i class="fa-solid fa-microphone text-xs opacity-50"></i>
                         <audio controls :src="msg.content" class="h-8 w-48 opacity-90"></audio>
                     </div>
 
-                    <!-- File -->
                     <div v-if="msg.type === 'file'" class="flex items-center gap-3 p-1">
                         <div class="w-10 h-10 bg-white/20 rounded flex items-center justify-center text-xl">
                             <i class="fa-solid fa-file"></i>
@@ -224,7 +197,6 @@
                         </div>
                     </div>
 
-                    <!-- Timestamp -->
                     <div class="text-[10px] mt-1 opacity-60 text-right">
                         {{ formatTime(msg.timestamp) }}
                     </div>
@@ -232,24 +204,20 @@
             </div>
         </div>
 
-        <!-- Input Area -->
         <footer class="p-4 bg-white dark:bg-[#000000] border-t border-slate-100 dark:border-slate-800">
             <div v-if="!isConnected" class="text-center text-sm text-slate-400 py-2">
                 {{ t('connect_first') }}
             </div>
             
             <div v-else class="flex items-end gap-2 relative">
-                
-                <!-- File Inputs (Hidden) -->
-                <input type="file" ref="imageInput" accept="image/*" class="hidden" @change="e => sendFile(e, 'image')">
-                <input type="file" ref="fileInput" class="hidden" @change="e => sendFile(e, 'file')">
+                <!-- File Inputs with CORRECTED HANDLERS -->
+                <input type="file" ref="imageInput" accept="image/*" class="hidden" @change="sendFile($event, 'image')">
+                <input type="file" ref="fileInput" class="hidden" @change="sendFile($event, 'file')">
 
-                <!-- Attachment Menu -->
                 <div class="relative">
                     <button @click="ui.showAttachments = !ui.showAttachments" class="w-10 h-10 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 transition">
                         <i class="fa-solid fa-paperclip"></i>
                     </button>
-                    <!-- Popover -->
                     <div v-if="ui.showAttachments" class="absolute bottom-12 left-0 bg-white dark:bg-[#2C2C2E] shadow-xl rounded-xl p-2 border border-slate-100 dark:border-slate-700 flex flex-col gap-1 w-32 z-20">
                         <button @click="$refs.imageInput.click(); ui.showAttachments = false" class="flex items-center gap-3 px-3 py-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg text-sm">
                             <i class="fa-regular fa-image text-blue-500"></i> {{ t('photo') }}
@@ -260,7 +228,6 @@
                     </div>
                 </div>
 
-                <!-- Text Input -->
                 <div class="flex-1 bg-slate-100 dark:bg-[#1C1C1E] rounded-2xl flex items-center min-h-[44px] border border-transparent focus-within:border-brand-light focus-within:bg-white dark:focus-within:bg-[#1C1C1E] transition-all">
                     <textarea 
                         v-model="inputMessage" 
@@ -272,7 +239,6 @@
                     ></textarea>
                 </div>
 
-                <!-- Mic / Send Button -->
                 <div v-if="inputMessage.trim()">
                     <button @click="sendMessage" class="w-10 h-10 rounded-full bg-brand-light text-white flex items-center justify-center hover:bg-blue-600 transition shadow-md shadow-blue-500/30">
                         <i class="fa-solid fa-paper-plane text-sm"></i>
@@ -294,7 +260,6 @@
 
             </div>
             
-            <!-- Recording Indicator -->
             <div v-if="ui.isRecording" class="absolute bottom-20 left-1/2 -translate-x-1/2 bg-red-500 text-white px-4 py-2 rounded-full shadow-lg text-xs font-bold animate-pulse">
                 Recording... {{ ui.recordingTime }}s
             </div>
@@ -302,7 +267,6 @@
 
     </main>
     
-    <!-- Image Modal -->
     <div v-if="ui.zoomedImage" @click="ui.zoomedImage = null" class="fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-4">
         <img :src="ui.zoomedImage" class="max-w-full max-h-full rounded shadow-2xl">
     </div>
@@ -310,7 +274,7 @@
 </div>
 
 <script>
-    const { createApp, ref, reactive, computed, onMounted, watch, nextTick } = Vue;
+    const { createApp, ref, reactive, computed, onMounted, nextTick } = Vue;
 
     createApp({
         setup() {
@@ -319,11 +283,10 @@
             const targetId = ref('');
             const peer = ref(null);
             const connection = ref(null);
-            const mobileView = ref('sidebar'); // sidebar | chat
+            const mobileView = ref('sidebar');
             const inputMessage = ref('');
             const messages = ref([]);
             
-            // Default avatar placeholder (SVG base64)
             const defaultAvatar = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23cbd5e1'%3E%3Cpath d='M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z'/%3E%3C/svg%3E";
 
             const user = reactive({
@@ -429,7 +392,6 @@
                     settings.lang = s.lang;
                     applyTheme();
                 } else {
-                    // Detect system preference
                     if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
                         settings.theme = 'dark';
                         applyTheme();
@@ -475,11 +437,10 @@
                 const reader = new FileReader();
                 reader.onload = (evt) => {
                     tempAvatar.value = evt.target.result;
-                    // If already setup (edit mode), save immediately
                     if(user.setupComplete) {
                         user.avatar = evt.target.result;
                         saveData();
-                        sendInfo(); // Update partner
+                        sendInfo(); 
                     }
                 };
                 reader.readAsDataURL(file);
@@ -495,19 +456,16 @@
 
             // --- PeerJS Core ---
             const initPeer = () => {
-                // We use default public cloud. 
-                // Note: ID persistence on public cloud is not guaranteed without own server.
-                // We will try to retrieve last ID, but usually we just get a new one.
+                // ADDED GOOGLE STUN SERVERS FOR BETTER CONNECTIVITY
                 peer.value = new Peer(null, {
-    debug: 2,
-    config: {
-        iceServers: [
-            { urls: 'stun:stun.l.google.com:19302' },
-            { urls: 'stun:stun1.l.google.com:19302' },
-            { urls: 'stun:stun2.l.google.com:19302' }
-        ]
-    }
-} 
+                    debug: 2,
+                    config: {
+                        iceServers: [
+                            { urls: 'stun:stun.l.google.com:19302' },
+                            { urls: 'stun:stun1.l.google.com:19302' }
+                        ]
+                    }
+                });
 
                 peer.value.on('open', (id) => {
                     myPeerId.value = id;
@@ -534,7 +492,6 @@
                 connection.value = conn;
 
                 connection.value.on('open', () => {
-                    // Send my profile info immediately
                     sendInfo();
                     mobileView.value = 'chat';
                 });
@@ -564,7 +521,6 @@
                     partner.name = data.payload.name;
                     partner.avatar = data.payload.avatar;
                 } else {
-                    // Message
                     messages.value.push({
                         sender: 'partner',
                         type: data.type,
@@ -588,7 +544,7 @@
                 };
 
                 connection.value.send(msg);
-                messages.value.push({ ...msg, content: msg.payload, sender: 'me' }); // Local echo
+                messages.value.push({ ...msg, content: msg.payload, sender: 'me' }); 
                 
                 inputMessage.value = '';
                 scrollToBottom();
@@ -612,14 +568,13 @@
                     scrollToBottom();
                 };
                 reader.readAsDataURL(file);
-                // Reset input
                 event.target.value = '';
             };
 
             // --- Voice Recording ---
             const startRecording = async () => {
                 if(!navigator.mediaDevices) {
-                    alert("Microphone access not supported in this environment (needs HTTPS or localhost)");
+                    alert("Microphone access not supported (Requires HTTPS or localhost)");
                     return;
                 }
                 try {
@@ -635,7 +590,6 @@
 
                     mediaRecorder.onstop = () => {
                         const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
-                        // Convert blob to base64 to send via JSON
                         const reader = new FileReader();
                         reader.readAsDataURL(audioBlob);
                         reader.onloadend = () => {
@@ -652,8 +606,7 @@
                                 scrollToBottom();
                             }
                         };
-                        
-                        stream.getTracks().forEach(track => track.stop()); // Stop mic
+                        stream.getTracks().forEach(track => track.stop());
                     };
 
                     mediaRecorder.start();
@@ -675,9 +628,8 @@
 
             const cancelRecording = () => {
                 if (mediaRecorder && ui.isRecording) {
-                    // Stop but don't send
                     mediaRecorder.stop(); 
-                    mediaRecorder.onstop = null; // Remove handler
+                    mediaRecorder.onstop = null;
                     clearInterval(recordInterval);
                     ui.isRecording = false;
                 }
@@ -705,7 +657,6 @@
                 ui.zoomedImage = src;
             };
 
-            // --- Lifecycle ---
             onMounted(() => {
                 loadData();
                 if (user.setupComplete) {
@@ -728,7 +679,6 @@
                 sendMessage, sendFile,
                 startRecording, stopRecording, cancelRecording,
                 chatContainer, openImage, formatTime,
-                // Refs
                 avatarInput
             };
         }
