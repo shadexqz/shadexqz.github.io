@@ -3,16 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Дурак для друзей</title>
+    <title>Дурак Онлайн</title>
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Roboto+Condensed:wght@400;700;900&display=swap');
 
         :root {
-            --card-w: 110px;
-            --card-h: 155px;
-            --radius: 8px;
-            --accent: #ff9100;
+            --card-w: 100px;
+            --card-h: 145px;
+            --radius: 6px;
+            --table-green: #235b2b; /* Классический зеленый */
+            --accent: #ffb300;
         }
 
         * { box-sizing: border-box; user-select: none; -webkit-tap-highlight-color: transparent; outline: none; }
@@ -20,14 +21,16 @@
         body {
             margin: 0;
             font-family: 'Roboto Condensed', sans-serif;
-            background-color: #1a4c6d; /* Глубокий синий */
+            background-color: #1b1b1b;
+            /* Узор для стола */
             background-image: 
-                radial-gradient(circle at 50% 50%, rgba(255,255,255,0.05) 0%, rgba(0,0,0,0.5) 100%),
-                url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.08'/%3E%3C/svg%3E");
+                radial-gradient(circle at 50% 50%, rgba(255,255,255,0.1) 0%, rgba(0,0,0,0.6) 100%),
+                url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E"),
+                linear-gradient(to bottom, #2e6e36, #1a4221);
             height: 100vh;
             overflow: hidden;
             display: flex; flex-direction: column;
-            color: white;
+            color: #eee;
         }
 
         /* --- UI LAYER --- */
@@ -40,180 +43,181 @@
         /* --- LOBBY --- */
         #lobby {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.85);
+            background: rgba(0,0,0,0.9);
             z-index: 9999;
             display: flex; align-items: center; justify-content: center;
-            backdrop-filter: blur(8px);
+            backdrop-filter: blur(5px);
             pointer-events: auto;
         }
         .panel {
-            background: #eee; color: #222;
-            padding: 30px; border-radius: 12px;
-            width: 95%; max-width: 450px; text-align: center;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.6);
-            border: 1px solid #555;
+            background: #e8e8e8; color: #222;
+            padding: 25px; border-radius: 4px;
+            width: 95%; max-width: 420px; text-align: center;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.8);
+            border: 1px solid #666;
         }
-        .panel h1 { margin: 0 0 20px; font-weight: 900; letter-spacing: 1px; color: #0d47a1; text-transform: uppercase; }
+        .panel h1 { margin: 0 0 15px; font-weight: 900; letter-spacing: 1px; color: #1a4221; text-transform: uppercase; font-size: 28px; }
         
         .inp {
-            width: 100%; padding: 14px; margin: 10px 0;
-            border: 2px solid #ccc; border-radius: 6px;
+            width: 100%; padding: 12px; margin: 8px 0;
+            border: 1px solid #aaa; border-radius: 4px;
             font-size: 18px; font-weight: bold; text-align: center; font-family: inherit;
-            background: #fff; transition: 0.2s;
+            background: #fff;
         }
-        .inp:focus { border-color: var(--accent); }
         
         .btn {
-            width: 100%; padding: 16px; border: none; margin-top: 10px;
+            width: 100%; padding: 14px; border: none; margin-top: 10px;
             font-size: 18px; font-weight: 900; text-transform: uppercase;
-            cursor: pointer; border-radius: 6px; transition: transform 0.1s;
-            color: white; box-shadow: 0 5px 0 rgba(0,0,0,0.2);
+            cursor: pointer; border-radius: 4px;
+            color: white; box-shadow: 0 3px 0 rgba(0,0,0,0.3);
+            text-shadow: 1px 1px 1px rgba(0,0,0,0.5);
         }
-        .btn:active { transform: translateY(3px); box-shadow: none; }
-        .btn-create { background: linear-gradient(to bottom, #43a047, #2e7d32); }
-        .btn-join { background: linear-gradient(to bottom, #1e88e5, #1565c0); }
+        .btn:active { transform: translateY(2px); box-shadow: none; }
+        .btn-create { background: linear-gradient(to bottom, #4caf50, #2e7d32); }
+        .btn-join { background: linear-gradient(to bottom, #2196f3, #1565c0); }
 
-        .avatars { display: flex; gap: 10px; justify-content: center; margin-bottom: 20px; }
+        .avatars { display: flex; gap: 8px; justify-content: center; margin-bottom: 15px; }
         .ava-opt {
-            width: 55px; height: 55px; border: 3px solid #ddd; cursor: pointer;
-            background-size: cover; border-radius: 10px;
+            width: 50px; height: 50px; border: 2px solid #ccc; cursor: pointer;
+            background-size: cover; border-radius: 50%;
             background-color: #333; transition: 0.2s;
         }
-        .ava-opt:hover { transform: scale(1.1); }
-        .ava-opt.selected { border-color: var(--accent); transform: scale(1.15); box-shadow: 0 0 10px rgba(0,0,0,0.3); }
+        .ava-opt.selected { border-color: var(--accent); transform: scale(1.1); box-shadow: 0 0 10px rgba(255,179,0,0.5); }
 
-        .opts { display: flex; gap: 20px; justify-content: center; margin: 15px 0; font-weight: bold; font-size: 18px; }
+        .opts { display: flex; gap: 15px; justify-content: center; margin: 10px 0; font-weight: bold; font-size: 16px; }
 
         /* --- GAME UI --- */
         #game { display: none; flex-direction: column; height: 100%; position: relative; overflow: hidden; }
 
+        /* CHAT */
         .chat-container {
-            position: absolute; bottom: 20px; right: 20px; width: 300px;
-            display: flex; flex-direction: column; align-items: flex-end;
+            position: absolute; bottom: 90px; left: 20px; width: 280px;
+            display: flex; flex-direction: column; align-items: flex-start;
             pointer-events: none; z-index: 2000;
         }
         .chat-log {
-            max-height: 200px; width: 100%; display: flex; flex-direction: column;
-            justify-content: flex-end; margin-bottom: 10px; overflow: hidden; text-align: right;
+            max-height: 180px; width: 100%; display: flex; flex-direction: column;
+            justify-content: flex-end; margin-bottom: 8px; overflow: hidden; text-align: left;
             mask-image: linear-gradient(to top, black 80%, transparent 100%);
             -webkit-mask-image: linear-gradient(to top, black 80%, transparent 100%);
         }
         .chat-msg {
-            background: rgba(0,0,0,0.4); padding: 5px 12px; margin-bottom: 4px;
-            border-radius: 8px; color: #fff; font-size: 14px; text-shadow: 1px 1px 2px black;
-            display: inline-block; align-self: flex-end; backdrop-filter: blur(2px);
-            border: 1px solid rgba(255,255,255,0.1);
+            background: rgba(0,0,0,0.6); padding: 4px 10px; margin-bottom: 4px;
+            border-radius: 4px; color: #eee; font-size: 13px;
+            display: inline-block; align-self: flex-start; backdrop-filter: blur(2px);
+            border-left: 3px solid var(--accent);
         }
-        .chat-inp-row { display: flex; width: 100%; pointer-events: auto; gap: 5px; opacity: 0.6; transition: opacity 0.3s; }
+        .chat-inp-row { display: flex; width: 100%; pointer-events: auto; gap: 5px; opacity: 0.7; transition: 0.3s; }
         .chat-inp-row:hover, .chat-inp-row:focus-within { opacity: 1; }
-        #chat-in { flex: 1; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.3); color: white; padding: 8px 12px; border-radius: 20px; font-size: 14px; text-align: right; }
-        #chat-send { width: 35px; height: 35px; border-radius: 50%; background: var(--accent); color: white; border: none; cursor: pointer; font-weight: bold; }
+        #chat-in { flex: 1; background: rgba(0,0,0,0.6); border: 1px solid #555; color: white; padding: 6px 10px; border-radius: 4px; font-size: 14px; }
+        #chat-send { width: 32px; background: var(--accent); color: black; border: none; cursor: pointer; font-weight: bold; border-radius: 4px; }
 
-        /* --- OPPONENTS --- */
-        .opponents-row { height: 190px; display: flex; justify-content: center; padding-top: 15px; gap: 30px; z-index: 50; }
-        .player-wrap { position: relative; width: 100px; display: flex; flex-direction: column; align-items: center; }
-        .p-name { font-size: 14px; font-weight: bold; text-shadow: 0 2px 4px black; background: rgba(0,0,0,0.6); padding: 2px 10px; border-radius: 6px; margin-bottom: 5px; max-width: 120px; overflow: hidden; text-overflow: ellipsis; z-index: 12; border: 1px solid rgba(255,255,255,0.1); }
-        .avatar-box { position: relative; width: 64px; height: 64px; z-index: 10; }
-        .avatar { width: 100%; height: 100%; background: #222; border: 3px solid #ccc; border-radius: 12px; object-fit: cover; box-shadow: 0 5px 15px rgba(0,0,0,0.5); }
-        .avatar.turn { border-color: #4caf50; box-shadow: 0 0 0 4px #4caf50, 0 5px 20px black; }
+        /* OPPONENTS */
+        .opponents-row { height: 160px; display: flex; justify-content: center; padding-top: 10px; gap: 20px; z-index: 50; }
+        .player-wrap { position: relative; width: 90px; display: flex; flex-direction: column; align-items: center; }
+        .p-name { font-size: 13px; font-weight: bold; text-shadow: 1px 1px 2px black; background: rgba(0,0,0,0.5); padding: 2px 8px; border-radius: 10px; margin-bottom: 4px; max-width: 100px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; z-index: 12; }
+        .avatar-box { position: relative; width: 56px; height: 56px; z-index: 10; }
+        .avatar { width: 100%; height: 100%; background: #222; border: 2px solid #aaa; border-radius: 50%; object-fit: cover; box-shadow: 0 4px 10px rgba(0,0,0,0.6); transition: 0.3s; }
+        .avatar.turn { border-color: #4caf50; box-shadow: 0 0 0 3px #4caf50, 0 5px 15px black; transform: scale(1.05); }
+        .avatar.defend { border-color: #ff9800; box-shadow: 0 0 0 3px #ff9800; }
         
-        .timer-svg { position: absolute; top: -5px; left: -5px; width: 74px; height: 74px; pointer-events: none; z-index: 11; }
-        .timer-path { fill: none; stroke: #4caf50; stroke-width: 4; stroke-dasharray: 220; stroke-dashoffset: 220; transition: stroke-dashoffset 1s linear; }
+        .p-hand-fan { position: absolute; top: 40px; left: 50%; width: 0; height: 0; z-index: 20; }
+        .opp-card { position: absolute; width: 40px; height: 58px; background-image: url('https://deckofcardsapi.com/static/img/back.png'); background-size: cover; border-radius: 3px; border: 1px solid #ccc; box-shadow: -1px 1px 3px rgba(0,0,0,0.4); transform-origin: 50% 120%; left: -20px; }
+        .card-count-badge { position: absolute; top: 80px; background: #333; border: 1px solid #777; color: #fff; font-size: 11px; font-weight: bold; padding: 1px 5px; border-radius: 3px; z-index: 30; }
 
-        .p-hand-fan { position: absolute; top: 50px; left: 50%; width: 0; height: 0; z-index: 20; }
-        .opp-card { position: absolute; width: 45px; height: 65px; background-image: url('https://deckofcardsapi.com/static/img/back.png'); background-size: cover; border-radius: 4px; border: 1px solid #ddd; box-shadow: -2px 2px 5px rgba(0,0,0,0.3); transform-origin: 50% 120%; left: -22px; }
-        .card-count-badge { position: absolute; top: 90px; background: #222; border: 1px solid #555; color: #fff; font-size: 12px; font-weight: bold; padding: 2px 6px; border-radius: 4px; z-index: 30; }
-
-        /* --- TABLE --- */
-        .table-area { flex: 1; position: relative; display: flex; justify-content: center; align-items: center; }
-        .deck-pos { position: absolute; left: 40px; top: 50%; transform: translateY(-50%); width: var(--card-w); height: var(--card-h); }
-        .trump-card { position: absolute; top: 20px; left: 35px; width: 100%; height: 100%; transform: rotate(90deg); z-index: 1; border-radius: var(--radius); box-shadow: 2px 2px 5px rgba(0,0,0,0.3); background-color: #fff; background-size: 100% 100%; }
-        .deck-top { position: absolute; top:0; left:0; width: 100%; height: 100%; background: url('https://deckofcardsapi.com/static/img/back.png') center/cover; border-radius: var(--radius); border: 2px solid #ccc; box-shadow: 4px 4px 10px rgba(0,0,0,0.5); z-index: 5; }
-        .deck-count { position: absolute; top: -35px; left: 0; width: 100%; text-align: center; font-weight: bold; text-shadow: 1px 1px 2px black; font-size: 18px; background: rgba(0,0,0,0.5); border-radius: 4px; padding: 2px 0; z-index: 10; }
-
-        .slots-wrap { display: flex; gap: 15px; justify-content: center; align-items: center; width: 100%; height: 100%; z-index: 10; }
-        .slot { width: var(--card-w); height: var(--card-h); position: relative; transition: 0.3s; }
-        .slot.interactive { cursor: pointer; }
-        .slot.interactive:hover { transform: scale(1.05); }
-        .card-face { width: 100%; height: 100%; position: absolute; border-radius: var(--radius); background-color: #fff; background-size: 100% 100%; box-shadow: 0 4px 10px rgba(0,0,0,0.4); transition: transform 0.4s cubic-bezier(0.19, 1, 0.22, 1); }
-        .card-att { transform: rotate(-2deg); z-index: 5; }
-        .card-def { transform: rotate(8deg) translate(10px, 10px); z-index: 6; }
-
-        /* --- MY ZONE --- */
-        .my-zone { height: 260px; position: relative; display: flex; justify-content: center; align-items: flex-end; z-index: 100; padding-bottom: 10px; pointer-events: none; }
-        .my-info { position: absolute; bottom: 20px; left: 20px; display: flex; gap: 15px; align-items: center; pointer-events: auto; }
-        .my-ava-big { width: 70px; height: 70px; border-radius: 12px; border: 3px solid #fff; background: #333; object-fit: cover; box-shadow: 0 5px 15px rgba(0,0,0,0.6); }
+        /* TABLE */
+        .table-area { flex: 1; position: relative; width: 100%; display: flex; justify-content: center; align-items: center; z-index: 40; }
         
-        /* FIXED HAND CONTAINER */
-        .hand-container { position: relative; width: 100%; max-width: 900px; height: 180px; display: flex; justify-content: center; pointer-events: none; }
+        .deck-pos { position: absolute; left: 20px; top: 50%; transform: translateY(-50%); width: var(--card-w); height: var(--card-h); }
+        .trump-card { position: absolute; top: 20px; left: 40px; width: 100%; height: 100%; transform: rotate(90deg); z-index: 1; border-radius: var(--radius); box-shadow: 2px 2px 5px rgba(0,0,0,0.3); background-color: #fff; background-size: 100% 100%; }
+        .deck-top { position: absolute; top:0; left:0; width: 100%; height: 100%; background: url('https://deckofcardsapi.com/static/img/back.png') center/cover; border-radius: var(--radius); border: 1px solid #aaa; box-shadow: 4px 4px 10px rgba(0,0,0,0.6); z-index: 5; transition: transform 0.3s; }
+        .deck-count { position: absolute; top: -30px; left: 0; width: 100%; text-align: center; font-weight: bold; text-shadow: 1px 1px 2px black; font-size: 16px; color: #ddd; z-index: 10; }
+
+        .bito-pos { position: absolute; right: 20px; top: 50%; transform: translateY(-50%); width: var(--card-w); height: var(--card-h); border: 2px dashed rgba(255,255,255,0.2); border-radius: var(--radius); display: flex; align-items: center; justify-content: center; color: rgba(255,255,255,0.2); font-weight: bold; letter-spacing: 2px; }
+
+        .slots-wrap { position: relative; width: 80%; height: 80%; display: flex; flex-wrap: wrap; justify-content: center; align-content: center; gap: 20px; z-index: 10; }
+        .slot-pair { position: relative; width: var(--card-w); height: var(--card-h); margin: 5px; }
+        .card-face { width: 100%; height: 100%; position: absolute; border-radius: var(--radius); background-color: #fff; background-size: 100% 100%; box-shadow: 0 4px 10px rgba(0,0,0,0.5); pointer-events: none; }
+        .card-att { transform: rotate(calc(var(--rnd) * 1deg)); z-index: 5; top: 0; left: 0; }
+        .card-def { transform: rotate(calc(var(--rnd) * 1deg + 10deg)) translate(15px, 15px); z-index: 6; }
+        
+        .thrower-mark { position: absolute; top: -10px; right: -10px; width: 24px; height: 24px; border-radius: 50%; border: 2px solid white; background-size: cover; z-index: 20; box-shadow: 0 2px 4px black; }
+
+        /* MY ZONE */
+        .my-zone { height: 200px; position: relative; display: flex; justify-content: center; align-items: flex-end; z-index: 100; padding-bottom: 10px; pointer-events: none; }
+        .hand-container { position: relative; width: 100%; max-width: 900px; height: 160px; display: flex; justify-content: center; pointer-events: none; }
         
         .my-card-wrap {
             position: absolute; width: var(--card-w); height: var(--card-h);
-            transform-origin: 50% 150%; 
+            transform-origin: 50% 120%; 
             transition: transform 0.2s cubic-bezier(0.1, 0.7, 1.0, 0.1);
-            cursor: pointer; bottom: 0;
+            bottom: 0;
             transform: translateX(var(--x)) translateY(var(--y)) rotate(var(--rot));
-            pointer-events: auto; /* IMPORTANT */
+            pointer-events: auto; /* IMPORTANT FOR DRAG */
+            cursor: grab;
+            touch-action: none;
         }
-        /* УЛУЧШЕННЫЙ ХОВЕР */
-        .my-card-wrap:hover { z-index: 1000 !important; transform: translateX(var(--x)) translateY(-40px) rotate(var(--rot)) scale(1.1); transition: transform 0.1s; }
-        .my-card-wrap.selected { z-index: 999 !important; transform: translateX(var(--x)) translateY(-60px) rotate(var(--rot)) scale(1.1); }
-        .my-card-wrap .card-face { box-shadow: 0 -5px 15px rgba(0,0,0,0.5); }
-        .my-card-wrap.selected .card-face { box-shadow: 0 0 0 4px #ffeb3b, 0 10px 30px black; }
-
-        /* SHAKE ANIMATION FOR INVALID MOVE */
-        .shake { animation: shake 0.4s ease-in-out; }
-        @keyframes shake { 0%, 100% {transform: translateX(0);} 25% {transform: translateX(-8px) rotate(-5deg);} 75% {transform: translateX(8px) rotate(5deg);} }
-
-        /* --- CONTROLS --- */
-        .controls { position: absolute; right: 20px; bottom: 220px; display: flex; flex-direction: column; align-items: flex-end; gap: 10px; z-index: 150; pointer-events: auto; }
-        .status-badge { background: rgba(0,0,0,0.85); color: white; padding: 10px 25px; border-radius: 30px; font-size: 18px; font-weight: bold; border: 2px solid rgba(255,255,255,0.2); backdrop-filter: blur(5px); text-shadow: 0 2px 2px black; box-shadow: 0 5px 15px rgba(0,0,0,0.4); }
-        .act-btn { border: none; padding: 15px 40px; font-size: 20px; font-weight: 900; text-transform: uppercase; cursor: pointer; color: white; border-radius: 50px; box-shadow: 0 5px 20px rgba(0,0,0,0.5); display: none; transition: transform 0.1s; }
-        .act-btn:active { transform: scale(0.95); }
-        .btn-take { background: linear-gradient(135deg, #ff9800, #f57c00); }
-        .btn-bito { background: linear-gradient(135deg, #d32f2f, #c62828); }
-
-        .bubble { position: absolute; top: -40px; left: 50%; transform: translateX(-50%) scale(0); padding: 8px 16px; border-radius: 20px; font-weight: bold; color: white; white-space: nowrap; z-index: 100; font-size: 14px; box-shadow: 0 4px 10px rgba(0,0,0,0.4); animation: bubblePop 2s forwards; pointer-events: none; }
-        @keyframes bubblePop { 0% { transform: translateX(-50%) scale(0); opacity: 0; } 10% { transform: translateX(-50%) scale(1.1); opacity: 1; } 20% { transform: translateX(-50%) scale(1); } 80% { opacity: 1; transform: translateX(-50%) translateY(0); } 100% { opacity: 0; transform: translateX(-50%) translateY(-30px); } }
+        .my-card-wrap.dragging { transition: none; z-index: 5000 !important; cursor: grabbing; box-shadow: 0 15px 40px rgba(0,0,0,0.6); transform: scale(1.05); }
+        .my-card-wrap:hover:not(.dragging) { z-index: 1000 !important; transform: translateX(var(--x)) translateY(-40px) rotate(var(--rot)) scale(1.05); }
+        .my-card-wrap .card-face { pointer-events: none; } /* Pass events through to wrap */
         
-        .toast { position: fixed; top: 10%; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.9); color: white; padding: 15px 30px; border-radius: 50px; font-size: 20px; font-weight: bold; box-shadow: 0 10px 30px rgba(0,0,0,0.7); z-index: 5000; animation: fadeInOut 2.5s forwards; border: 1px solid #444; }
-        @keyframes fadeInOut { 0%{opacity:0;transform:translateX(-50%) translateY(-20px);} 15%{opacity:1;transform:translateX(-50%) translateY(0);} 85%{opacity:1;} 100%{opacity:0;} }
+        .shake { animation: shake 0.4s ease-in-out; }
+        @keyframes shake { 0%, 100% {transform: translateX(var(--x)) rotate(var(--rot));} 25% {transform: translateX(calc(var(--x) - 10px)) rotate(calc(var(--rot) - 5deg));} 75% {transform: translateX(calc(var(--x) + 10px)) rotate(calc(var(--rot) + 5deg));} }
+
+        /* CONTROLS */
+        .controls { position: absolute; right: 20px; bottom: 200px; display: flex; flex-direction: column; align-items: flex-end; gap: 12px; z-index: 150; pointer-events: auto; }
+        .status-badge { background: rgba(0,0,0,0.7); color: white; padding: 8px 20px; border-radius: 4px; font-size: 16px; font-weight: bold; border: 1px solid rgba(255,255,255,0.2); backdrop-filter: blur(4px); text-shadow: 1px 1px 1px black; box-shadow: 0 4px 10px rgba(0,0,0,0.5); }
+        .act-btn { border: none; padding: 12px 30px; font-size: 18px; font-weight: 900; text-transform: uppercase; cursor: pointer; color: white; border-radius: 30px; box-shadow: 0 5px 15px rgba(0,0,0,0.5); display: none; transition: 0.1s; border: 2px solid rgba(255,255,255,0.3); }
+        .act-btn:active { transform: scale(0.95); }
+        .btn-take { background: linear-gradient(135deg, #f57c00, #e65100); }
+        .btn-bito { background: linear-gradient(135deg, #d32f2f, #b71c1c); }
+
+        .bubble { position: absolute; top: -35px; left: 50%; transform: translateX(-50%) scale(0); padding: 5px 12px; border-radius: 10px; font-weight: bold; color: white; white-space: nowrap; z-index: 100; font-size: 12px; box-shadow: 0 2px 5px rgba(0,0,0,0.5); animation: bubblePop 2.5s forwards; pointer-events: none; opacity: 0; }
+        @keyframes bubblePop { 0% { transform: translateX(-50%) scale(0); opacity: 0; } 10% { transform: translateX(-50%) scale(1); opacity: 1; } 80% { opacity: 1; transform: translateX(-50%) translateY(0); } 100% { opacity: 0; transform: translateX(-50%) translateY(-20px); } }
+
+        /* FLYING ANIMATION HELPER */
+        .flying-card { position: fixed; width: var(--card-w); height: var(--card-h); z-index: 9999; pointer-events: none; transition: transform 0.6s cubic-bezier(0.2, 0.8, 0.2, 1); box-shadow: 0 10px 30px rgba(0,0,0,0.5); border-radius: var(--radius); background-size: 100% 100%; }
 
         @media (max-width: 800px) {
-            :root { --card-w: 80px; --card-h: 112px; }
-            .opponents-row { height: 150px; gap: 10px; }
-            .my-zone { height: 180px; }
-            .controls { bottom: 160px; right: 10px; }
-            .chat-container { width: 220px; bottom: 10px; right: 10px; }
-            .p-hand-fan { top: 45px; }
-            .my-card-wrap:hover { transform: translateX(var(--x)) translateY(-30px) rotate(var(--rot)) scale(1.15); }
+            :root { --card-w: 70px; --card-h: 98px; }
+            .opponents-row { height: 130px; gap: 5px; }
+            .my-zone { height: 140px; }
+            .controls { bottom: 150px; right: 10px; }
+            .chat-container { width: 200px; bottom: 10px; left: 10px; }
+            .p-hand-fan { top: 35px; }
+            .opp-card { width: 30px; height: 42px; left: -15px; }
+            .slots-wrap { gap: 10px; }
+            .slot-pair { margin: 2px; }
+            .chat-msg { font-size: 11px; }
+            .deck-pos { left: 10px; }
+            .bito-pos { right: 10px; }
         }
     </style>
 </head>
 <body>
     <div id="lobby">
         <div class="panel" id="p-setup">
-            <h1>Дурак для друзей</h1>
+            <h1>Дурак Онлайн</h1>
             <div class="avatars" id="ava-list"></div>
-            <input type="text" id="p-name" class="inp" placeholder="Ваш ник" value="Игрок" maxlength="12">
+            <input type="text" id="p-name" class="inp" placeholder="Ваше Имя" value="Игрок" maxlength="10">
             <div class="opts">
-                <label><input type="radio" name="mode" value="2" checked> 1x1</label>
+                <label><input type="radio" name="mode" value="2" checked> 2 Игрока</label>
                 <label><input type="radio" name="mode" value="3"> 3 Игрока</label>
                 <label><input type="radio" name="mode" value="4"> 4 Игрока</label>
             </div>
-            <div class="opts" style="font-size:16px;">
-                <label style="cursor:pointer; display:flex; align-items:center; gap:5px;"><input type="checkbox" id="chk-transfer" style="width:18px; height:18px;"> Переводной</label>
+            <div class="opts" style="font-size:15px; color:#555;">
+                <label style="cursor:pointer; display:flex; align-items:center; gap:5px;"><input type="checkbox" id="chk-transfer" checked style="width:18px; height:18px;"> Переводной</label>
             </div>
             <button class="btn btn-create" onclick="Lobby.create()">Создать стол</button>
-            <div style="margin:10px; color:#999; font-weight:bold; font-size:14px;">— или —</div>
+            <div style="margin:10px; color:#777; font-weight:bold; font-size:14px;">— войти по ID —</div>
             <input type="text" id="join-id" class="inp" placeholder="ID комнаты">
             <button class="btn btn-join" onclick="Lobby.join()">Войти</button>
         </div>
         <div class="panel" id="p-wait" style="display:none;">
-            <h2>Комната создана</h2>
-            <p>ID комнаты:</p>
-            <input type="text" id="host-id" class="inp" style="background:#eee; font-family:monospace;" readonly onclick="this.select()">
-            <p id="wait-msg" style="color:#d32f2f; font-weight:bold; font-size:24px;">1/2</p>
+            <h2>Комната готова</h2>
+            <p>Отправьте этот ID друзьям:</p>
+            <input type="text" id="host-id" class="inp" style="background:#ddd; font-family:monospace; color:#000;" readonly onclick="this.select()">
+            <p id="wait-msg" style="color:#d32f2f; font-weight:bold; font-size:24px; margin: 10px 0;">Ожидание...</p>
             <div style="font-size:30px; animation:spin 1s infinite linear; color:#555;">↻</div>
             <style>@keyframes spin { 100% {transform:rotate(360deg);} }</style>
         </div>
@@ -221,38 +225,35 @@
 
     <div id="game">
         <div id="ui-layer"><div class="opponents-row" id="opponents-area"></div></div>
+        
         <div class="chat-container">
             <div class="chat-log" id="chat-log"></div>
             <div class="chat-inp-row">
-                <input type="text" id="chat-in" placeholder="Сообщение..." autocomplete="off" maxlength="30">
-                <button id="chat-send" onclick="Game.sendChat()">➤</button>
+                <input type="text" id="chat-in" placeholder="Чат..." autocomplete="off" maxlength="30">
+                <button id="chat-send" onclick="Game.sendChat()">➜</button>
             </div>
         </div>
-        <div class="table-area">
+
+        <div class="table-area" id="drop-zone">
             <div class="deck-pos">
                 <div class="deck-count" id="deck-n">36</div>
                 <div id="trump-slot"></div>
                 <div class="deck-top" id="deck-visual"></div>
             </div>
-            <div class="bito-pos" id="bito-visual" style="position:absolute; right:40px; opacity:0.3; font-weight:bold;"></div>
-            <div class="slots-wrap" id="slots-area"></div>
+            <div class="bito-pos" id="bito-visual">БИТО</div>
+            
+            <div class="slots-wrap" id="slots-area">
+                <!-- Карты стола -->
+            </div>
+
             <div class="controls">
                 <div class="status-badge" id="status-txt">Подключение...</div>
                 <button class="act-btn btn-bito" id="btn-bito" onclick="Game.act('BITO')">БИТО</button>
                 <button class="act-btn btn-take" id="btn-take" onclick="Game.act('TAKE')">ВЗЯТЬ</button>
             </div>
         </div>
+
         <div class="my-zone">
-            <div class="my-info">
-                <div style="position:relative;">
-                    <img id="my-ava" class="my-ava-big" src="">
-                    <svg class="timer-svg" viewBox="0 0 74 74"><rect class="timer-path" id="my-timer" x="2" y="2" width="70" height="70" rx="12" ry="12"></rect></svg>
-                </div>
-                <div style="text-shadow: 1px 1px 2px black;">
-                    <div style="font-weight:bold; font-size:20px;">ВЫ</div>
-                    <div style="font-size:14px; opacity:0.8;" id="my-name-display">Игрок</div>
-                </div>
-            </div>
             <div class="hand-container" id="my-hand"></div>
         </div>
     </div>
@@ -262,145 +263,244 @@
         const SUITS = ['S','C','H','D'];
         const RANKS = ['6','7','8','9','0','J','Q','K','A'];
         
-        // НОВЫЕ РАЗНЫЕ ЗВУКИ
         const Snd = {
             play(t) {
                 let u = '';
-                // Клик (Snap)
-                if(t==='click') u='data:audio/mp3;base64,SUQzBAAAAAAAI1RTU0UAAAAPAAADTGl2Y29kZXIgMS4wLjAA//uQZAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAASW5mbwAAAA8AAAAZAAACcQADBQoPEhQWGBwfIiQmKCsuMDM2ODs9QEJFRkdJS0xPUFJTVlleYWNlZmhqbG9xdHZ5fH6Ag4WHiYuOkJOVmJqcn6Gkp6qsrrG0tru+wMPEyMvO0NPU1tjc3+Lj5ufq7O/x9Pf5+//uQZAAABp1vXf0wAAjbrWv/pAAAEckm08w01Ikek218w01MAAAp5nJp8/7l63//+5at///5yab///85NMAAAAAAklN/////p5yab//+nmcmn//p5nJp//6ecmm//p5nJpgAAAAACS///+nnJpv//6ecmm//p5yab/+nnJpv/6ecmmAAAAAAJL///6ecmm//p5yab/+nnJpv/6ecmm//p5yacAAABFADwAAAAAAAAA//uQZAAACW0vW/zBwAk2pWu/mDgAAAAAiAAADAAA//uQZAAACW0vW/zBwAk2pWu/mDgAAAAAiAAADAAA//uQZAAACW0vW/zBwAk2pWu/mDgAAAAAiAAADAAA//uQZAAACW0vW/zBwAk2pWu/mDgAAAAAiAAADAAA//uQZAAACW0vW/zBwAk2pWu/mDgAAAAAiAAADAAA//uQZAAACW0vW/zBwAk2pWu/mDgAAAAAiAAADAAA//uQZAAACW0vW/zBwAk2pWu/mDgAAAAAiAAADAAA//uQZAAACW0vW/zBwAk2pWu/mDgAAAAAiAAADAAA//uQZAAACW0vW/zBwAk2pWu/mDgAAAAAiAAADAAA//uQZAAACW0vW/zBwAk2pWu/mDgAAAAAiAAADAAA';
-                // Карта (Slide)
-                if(t==='card') u='data:audio/mp3;base64,SUQzBAAAAAAAI1RTU0UAAAAPAAADTGl2Y29kZXIgMS4wLjAA//uQZAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAASW5mbwAAAA8AAAAZAAABsQAFBwoNEhcaHR8jKC0wNTo9QkVJTlFXYWZobG9zdnl9goaLjZKXnZ+iqK6xtri8wcfLztLX29/j5+vv8/f7//uQZAAABllvX/0wAAjLrWv/pAAAEckm08w01Ikek218w01MAAAp5nJp8/7l63//+5at///5yab///85NMAAAAAAklN/////p5yab//+nmcmn//p5nJp//6ecmm//p5yabAAAAAAJL///6ecmm//p5yab/+nnJpv/6ecmm//p5yabAAAAAAJL///6ecmm//p5yab/+nnJpv/6ecmm//p5yacAAABFADwAAAAAAAAA//uQZAAACVEvW/zBwAkyJWv/mDgAAAAAiAAADAAA//uQZAAACVEvW/zBwAkyJWv/mDgAAAAAiAAADAAA//uQZAAACVEvW/zBwAkyJWv/mDgAAAAAiAAADAAA//uQZAAACVEvW/zBwAkyJWv/mDgAAAAAiAAADAAA//uQZAAACVEvW/zBwAkyJWv/mDgAAAAAiAAADAAA//uQZAAACVEvW/zBwAkyJWv/mDgAAAAAiAAADAAA//uQZAAACVEvW/zBwAkyJWv/mDgAAAAAiAAADAAA//uQZAAACVEvW/zBwAkyJWv/mDgAAAAAiAAADAAA//uQZAAACVEvW/zBwAkyJWv/mDgAAAAAiAAADAAA//uQZAAACVEvW/zBwAkyJWv/mDgAAAAAiAAADAAA';
-                // Взять (Shuffle)
-                if(t==='take') u='https://cdn.pixabay.com/audio/2022/03/15/audio_2c416e3427.mp3';
-                // Бито (Thud)
-                if(t==='bito') u='https://cdn.pixabay.com/audio/2022/03/15/audio_7368815123.mp3';
-                // Победа
+                if(t==='click') u='data:audio/mp3;base64,SUQzBAAAAAAAI1RTU0UAAAAPAAADTGl2Y29kZXIgMS4wLjAA//uQZAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAASW5mbwAAAA8AAAAZAAACcQADBQoPEhQWGBwfIiQmKCsuMDM2ODs9QEJFRkdJS0xPUFJTVlleYWNlZmhqbG9xdHZ5fH6Ag4WHiYuOkJOVmJqcn6Gkp6qsrrG0tru+wMPEyMvO0NPU1tjc3+Lj5ufq7O/x9Pf5+//uQZAAABp1vXf0wAAjbrWv/pAAAEckm08w01Ikek218w01MAAAp5nJp8/7l63//+5at///5yab///85NMAAAAAAklN/////p5yab//+nmcmn//p5nJp//6ecmm//p5nJpgAAAAACS///+nnJpv//6ecmm//p5yab/+nnJpv/6ecmmAAAAAAJL///6ecmm//p5yab/+nnJpv/6ecmm//p5yacAAABFADwAAAAAAAAA//uQZAAACW0vW/zBwAk2pWu/mDgAAAAAiAAADAAA//uQZAAACW0vW/zBwAk2pWu/mDgAAAAAiAAADAAA//uQZAAACW0vW/zBwAk2pWu/mDgAAAAAiAAADAAA//uQZAAACW0vW/zBwAk2pWu/mDgAAAAAiAAADAAA//uQZAAACW0vW/zBwAk2pWu/mDgAAAAAiAAADAAA//uQZAAACW0vW/zBwAk2pWu/mDgAAAAAiAAADAAA//uQZAAACW0vW/zBwAk2pWu/mDgAAAAAiAAADAAA//uQZAAACW0vW/zBwAk2pWu/mDgAAAAAiAAADAAA//uQZAAACW0vW/zBwAk2pWu/mDgAAAAAiAAADAAA';
+                if(t==='card') u='data:audio/mp3;base64,SUQzBAAAAAAAI1RTU0UAAAAPAAADTGl2Y29kZXIgMS4wLjAA//uQZAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAASW5mbwAAAA8AAAAZAAABsQAFBwoNEhcaHR8jKC0wNTo9QkVJTlFXYWZobG9zdnl9goaLjZKXnZ+iqK6xtri8wcfLztLX29/j5+vv8/f7//uQZAAABllvX/0wAAjLrWv/pAAAEckm08w01Ikek218w01MAAAp5nJp8/7l63//+5at///5yab///85NMAAAAAAklN/////p5yab//+nmcmn//p5nJp//6ecmm//p5yabAAAAAAJL///6ecmm//p5yab/+nnJpv/6ecmm//p5yabAAAAAAJL///6ecmm//p5yab/+nnJpv/6ecmm//p5yacAAABFADwAAAAAAAAA//uQZAAACVEvW/zBwAkyJWv/mDgAAAAAiAAADAAA//uQZAAACVEvW/zBwAkyJWv/mDgAAAAAiAAADAAA//uQZAAACVEvW/zBwAkyJWv/mDgAAAAAiAAADAAA//uQZAAACVEvW/zBwAkyJWv/mDgAAAAAiAAADAAA//uQZAAACVEvW/zBwAkyJWv/mDgAAAAAiAAADAAA//uQZAAACVEvW/zBwAkyJWv/mDgAAAAAiAAADAAA//uQZAAACVEvW/zBwAkyJWv/mDgAAAAAiAAADAAA//uQZAAACVEvW/zBwAkyJWv/mDgAAAAAiAAADAAA//uQZAAACVEvW/zBwAkyJWv/mDgAAAAAiAAADAAA';
                 if(t==='win') u='https://cdn.pixabay.com/audio/2021/08/04/audio_12b0c7443c.mp3';
-
                 if(u) new Audio(u).play().catch(()=>{});
             }
         };
 
-        class Engine {
+        class DurakEngine {
             constructor(hName, hAva, mode, transfer) {
                 this.mode = parseInt(mode);
-                this.transfer = transfer;
+                this.canTransfer = transfer; // Правило переводного
                 this.players = [{id:'host', name:hName, ava:hAva, hand:[]}];
                 this.deck = [];
                 this.trump = null;
-                this.field = [];
-                this.turn = 0;
-                this.startTime = 0;
-                this.state = 'lobby';
-                this.win = null;
+                this.field = []; // [{att: Card, def: Card|null, from: pIdx}]
+                this.attacker = 0;
+                this.defender = 1;
+                this.isFirstBout = true; // Первый кон
+                this.state = 'lobby'; // lobby, game, end
+                this.winOrder = [];
                 this.lastAction = null;
+                this.msg = '';
             }
+
             addPlayer(id, name, ava) {
                 if(this.players.length >= this.mode) return false;
                 this.players.push({id, name, ava, hand:[]});
                 return true;
             }
+
             start() {
                 this.deck = [];
                 SUITS.forEach(s => RANKS.forEach(r => this.deck.push({r, s})));
                 this.deck.sort(() => Math.random() - 0.5);
+                
+                // Раздача
                 this.players.forEach(p => p.hand = this.deck.splice(0,6));
+                
+                // Козырь
                 this.trump = this.deck.pop();
-                this.deck.unshift(this.trump);
-                let min=100, fp=0;
+                this.deck.unshift(this.trump); // Кладем под низ
+
+                // Определяем первый ход (младший козырь)
+                let minVal = 100, firstP = 0;
                 this.players.forEach((p,i) => {
                     p.hand.forEach(c => {
-                        if(c.s===this.trump.s && RANKS.indexOf(c.r)<min) { min = RANKS.indexOf(c.r); fp=i; }
+                        if(c.s === this.trump.s) {
+                            const val = RANKS.indexOf(c.r);
+                            if(val < minVal) { minVal = val; firstP = i; }
+                        }
                     });
                 });
-                this.changeTurn(fp);
+
+                this.attacker = firstP;
+                this.defender = (firstP + 1) % this.players.length;
                 this.state = 'game';
+                this.isFirstBout = true;
                 this.lastAction = {type: 'START'};
             }
-            changeTurn(idx) { this.turn = idx; this.startTime = Date.now(); }
-            next(off=1) { return (this.turn + off) % this.players.length; }
-            beat(a, d) {
-                if(a.s===d.s) return RANKS.indexOf(d.r) > RANKS.indexOf(a.r);
-                return d.s === this.trump.s;
-            }
-            move(pidx, type, d) {
-                if(this.state !== 'game') return {success: false, reason: 'Игра не идет'};
-                const p = this.players[pidx];
 
+            // Проверка возможности действия
+            move(pidx, type, d) {
+                if(this.state !== 'game') return {ok: false};
+                const p = this.players[pidx];
+                
+                // АТАКА или ПОДКИДЫВАНИЕ
                 if(type === 'ATTACK') {
-                    const isAtt = (pidx === this.turn);
-                    const isTrans = (this.transfer && pidx === this.next() && this.field.length > 0 && this.field.every(s => !s.def));
-                    if(!isAtt && !isTrans) return {success: false, reason: 'Не ваш ход'};
-                    
                     const card = p.hand[d.i];
-                    if(this.field.length > 0) {
+                    
+                    // Если стол пуст (Атака)
+                    if(this.field.length === 0) {
+                        if(pidx !== this.attacker) return {ok: false, r: 'Не ваш ход'};
+                        p.hand.splice(d.i, 1);
+                        this.field.push({att: card, def: null, from: pidx});
+                        this.lastAction = {type: 'ATTACK', p: pidx};
+                        return {ok: true};
+                    } 
+                    // Подкидывание
+                    else {
+                        // Кто может подкидывать? Все, кроме отбивающегося
+                        if(pidx === this.defender) {
+                            // Проверка на ПЕРЕВОД
+                            if(this.canTransfer && !this.isFirstBout) {
+                                // Перевод возможен если: 
+                                // 1. Карты на столе не отбиты (в текущем коде проверяем, что все def == null)
+                                // 2. У игрока есть карта такого же достоинства
+                                const allUnbeaten = this.field.every(s => !s.def);
+                                if(allUnbeaten && this.field[0].att.r === card.r) {
+                                    // Проверка: хватит ли карт у СЛЕДУЮЩЕГО игрока
+                                    const nextP = this.players[(this.defender + 1) % this.players.length];
+                                    if(nextP.hand.length < this.field.length + 1) return {ok: false, r: 'У следующего мало карт'};
+                                    
+                                    p.hand.splice(d.i, 1);
+                                    this.field.push({att: card, def: null, from: pidx});
+                                    
+                                    // Смена ролей: текущий защищающийся становится атакующим
+                                    this.attacker = this.defender;
+                                    this.defender = (this.attacker + 1) % this.players.length;
+                                    // Пропускаем выбывших (в простой версии просто index)
+                                    // TODO: Логика пропусков если >2 игроков и кто-то вышел
+                                    
+                                    this.lastAction = {type: 'TRANSFER', p: pidx};
+                                    return {ok: true};
+                                }
+                            }
+                            return {ok: false, r: 'Нельзя подкидывать себе'};
+                        }
+
+                        // Проверка на ранг
                         const ranks = new Set(this.field.flatMap(x => [x.att.r, x.def?.r].filter(Boolean)));
-                        if(!ranks.has(card.r)) return {success: false, reason: 'Карта не подходит', badCard: true};
+                        if(!ranks.has(card.r)) return {ok: false, r: 'Нет такого ранга', bad: true};
+
+                        // Лимит карт
+                        // Первый отбой 5, иначе 6.
+                        // И не больше чем карт у отбивающегося
+                        const limit = this.isFirstBout ? 5 : 6;
+                        const cardsActive = this.field.filter(x=>!x.def).length;
+                        if(this.field.length >= limit) return {ok: false, r: 'Куча полна'};
+                        if(cardsActive >= this.players[this.defender].hand.length) return {ok: false, r: 'У игрока нет карт'};
+
+                        p.hand.splice(d.i, 1);
+                        this.field.push({att: card, def: null, from: pidx});
+                        this.lastAction = {type: 'ATTACK', p: pidx};
+                        return {ok: true};
+                    }
+                }
+
+                // ЗАЩИТА
+                if(type === 'DEFEND') {
+                    if(pidx !== this.defender) return {ok: false};
+                    
+                    // Пытаемся отбить конкретный слот или первый неотбитый?
+                    // В d.targetSlot придет индекс слота
+                    const slot = this.field[d.targetSlot];
+                    if(!slot || slot.def) return {ok: false};
+
+                    const card = p.hand[d.i];
+                    const attC = slot.att;
+                    let wins = false;
+
+                    if(attC.s === card.s) {
+                        wins = RANKS.indexOf(card.r) > RANKS.indexOf(attC.r);
+                    } else if (card.s === this.trump.s) {
+                        wins = true;
                     }
 
-                    const defIdx = isTrans ? (pidx + 1) % this.players.length : this.next();
-                    const defP = this.players[defIdx];
-                    if(this.field.filter(x=>!x.def).length + 1 > defP.hand.length) return {success: false, reason: 'Много карт'};
-                    if(this.field.length >= 6) return {success: false, reason: 'Стол полон'};
+                    if(!wins) return {ok: false, r: 'Карта слаба', bad: true};
 
-                    p.hand.splice(d.i, 1);
-                    this.field.push({att: card, def: null, from: pidx});
-                    if(isTrans) { this.changeTurn(pidx); this.lastAction = {type: 'TRANSFER', p: pidx}; } 
-                    else { this.startTime = Date.now(); this.lastAction = {type: 'ATTACK', p: pidx}; }
-                    return {success: true};
-                }
-                if(type === 'DEFEND') {
-                    if(pidx !== this.next()) return {success: false};
-                    const slot = this.field[d.s];
-                    if(!slot || slot.def) return {success: false};
-                    const card = p.hand[d.i];
-                    if(!this.beat(slot.att, card)) return {success: false, reason: 'Слабая карта', badCard: true};
                     p.hand.splice(d.i, 1);
                     slot.def = card;
                     this.lastAction = {type: 'DEFEND', p: pidx};
-                    return {success: true};
+                    return {ok: true};
                 }
+
+                // БИТО (Только атакующий жмет? Или авто? Обычно атакующий говорит "Бито")
                 if(type === 'BITO') {
-                    if(pidx !== this.turn) return {success: false};
-                    if(this.field.some(x=>!x.def)) return {success: false};
+                    // Бито нажать может любой атакующий, если все крыто.
+                    if(pidx === this.defender) return {ok: false};
+                    if(this.field.some(x => !x.def)) return {ok: false, r: 'Не все отбито'};
+
                     this.field = [];
-                    this.refill();
-                    this.changeTurn(this.next());
+                    this.isFirstBout = false;
+                    this.refillHands();
+                    
+                    // Ход переходит отбивавшемуся
+                    this.attacker = this.defender;
+                    this.defender = (this.attacker + 1) % this.players.length;
+                    
+                    this.checkWin();
                     this.lastAction = {type: 'BITO', p: pidx};
-                    return {success: true};
+                    return {ok: true};
                 }
+
+                // ВЗЯТЬ
                 if(type === 'TAKE') {
-                    if(pidx !== this.next()) return {success: false};
-                    this.field.forEach(x => { p.hand.push(x.att); if(x.def) p.hand.push(x.def); });
+                    if(pidx !== this.defender) return {ok: false};
+                    
+                    // Забирает все со стола
+                    this.field.forEach(x => {
+                        p.hand.push(x.att);
+                        if(x.def) p.hand.push(x.def);
+                    });
                     this.field = [];
-                    this.refill(true);
-                    let n = this.next(2);
-                    if(this.players.length===2) n = this.next(1);
-                    this.changeTurn(n);
+                    this.isFirstBout = false;
+                    this.refillHands(); // Добирают остальные
+
+                    // Ход пропускается, атакует следующий слева от взявшего
+                    this.attacker = (this.defender + 1) % this.players.length;
+                    this.defender = (this.attacker + 1) % this.players.length;
+
+                    this.checkWin();
                     this.lastAction = {type: 'TAKE', p: pidx};
-                    return {success: true};
+                    return {ok: true};
                 }
-                return {success: false};
+
+                return {ok: false};
             }
-            refill(skipDef=false) {
+
+            refillHands() {
+                // Порядок добора: Атакующий (тот кто ходил первым), затем по кругу, Отбивавшийся последним
+                // Упрощенно: просто по кругу начиная с attacker
                 const q = [];
-                for(let i=0; i<this.players.length; i++) q.push((this.turn + i)%this.players.length);
+                for(let i=0; i<this.players.length; i++) q.push((this.attacker + i) % this.players.length);
+                
                 q.forEach(idx => {
-                    if(skipDef && idx === this.next()) return;
                     const p = this.players[idx];
-                    while(p.hand.length < 6 && this.deck.length > 0) p.hand.push(this.deck.pop());
+                    while(p.hand.length < 6 && this.deck.length > 0) {
+                        p.hand.push(this.deck.pop());
+                    }
                 });
-                this.players.forEach(p => { if(p.hand.length===0 && this.deck.length===0 && !this.win) this.win = p.name; });
             }
+
+            checkWin() {
+                // Если колода пуста и у игрока нет карт -> победа
+                this.players.forEach(p => {
+                    if(p.hand.length === 0 && this.deck.length === 0 && !this.winOrder.includes(p.name)) {
+                        this.winOrder.push(p.name);
+                    }
+                });
+                if(this.winOrder.length >= this.players.length - 1) {
+                    this.state = 'end';
+                }
+            }
+
             dump() {
                 return {
-                    d: this.deck.length, tr: this.trump, f: this.field, t: this.turn, tm: this.startTime,
+                    dk: this.deck.length, tr: this.trump, f: this.field, 
+                    att: this.attacker, def: this.defender,
                     ps: this.players.map(p => ({id:p.id, name:p.name, ava:p.ava, cnt:p.hand.length})),
-                    win: this.win, la: this.lastAction
+                    win: this.winOrder, la: this.lastAction
                 };
             }
         }
 
+        /* --- UI & NETWORKING --- */
         const Lobby = {
             ava: 1,
             init() {
@@ -415,14 +515,14 @@
             },
             create() {
                 Snd.play('click');
-                const n = document.getElementById('p-name').value || 'Игрок';
+                const n = document.getElementById('p-name').value || 'Host';
                 const m = document.querySelector('input[name="mode"]:checked').value;
                 const tr = document.getElementById('chk-transfer').checked;
                 Game.initHost(n, this.ava, m, tr);
             },
             join() {
                 Snd.play('click');
-                const n = document.getElementById('p-name').value || 'Игрок';
+                const n = document.getElementById('p-name').value || 'Guest';
                 const id = document.getElementById('join-id').value;
                 if(!id) return Game.toast('Введите ID');
                 Game.initClient(n, this.ava, id);
@@ -430,11 +530,12 @@
         };
 
         const Game = {
-            role: null, eng: null, peer: null, conns: [], conn: null, myId: null, st: null, hand: [], sel: null,
-            
+            role: null, eng: null, peer: null, conns: [], conn: null, myId: null, 
+            state: null, hand: [], dragging: null, dragOff: {x:0, y:0},
+
             initHost(n, a, m, t) {
                 this.role = 'host';
-                this.eng = new Engine(n, a, m, t);
+                this.eng = new DurakEngine(n, a, m, t);
                 this.peer = new Peer();
                 this.peer.on('open', id => {
                     document.getElementById('p-setup').style.display = 'none';
@@ -442,7 +543,7 @@
                     document.getElementById('host-id').value = id;
                 });
                 this.peer.on('connection', c => {
-                    c.on('open', () => { this.conns.push(c); this.bc({t:'C', n:'INFO', m:'Подключение...', s:1}); });
+                    c.on('open', () => { this.conns.push(c); this.bc({t:'CHAT', n:'System', m:'Подключение...'}); });
                     c.on('data', d => this.handleData(c, d));
                 });
             },
@@ -452,280 +553,363 @@
                 this.peer.on('open', () => {
                     this.conn = this.peer.connect(id);
                     this.conn.on('open', () => {
-                        this.conn.send({t:'J', n, a});
+                        this.conn.send({t:'JOIN', n, a});
                         document.getElementById('p-setup').style.display = 'none';
+                        document.getElementById('status-txt').innerText = "Ожидание...";
                     });
                     this.conn.on('data', d => this.handleData(null, d));
-                    this.conn.on('close', () => { alert('Разрыв соединения'); location.reload(); });
+                    this.conn.on('close', () => { alert('Хост отключился'); location.reload(); });
                 });
             },
             handleData(c, d) {
-                if(d.t==='J' && this.role==='host') {
-                    if(this.eng.addPlayer(c.peer, d.n, d.a)) {
-                        document.getElementById('wait-msg').innerText = `${this.eng.players.length}/${this.eng.mode}`;
-                        this.bc({t:'C', n:'INFO', m:`${d.n} вошел`, s:1});
-                        if(this.eng.players.length == this.eng.mode) {
-                            this.eng.start();
-                            this.sync();
-                            this.startGameUI();
-                            Snd.play('take'); // Sound of shuffling/deal
+                // Host Logic
+                if(this.role === 'host') {
+                    if(d.t === 'JOIN') {
+                        if(this.eng.addPlayer(c.peer, d.n, d.a)) {
+                            document.getElementById('wait-msg').innerText = `${this.eng.players.length}/${this.eng.mode}`;
+                            this.bc({t:'CHAT', n:'System', m:`${d.n} вошел`});
+                            if(this.eng.players.length == this.eng.mode) {
+                                this.eng.start();
+                                this.sync();
+                                this.bc({t:'START_UI'});
+                            }
                         }
                     }
-                }
-                if(d.t==='A' && this.role==='host') {
-                    const pIdx = this.eng.players.findIndex(p=>p.id===c.peer);
-                    if(pIdx!==-1) {
-                        const res = this.eng.move(pIdx, d.a, d.d);
-                        if(res.success) this.sync();
-                        else if(res.badCard) {
-                            c.send({t:'ERR_CARD', i:d.d.i}); // Tell client to shake card
+                    if(d.t === 'ACT') {
+                        const pIdx = this.eng.players.findIndex(p=>p.id === c.peer);
+                        if(pIdx !== -1) {
+                            const res = this.eng.move(pIdx, d.a, d.d);
+                            if(res.ok) this.sync();
+                            else if(res.bad) c.send({t:'BAD_MOVE', i:d.d.i, r:res.r});
                         }
                     }
+                    if(d.t === 'CHAT') this.bc(d, c.peer); // Resend to all
                 }
-                if(d.t==='C') {
-                    if(this.role === 'host') this.bc(d, c ? c.peer : null);
-                    this.addChat(d);
+
+                // Client/Common Logic
+                if(d.t === 'START_UI') {
+                    document.getElementById('lobby').style.display = 'none';
+                    document.getElementById('game').style.display = 'flex';
                 }
-                if(d.t==='S') {
-                    this.startGameUI();
-                    this.st = d.s; this.hand = d.h; this.myId = d.mid;
-                    this.draw();
-                    if(d.s.win) Snd.play('win');
-                    else if(d.s.la) {
-                        if(d.s.la.type==='BITO') Snd.play('bito');
-                        if(d.s.la.type==='ATTACK' || d.s.la.type==='DEFEND') Snd.play('card');
-                        if(d.s.la.type==='TAKE') Snd.play('take');
-                    }
+                if(d.t === 'SYNC') {
+                    this.state = d.s;
+                    this.hand = d.h;
+                    this.myId = d.mid;
+                    this.render();
+                    this.playSound(d.s.la);
                 }
-                if(d.t==='ERR_CARD') this.shakeCard(d.i);
+                if(d.t === 'CHAT') this.addChat(d);
+                if(d.t === 'BAD_MOVE') {
+                    const el = document.querySelectorAll('.my-card-wrap')[d.i];
+                    if(el) { el.classList.remove('shake'); void el.offsetWidth; el.classList.add('shake'); }
+                    this.toast(d.r || "Нельзя");
+                }
             },
-            startGameUI() {
-                document.getElementById('lobby').style.display = 'none';
-                document.getElementById('game').style.display = 'flex';
-            },
-            bc(d) {
-                if(d.t==='C' && !d.n && this.eng) {
-                    const p = this.eng.players.find(x=>x.id === d.id);
-                    d.n = p ? p.name : '???';
+            bc(data, skipId=null) {
+                if(data.t==='CHAT' && !data.n && this.eng) { // Host resolves name
+                    const p = this.eng.players.find(x=>x.id === (data.id || 'host'));
+                    data.n = p ? p.name : '???';
                 }
-                this.conns.forEach(c=>c.send(d));
+                if(this.role === 'host') {
+                    if(data.t === 'CHAT') this.addChat(data);
+                    this.conns.forEach(c => { if(c.peer!==skipId) c.send(data); });
+                }
             },
             sync() {
-                if(this.role!=='host') return;
                 const s = this.eng.dump();
-                this.st = s; this.hand = this.eng.players[0].hand; this.myId = 'host';
-                this.draw();
+                this.state = s; 
+                this.hand = this.eng.players[0].hand;
+                this.myId = 'host';
+                this.render();
+                
                 this.conns.forEach(c => {
-                    const p = this.eng.players.find(x=>x.id===c.peer);
-                    c.send({t:'S', s, h:p?p.hand:[], mid:c.peer});
+                    const p = this.eng.players.find(x=>x.id === c.peer);
+                    c.send({t:'SYNC', s, h:p?p.hand:[], mid:c.peer});
                 });
             },
             act(type, d={}) {
-                if(this.role==='host') {
+                if(this.role === 'host') {
                     const res = this.eng.move(0, type, d);
-                    if(res.success) { Snd.play('click'); this.sync(); }
-                    else {
-                        if(res.badCard) this.shakeCard(d.i);
-                        // No text toast!
+                    if(res.ok) this.sync();
+                    else if(res.bad) {
+                        const el = document.querySelectorAll('.my-card-wrap')[d.i];
+                        if(el) { el.classList.remove('shake'); void el.offsetWidth; el.classList.add('shake'); }
+                        this.toast(res.r);
                     }
                 } else {
-                    Snd.play('click');
-                    this.conn.send({t:'A', a:type, d});
+                    this.conn.send({t:'ACT', a:type, d});
                 }
-                this.sel = null;
             },
-            shakeCard(idx) {
-                const el = document.querySelectorAll('.my-card-wrap')[idx];
-                if(el) { el.classList.remove('shake'); void el.offsetWidth; el.classList.add('shake'); }
-            },
-            draw() {
-                const s = this.st;
+            render() {
+                const s = this.state;
                 if(!s) return;
-                const myIdx = s.ps.findIndex(p=>p.id===this.myId) > -1 ? s.ps.findIndex(p=>p.id===this.myId) : 0;
-                document.getElementById('my-ava').src = `https://robohash.org/${s.ps[myIdx].ava}.png?set=set4`;
-                document.getElementById('my-name-display').innerText = s.ps[myIdx].name;
                 
-                const myTimer = document.getElementById('my-timer');
-                if(s.t === myIdx) { this.animTimer(myTimer, s.tm); myTimer.parentElement.style.opacity = 1; }
-                else myTimer.parentElement.style.opacity = 0;
-
+                // 1. My Info (Implicit) & Opponents
+                const myIdx = s.ps.findIndex(p=>p.id===this.myId) > -1 ? s.ps.findIndex(p=>p.id===this.myId) : 0;
                 const oppDiv = document.getElementById('opponents-area');
                 oppDiv.innerHTML = '';
+                
                 for(let i=1; i<s.ps.length; i++) {
                     const idx = (myIdx + i) % s.ps.length;
                     const p = s.ps[idx];
-                    const isTurn = (s.t === idx);
-                    let fanHTML = '';
-                    const cnt = Math.min(p.cnt, 36);
-                    for(let k=0; k<cnt; k++) {
-                        const spread = 12; const startRot = -(cnt-1)*spread/2; const rot = startRot + k*spread;
-                        fanHTML += `<div class="opp-card" style="transform: rotate(${rot}deg) translateY(${Math.abs(rot)*0.5}px);"></div>`;
-                    }
+                    const isAtt = (s.att === idx);
+                    const isDef = (s.def === idx);
+                    
                     const el = document.createElement('div');
                     el.className = 'player-wrap';
                     el.innerHTML = `
                         <div class="p-name">${p.name}</div>
                         <div class="avatar-box">
-                            <img src="https://robohash.org/${p.ava}.png?set=set4" class="avatar ${isTurn?'turn':''}">
-                            ${isTurn ? `<svg class="timer-svg" viewBox="0 0 74 74"><rect class="timer-path" id="t-${idx}" x="2" y="2" width="70" height="70" rx="12" ry="12"></rect></svg>` : ''}
+                            <img src="https://robohash.org/${p.ava}.png?set=set4" class="avatar ${isAtt?'turn':''} ${isDef?'defend':''}">
                         </div>
-                        <div class="p-hand-fan">${fanHTML}</div>
-                        ${p.cnt>0 ? `<div class="card-count-badge">${p.cnt}</div>` : ''}
+                        ${p.cnt > 0 ? `<div class="p-hand-fan"><div class="opp-card"></div></div><div class="card-count-badge">${p.cnt}</div>` : ''}
                     `;
                     oppDiv.appendChild(el);
-                    if(isTurn) this.animTimer(document.getElementById(`t-${idx}`), s.tm);
                     if(s.la && s.la.p === idx) this.showBubble(el, s.la.type);
                 }
 
-                document.getElementById('deck-n').innerText = s.d;
-                document.getElementById('deck-visual').style.display = s.d > 0 ? 'block' : 'none';
+                // 2. Deck & Trump
+                document.getElementById('deck-n').innerText = s.dk;
+                document.getElementById('deck-visual').style.display = s.dk > 0 ? 'block' : 'none';
                 const tSlot = document.getElementById('trump-slot');
                 tSlot.innerHTML = '';
-                if(s.tr && s.d > 0) {
+                if(s.tr && s.dk > 0) {
                     const img = document.createElement('div');
                     img.className = 'trump-card';
                     img.style.backgroundImage = `url('${IMG_API(s.tr.r, s.tr.s)}')`;
                     tSlot.appendChild(img);
-                } else if (s.tr) {
-                    tSlot.innerHTML = `<div style="position:absolute;top:0;left:0;opacity:0.3;font-size:40px;color:white;font-weight:bold;padding:10px;">${this.suitIcon(s.tr.s)}</div>`;
+                } else if(s.tr) {
+                    tSlot.innerHTML = `<div style="position:absolute;top:5px;left:5px;opacity:0.2;font-size:30px;color:white;">${this.suitIcon(s.tr.s)}</div>`;
                 }
 
+                // 3. Table (Slots)
                 const slDiv = document.getElementById('slots-area');
                 slDiv.innerHTML = '';
                 s.f.forEach((slot, si) => {
                     const d = document.createElement('div');
-                    d.className = 'slot';
+                    d.className = 'slot-pair';
+                    d.dataset.idx = si; // For dropping defense
+                    
+                    // Attack Card
                     const ac = document.createElement('div');
                     ac.className = 'card-face card-att';
                     ac.style.backgroundImage = `url('${IMG_API(slot.att.r, slot.att.s)}')`;
+                    ac.style.setProperty('--rnd', (Math.random()*10 - 5));
+                    
+                    // Marker who threw
+                    const throwerP = s.ps[slot.from];
+                    const mark = document.createElement('div');
+                    mark.className = 'thrower-mark';
+                    mark.style.backgroundImage = `url('https://robohash.org/${throwerP.ava}.png?set=set4')`;
+                    ac.appendChild(mark);
+
                     d.appendChild(ac);
+
+                    // Defend Card
                     if(slot.def) {
                         const dc = document.createElement('div');
                         dc.className = 'card-face card-def';
                         dc.style.backgroundImage = `url('${IMG_API(slot.def.r, slot.def.s)}')`;
+                        dc.style.setProperty('--rnd', (Math.random()*10 - 5));
                         d.appendChild(dc);
-                    } else if(s.t !== myIdx) {
-                        const defIdx = (s.t+1)%s.ps.length;
-                        if(myIdx === defIdx) {
-                            d.classList.add('interactive');
-                            d.onclick = () => this.act('DEFEND', {i:this.sel, s:si});
-                        }
                     }
                     slDiv.appendChild(d);
                 });
 
+                // 4. My Hand
                 const hDiv = document.getElementById('my-hand');
                 hDiv.innerHTML = '';
-                const myCards = this.hand;
-                const total = myCards.length;
-                const range = 60; // Wider range for more space
-                const step = total > 1 ? range / (total - 1) : 0;
-                const startDeg = -(range/2);
+                const total = this.hand.length;
+                const range = Math.min(total * 20, 80);
+                const step = total > 1 ? (range*2) / (total-1) : 0;
 
-                myCards.forEach((c, i) => {
-                    const rot = startDeg + (i * step);
-                    const yOff = Math.abs(rot) * 1.0; 
-                    const xOff = (i - (total-1)/2) * 35; // Increased spacing
-
+                this.hand.forEach((c, i) => {
                     const w = document.createElement('div');
-                    w.className = 'my-card-wrap' + (this.sel===i ? ' selected' : '');
+                    w.className = 'my-card-wrap';
+                    w.dataset.idx = i;
+                    
+                    const rot = total > 1 ? -range + (i * step) : 0;
+                    const yOff = Math.abs(rot)*0.5;
+                    const xOff = (i - (total-1)/2) * 35; // Spacing
+
                     w.style.setProperty('--rot', rot+'deg');
                     w.style.setProperty('--y', yOff+'px');
                     w.style.setProperty('--x', xOff+'px');
-                    w.style.zIndex = i + 10; // Basic layering
-                    
+                    w.style.zIndex = i + 10;
+
                     const f = document.createElement('div');
                     f.className = 'card-face';
                     f.style.backgroundImage = `url('${IMG_API(c.r,c.s)}')`;
                     w.appendChild(f);
 
-                    w.onclick = (e) => {
-                        e.stopPropagation();
-                        const isMyTurn = (s.t === myIdx);
-                        const isTransfer = (this.eng?.transfer && myIdx===(s.t+1)%s.ps.length && s.f.length>0 && s.f.every(x=>!x.def));
-                        
-                        // Если мой ход атаковать или переводить - клик сразу отправляет карту
-                        if(isMyTurn || isTransfer) {
-                            this.sel = i;
-                            this.act('ATTACK', {i});
-                        } else {
-                            // Если я защищаюсь - просто выделяем карту
-                            this.sel = (this.sel===i) ? null : i;
-                            this.draw();
-                        }
-                    };
+                    // DRAG HANDLERS
+                    w.addEventListener('mousedown', e => this.dragStart(e, w, i));
+                    w.addEventListener('touchstart', e => this.dragStart(e, w, i), {passive:false});
+
                     hDiv.appendChild(w);
                 });
 
-                const bB = document.getElementById('btn-bito');
-                const bT = document.getElementById('btn-take');
+                // 5. Controls & Status
+                const btnB = document.getElementById('btn-bito');
+                const btnT = document.getElementById('btn-take');
                 const st = document.getElementById('status-txt');
-                bB.style.display = 'none'; bT.style.display = 'none';
+                btnB.style.display = 'none'; btnT.style.display = 'none';
 
-                if(s.win) {
-                    st.innerText = `${s.win} ПОБЕДИЛ!`;
-                    st.style.background = "#d32f2f";
-                } else if (s.t === myIdx) {
-                    st.innerText = "ВАШ ХОД";
-                    st.style.borderColor = "#4caf50";
-                    if(s.f.length>0 && s.f.every(x=>x.def)) bB.style.display = 'block';
+                if(s.win.length > 0) {
+                    st.innerText = s.win[0] + " ПОБЕДИЛ!";
+                    st.style.background = "#ffd700"; st.style.color="black";
+                } else if(s.att === myIdx) {
+                    st.innerText = "ВАШ ХОД (АТАКА)";
+                    st.style.border = "2px solid #4caf50";
+                    // Если все побито - можно жать БИТО
+                    if(s.f.length > 0 && s.f.every(x=>x.def)) btnB.style.display = 'block';
+                } else if(s.def === myIdx) {
+                    st.innerText = "ОТБИВАЙТЕСЬ";
+                    st.style.border = "2px solid #ff9800";
+                    if(s.f.some(x=>!x.def)) btnT.style.display = 'block';
                 } else {
-                    const defIdx = (s.t+1)%s.ps.length;
-                    if(myIdx === defIdx) {
-                        st.innerText = "ОТБИВАЙТЕСЬ";
-                        st.style.borderColor = "#ff9800";
-                        if(s.f.some(x=>!x.def)) bT.style.display = 'block';
-                    } else {
-                        st.innerText = `Ходит: ${s.ps[s.t].name}`;
-                        st.style.borderColor = "#fff";
-                    }
+                    st.innerText = "ЖДЕМ...";
+                    st.style.border = "1px solid #aaa";
                 }
             },
-            animTimer(el, start) {
-                if(!el) return;
-                const dur = 45000;
-                const p = Math.max(0, (dur - (Date.now() - start)) / dur);
-                el.style.strokeDashoffset = 220 * (1 - p);
-                if(p>0) requestAnimationFrame(()=>this.animTimer(el,start));
+            
+            // --- DRAG N DROP LOGIC ---
+            dragStart(e, el, idx) {
+                if(this.dragging) return;
+                const touch = e.touches ? e.touches[0] : e;
+                this.dragging = { el, idx, startX: touch.clientX, startY: touch.clientY };
+                
+                // Get initial visual rect to calculate offsets relative to pointer
+                const rect = el.getBoundingClientRect();
+                this.dragOff.x = touch.clientX - rect.left - rect.width/2;
+                this.dragOff.y = touch.clientY - rect.top - rect.height/2;
+
+                el.classList.add('dragging');
+                
+                const move = (ev) => this.dragMove(ev);
+                const end = (ev) => {
+                    window.removeEventListener('mousemove', move);
+                    window.removeEventListener('touchmove', move);
+                    window.removeEventListener('mouseup', end);
+                    window.removeEventListener('touchend', end);
+                    this.dragEnd(ev);
+                };
+                window.addEventListener('mousemove', move);
+                window.addEventListener('touchmove', move, {passive:false});
+                window.addEventListener('mouseup', end);
+                window.addEventListener('touchend', end);
             },
-            showBubble(parent, type) {
-                const map = { 'ATTACK': 'Ходит', 'DEFEND': 'Бьет', 'BITO': 'Бито!', 'TAKE': 'Беру...', 'TRANSFER': 'Перевод!', 'START': 'Игра началась!' };
+            dragMove(e) {
+                if(!this.dragging) return;
+                e.preventDefault(); // Stop scroll
+                const touch = e.touches ? e.touches[0] : e;
+                const dx = touch.clientX - this.dragging.startX;
+                const dy = touch.clientY - this.dragging.startY;
+                
+                // Apply transform visually. We keep the initial rotation to look nice
+                const initialRot = this.dragging.el.style.getPropertyValue('--rot');
+                const initialX = this.dragging.el.style.getPropertyValue('--x'); // CSS var value string like "10px"
+                
+                // We override the transform via style directly for performance
+                // Combining the CSS var translation with the drag delta
+                this.dragging.el.style.transform = `translate(${dx}px, ${dy}px) rotate(${initialRot})`;
+            },
+            dragEnd(e) {
+                if(!this.dragging) return;
+                const el = this.dragging.el;
+                el.classList.remove('dragging');
+                el.style.transform = ''; // Revert to CSS class control
+
+                // Check collision with Table or Slots
+                const touch = e.changedTouches ? e.changedTouches[0] : e;
+                const dropZone = document.getElementById('drop-zone').getBoundingClientRect();
+                
+                // Simple collision: Pointer inside table area
+                const inTable = (touch.clientX > dropZone.left && touch.clientX < dropZone.right && 
+                                 touch.clientY > dropZone.top && touch.clientY < dropZone.bottom);
+
+                if(inTable) {
+                    // Determine action based on Game State
+                    const s = this.state;
+                    const myIdx = s.ps.findIndex(p=>p.id===this.myId) > -1 ? s.ps.findIndex(p=>p.id===this.myId) : 0;
+                    const cardIdx = this.dragging.idx;
+
+                    // 1. Defend logic: Dropped ON a specific slot?
+                    if(myIdx === s.def) {
+                        // Find if we are over a specific slot
+                        const slots = document.querySelectorAll('.slot-pair');
+                        let targetSlot = -1;
+                        slots.forEach(slotEl => {
+                            const r = slotEl.getBoundingClientRect();
+                            if(touch.clientX > r.left && touch.clientX < r.right && 
+                               touch.clientY > r.top && touch.clientY < r.bottom) {
+                                targetSlot = parseInt(slotEl.dataset.idx);
+                            }
+                        });
+
+                        if(targetSlot !== -1) {
+                            this.act('DEFEND', {i: cardIdx, targetSlot});
+                        } else {
+                            // If dropped on table generally, maybe auto-target first undefended?
+                            // Or just treat as ATTACK/TRANSFER attempt?
+                            // Let's try to interpret as Transfer if valid, else ignore
+                             this.act('ATTACK', {i: cardIdx}); // Transfer acts via ATTACK logic in Engine
+                        }
+                    } 
+                    // 2. Attack logic
+                    else {
+                        this.act('ATTACK', {i: cardIdx});
+                    }
+                }
+                
+                this.dragging = null;
+            },
+
+            playSound(la) {
+                if(!la) return;
+                if(la.type === 'START') Snd.play('click');
+                if(la.type === 'ATTACK' || la.type === 'TRANSFER') Snd.play('card');
+                if(la.type === 'DEFEND') Snd.play('card');
+                if(la.type === 'BITO') Snd.play('card'); // Can add thud sound
+                if(la.type === 'TAKE') Snd.play('click');
+            },
+            showBubble(el, t) {
+                const map = {'ATTACK':'Ходит', 'DEFEND':'Отбил', 'BITO':'Бито!', 'TAKE':'Беру', 'TRANSFER':'Перевод!', 'START':'Погнали'};
                 const b = document.createElement('div');
                 b.className = 'bubble';
-                b.style.background = (type==='TAKE')?'#f57c00':(type==='BITO'?'#d32f2f':'#43a047');
-                b.innerText = map[type] || type;
-                parent.appendChild(b);
-                setTimeout(()=>b.remove(), 2000);
+                b.innerText = map[t] || t;
+                el.appendChild(b);
+                setTimeout(()=>b.remove(), 2500);
             },
             toast(m) {
-                const t = document.createElement('div');
-                t.className = 'toast'; t.innerText = m;
-                document.body.appendChild(t);
-                setTimeout(()=>t.remove(), 3000);
+                const b = document.createElement('div');
+                b.style.cssText = "position:fixed;top:20%;left:50%;transform:translateX(-50%);background:rgba(0,0,0,0.8);color:white;padding:10px 20px;border-radius:20px;z-index:9000;pointer-events:none;border:1px solid #555;";
+                b.innerText = m;
+                document.body.appendChild(b);
+                setTimeout(()=>b.remove(), 2000);
             },
             sendChat() {
-                const inp = document.getElementById('chat-in');
-                const m = inp.value.trim();
+                const i = document.getElementById('chat-in');
+                const m = i.value.trim();
                 if(!m) return;
                 let n = 'Я';
                 if(this.role==='host') n = this.eng.players[0].name;
-                if(this.role === 'host') { const msg = {t:'C', n, m, id:'host'}; this.addChat(msg); this.bc(msg); } 
-                else { this.conn.send({t:'C', m, id:this.myId}); }
-                inp.value = '';
+                const d = {t:'CHAT', n, m, id:this.myId};
+                if(this.role==='host') { this.addChat(d); this.bc(d); }
+                else this.conn.send(d);
+                i.value = '';
             },
             addChat(d) {
                 const log = document.getElementById('chat-log');
                 const el = document.createElement('div');
                 el.className = 'chat-msg';
-                if(d.s) { el.style.color = '#ffeb3b'; el.innerHTML = `<i>${d.m}</i>`; } 
-                else { el.innerHTML = `<b>${d.n}:</b> ${d.m}`; }
+                el.innerHTML = `<b style="opacity:0.7">${d.n}:</b> ${d.m}`;
                 log.appendChild(el);
-                while(log.children.length > 5) log.removeChild(log.firstChild);
+                log.scrollTop = log.scrollHeight;
             },
             suitIcon(s) { return {'S':'♠','C':'♣','H':'♥','D':'♦'}[s]; }
         };
 
-        document.getElementById('chat-in').addEventListener('keydown', e=>{if(e.key==='Enter') Game.sendChat()});
         Lobby.init();
     </script>
 </body>
