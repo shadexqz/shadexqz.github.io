@@ -1,693 +1,682 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Дурак Онлайн</title>
-    <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700;900&display=swap');
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tweeyer - P2P Messenger</title>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
+    <!-- Vue.js 3 -->
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    
+    <!-- PeerJS -->
+    <script src="https://unpkg.com/peerjs@1.4.7/dist/peerjs.min.js"></script>
+
+    <style>
         :root {
-            --card-w: 110px;
-            --card-h: 154px;
-            --radius: 8px;
-            --bg-dark: #0f172a; /* Очень темный синий */
-            --bg-table: #1e3a8a; /* Синий сукно */
-            --accent: #fbbf24;
+            /* Light Theme (Twitter-ish) */
+            --bg-primary: #ffffff;
+            --bg-secondary: #f7f9f9;
+            --text-primary: #0f1419;
+            --text-secondary: #536471;
+            --accent-color: #1DA1F2;
+            --accent-hover: #1a91da;
+            --border-color: #eff3f4;
+            --msg-me-bg: #1DA1F2;
+            --msg-me-text: #ffffff;
+            --msg-friend-bg: #eff3f4;
+            --msg-friend-text: #0f1419;
+            --shadow: 0 2px 10px rgba(0,0,0,0.05);
+            --status-online: #00ba7c;
+            --status-offline: #f4212e;
+            --status-connecting: #ffd400;
         }
 
-        * { box-sizing: border-box; user-select: none; -webkit-tap-highlight-color: transparent; outline: none; }
-        
-        body {
+        .dark-theme {
+            /* Dark Theme (Deep Black/High Contrast) */
+            --bg-primary: #000000;
+            --bg-secondary: #16181c;
+            --text-primary: #e7e9ea;
+            --text-secondary: #71767b;
+            --accent-color: #1d9bf0;
+            --accent-hover: #1a8cd8;
+            --border-color: #2f3336;
+            --msg-me-bg: #1d9bf0;
+            --msg-me-text: #ffffff;
+            --msg-friend-bg: #2f3336;
+            --msg-friend-text: #e7e9ea;
+            --shadow: 0 2px 10px rgba(255,255,255,0.05);
+        }
+
+        * {
+            box-sizing: border-box;
             margin: 0;
+            padding: 0;
+        }
+
+        body {
             font-family: 'Roboto', sans-serif;
-            background-color: var(--bg-dark);
-            /* Текстура стола */
-            background-image: 
-                radial-gradient(circle at 50% 50%, rgba(30, 58, 138, 0.4) 0%, rgba(15, 23, 42, 0.9) 100%),
-                url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M20 20.5V18H0v-2h20v-2H0v-2h20v-2H0V8h20V6H0V4h20V2H0V0h22v20h2V0h2v20h2V0h2v20h2V0h2v20h2V0h2v20h2v2H22v2h18v2H22v2h18v2H22v2h18v2H22v2h18v2H22v2h18v2H22v2h18v2H20v-2.5zM18 20H0v-2h18v2zm0-4H0v-2h18v2zm0-4H0v-2h18v2zm0-4H0V6h18v2zm0-4H0V2h18v2z' fill='%23ffffff' fill-opacity='0.03' fill-rule='evenodd'/%3E%3C/svg%3E");
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            transition: background-color 0.3s, color 0.3s;
             height: 100vh;
             overflow: hidden;
-            display: flex; flex-direction: column;
-            color: #fff;
         }
 
-        /* --- LOBBY --- */
-        #lobby {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(15, 23, 42, 0.98);
-            z-index: 9999;
-            display: flex; align-items: center; justify-content: center;
-        }
-        .panel {
-            background: #1e293b; color: #fff;
-            padding: 30px; border-radius: 16px;
-            width: 90%; max-width: 400px; text-align: center;
-            box-shadow: 0 0 50px rgba(0,0,0,0.8);
-            border: 1px solid #334155;
-        }
-        .panel h1 { margin: 0 0 20px; font-weight: 900; color: var(--accent); text-transform: uppercase; letter-spacing: 1px; }
-        
-        .inp {
-            width: 100%; padding: 14px; margin: 10px 0;
-            border: 1px solid #475569; border-radius: 8px;
-            font-size: 16px; font-weight: bold; text-align: center;
-            background: #0f172a; color: white;
-        }
-        .btn {
-            width: 100%; padding: 16px; border: none; margin-top: 15px;
-            font-size: 16px; font-weight: 900; text-transform: uppercase;
-            cursor: pointer; border-radius: 8px; color: #0f172a;
-            transition: 0.2s;
-        }
-        .btn-create { background: var(--accent); }
-        .btn-create:hover { background: #f59e0b; }
-        .btn-join { background: #3b82f6; color: white; }
-
-        .avatars { display: flex; gap: 10px; justify-content: center; margin-bottom: 20px; }
-        .ava-opt {
-            width: 50px; height: 50px; border: 2px solid #334155; cursor: pointer;
-            background-size: cover; border-radius: 12px;
-            background-color: #1e293b; transition: 0.2s;
-        }
-        .ava-opt.selected { border-color: var(--accent); transform: scale(1.15); box-shadow: 0 0 15px rgba(251, 191, 36, 0.3); }
-
-        /* --- GAME UI --- */
-        #game { display: none; flex-direction: column; height: 100%; position: relative; }
-
-        .opponents-row {
-            height: 140px; width: 100%;
-            display: flex; justify-content: center; align-items: flex-start;
-            padding-top: 15px; gap: 25px; z-index: 50;
-        }
-        .player-wrap { position: relative; width: 85px; display: flex; flex-direction: column; align-items: center; }
-        .p-name { 
-            font-size: 13px; font-weight: bold; color: #cbd5e1;
-            background: rgba(15, 23, 42, 0.8); padding: 4px 10px; border-radius: 20px; 
-            margin-bottom: 6px; max-width: 100px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-            border: 1px solid #334155;
-        }
-        .avatar-box { position: relative; width: 60px; height: 60px; }
-        .avatar { 
-            width: 100%; height: 100%; background: #0f172a; 
-            border: 2px solid #475569; border-radius: 14px;
-            object-fit: cover; box-shadow: 0 4px 10px rgba(0,0,0,0.5); 
-        }
-        .avatar.turn { border-color: #22c55e; box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.3); }
-        .avatar.def { border-color: #f97316; box-shadow: 0 0 0 4px rgba(249, 115, 22, 0.3); }
-        
-        .card-count-badge {
-            position: absolute; bottom: -8px; right: -8px;
-            background: #1e293b; color: white; font-size: 12px; font-weight: bold;
-            padding: 2px 6px; border-radius: 6px; border: 1px solid #475569; z-index: 20;
+        #app {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            position: relative;
         }
 
-        /* TABLE */
-        .table-area { 
-            flex: 1; position: relative; width: 100%; 
-        }
-        
-        .deck-pos { position: absolute; left: 20px; top: 50%; transform: translateY(-50%); width: var(--card-w); height: var(--card-h); }
-        .trump-card { 
-            position: absolute; top: 15px; left: 30px; width: 100%; height: 100%; 
-            transform: rotate(90deg); border-radius: var(--radius); 
-            box-shadow: 2px 2px 10px rgba(0,0,0,0.4); background-size: cover; 
-        }
-        .deck-top { 
-            position: absolute; top:0; left:0; width: 100%; height: 100%; 
-            background: url('https://deckofcardsapi.com/static/img/back.png') center/cover; 
-            border-radius: var(--radius); border: 1px solid #64748b; 
-            box-shadow: 5px 5px 20px rgba(0,0,0,0.6); 
-        }
-        .deck-count { 
-            position: absolute; top: -30px; left: 0; width: 100%; 
-            text-align: center; font-weight: bold; font-size: 18px; color: #94a3b8; 
+        /* --- Header --- */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 20px;
+            border-bottom: 1px solid var(--border-color);
+            background-color: var(--bg-primary);
+            z-index: 10;
         }
 
-        .bito-pos { 
-            position: absolute; right: 20px; top: 50%; transform: translateY(-50%); 
-            width: var(--card-w); height: var(--card-h); 
-            border: 2px dashed rgba(255,255,255,0.1); border-radius: var(--radius); 
-            display: flex; align-items: center; justify-content: center; 
-            color: rgba(255,255,255,0.1); font-weight: bold; letter-spacing: 2px;
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--accent-color);
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
 
-        .slots-wrap {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            display: flex; justify-content: center; align-items: center;
-            flex-wrap: wrap; align-content: center; pointer-events: none;
-        }
-        .slot-pair { 
-            position: relative; width: var(--card-w); height: var(--card-h); margin: 0 10px; 
-            pointer-events: auto; /* Для дропа */
-        }
-        .card-face { 
-            width: 100%; height: 100%; position: absolute; border-radius: var(--radius); 
-            background-color: #fff; background-size: 100% 100%; 
-            box-shadow: 0 10px 25px rgba(0,0,0,0.5); 
-        }
-        .card-att { transform: rotate(-3deg); z-index: 5; }
-        .card-def { transform: rotate(8deg) translate(20px, 15px); z-index: 6; }
-
-        /* MY HAND */
-        .my-zone {
-            height: 190px; width: 100%;
-            position: relative; z-index: 100;
-            display: flex; justify-content: center;
-            overflow: visible; /* Чтобы карты торчали */
-        }
-        
-        .hand-container {
-            position: absolute; bottom: -30px;
-            width: 100%; height: 200px;
-            display: flex; justify-content: center; align-items: flex-end;
+        .controls {
+            display: flex;
+            gap: 15px;
         }
 
-        .my-card-wrap {
-            position: absolute;
-            width: var(--card-w); height: var(--card-h);
-            transform-origin: 50% 150%; 
-            bottom: 40px; 
-            transition: transform 0.1s ease-out;
-            cursor: grab;
-            box-shadow: 0 -5px 15px rgba(0,0,0,0.4);
-            border-radius: var(--radius);
+        .icon-btn {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: color 0.2s;
         }
-        .my-card-wrap:hover {
-            z-index: 1000 !important;
-            /* Важно: не ломаем transform, а дополняем его */
-            transform: translateX(var(--tx)) rotate(var(--rot)) translateY(-40px) scale(1.1) !important;
-        }
-        .my-card-wrap.dragging {
-            z-index: 9999 !important;
-            transition: none;
-            cursor: grabbing;
-            pointer-events: none; 
-            transform: scale(1.15) !important;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.7);
-        }
-        .shake { animation: shake 0.4s ease-in-out; }
-        @keyframes shake { 0%, 100% {transform: translateX(var(--tx)) rotate(var(--rot));} 25% {transform: translateX(calc(var(--tx) - 10px)) rotate(calc(var(--rot) - 5deg));} 75% {transform: translateX(calc(var(--tx) + 10px)) rotate(calc(var(--rot) + 5deg));} }
 
-        /* UI ELEMENTS */
+        .icon-btn:hover {
+            color: var(--accent-color);
+        }
+
+        /* --- Connection Panel --- */
+        .connection-panel {
+            background-color: var(--bg-secondary);
+            padding: 20px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .id-display {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .id-display label {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .id-box {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-family: monospace;
+            font-size: 1.1rem;
+            background: var(--bg-primary);
+            padding: 8px 12px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+        }
+
+        .copy-btn {
+            color: var(--accent-color);
+            cursor: pointer;
+        }
+
+        .connect-form {
+            display: flex;
+            gap: 10px;
+            flex-grow: 1;
+            max-width: 500px;
+        }
+
+        input[type="text"] {
+            flex-grow: 1;
+            padding: 10px 15px;
+            border-radius: 20px;
+            border: 1px solid var(--border-color);
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            outline: none;
+        }
+
+        input[type="text"]:focus {
+            border-color: var(--accent-color);
+        }
+
+        .btn-primary {
+            background-color: var(--accent-color);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--accent-hover);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 5px;
+        }
+
+        /* --- Chat Area --- */
         .chat-container {
-            position: absolute; bottom: 10px; left: 10px; width: 260px; z-index: 200;
+            flex-grow: 1;
+            overflow-y: auto;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            background-color: var(--bg-primary);
         }
-        .chat-log { 
-            height: 160px; overflow-y: auto; display: flex; flex-direction: column; 
-            justify-content: flex-end; margin-bottom: 8px; 
-            mask-image: linear-gradient(to top, black 80%, transparent 100%);
-        }
-        .chat-msg { 
-            background: rgba(15, 23, 42, 0.7); color: #e2e8f0; padding: 6px 10px; 
-            margin-top: 4px; border-radius: 6px; font-size: 13px; align-self: flex-start;
-            border-left: 3px solid var(--accent);
-        }
-        .chat-inp-row { display: flex; gap: 5px; opacity: 0.6; transition: 0.2s; }
-        .chat-inp-row:hover { opacity: 1; }
-        #chat-in { width: 100%; background: rgba(0,0,0,0.6); border: 1px solid #475569; color: white; padding: 8px; border-radius: 6px; }
-        #chat-btn { background: var(--accent); border: none; border-radius: 6px; cursor: pointer; padding: 0 12px; font-weight: bold; color: #0f172a; }
 
-        .controls { position: absolute; right: 20px; bottom: 210px; z-index: 150; display: flex; flex-direction: column; align-items: flex-end; gap: 12px; }
-        .status-badge { 
-            background: rgba(15, 23, 42, 0.85); padding: 10px 20px; border-radius: 8px; 
-            font-weight: bold; border: 1px solid #475569; color: #fff; backdrop-filter: blur(4px);
+        .message-wrapper {
+            display: flex;
+            flex-direction: column;
+            max-width: 70%;
         }
-        .act-btn { 
-            padding: 14px 30px; font-size: 18px; font-weight: 900; text-transform: uppercase; 
-            border: none; border-radius: 8px; cursor: pointer; color: white; 
-            box-shadow: 0 8px 20px rgba(0,0,0,0.4); display: none;
-            transition: transform 0.1s;
+
+        .message-wrapper.me {
+            align-self: flex-end;
+            align-items: flex-end;
         }
-        .act-btn:active { transform: translateY(2px); }
-        .btn-bito { background: #ef4444; }
-        .btn-take { background: #f97316; }
 
-        .toast { position: fixed; top: 15%; left: 50%; transform: translateX(-50%); background: #1e293b; color: white; padding: 12px 24px; border-radius: 30px; z-index: 5000; animation: fade 2.5s forwards; border: 1px solid #475569; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-        @keyframes fade { 0%{opacity:0;transform:translate(-50%,20px);} 10%{opacity:1;transform:translate(-50%,0);} 80%{opacity:1;} 100%{opacity:0;} }
+        .message-wrapper.friend {
+            align-self: flex-start;
+            align-items: flex-start;
+        }
 
-        @media (max-width: 800px) {
-            :root { --card-w: 80px; --card-h: 112px; }
-            .opponents-row { height: 120px; gap: 15px; }
-            .chat-container { width: 200px; bottom: 10px; opacity: 0.9; }
-            .controls { bottom: 180px; right: 10px; }
-            .my-zone { height: 170px; }
-            .deck-pos { left: 10px; }
-            .bito-pos { right: 10px; }
+        .message-bubble {
+            padding: 12px 16px;
+            border-radius: 20px;
+            font-size: 1rem;
+            line-height: 1.4;
+            position: relative;
+            word-wrap: break-word;
+            box-shadow: var(--shadow);
+        }
+
+        .me .message-bubble {
+            background-color: var(--msg-me-bg);
+            color: var(--msg-me-text);
+            border-bottom-right-radius: 4px;
+        }
+
+        .friend .message-bubble {
+            background-color: var(--msg-friend-bg);
+            color: var(--msg-friend-text);
+            border-bottom-left-radius: 4px;
+        }
+
+        .timestamp {
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+            margin-top: 4px;
+            padding: 0 5px;
+        }
+
+        .empty-state {
+            text-align: center;
+            color: var(--text-secondary);
+            margin-top: 50px;
+        }
+
+        .empty-state i {
+            font-size: 3rem;
+            margin-bottom: 10px;
+            opacity: 0.5;
+        }
+
+        /* --- Footer / Input --- */
+        footer {
+            padding: 15px 20px;
+            border-top: 1px solid var(--border-color);
+            background-color: var(--bg-primary);
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        /* Scrollbar Styling */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: var(--border-color);
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--text-secondary);
+        }
+
+        /* Mobile Adjustments */
+        @media (max-width: 600px) {
+            .connection-panel {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .connect-form {
+                max-width: 100%;
+            }
+            .message-wrapper {
+                max-width: 85%;
+            }
+        }
+        
+        /* Notifications/Alerts */
+        .toast {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: var(--accent-color);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 30px;
+            font-size: 0.9rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            opacity: 0;
+            transition: opacity 0.3s;
+            pointer-events: none;
+            z-index: 100;
+        }
+        .toast.show {
+            opacity: 1;
         }
     </style>
 </head>
 <body>
-    <div id="lobby">
-        <div class="panel" id="p-setup">
-            <h1>Дурак Онлайн</h1>
-            <div class="avatars" id="ava-list"></div>
-            <input type="text" id="p-name" class="inp" placeholder="Ваше Имя" value="Игрок" maxlength="10">
-            <div style="margin:20px 0; color:#94a3b8; display:flex; gap:15px; justify-content:center;">
-                <label><input type="radio" name="mode" value="2" checked> 2 Игрока</label>
-                <label><input type="radio" name="mode" value="3"> 3 Игрока</label>
-                <label><input type="radio" name="mode" value="4"> 4 Игрока</label>
-            </div>
-            <div style="margin-bottom:20px; color:#94a3b8;">
-                <label style="cursor:pointer;"><input type="checkbox" id="chk-transfer" checked> Переводной</label>
-            </div>
-            <button class="btn btn-create" onclick="Lobby.create()">Создать стол</button>
-            <div style="margin:15px; font-size:12px; font-weight:bold; color:#64748b;">— или —</div>
-            <input type="text" id="join-id" class="inp" placeholder="ID Комнаты">
-            <button class="btn btn-join" onclick="Lobby.join()">Войти по ID</button>
-        </div>
-        <div class="panel" id="p-wait" style="display:none;">
-            <h2 style="color:#cbd5e1">Ожидание...</h2>
-            <p style="color:#94a3b8; font-size:14px;">Ваш ID (отправьте другу):</p>
-            <input type="text" id="host-id" class="inp" style="background:#0f172a; color:#fbbf24; border-color:#fbbf24;" readonly onclick="this.select()">
-            <p id="wait-msg" style="font-size:32px; font-weight:900; color:#fff; margin:20px 0;">1/2</p>
-            <div style="font-size:24px; animation:spin 1s infinite linear; color:#3b82f6;">↻</div>
-            <style>@keyframes spin { 100% {transform:rotate(360deg);} }</style>
-        </div>
+
+<div id="app" :class="theme === 'dark' ? 'dark-theme' : ''">
+    
+    <!-- Notification Toast -->
+    <div class="toast" :class="{ show: toast.visible }">
+        {{ toast.message }}
     </div>
 
-    <div id="game">
-        <div class="opponents-row" id="opponents-area"></div>
-        
-        <div class="table-area" id="table-drop-zone">
-            <div class="deck-pos">
-                <div class="deck-count" id="deck-n">36</div>
-                <div id="trump-slot"></div>
-                <div class="deck-top" id="deck-visual"></div>
-            </div>
-            <div class="bito-pos">БИТО</div>
-            <div class="slots-wrap" id="slots-area"></div>
+    <!-- Header -->
+    <header>
+        <div class="logo">
+            <i class="fa-brands fa-twitter"></i> Tweeyer
         </div>
-
         <div class="controls">
-            <div class="status-badge" id="status-txt">...</div>
-            <button class="act-btn btn-bito" id="btn-bito" onclick="Game.act('BITO')">Бито</button>
-            <button class="act-btn btn-take" id="btn-take" onclick="Game.act('TAKE')">Взять</button>
+            <button class="icon-btn" @click="toggleLang" :title="t[lang].toggleLang">
+                <span style="font-size: 0.9rem; font-weight: bold;">{{ lang.toUpperCase() }}</span>
+            </button>
+            <button class="icon-btn" @click="toggleTheme" :title="t[lang].toggleTheme">
+                <i :class="theme === 'dark' ? 'fa-solid fa-sun' : 'fa-solid fa-moon'"></i>
+            </button>
+            <button class="icon-btn" @click="clearHistory" :title="t[lang].clearChat">
+                <i class="fa-solid fa-trash"></i>
+            </button>
         </div>
+    </header>
 
-        <div class="chat-container">
-            <div class="chat-log" id="chat-log"></div>
-            <div class="chat-inp-row">
-                <input id="chat-in" placeholder="Чат..." autocomplete="off">
-                <button id="chat-btn" onclick="Game.sendChat()">➜</button>
+    <!-- Connection Panel -->
+    <div class="connection-panel">
+        <div class="id-display">
+            <label>{{ t[lang].myIdLabel }}</label>
+            <div class="id-box">
+                <span>{{ myId || t[lang].initializing }}</span>
+                <i class="fa-regular fa-copy copy-btn" v-if="myId" @click="copyId" :title="t[lang].copy"></i>
             </div>
         </div>
 
-        <div class="my-zone">
-            <div class="hand-container" id="my-hand"></div>
+        <div class="connect-form">
+            <input type="text" v-model="targetId" :placeholder="t[lang].connectPlaceholder">
+            <button class="btn-primary" @click="connectToPeer" :disabled="!myId || isConnected || !targetId">
+                <i class="fa-solid fa-link" v-if="!isConnected"></i>
+                {{ isConnected ? t[lang].connected : t[lang].connectBtn }}
+            </button>
+        </div>
+        
+        <div class="status-display">
+            <span class="status-dot" :style="{ backgroundColor: statusColor }"></span>
+            <small>{{ connectionStatusText }}</small>
         </div>
     </div>
 
-    <script>
-        const IMG = (r,s) => `https://deckofcardsapi.com/static/img/${r}${s}.png`;
-        const SUITS = ['S','C','H','D'];
-        const RANKS = ['6','7','8','9','0','J','Q','K','A'];
+    <!-- Chat Area -->
+    <div class="chat-container" ref="chatContainer">
+        <div v-if="messages.length === 0" class="empty-state">
+            <i class="fa-regular fa-comments"></i>
+            <p>{{ t[lang].emptyChat }}</p>
+        </div>
 
-        const Snd = {
-            play(t) {
-                const s = {
-                    'click': 'data:audio/mp3;base64,SUQzBAAAAAAAI1RTU0UAAAAPAAADTGl2Y29kZXIgMS4wLjAA//uQZAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAASW5mbwAAAA8AAAAZAAACcQADBQoPEhQWGBwfIiQmKCsuMDM2ODs9QEJFRkdJS0xPUFJTVlleYWNlZmhqbG9xdHZ5fH6Ag4WHiYuOkJOVmJqcn6Gkp6qsrrG0tru+wMPEyMvO0NPU1tjc3+Lj5ufq7O/x9Pf5+//uQZAAABp1vXf0wAAjbrWv/pAAAEckm08w01Ikek218w01MAAAp5nJp8/7l63//+5at///5yab///85NMAAAAAAklN/////p5yab//+nmcmn//p5nJp//6ecmm//p5nJpgAAAAACS///+nnJpv//6ecmm//p5yab/+nnJpv/6ecmmAAAAAAJL///6ecmm//p5yab/+nnJpv/6ecmm//p5yacAAABFADwAAAAAAAAA//uQZAAACW0vW/zBwAk2pWu/mDgAAAAAiAAADAAA//uQZAAACW0vW/zBwAk2pWu/mDgAAAAAiAAADAAA//uQZAAACW0vW/zBwAk2pWu/mDgAAAAAiAAADAAA//uQZAAACW0vW/zBwAk2pWu/mDgAAAAAiAAADAAA//uQZAAACW0vW/zBwAk2pWu/mDgAAAAAiAAADAAA//uQZAAACW0vW/zBwAk2pWu/mDgAAAAAiAAADAAA//uQZAAACW0vW/zBwAk2pWu/mDgAAAAAiAAADAAA//uQZAAACW0vW/zBwAk2pWu/mDgAAAAAiAAADAAA//uQZAAACW0vW/zBwAk2pWu/mDgAAAAAiAAADAAA',
-                    'card': 'data:audio/mp3;base64,SUQzBAAAAAAAI1RTU0UAAAAPAAADTGl2Y29kZXIgMS4wLjAA//uQZAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAASW5mbwAAAA8AAAAZAAABsQAFBwoNEhcaHR8jKC0wNTo9QkVJTlFXYWZobG9zdnl9goaLjZKXnZ+iqK6xtri8wcfLztLX29/j5+vv8/f7//uQZAAABllvX/0wAAjLrWv/pAAAEckm08w01Ikek218w01MAAAp5nJp8/7l63//+5at///5yab///85NMAAAAAAklN/////p5yab//+nmcmn//p5nJp//6ecmm//p5yabAAAAAAJL///6ecmm//p5yab/+nnJpv/6ecmm//p5yabAAAAAAJL///6ecmm//p5yab/+nnJpv/6ecmm//p5yacAAABFADwAAAAAAAAA//uQZAAACVEvW/zBwAkyJWv/mDgAAAAAiAAADAAA//uQZAAACVEvW/zBwAkyJWv/mDgAAAAAiAAADAAA//uQZAAACVEvW/zBwAkyJWv/mDgAAAAAiAAADAAA//uQZAAACVEvW/zBwAkyJWv/mDgAAAAAiAAADAAA//uQZAAACVEvW/zBwAkyJWv/mDgAAAAAiAAADAAA//uQZAAACVEvW/zBwAkyJWv/mDgAAAAAiAAADAAA//uQZAAACVEvW/zBwAkyJWv/mDgAAAAAiAAADAAA//uQZAAACVEvW/zBwAkyJWv/mDgAAAAAiAAADAAA//uQZAAACVEvW/zBwAkyJWv/mDgAAAAAiAAADAAA'
-                };
-                if(s[t]) new Audio(s[t]).play().catch(()=>{});
-            }
-        };
+        <div v-for="(msg, index) in messages" :key="index" class="message-wrapper" :class="msg.sender === 'me' ? 'me' : 'friend'">
+            <div class="message-bubble">
+                {{ msg.text }}
+            </div>
+            <div class="timestamp">
+                {{ msg.time }}
+            </div>
+        </div>
+    </div>
 
-        class Engine {
-            constructor(name, ava, mode, trans) {
-                this.mode = parseInt(mode);
-                this.trans = trans;
-                this.players = [{id:'host', name, ava, hand:[]}];
-                this.deck = []; this.trump = null; this.field = [];
-                this.att = 0; this.def = 1; this.firstBout = true;
-                this.state = 'lobby'; this.win = []; this.la = null;
-            }
-            add(id, name, ava) {
-                if(this.players.length >= this.mode) return false;
-                this.players.push({id, name, ava, hand:[]});
-                return true;
-            }
-            start() {
-                this.deck = [];
-                SUITS.forEach(s=>RANKS.forEach(r=>this.deck.push({r,s})));
-                this.deck.sort(()=>Math.random()-0.5);
-                this.players.forEach(p=>p.hand=this.deck.splice(0,6));
-                this.trump = this.deck.pop(); this.deck.unshift(this.trump);
-                
-                let min=100, f=0;
-                this.players.forEach((p,i)=>{
-                    p.hand.forEach(c=>{ if(c.s===this.trump.s && RANKS.indexOf(c.r)<min){min=RANKS.indexOf(c.r); f=i;} });
-                });
-                this.att=f; this.def=(f+1)%this.players.length;
-                this.state='game'; this.la={t:'START'};
-            }
-            move(pi, type, d) {
-                if(this.state!=='game') return {ok:false};
-                const p = this.players[pi];
-                
-                if(type==='ATT') {
-                    const c = p.hand[d.i];
-                    if(this.field.length===0) {
-                        if(pi!==this.att) return {ok:false, r:'Не ваш ход'};
-                        p.hand.splice(d.i,1); this.field.push({a:c, d:null, from:pi});
-                        this.la={t:'ATT',p:pi}; return {ok:true};
-                    }
-                    if(pi===this.def && this.trans && !this.firstBout && this.field.every(x=>!x.d) && this.field[0].a.r===c.r) {
-                        const next = (this.def+1)%this.players.length;
-                        if(this.players[next].hand.length < this.field.length+1) return {ok:false, r:'Мало карт'};
-                        p.hand.splice(d.i,1); this.field.push({a:c, d:null, from:pi});
-                        this.att=this.def; this.def=next;
-                        this.la={t:'TRANS',p:pi}; return {ok:true};
-                    }
-                    if(pi===this.def) return {ok:false, r:'Себе нельзя'};
-                    
-                    const ranks = new Set(this.field.flatMap(x=>[x.a.r, x.d?.r].filter(Boolean)));
-                    if(!ranks.has(c.r)) return {ok:false, r:'Нет такой карты'};
-                    if(this.field.length >= (this.firstBout?5:6)) return {ok:false, r:'Куча полна'};
-                    if(this.field.filter(x=>!x.d).length >= this.players[this.def].hand.length) return {ok:false, r:'У него нет карт'};
-                    
-                    p.hand.splice(d.i,1); this.field.push({a:c, d:null, from:pi});
-                    this.la={t:'ATT',p:pi}; return {ok:true};
-                }
-                if(type==='DEF') {
-                    if(pi!==this.def) return {ok:false};
-                    const s = this.field[d.si];
-                    if(!s || s.d) return {ok:false};
-                    const c = p.hand[d.i];
-                    let win = (c.s===s.a.s && RANKS.indexOf(c.r)>RANKS.indexOf(s.a.r)) || (c.s===this.trump.s && s.a.s!==this.trump.s);
-                    if(!win) return {ok:false, r:'Слабо', bad:true};
-                    p.hand.splice(d.i,1); s.d=c;
-                    this.la={t:'DEF',p:pi}; return {ok:true};
-                }
-                if(type==='BITO') {
-                    if(pi===this.def || this.field.some(x=>!x.d)) return {ok:false};
-                    this.field=[]; this.refill(); this.att=this.def; this.def=(this.att+1)%this.players.length; this.firstBout=false;
-                    this.la={t:'BITO',p:pi}; return {ok:true};
-                }
-                if(type==='TAKE') {
-                    if(pi!==this.def) return {ok:false};
-                    this.field.forEach(x=>{ p.hand.push(x.a); if(x.d) p.hand.push(x.d); });
-                    this.field=[]; this.refill(); this.att=(this.def+1)%this.players.length; this.def=(this.att+1)%this.players.length; this.firstBout=false;
-                    this.la={t:'TAKE',p:pi}; return {ok:true};
-                }
-            }
-            refill() {
-                for(let i=0;i<this.players.length;i++) {
-                    const p = this.players[(this.att+i)%this.players.length];
-                    while(p.hand.length<6 && this.deck.length>0) p.hand.push(this.deck.pop());
-                }
-                this.players.forEach(p=>{ if(!p.hand.length && !this.deck.length && !this.win.includes(p.name)) this.win.push(p.name); });
-                if(this.win.length >= this.players.length-1) this.state='end';
-            }
-            dump() {
-                return {
-                    dk: this.deck.length, tr: this.trump, f: this.field, 
-                    att: this.att, def: this.def, win: this.win, la: this.la,
-                    ps: this.players.map(p=>({id:p.id, n:p.name, a:p.ava, c:p.hand.length}))
-                };
-            }
-        }
+    <!-- Footer Input -->
+    <footer>
+        <input 
+            type="text" 
+            v-model="newMessage" 
+            @keyup.enter="sendMessage" 
+            :placeholder="isConnected ? t[lang].typeMessage : t[lang].connectFirst"
+            :disabled="!isConnected"
+        >
+        <button class="icon-btn" @click="sendMessage" :disabled="!isConnected || !newMessage.trim()" style="color: var(--accent-color)">
+            <i class="fa-solid fa-paper-plane"></i>
+        </button>
+    </footer>
 
-        const Lobby = {
-            ava: 1,
-            init() {
-                const l = document.getElementById('ava-list');
-                [1,2,3,4,5].forEach(i=>{
-                    const d=document.createElement('div'); d.className='ava-opt'+(i===1?' selected':'');
-                    d.style.backgroundImage=`url('https://robohash.org/${i}.png?set=set4')`;
-                    d.onclick=()=>{this.ava=i; Snd.play('click'); document.querySelectorAll('.ava-opt').forEach(x=>x.classList.remove('selected')); d.classList.add('selected');};
-                    l.appendChild(d);
-                });
-            },
-            create() {
-                Snd.play('click');
-                const n = document.getElementById('p-name').value || 'Host';
-                const m = document.querySelector('input[name="mode"]:checked').value;
-                const tr = document.getElementById('chk-transfer').checked;
-                Game.host(n, this.ava, m, tr);
-            },
-            join() {
-                Snd.play('click');
-                const n = document.getElementById('p-name').value || 'Guest';
-                const id = document.getElementById('join-id').value;
-                if(id) Game.client(n, this.ava, id);
-            }
-        };
+</div>
 
-        const Game = {
-            r: null, eng: null, peer: null, conn: null, conns: [], myId: null, st: null, hand: [], dragging: null,
+<script>
+    const { createApp, ref, computed, onMounted, nextTick, watch } = Vue;
+
+    createApp({
+        setup() {
+            // --- State ---
+            const myId = ref(null);
+            const targetId = ref('');
+            const peer = ref(null);
+            const conn = ref(null);
+            const messages = ref([]);
+            const newMessage = ref('');
+            const theme = ref('dark'); // 'dark' or 'light'
+            const lang = ref('en'); // 'en' or 'ru'
+            const connectionStatus = ref('offline'); // offline, connecting, connected
+            const chatContainer = ref(null);
             
-            host(n, a, m, t) {
-                this.r = 'host';
-                this.eng = new Engine(n, a, m, t);
-                this.peer = new Peer();
-                this.peer.on('open', id=>{
-                    document.getElementById('p-setup').style.display='none';
-                    document.getElementById('p-wait').style.display='block';
-                    document.getElementById('host-id').value=id;
-                    document.getElementById('wait-msg').innerText = `1/${m}`;
+            // Toast Notification
+            const toast = ref({ visible: false, message: '' });
+
+            // --- Translations ---
+            const t = {
+                en: {
+                    myIdLabel: 'My User ID',
+                    initializing: 'Generating...',
+                    copy: 'Copy to Clipboard',
+                    connectPlaceholder: 'Enter Friend ID',
+                    connectBtn: 'Connect',
+                    connected: 'Chatting',
+                    typeMessage: 'Start a new message',
+                    connectFirst: 'Connect to a friend to chat',
+                    emptyChat: 'No messages yet. Connect and say Hello!',
+                    toggleTheme: 'Toggle Theme',
+                    toggleLang: 'Switch Language',
+                    clearChat: 'Clear History',
+                    status_offline: 'Offline',
+                    status_connecting: 'Connecting...',
+                    status_connected: 'Online',
+                    err_peer: 'Connection Error. ID might be invalid.',
+                    copied: 'ID Copied!',
+                    peer_connected: 'Friend connected!'
+                },
+                ru: {
+                    myIdLabel: 'Мой ID',
+                    initializing: 'Генерация...',
+                    copy: 'Скопировать',
+                    connectPlaceholder: 'Введите ID друга',
+                    connectBtn: 'Подкл.',
+                    connected: 'В чате',
+                    typeMessage: 'Введите сообщение...',
+                    connectFirst: 'Подключитесь к другу для общения',
+                    emptyChat: 'Сообщений нет. Скажите Привет!',
+                    toggleTheme: 'Сменить тему',
+                    toggleLang: 'Сменить язык',
+                    clearChat: 'Очистить историю',
+                    status_offline: 'Оффлайн',
+                    status_connecting: 'Подключение...',
+                    status_connected: 'Онлайн',
+                    err_peer: 'Ошибка. Неверный ID.',
+                    copied: 'ID скопирован!',
+                    peer_connected: 'Друг подключился!'
+                }
+            };
+
+            // --- Computed Properties ---
+            const isConnected = computed(() => connectionStatus.value === 'connected');
+            
+            const statusColor = computed(() => {
+                if (connectionStatus.value === 'connected') return 'var(--status-online)';
+                if (connectionStatus.value === 'connecting') return 'var(--status-connecting)';
+                return 'var(--status-offline)';
+            });
+
+            const connectionStatusText = computed(() => {
+                if (connectionStatus.value === 'connected') return t[lang.value].status_connected;
+                if (connectionStatus.value === 'connecting') return t[lang.value].status_connecting;
+                return t[lang.value].status_offline;
+            });
+
+            // --- Actions ---
+
+            const showToast = (msg) => {
+                toast.value.message = msg;
+                toast.value.visible = true;
+                setTimeout(() => { toast.value.visible = false; }, 3000);
+            };
+
+            const toggleTheme = () => {
+                theme.value = theme.value === 'dark' ? 'light' : 'dark';
+            };
+
+            const toggleLang = () => {
+                lang.value = lang.value === 'en' ? 'ru' : 'en';
+            };
+
+            const copyId = () => {
+                if (myId.value) {
+                    navigator.clipboard.writeText(myId.value);
+                    showToast(t[lang.value].copied);
+                }
+            };
+
+            const clearHistory = () => {
+                if(confirm('Delete all messages?')) {
+                    messages.value = [];
+                    saveData();
+                }
+            };
+
+            const scrollToBottom = async () => {
+                await nextTick();
+                if (chatContainer.value) {
+                    chatContainer.value.scrollTop = chatContainer.value.scrollHeight;
+                }
+            };
+
+            // --- PeerJS Logic ---
+
+            const initPeer = () => {
+                // Initialize Peer with no arguments (Serverless/Public Cloud)
+                peer.value = new Peer();
+
+                peer.value.on('open', (id) => {
+                    myId.value = id;
                 });
-                this.peer.on('connection', c=>{
-                    c.on('open', ()=>{ this.conns.push(c); });
-                    c.on('data', d=>this.hD(c,d));
+
+                // Handle incoming connection
+                peer.value.on('connection', (connection) => {
+                    setupConnection(connection);
+                    showToast(t[lang.value].peer_connected);
                 });
-            },
-            client(n, a, id) {
-                this.r = 'client';
-                this.peer = new Peer();
-                this.peer.on('open', ()=>{
-                    this.conn = this.peer.connect(id);
-                    this.conn.on('open', ()=>{ 
-                        this.conn.send({t:'J', n, a}); 
-                        document.getElementById('p-setup').style.display='none';
-                        document.getElementById('p-wait').style.display='block';
-                        document.getElementById('wait-msg').innerText = "Подключение...";
+
+                peer.value.on('error', (err) => {
+                    console.error(err);
+                    showToast(t[lang.value].err_peer);
+                    connectionStatus.value = 'offline';
+                });
+            };
+
+            const connectToPeer = () => {
+                if (!targetId.value) return;
+                connectionStatus.value = 'connecting';
+                const connection = peer.value.connect(targetId.value);
+                
+                // We need to wait for open to ensure connection is valid
+                connection.on('open', () => {
+                    setupConnection(connection);
+                });
+
+                connection.on('error', (err) => {
+                    showToast(t[lang.value].err_peer);
+                    connectionStatus.value = 'offline';
+                });
+            };
+
+            const setupConnection = (connection) => {
+                // Close existing if any
+                if (conn.value) {
+                    conn.value.close();
+                }
+
+                conn.value = connection;
+                connectionStatus.value = 'connected';
+                targetId.value = connection.peer; // Sync input with connected peer
+
+                // Receive Data
+                conn.value.on('data', (data) => {
+                    messages.value.push({
+                        text: data.text,
+                        time: data.time,
+                        sender: 'friend'
                     });
-                    this.conn.on('data', d=>this.hD(null,d));
-                });
-            },
-            hD(c, d) { 
-                if(this.r==='host') {
-                    if(d.t==='J') {
-                        if(this.eng.add(c.peer, d.n, d.a)) {
-                            document.getElementById('wait-msg').innerText = `${this.eng.players.length}/${this.eng.mode}`;
-                            if(this.eng.players.length == this.eng.mode) {
-                                this.eng.start(); 
-                                this.sync(); // Sync sends to clients AND updates host self
-                            }
-                        }
-                    }
-                    if(d.t==='ACT') {
-                        const pi = this.eng.players.findIndex(p=>p.id===c.peer);
-                        const res = this.eng.move(pi, d.a, d.d);
-                        if(res.ok) this.sync();
-                        else if(res.bad) c.send({t:'BAD', i:d.d.i});
-                        else c.send({t:'MSG', m:res.r});
-                    }
-                    if(d.t==='CHAT') this.bc(d, c.peer);
-                }
-                
-                // CLIENT HANDLING
-                if(d.t==='SYNC') {
-                    this.st = d.s; this.hand = d.h; this.myId = d.mid;
-                    this.draw();
-                    if(d.s.la && d.s.la.t==='ATT') Snd.play('card');
-                    if(d.s.la && d.s.la.t==='BITO') Snd.play('card');
-                }
-                if(d.t==='BAD') {
-                     const el = document.querySelectorAll('.my-card-wrap')[d.i];
-                     if(el) { el.classList.remove('shake'); void el.offsetWidth; el.classList.add('shake'); }
-                }
-                if(d.t==='MSG') this.toast(d.m);
-                if(d.t==='CHAT') this.addChat(d.n, d.m);
-            },
-            bc(d, skip) {
-                if(this.r==='host') {
-                    if(d.t==='CHAT') this.addChat(d.n, d.m);
-                    this.conns.forEach(c=>{ if(c.peer!==skip) c.send(d); });
-                }
-            },
-            sync() {
-                // FORCE SHOW GAME for Host (Fix for "Not launching")
-                document.getElementById('lobby').style.display='none';
-                document.getElementById('game').style.display='flex';
-
-                const s = this.eng.dump();
-                
-                // Update Host Self
-                this.st = s; this.hand = this.eng.players[0].hand; this.myId = 'host';
-                this.draw();
-                
-                // Send to Clients
-                this.conns.forEach(c=>{
-                    const p = this.eng.players.find(x=>x.id===c.peer);
-                    c.send({t:'SYNC', s, h:p?p.hand:[], mid:c.peer});
-                });
-            },
-            act(type, d={}) {
-                if(this.r==='host') {
-                    const res = this.eng.move(0, type, d);
-                    if(res.ok) this.sync();
-                    else if(res.bad) { 
-                        const el = document.querySelectorAll('.my-card-wrap')[d.i];
-                        if(el) { el.classList.remove('shake'); void el.offsetWidth; el.classList.add('shake'); }
-                    } else this.toast(res.r);
-                } else this.conn.send({t:'ACT', a:type, d});
-            },
-            
-            draw() {
-                const s = this.st;
-                const myIdx = s.ps.findIndex(p=>p.id===this.myId) > -1 ? s.ps.findIndex(p=>p.id===this.myId) : 0;
-                
-                // Opponents
-                const oppDiv = document.getElementById('opponents-area');
-                oppDiv.innerHTML = '';
-                for(let i=1; i<s.ps.length; i++) {
-                    const idx = (myIdx+i)%s.ps.length;
-                    const p = s.ps[idx];
-                    oppDiv.innerHTML += `
-                        <div class="player-wrap">
-                            <div class="p-name">${p.n}</div>
-                            <div class="avatar-box">
-                                <img src="https://robohash.org/${p.a}.png?set=set4" class="avatar ${s.att===idx?'turn':''} ${s.def===idx?'def':''}">
-                                ${p.c>0 ? `<div class="card-count-badge">${p.c}</div>` : ''}
-                            </div>
-                        </div>`;
-                }
-
-                // Table Info
-                document.getElementById('deck-n').innerText = s.dk;
-                document.getElementById('deck-visual').style.display = s.dk>0?'block':'none';
-                const ts = document.getElementById('trump-slot');
-                ts.innerHTML = (s.tr && s.dk>0) ? `<div class="trump-card" style="background-image:url('${IMG(s.tr.r, s.tr.s)}')"></div>` : 
-                    (s.tr ? `<div style="opacity:0.2; font-size:40px; margin-top:10px; color:white;">${{'S':'♠','C':'♣','H':'♥','D':'♦'}[s.tr.s]}</div>` : '');
-
-                // Slots
-                const sl = document.getElementById('slots-area');
-                sl.innerHTML = '';
-                s.f.forEach((x, i) => {
-                    const d = document.createElement('div'); d.className='slot-pair';
-                    d.dataset.si = i;
-                    d.innerHTML = `<div class="card-face card-att" style="background-image:url('${IMG(x.a.r,x.a.s)}')"></div>`;
-                    if(x.d) d.innerHTML += `<div class="card-face card-def" style="background-image:url('${IMG(x.d.r,x.d.s)}')"></div>`;
-                    sl.appendChild(d);
+                    scrollToBottom();
+                    saveData();
                 });
 
-                // My Hand (Fan)
-                const hDiv = document.getElementById('my-hand');
-                hDiv.innerHTML = '';
-                const cnt = this.hand.length;
-                const arc = 10; 
-                const startDeg = -((cnt-1)*arc)/2;
-
-                this.hand.forEach((c, i) => {
-                    const w = document.createElement('div');
-                    w.className = 'my-card-wrap';
-                    const rot = startDeg + (i * arc);
-                    const tx = (i - (cnt-1)/2) * 30; 
-                    
-                    w.style.setProperty('--rot', rot+'deg');
-                    w.style.setProperty('--tx', tx+'px');
-                    w.style.transform = `translateX(${tx}px) rotate(${rot}deg)`;
-                    w.innerHTML = `<div class="card-face" style="background-image:url('${IMG(c.r,c.s)}')"></div>`;
-                    w.onmousedown = w.ontouchstart = (e) => this.dragStart(e, w, i);
-                    hDiv.appendChild(w);
+                conn.value.on('close', () => {
+                    connectionStatus.value = 'offline';
+                    conn.value = null;
                 });
+            };
 
-                // Status & Buttons
-                const bB = document.getElementById('btn-bito');
-                const bT = document.getElementById('btn-take');
-                const st = document.getElementById('status-txt');
-                bB.style.display='none'; bT.style.display='none';
-                
-                if(s.win.length) { 
-                    st.innerText = s.win[0]+' WIN!'; st.style.borderColor='#fbbf24'; st.style.color='#fbbf24'; 
-                } else if(s.att===myIdx) {
-                    st.innerText = "ВАШ ХОД"; st.style.borderColor='#22c55e'; st.style.color='#22c55e';
-                    if(s.f.length && s.f.every(x=>x.d)) bB.style.display='block';
-                } else if(s.def===myIdx) {
-                    st.innerText = "ОТБИВАЙТЕСЬ"; st.style.borderColor='#f97316'; st.style.color='#f97316';
-                    if(s.f.some(x=>!x.d)) bT.style.display='block';
-                } else {
-                    st.innerText = "ХОД ПРОТИВНИКА"; st.style.borderColor='#475569'; st.style.color='#cbd5e1';
-                }
-            },
+            const sendMessage = () => {
+                if (!isConnected.value || !newMessage.value.trim()) return;
 
-            dragStart(e, el, i) {
-                if(this.dragging) return;
-                const t = e.touches ? e.touches[0] : e;
-                this.dragging = { el, i, sx: t.clientX, sy: t.clientY };
-                
-                const style = window.getComputedStyle(el);
-                const matrix = new DOMMatrix(style.transform);
-                this.dragging.ix = matrix.m41; 
-                this.dragging.iy = matrix.m42;
-                this.dragging.ir = el.style.getPropertyValue('--rot');
-
-                el.classList.add('dragging');
-
-                const move = (ev) => {
-                    ev.preventDefault();
-                    const tt = ev.touches ? ev.touches[0] : ev;
-                    const dx = tt.clientX - this.dragging.sx;
-                    const dy = tt.clientY - this.dragging.sy;
-                    el.style.transform = `translate(${this.dragging.ix + dx}px, ${this.dragging.iy + dy}px) rotate(${this.dragging.ir})`;
+                const msgData = {
+                    text: newMessage.value.trim(),
+                    time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
                 };
-                const end = (ev) => {
-                    window.removeEventListener('mousemove', move); window.removeEventListener('touchmove', move);
-                    window.removeEventListener('mouseup', end); window.removeEventListener('touchend', end);
-                    
-                    el.classList.remove('dragging');
-                    el.style.transform = `translateX(${this.dragging.ix}px) rotate(${this.dragging.ir})`; 
-                    
-                    const tt = ev.changedTouches ? ev.changedTouches[0] : ev;
-                    const drop = document.getElementById('table-drop-zone').getBoundingClientRect();
-                    
-                    if(tt.clientY < drop.bottom && tt.clientY > drop.top) {
-                        const s = this.st;
-                        const myIdx = s.ps.findIndex(p=>p.id===this.myId)>-1?s.ps.findIndex(p=>p.id===this.myId):0;
-                        if(myIdx===s.def) {
-                            const slots = document.querySelectorAll('.slot-pair');
-                            let si = -1;
-                            slots.forEach(sl => {
-                                const r = sl.getBoundingClientRect();
-                                if(tt.clientX>r.left && tt.clientX<r.right) si = parseInt(sl.dataset.si);
-                            });
-                            if(si>-1) this.act('DEF', {i, si});
-                            else this.act('ATT', {i});
-                        } else {
-                            this.act('ATT', {i});
-                        }
-                    }
-                    this.dragging = null;
-                };
-                window.addEventListener('mousemove', move); window.addEventListener('touchmove', move, {passive:false});
-                window.addEventListener('mouseup', end); window.addEventListener('touchend', end);
-            },
 
-            sendChat() {
-                const i = document.getElementById('chat-in');
-                const m = i.value.trim();
-                if(!m) return;
-                let n = this.r==='host' ? this.eng.players[0].name : 'Я';
-                if(this.r==='host') { this.addChat(n,m); this.bc({t:'CHAT', n, m}); }
-                else this.conn.send({t:'CHAT', n:this.st.ps.find(p=>p.id===this.myId).n, m});
-                i.value='';
-            },
-            addChat(n,m) {
-                const l = document.getElementById('chat-log');
-                const d = document.createElement('div'); d.className='chat-msg';
-                d.innerHTML = `<b>${n}:</b> ${m}`;
-                l.appendChild(d); l.scrollTop = l.scrollHeight;
-            },
-            toast(m) {
-                const d = document.createElement('div'); d.className='toast'; d.innerText=m;
-                document.body.appendChild(d); setTimeout(()=>d.remove(),2000);
-            }
-        };
-        Lobby.init();
-        document.getElementById('chat-in').addEventListener('keydown', e=>{if(e.key==='Enter') Game.sendChat()});
-    </script>
+                // Send via PeerJS
+                conn.value.send(msgData);
+
+                // Add to local UI
+                messages.value.push({
+                    ...msgData,
+                    sender: 'me'
+                });
+
+                newMessage.value = '';
+                scrollToBottom();
+                saveData();
+            };
+
+            // --- Persistence ---
+            const saveData = () => {
+                localStorage.setItem('tweeyer_theme', theme.value);
+                localStorage.setItem('tweeyer_lang', lang.value);
+                localStorage.setItem('tweeyer_msgs', JSON.stringify(messages.value));
+            };
+
+            const loadData = () => {
+                const sTheme = localStorage.getItem('tweeyer_theme');
+                const sLang = localStorage.getItem('tweeyer_lang');
+                const sMsgs = localStorage.getItem('tweeyer_msgs');
+
+                if (sTheme) theme.value = sTheme;
+                if (sLang) lang.value = sLang;
+                if (sMsgs) messages.value = JSON.parse(sMsgs);
+            };
+
+            // --- Lifecycle ---
+            watch([theme, lang], () => {
+                saveData();
+            });
+
+            onMounted(() => {
+                loadData();
+                initPeer();
+                scrollToBottom();
+            });
+
+            return {
+                myId,
+                targetId,
+                messages,
+                newMessage,
+                theme,
+                lang,
+                t,
+                isConnected,
+                statusColor,
+                connectionStatusText,
+                chatContainer,
+                toast,
+                // Actions
+                toggleTheme,
+                toggleLang,
+                copyId,
+                connectToPeer,
+                sendMessage,
+                clearHistory
+            };
+        }
+    }).mount('#app');
+</script>
+
 </body>
 </html>
