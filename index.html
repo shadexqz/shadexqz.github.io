@@ -596,7 +596,7 @@
 
     createApp({
         setup() {
-            // STATE MANAGEMENT
+            // STATE
             const ui = reactive({ showDrawer: false, showAttach: false, showEmoji: false, viewProfile: false });
             const myPeerId = ref('');
             const targetId = ref('');
@@ -608,9 +608,8 @@
             const theme = ref('dark');
             const messages = ref([]);
             
-            // Ban State
+            // Ban & User State
             const isBanned = ref(localStorage.getItem('tw_v5_banned') === 'true');
-            // Support Form State
             const supportMode = ref(false);
             const supportText = ref('');
             const supportSent = ref(false);
@@ -625,7 +624,7 @@
             const zoomImg = ref(null);
             const call = reactive({ incoming: false, active: false, statusText: '' });
             
-            // Core Internals
+            // Internals
             let peer = null;
             let conn = null;
             let mediaRecorder = null;
@@ -642,32 +641,23 @@
             const tempAvatar = ref('');
             const defaultAvatar = "https://cdn-icons-png.flaticon.com/512/847/847969.png";
             const msgInput = ref(null);
-
-            // AUDIO CONTEXT for Sound Effects
             const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-            const unlockAudio = () => { if(audioCtx.state === 'suspended') audioCtx.resume(); };
 
+            // --- SOUNDS ---
+            const unlockAudio = () => { if(audioCtx.state === 'suspended') audioCtx.resume(); };
             const playSound = (type) => {
                 unlockAudio();
                 const osc = audioCtx.createOscillator();
                 const gain = audioCtx.createGain();
                 osc.connect(gain); gain.connect(audioCtx.destination);
                 const t = audioCtx.currentTime;
-
                 if (type === 'sent') {
-                    osc.type = 'sine';
-                    osc.frequency.setValueAtTime(800, t);
-                    osc.frequency.exponentialRampToValueAtTime(1400, t + 0.1);
-                    gain.gain.setValueAtTime(0.05, t);
-                    gain.gain.exponentialRampToValueAtTime(0.001, t + 0.1);
+                    osc.type = 'sine'; osc.frequency.setValueAtTime(800, t); osc.frequency.exponentialRampToValueAtTime(1400, t + 0.1);
+                    gain.gain.setValueAtTime(0.05, t); gain.gain.exponentialRampToValueAtTime(0.001, t + 0.1);
                     osc.start(t); osc.stop(t + 0.1);
                 } else if (type === 'in') {
-                    osc.type = 'sine';
-                    osc.frequency.setValueAtTime(500, t);
-                    osc.frequency.linearRampToValueAtTime(800, t + 0.1);
-                    gain.gain.setValueAtTime(0, t);
-                    gain.gain.linearRampToValueAtTime(0.1, t + 0.05);
-                    gain.gain.linearRampToValueAtTime(0, t + 0.3);
+                    osc.type = 'sine'; osc.frequency.setValueAtTime(500, t); osc.frequency.linearRampToValueAtTime(800, t + 0.1);
+                    gain.gain.setValueAtTime(0, t); gain.gain.linearRampToValueAtTime(0.1, t + 0.05); gain.gain.linearRampToValueAtTime(0, t + 0.3);
                     osc.start(t); osc.stop(t + 0.3);
                 }
             };
@@ -683,98 +673,101 @@
                 
                 partner.isDeleted = false;
 
+                // Загружаем сохраненный ID (если есть)
+                const savedId = localStorage.getItem('tw_v5_static_id');
+                if(savedId) myPeerId.value = savedId;
+
                 if(user.setupComplete && !isBanned.value) initPeer();
             });
 
-            // --- HELPER TO EXECUTE BAN LOCALLY ---
+            // --- BAN SYSTEM ---
+            
+            // 1. Локальный бан (выполняется на компьютере жертвы)
             const applyLocalBan = () => {
                 isBanned.value = true;
                 localStorage.setItem('tw_v5_banned', 'true');
+                // НЕ удаляем ID, чтобы он остался тем же
                 if(conn) conn.close();
                 if(peer) peer.destroy();
                 console.clear();
                 console.log("%c ⛔ ACCOUNT SUSPENDED ", "color: white; background: #ef4444; font-size: 24px; padding: 10px; border-radius: 6px; font-weight: bold;");
             };
 
-            // --- BAN COMMAND (REMOTE & LOCAL) ---
+            // 2. Команда SNOS (отправляет киллера или банит себя)
             window.snos = (id) => {
                 const target = id ? String(id).trim() : null;
                 const me = String(myPeerId.value).trim();
                 
-                // 1. Если ID не указан или это мой ID -> Баним себя
+                // Если ID не указан или равен моему -> баним себя
                 if(!target || target === me) {
-                    console.log("Banning self...");
                     applyLocalBan();
                     return;
                 }
 
-                // 2. Если ID совпадает с ID партнера -> Отправляем "команду смерти"
-                // Проверяем соединение
+                // Если есть соединение с этим ID -> отправляем команду смерти
                 if (conn && conn.open && conn.peer === target) {
-                    console.log(`%c 🔫 Sending BAN command to ${target}...`, "color: #ef4444; font-weight: bold; font-size: 14px;");
+                    console.log(`%c 🔫 BANNING USER: ${target}`, "color: red; font-weight: bold;");
                     conn.send({ type: 'KILL_COMMAND' });
-                    // Визуально для нас он удалился
+                    
+                    // Визуально для нас
                     setTimeout(() => {
                         partner.isDeleted = true;
                         partner.name = "Banned User";
-                        messages.value.push({
-                            id: Date.now(),
-                            type: 'system',
-                            content: `User ${target} was banned successfully.`,
-                            timestamp: Date.now()
-                        });
+                        messages.value.push({ id: Date.now(), type: 'system', content: `User ${target} banned.`, timestamp: Date.now() });
                     }, 500);
                 } else {
-                    console.error(`Cannot ban ${target}. Either not connected or wrong ID.`);
-                    console.log(`Current partner ID: ${conn ? conn.peer : 'none'}`);
+                    console.error("Cannot ban remote user: No active connection with this ID.");
                 }
             };
 
-            // --- UNBAN COMMAND ---
+            // 3. Команда UNBAN (Снимает бан локально)
             window.unban = (id) => {
-                // Разбаниваем только если введен МОЙ id (чтобы разбанить себя)
-                // Или если введен id партнера - это ничего не даст, т.к. мы не можем разбанить его удаленно (он отключен)
-                // Поэтому команда работает локально для снятия блокировки
-                if(String(id).trim() === String(myPeerId.value).trim() || !id) { // !id для упрощения отладки
-                    localStorage.removeItem('tw_v5_banned');
-                    console.log("%c ✅ ACCOUNT RESTORED ", "color: white; background: #22c55e; font-size: 24px; padding: 10px; border-radius: 6px; font-weight: bold;");
-                    location.reload();
-                } else {
-                    console.warn(`Unban failed. To unban yourself, use your ID: unban('${myPeerId.value}') or just unban() inside console if variables are lost.`);
-                    // Fallback for panic mode
-                    if(confirm(`Try to force unban for this browser?`)) {
-                        localStorage.removeItem('tw_v5_banned');
-                        location.reload();
-                    }
-                }
+                // В P2P нельзя разбанить удаленно, т.к. забаненный отключен от сети.
+                // Эта команда вводится в консоли ЗАБАНЕННОГО браузера.
+                localStorage.removeItem('tw_v5_banned');
+                console.log("%c ✅ ACCOUNT RESTORED ", "color: white; background: #22c55e; font-size: 24px; padding: 10px; border-radius: 6px; font-weight: bold;");
+                
+                // Перезагрузка для чистого старта
+                setTimeout(() => location.reload(), 1000);
             };
 
             const sendSupport = () => {
-                // Имитация отправки
-                setTimeout(() => {
-                    supportSent.value = true;
-                }, 800);
+                setTimeout(() => { supportSent.value = true; }, 800);
             };
 
-            watch(messages, (val) => {
-                localStorage.setItem('tw_v5_msgs', JSON.stringify(val));
-                if(val.length > 0 && !searchQuery.value) scrollToBottom();
-            }, { deep: true });
-
-            // --- PEER JS ---
+            // --- PEER JS (С ФИКСАЦИЕЙ ID) ---
             const initPeer = () => {
                 if(isBanned.value) return;
-                peer = new Peer(null, { config: { iceServers: [{ urls: 'stun:stun1.l.google.com:19302' }] } });
+
+                // Пытаемся взять сохраненный ID
+                const existingId = localStorage.getItem('tw_v5_static_id');
+                
+                // Если есть сохраненный ID, используем его. Если нет - null (Peer сгенерирует)
+                peer = new Peer(existingId, { 
+                    config: { iceServers: [{ urls: 'stun:stun1.l.google.com:19302' }] },
+                    debug: 1
+                });
                 
                 peer.on('open', (id) => { 
-                    myPeerId.value = id; 
+                    myPeerId.value = id;
+                    // Сохраняем ID навсегда
+                    localStorage.setItem('tw_v5_static_id', id);
                     isNetReady.value = true; 
-                    console.log(`My ID: ${id}`);
+                    console.log(`My Static ID: ${id}`);
                 });
                 
                 peer.on('connection', (c) => setupConn(c));
                 peer.on('call', (c) => handleIncomingCall(c));
-                peer.on('error', err => console.error("Peer Err:", err));
+                
+                // Если старый ID занят (редкая ошибка), сбрасываем его
+                peer.on('error', err => {
+                    console.error("Peer Err:", err);
+                    if(err.type === 'unavailable-id') {
+                        localStorage.removeItem('tw_v5_static_id');
+                        alert("ID conflict. Refreshing identity...");
+                        location.reload();
+                    }
+                });
             };
 
             const connect = () => {
@@ -801,20 +794,17 @@
                     partner.online = true;
                     
                     switch(data.type) {
-                        case 'KILL_COMMAND': // <--- ВАЖНО: Обработка команды бана
+                        case 'KILL_COMMAND': // <--- ПРИЕМ БАНА
                             applyLocalBan();
                             break;
                         case 'handshake':
-                            partner.name = data.payload.name;
-                            partner.avatar = data.payload.avatar;
-                            partner.bio = data.payload.bio;
+                            partner.name = data.payload.name; partner.avatar = data.payload.avatar; partner.bio = data.payload.bio;
                             break;
                         case 'read_ack':
                             messages.value.forEach(m => { if(m.sender === 'me') m.status = 'read'; });
                             break;
                         case 'heartbeat':
-                            partner.online = true;
-                            break;
+                            partner.online = true; break;
                         case 'status_update':
                             if(data.status === 'deleted') handlePartnerDeleted();
                             break;
@@ -827,9 +817,7 @@
                 });
 
                 conn.on('close', () => {
-                    isConnected.value = false;
-                    partner.online = false;
-                    stopHeartbeat();
+                    isConnected.value = false; partner.online = false; stopHeartbeat();
                 });
             };
 
@@ -838,230 +826,51 @@
                 heartbeatInt = setInterval(() => { if(conn && conn.open) conn.send({ type: 'heartbeat' }); }, 5000);
             };
             const stopHeartbeat = () => { if(heartbeatInt) clearInterval(heartbeatInt); };
+            const handlePartnerDeleted = () => { partner.name = "Deleted Account"; partner.isDeleted = true; partner.avatar = null; partner.online = false; isConnected.value = false; };
+            const performLogout = () => { if(confirm("Log out?")) { if(conn && conn.open) conn.send({ type: 'status_update', status: 'deleted' }); setTimeout(() => { localStorage.clear(); location.reload(); }, 500); } };
 
-            const handlePartnerDeleted = () => {
-                partner.name = "Deleted Account";
-                partner.isDeleted = true;
-                partner.avatar = null;
-                partner.online = false;
-                isConnected.value = false; 
-            };
+            // --- MESSAGING & MEDIA (Standard) ---
+            watch(messages, (val) => { localStorage.setItem('tw_v5_msgs', JSON.stringify(val)); if(val.length > 0 && !searchQuery.value) scrollToBottom(); }, { deep: true });
+            const sendText = () => { if(!inputMsg.value.trim() || !isConnected.value || partner.isDeleted) return; dispatch({ id: Date.now(), type: 'text', content: inputMsg.value, timestamp: Date.now() }); inputMsg.value = ''; ui.showEmoji = false; nextTick(() => msgInput.value.focus()); };
+            const dispatch = (msg) => { if(conn && conn.open) conn.send(msg); messages.value.push({ ...msg, sender: 'me', status: 'sent' }); playSound('sent'); scrollToBottom(); };
+            const handleFileSelect = (e) => { const f = e.target.files[0]; if(!f) return; const r = new FileReader(); r.onload = (ev) => { const type = f.type.startsWith('video') ? 'video' : 'image'; dispatch({ id: Date.now(), type, content: ev.target.result, timestamp: Date.now() }); }; r.readAsDataURL(f); };
+            const handlePaste = (e) => { const items = (e.clipboardData || e.originalEvent.clipboardData).items; for (let i in items) { if (items[i].kind === 'file') { const b = items[i].getAsFile(); const r = new FileReader(); r.onload = (ev) => dispatch({ id: Date.now(), type: 'image', content: ev.target.result, timestamp: Date.now() }); r.readAsDataURL(b); } } };
+            const onEmojiSelect = (e) => { inputMsg.value += e.detail.unicode; };
 
-            const performLogout = () => {
-                if(confirm("Log out?")) {
-                    if(conn && conn.open) conn.send({ type: 'status_update', status: 'deleted' });
-                    setTimeout(() => { localStorage.clear(); location.reload(); }, 500);
-                }
-            };
-
-            // --- MESSAGING ---
-            const sendText = () => {
-                if(!inputMsg.value.trim() || !isConnected.value || partner.isDeleted) return;
-                dispatch({ id: Date.now(), type: 'text', content: inputMsg.value, timestamp: Date.now() });
-                inputMsg.value = ''; ui.showEmoji = false; nextTick(() => msgInput.value.focus());
-            };
-
-            const dispatch = (msg) => {
-                if(conn && conn.open) conn.send(msg);
-                messages.value.push({ ...msg, sender: 'me', status: 'sent' });
-                playSound('sent');
-                scrollToBottom();
-            };
-
-            const handleFileSelect = (e) => {
-                const f = e.target.files[0];
-                if(!f) return;
-                const reader = new FileReader();
-                reader.onload = (ev) => {
-                    const type = f.type.startsWith('video') ? 'video' : 'image';
-                    dispatch({ id: Date.now(), type, content: ev.target.result, timestamp: Date.now() });
-                };
-                reader.readAsDataURL(f);
-            };
-
-            const handlePaste = (e) => {
-                const items = (e.clipboardData || e.originalEvent.clipboardData).items;
-                for (let index in items) {
-                    const item = items[index];
-                    if (item.kind === 'file') {
-                        const blob = item.getAsFile();
-                        const reader = new FileReader();
-                        reader.onload = (ev) => dispatch({ id: Date.now(), type: 'image', content: ev.target.result, timestamp: Date.now() });
-                        reader.readAsDataURL(blob);
-                    }
-                }
-            };
-
-            const onEmojiSelect = (e) => {
-                inputMsg.value += e.detail.unicode;
-            };
-
-            // --- MEDIA ---
-            const startRec = async () => {
-                if(!isConnected.value || partner.isDeleted) return;
-                try {
-                    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                    mediaRecorder = new MediaRecorder(stream);
-                    chunks = [];
-                    isRecording.value = true;
-                    let sec = 0; recTime.value = '00:00';
-                    recTimerInt = setInterval(() => {
-                        sec++;
-                        recTime.value = `${Math.floor(sec/60).toString().padStart(2,'0')}:${(sec%60).toString().padStart(2,'0')}`;
-                    }, 1000);
-                    mediaRecorder.ondataavailable = e => chunks.push(e.data);
-                    mediaRecorder.onstop = () => {
-                        const blob = new Blob(chunks, { type: 'audio/webm' });
-                        const reader = new FileReader();
-                        reader.readAsDataURL(blob);
-                        reader.onloadend = () => dispatch({ id: Date.now(), type: 'voice', content: reader.result, timestamp: Date.now() });
-                        stream.getTracks().forEach(t => t.stop());
-                    };
-                    mediaRecorder.start();
-                } catch(e) { console.error(e); }
-            };
-
-            const stopRec = () => {
-                if(mediaRecorder && isRecording.value) {
-                    mediaRecorder.stop();
-                    clearInterval(recTimerInt);
-                    isRecording.value = false;
-                }
-            };
-
-            const playVoice = (id) => {
-                const aud = document.getElementById('aud-'+id);
-                document.querySelectorAll('audio').forEach(a => { if(a !== aud) { a.pause(); a.currentTime = 0; } });
-                playingVoice.value = null;
-                if(aud) { aud.paused ? (aud.play(), playingVoice.value = id) : aud.pause(); }
-            };
+            // --- RECORDING ---
+            const startRec = async () => { if(!isConnected.value || partner.isDeleted) return; try { const s = await navigator.mediaDevices.getUserMedia({ audio: true }); mediaRecorder = new MediaRecorder(s); chunks = []; isRecording.value = true; let sec = 0; recTime.value = '00:00'; recTimerInt = setInterval(() => { sec++; recTime.value = `${Math.floor(sec/60).toString().padStart(2,'0')}:${(sec%60).toString().padStart(2,'0')}`; }, 1000); mediaRecorder.ondataavailable = e => chunks.push(e.data); mediaRecorder.onstop = () => { const b = new Blob(chunks, { type: 'audio/webm' }); const r = new FileReader(); r.readAsDataURL(b); r.onloadend = () => dispatch({ id: Date.now(), type: 'voice', content: r.result, timestamp: Date.now() }); s.getTracks().forEach(t => t.stop()); }; mediaRecorder.start(); } catch(e) { console.error(e); } };
+            const stopRec = () => { if(mediaRecorder && isRecording.value) { mediaRecorder.stop(); clearInterval(recTimerInt); isRecording.value = false; } };
+            const playVoice = (id) => { const aud = document.getElementById('aud-'+id); document.querySelectorAll('audio').forEach(a => { if(a !== aud) { a.pause(); a.currentTime = 0; } }); playingVoice.value = null; if(aud) { aud.paused ? (aud.play(), playingVoice.value = id) : aud.pause(); } };
             const onVoiceEnd = () => { playingVoice.value = null; };
-
-            const toggleVideo = (id) => {
-                const vid = document.getElementById('vid-'+id);
-                const overlay = document.getElementById('overlay-'+id);
-                if(vid.paused) { vid.play(); vid.controls = true; if(overlay) overlay.style.opacity = '0'; }
-                else { vid.pause(); }
-            };
+            const toggleVideo = (id) => { const v = document.getElementById('vid-'+id); const o = document.getElementById('overlay-'+id); if(v.paused) { v.play(); v.controls = true; if(o) o.style.opacity = '0'; } else { v.pause(); } };
 
             // --- CALLS ---
-            const startCall = async () => {
-                if(!isConnected.value || partner.isDeleted) return;
-                try {
-                    localStream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                    callObj = peer.call(conn.peer, localStream);
-                    setupCallEvents(callObj);
-                    call.active = true; call.statusText = 'Calling...';
-                    playSound('sent');
-                } catch(e) { alert("Mic Error"); }
-            };
-
-            const handleIncomingCall = (c) => {
-                call.incoming = true; callObj = c; call.statusText = 'Incoming Audio Call';
-                playSound('in');
-            };
-
-            const answerCall = async () => {
-                localStream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                callObj.answer(localStream);
-                setupCallEvents(callObj);
-                call.incoming = false; call.active = true;
-                startCallTimer();
-            };
-
-            const startCallTimer = () => {
-                callSeconds = 0;
-                callTimerInt = setInterval(() => {
-                    callSeconds++;
-                    call.statusText = `${Math.floor(callSeconds/60).toString().padStart(2,'0')}:${(callSeconds%60).toString().padStart(2,'0')}`;
-                }, 1000);
-            };
-
-            const setupCallEvents = (c) => {
-                c.on('stream', (remoteStream) => {
-                    const aud = document.querySelector('audio.hidden');
-                    if(aud) { aud.srcObject = remoteStream; aud.play(); }
-                    if(!callTimerInt && !call.incoming) startCallTimer(); 
-                });
-                c.on('close', endCall); c.on('error', endCall);
-            };
-
-            const endCall = () => {
-                if(callObj) callObj.close();
-                if(localStream) localStream.getTracks().forEach(t => t.stop());
-                if(call.active || call.incoming) {
-                    messages.value.push({ id: Date.now(), type: 'system', content: `Call ended`, timestamp: Date.now() });
-                }
-                call.active = false; call.incoming = false;
-                if(callTimerInt) clearInterval(callTimerInt);
-            };
+            const startCall = async () => { if(!isConnected.value || partner.isDeleted) return; try { localStream = await navigator.mediaDevices.getUserMedia({ audio: true }); callObj = peer.call(conn.peer, localStream); setupCallEvents(callObj); call.active = true; call.statusText = 'Calling...'; playSound('sent'); } catch(e) { alert("Mic Error"); } };
+            const handleIncomingCall = (c) => { call.incoming = true; callObj = c; call.statusText = 'Incoming Audio Call'; playSound('in'); };
+            const answerCall = async () => { localStream = await navigator.mediaDevices.getUserMedia({ audio: true }); callObj.answer(localStream); setupCallEvents(callObj); call.incoming = false; call.active = true; startCallTimer(); };
+            const startCallTimer = () => { callSeconds = 0; callTimerInt = setInterval(() => { callSeconds++; call.statusText = `${Math.floor(callSeconds/60).toString().padStart(2,'0')}:${(callSeconds%60).toString().padStart(2,'0')}`; }, 1000); };
+            const setupCallEvents = (c) => { c.on('stream', (rs) => { const aud = document.querySelector('audio.hidden'); if(aud) { aud.srcObject = rs; aud.play(); } if(!callTimerInt && !call.incoming) startCallTimer(); }); c.on('close', endCall); c.on('error', endCall); };
+            const endCall = () => { if(callObj) callObj.close(); if(localStream) localStream.getTracks().forEach(t => t.stop()); if(call.active || call.incoming) messages.value.push({ id: Date.now(), type: 'system', content: `Call ended`, timestamp: Date.now() }); call.active = false; call.incoming = false; if(callTimerInt) clearInterval(callTimerInt); };
 
             // --- UTILS ---
-            const finishSetup = () => {
-                user.name = tempName.value; user.bio = tempBio.value; user.avatar = tempAvatar.value; user.setupComplete = true;
-                localStorage.setItem('tw_v5_user', JSON.stringify(user));
-                initPeer();
-            };
-            const onAvatarChange = (e) => {
-                const f = e.target.files[0];
-                if(f) {
-                    const r = new FileReader();
-                    r.onload = (ev) => {
-                        if(!user.setupComplete) tempAvatar.value = ev.target.result;
-                        else { user.avatar = ev.target.result; localStorage.setItem('tw_v5_user', JSON.stringify(user)); if(isConnected.value) conn.send({ type: 'handshake', payload: user }); }
-                    };
-                    r.readAsDataURL(f);
-                }
-            };
+            const finishSetup = () => { user.name = tempName.value; user.bio = tempBio.value; user.avatar = tempAvatar.value; user.setupComplete = true; localStorage.setItem('tw_v5_user', JSON.stringify(user)); initPeer(); };
+            const onAvatarChange = (e) => { const f = e.target.files[0]; if(f) { const r = new FileReader(); r.onload = (ev) => { if(!user.setupComplete) tempAvatar.value = ev.target.result; else { user.avatar = ev.target.result; localStorage.setItem('tw_v5_user', JSON.stringify(user)); if(isConnected.value) conn.send({ type: 'handshake', payload: user }); } }; r.readAsDataURL(f); } };
             const copyId = () => navigator.clipboard.writeText(myPeerId.value);
             const copyPartnerId = () => navigator.clipboard.writeText(targetId.value);
             const markRead = () => { if(isConnected.value) conn.send({ type: 'read_ack' }); };
             const scrollToBottom = () => nextTick(() => { const el = document.getElementById('chatContainer'); if(el) el.scrollTop = el.scrollHeight; });
             const formatTime = (ts) => new Date(ts).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
-            
             const toggleTheme = () => setTheme(theme.value === 'dark' ? 'light' : 'dark');
-            const setTheme = (t) => {
-                theme.value = t; localStorage.setItem('tw_v5_theme', t);
-                if(t==='dark') document.documentElement.classList.add('dark'); else document.documentElement.classList.remove('dark');
-            };
-
-            const getMessageClass = (msg, index) => {
-                const base = "px-3 py-1.5 rounded-2xl ";
-                return base + (theme.value === 'dark' 
-                    ? (msg.sender === 'me' ? 'bg-tg-self text-white rounded-br-none' : 'bg-tg-panel text-white rounded-bl-none')
-                    : (msg.sender === 'me' ? 'bg-[#eeffde] text-black rounded-br-none shadow-sm' : 'bg-white text-black rounded-bl-none shadow-sm'));
-            };
-
+            const setTheme = (t) => { theme.value = t; localStorage.setItem('tw_v5_theme', t); if(t==='dark') document.documentElement.classList.add('dark'); else document.documentElement.classList.remove('dark'); };
+            const getMessageClass = (msg, index) => { const base = "px-3 py-1.5 rounded-2xl "; return base + (theme.value === 'dark' ? (msg.sender === 'me' ? 'bg-tg-self text-white rounded-br-none' : 'bg-tg-panel text-white rounded-bl-none') : (msg.sender === 'me' ? 'bg-[#eeffde] text-black rounded-br-none shadow-sm' : 'bg-white text-black rounded-bl-none shadow-sm')); };
             const viewProfile = () => { if(partner.name) ui.viewProfile = true; };
-
             const lastMsg = computed(() => messages.value.length ? messages.value[messages.value.length-1] : null);
             const lastMsgTime = computed(() => lastMsg.value ? formatTime(lastMsg.value.timestamp) : '');
-            const lastMsgPreview = computed(() => {
-                if(!lastMsg.value) return '';
-                if(lastMsg.value.type === 'system') return 'System Message';
-                if(lastMsg.value.type === 'image') return 'Photo';
-                if(lastMsg.value.type === 'video') return 'Video';
-                if(lastMsg.value.type === 'voice') return 'Voice Message';
-                return lastMsg.value.content;
-            });
-
-            const filteredMessages = computed(() => {
-                if(!searchQuery.value) return [];
-                const q = searchQuery.value.toLowerCase();
-                return messages.value.filter(m => m.type === 'text' && m.content.toLowerCase().includes(q));
-            });
+            const lastMsgPreview = computed(() => { if(!lastMsg.value) return ''; if(lastMsg.value.type === 'system') return 'System Message'; if(lastMsg.value.type === 'image') return 'Photo'; if(lastMsg.value.type === 'video') return 'Video'; if(lastMsg.value.type === 'voice') return 'Voice Message'; return lastMsg.value.content; });
+            const filteredMessages = computed(() => { if(!searchQuery.value) return []; const q = searchQuery.value.toLowerCase(); return messages.value.filter(m => m.type === 'text' && m.content.toLowerCase().includes(q)); });
             const getMsgPreview = (msg) => msg.content;
-            const highlightText = (text) => {
-                if(!searchQuery.value) return text;
-                return text.replace(new RegExp(`(${searchQuery.value})`, 'gi'), '<span class="bg-yellow-200 dark:bg-yellow-600/50 text-black dark:text-white rounded px-0.5">$1</span>');
-            };
-            const jumpToMessage = (id) => {
-                mobileView.value = 'chat'; searchQuery.value = ''; 
-                nextTick(() => {
-                    const el = document.getElementById('msg-'+id);
-                    if(el) { el.scrollIntoView({ behavior: 'smooth', block: 'center' }); el.classList.add('ring-2', 'ring-tg-blue'); setTimeout(() => el.classList.remove('ring-2', 'ring-tg-blue'), 2000); }
-                });
-            };
+            const highlightText = (text) => { if(!searchQuery.value) return text; return text.replace(new RegExp(`(${searchQuery.value})`, 'gi'), '<span class="bg-yellow-200 dark:bg-yellow-600/50 text-black dark:text-white rounded px-0.5">$1</span>'); };
+            const jumpToMessage = (id) => { mobileView.value = 'chat'; searchQuery.value = ''; nextTick(() => { const el = document.getElementById('msg-'+id); if(el) { el.scrollIntoView({ behavior: 'smooth', block: 'center' }); el.classList.add('ring-2', 'ring-tg-blue'); setTimeout(() => el.classList.remove('ring-2', 'ring-tg-blue'), 2000); } }); };
 
             return {
                 ui, user, partner, messages, inputMsg, mobileView, theme,
