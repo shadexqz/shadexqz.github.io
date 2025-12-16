@@ -590,6 +590,7 @@
                 return base + (theme.value === 'dark' ? (msg.sender === 'me' ? 'bg-tg-self text-white rounded-br-none' : 'bg-tg-panel text-white rounded-bl-none') : (msg.sender === 'me' ? 'bg-[#eeffde] text-black rounded-br-none shadow-sm' : 'bg-white text-black rounded-bl-none shadow-sm'));
             };
             const formatTime = (ts) => new Date(ts).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
+            const viewProfile = () => { if(partner.name) ui.viewProfile = true; };
             
             // COMPUTED
             const currentMessages = computed(() => {
@@ -632,7 +633,8 @@
                 replyingTo, editingMsg, appealMode, appealSent, appealText, SYSTEM_ID,
                 finishSetup, connect, sendText, startReply, startEdit, cancelAction, toggleReaction, switchChat,
                 handleFileSelect, handlePaste, startRec, stopRec, playVoice, toggleVideo, onAvatarChange, copyId, performLogout, viewProfile,
-                lastMsgTime, lastMsgPreview, systemLastMsg, p2pLastMsgTime, p2pLastMsgPreview, hasP2PMessages,
+                lastMsgTime: computed(() => p2pLastMsgTime.value), // Shim to prevent ref error if header used old var
+                systemLastMsg, p2pLastMsgTime, p2pLastMsgPreview, hasP2PMessages,
                 getMessageClass, toggleTheme, scrollToBottom, formatTime, unlockAudio, startCall, endCall, answerCall, sendAppeal,
                 onEmojiSelect: (e) => inputMsg.value += e.detail.unicode
             };
