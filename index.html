@@ -3,19 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Tweeyer</title>
+    <title>Tweeyer v0.0.1 Web Edition (Full)</title>
     
     <!-- Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <!-- Libraries -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <script src="https://unpkg.com/peerjs@1.4.7/dist/peerjs.min.js"></script>
-    <!-- Emoji Picker -->
     <script type="module" src="https://cdn.jsdelivr.net/npm/emoji-picker-element@^1/index.js"></script>
-    <!-- Twemoji (для отображения Apple Emojis) -->
     <script src="https://unpkg.com/twemoji@latest/dist/twemoji.min.js"></script>
 
     <script>
@@ -23,29 +21,33 @@
             darkMode: 'class',
             theme: {
                 extend: {
-                    fontFamily: { sans: ['Roboto', 'sans-serif'] },
+                    fontFamily: { sans: ['Inter', 'sans-serif'] },
                     colors: {
-                        bg: '#0f1621',       // Main dark background
-                        sidebar: '#17212b',  // Sidebar
-                        surface: '#242f3d',  // Panels
-                        input: '#17212b',
-                        primary: '#8774e1',  // Telegram-like Purple/Blue
-                        bubble: {
-                            in: '#182533',   // Incoming msg
-                            out: '#2b5278'   // Outgoing msg
-                        },
-                        text: {
-                            main: '#f5f5f5',
-                            meta: '#6c7883'
-                        }
+                        // Gray Theme (Slate)
+                        sidebar: '#2c3e50',    
+                        panel: '#34495e',
+                        bg_dark: '#1e1e1e',
+                        
+                        // Lilac Accents
+                        primary: '#a29bfe',    
+                        primary_hover: '#6c5ce7',
+                        
+                        // Bubbles
+                        bubble_in: '#34495e',
+                        bubble_out: '#6c5ce7', 
+                        
+                        // System
+                        danger: '#ff7675',
+                        success: '#55efc4'
                     },
                     animation: {
-                        'fade-in': 'fadeIn 0.2s ease-out forwards',
+                        'fade-in': 'fadeIn 0.2s ease-out',
                         'slide-up': 'slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
+                        'pulse-slow': 'pulse 3s infinite',
                     },
                     keyframes: {
                         fadeIn: { '0%': { opacity: 0 }, '100%': { opacity: 1 } },
-                        slideUp: { '0%': { transform: 'translateY(20px)', opacity: 0 }, '100%': { transform: 'translateY(0)', opacity: 1 } }
+                        slideUp: { '0%': { transform: 'translateY(10px)', opacity: 0 }, '100%': { transform: 'translateY(0)', opacity: 1 } }
                     }
                 }
             }
@@ -53,8 +55,7 @@
     </script>
 
     <style>
-        /* Global Styles */
-        body { background-color: #0f1621; color: #f5f5f5; overflow: hidden; -webkit-tap-highlight-color: transparent; }
+        body { background-color: #2c3e50; color: #ecf0f1; overflow: hidden; -webkit-tap-highlight-color: transparent; }
         
         /* Custom Scrollbar */
         ::-webkit-scrollbar { width: 5px; }
@@ -62,248 +63,217 @@
         ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
         ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
 
-        /* Chat Background Pattern */
+        /* Beautiful Pattern Background */
         .chat-bg {
-            background-color: #0f1621;
-            background-image: url("data:image/svg+xml,%3Csvg width='400' height='400' xmlns='http://www.w3.org/2000/svg'%3E%3Cdefs%3E%3Cpattern id='doodle' patternUnits='userSpaceOnUse' width='400' height='400' patternTransform='scale(0.5)'%3E%3Cpath d='M204 220c0-15-12-25-25-25s-25 10-25 25 12 25 25 25 25-10 25-25zm-26-89c0-11-9-20-20-20s-20 9-20 20 9 20 20 20 20-9 20-20zm90-50c0-11-9-20-20-20s-20 9-20 20 9 20 20 20 20-9 20-20zm-20 180c0-11-9-20-20-20s-20 9-20 20 9 20 20 20 20-9 20-20z' fill='%231d2836' fill-opacity='0.4'/%3E%3C/pattern%3E%3C/defs%3E%3Crect width='100%25' height='100%25' fill='url(%23doodle)'/%3E%3C/svg%3E");
+            background-color: #1a1a1a;
+            background-image: radial-gradient(#ffffff 1px, transparent 1px), radial-gradient(#ffffff 1px, transparent 1px);
+            background-position: 0 0, 20px 20px;
+            background-size: 40px 40px;
+            position: relative;
+        }
+        .chat-bg::before {
+            content: ''; position: absolute; inset: 0;
+            background: rgba(26, 26, 26, 0.93); /* Dark overlay */
+            pointer-events: none;
         }
 
         /* Message Bubbles */
-        .msg-bubble { 
-            position: relative; 
-            box-shadow: 0 1px 2px rgba(0,0,0,0.15);
-        }
-        .msg-tail-in::before {
-            content: ""; position: absolute; bottom: 0; left: -6px; width: 12px; height: 16px;
-            background-color: #182533; border-bottom-right-radius: 10px; z-index: 0;
-            clip-path: polygon(100% 0, 100% 100%, 0 100%);
-        }
-        .msg-tail-out::before {
-            content: ""; position: absolute; bottom: 0; right: -6px; width: 12px; height: 16px;
-            background-color: #2b5278; border-bottom-left-radius: 10px; z-index: 0;
-            clip-path: polygon(0 0, 0 100%, 100% 100%);
-        }
+        .msg-bubble { position: relative; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
+        .tail-out { border-bottom-right-radius: 0 !important; }
+        .tail-in { border-bottom-left-radius: 0 !important; }
 
-        /* Emoji Styling */
-        .emoji { height: 1.3em; width: 1.3em; margin: 0 .05em 0 .1em; vertical-align: -0.1em; }
+        /* Emoji */
+        img.emoji { height: 1.3em; width: 1.3em; margin: 0 .05em 0 .1em; vertical-align: -0.1em; }
         
-        /* Audio visualizer */
+        /* Audio Visualizer */
         .bar { width: 3px; background: currentColor; border-radius: 99px; animation: sound 0s infinite ease-in-out alternate; }
         .playing .bar { animation-duration: 0.4s; }
         @keyframes sound { 0% { height: 20%; } 100% { height: 100%; } }
 
-        /* Transitions */
-        .fade-enter-active, .fade-leave-active { transition: opacity 0.2s ease; }
-        .fade-enter-from, .fade-leave-to { opacity: 0; }
-        .slide-panel-enter-active, .slide-panel-leave-active { transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); }
-        .slide-panel-enter-from, .slide-panel-leave-to { transform: translateX(-100%); }
+        /* Glass Input */
+        .glass-input {
+            background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.05); color: white;
+        }
+        .glass-input:focus { border-color: #a29bfe; background: rgba(0,0,0,0.3); }
     </style>
 </head>
 <body>
 
 <div id="app" class="h-full flex relative text-[15px] font-sans overflow-hidden">
 
-    <!-- ================= AUTH / SETUP ================= -->
-    <div v-if="!user.setupComplete" class="absolute inset-0 z-[100] bg-[#0f1621] flex items-center justify-center p-6">
-        <div class="w-full max-w-md bg-[#17212b] rounded-2xl p-8 shadow-2xl text-center border border-white/5 relative overflow-hidden">
-            <!-- Glow Effect -->
-            <div class="absolute top-0 left-1/2 -translate-x-1/2 w-64 h-32 bg-primary/20 blur-[60px] rounded-full"></div>
-
-            <div class="relative z-10">
-                <div class="w-20 h-20 bg-gradient-to-br from-primary to-blue-600 rounded-full mx-auto mb-6 flex items-center justify-center shadow-lg shadow-primary/30">
-                    <i class="fa-solid fa-bolt text-3xl text-white"></i>
-                </div>
-                <h1 class="text-2xl font-bold text-white mb-2">Welcome to Tweeyer</h1>
-                <p class="text-text-meta text-sm mb-8">Secure, encrypted P2P messaging.<br>No servers, no tracking.</p>
-
-                <div class="space-y-5">
-                    <div class="flex justify-center">
-                        <div class="relative w-24 h-24 group cursor-pointer" @click="$refs.avaInput.click()">
-                            <img :src="tempAvatar || defaultAvatar" class="w-full h-full rounded-full object-cover border-4 border-[#242f3d] transition group-hover:opacity-80">
-                            <div class="absolute inset-0 flex items-center justify-center text-white opacity-0 group-hover:opacity-100 transition">
-                                <i class="fa-solid fa-camera text-xl shadow-black drop-shadow-md"></i>
-                            </div>
-                        </div>
-                    </div>
-                    <input type="file" ref="avaInput" class="hidden" accept="image/*" @change="onAvatarChange">
-
-                    <input v-model="tempName" placeholder="Your Display Name" class="w-full bg-[#0f1621] text-white px-4 py-3 rounded-xl border border-[#242f3d] focus:border-primary outline-none text-center transition placeholder-gray-600">
-                    
-                    <button @click="finishSetup" :disabled="!tempName" class="w-full bg-primary hover:bg-[#9685e8] text-white font-medium py-3 rounded-xl transition shadow-lg shadow-primary/20 disabled:opacity-50 disabled:shadow-none transform active:scale-95">
-                        Start Messaging
-                    </button>
-                </div>
+    <!-- ================= AUTH SCREEN ================= -->
+    <div v-if="!user.setupComplete" class="absolute inset-0 z-[100] bg-[#2c3e50] flex items-center justify-center p-6">
+        <div class="w-full max-w-sm bg-[#34495e] rounded-2xl p-8 shadow-2xl border border-white/5 relative flex flex-col items-center animate-fade-in">
+            <div class="w-20 h-20 bg-gradient-to-br from-primary to-primary_hover rounded-2xl flex items-center justify-center shadow-lg mb-6 rotate-3">
+                <i class="fa-solid fa-paper-plane text-3xl text-white"></i>
             </div>
+            <h1 class="text-2xl font-bold text-white">Tweeyer</h1>
+            <p class="text-gray-400 text-sm mb-8">v0.0.1 Web Edition</p>
+
+            <div class="relative w-24 h-24 mb-6 group cursor-pointer" @click="$refs.avaInput.click()">
+                <img :src="tempAvatar || defaultAvatar" class="w-full h-full rounded-full object-cover border-4 border-[#2c3e50] shadow-md bg-black/20">
+                <div class="absolute inset-0 bg-black/40 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition"><i class="fa-solid fa-camera text-white"></i></div>
+            </div>
+            <input type="file" ref="avaInput" hidden @change="onAvatarChange" accept="image/*">
+
+            <input v-model="tempName" placeholder="Your Name" class="w-full h-12 px-4 rounded-xl glass-input outline-none text-center transition mb-4">
+            
+            <button @click="finishSetup" :disabled="!tempName" class="w-full h-12 bg-primary hover:bg-primary_hover text-white font-bold rounded-xl transition shadow-lg shadow-primary/30 disabled:opacity-50 active:scale-95">
+                Start Messaging
+            </button>
         </div>
     </div>
 
-    <!-- ================= LEFT SIDEBAR ================= -->
-    <aside class="w-full md:w-[360px] flex-shrink-0 flex flex-col bg-sidebar border-r border-black/20 z-20 absolute md:relative h-full transition-transform duration-300"
+    <!-- ================= SIDEBAR ================= -->
+    <aside class="w-full md:w-80 bg-sidebar border-r border-black/10 flex flex-col shrink-0 z-20 absolute md:relative h-full transition-transform duration-300 shadow-xl"
            :class="mobileView === 'chat' ? '-translate-x-full md:translate-x-0' : 'translate-x-0'">
         
-        <!-- Sidebar Header -->
-        <div class="h-14 px-3 flex items-center gap-3 shrink-0">
-            <button @click="ui.showMenu = true" class="w-10 h-10 rounded-full hover:bg-white/5 flex items-center justify-center text-gray-400 transition">
+        <!-- Header -->
+        <div class="h-16 px-4 flex items-center gap-3 shrink-0 bg-[#34495e]/30">
+            <button @click="ui.drawer = true" class="w-10 h-10 rounded-full hover:bg-white/5 flex items-center justify-center text-gray-300 transition">
                 <i class="fa-solid fa-bars"></i>
             </button>
             <div class="flex-1 relative">
-                <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm"></i>
-                <input v-model="searchQuery" placeholder="Search" class="w-full bg-[#242f3d] rounded-full h-9 pl-9 pr-4 text-sm text-white placeholder-gray-500 outline-none focus:bg-[#2b3949] transition border border-transparent focus:border-primary/50">
+                <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-xs"></i>
+                <input v-model="searchQuery" placeholder="Search" class="w-full bg-black/20 rounded-lg h-9 pl-8 pr-3 text-sm text-white outline-none focus:bg-black/30 transition placeholder-gray-500">
             </div>
         </div>
 
-        <!-- Connection Widget (Compact) -->
-        <div class="px-2 pb-2">
-            <div class="bg-[#242f3d]/50 rounded-lg p-3 border border-white/5">
+        <!-- Connection -->
+        <div class="p-3">
+            <div class="bg-black/20 rounded-xl p-3 border border-white/5">
                 <div class="flex justify-between items-center mb-2">
-                    <span class="text-[10px] uppercase font-bold text-primary tracking-wider">My Connection ID</span>
-                    <button @click="copyId" class="text-[10px] bg-primary/20 text-primary hover:bg-primary hover:text-white px-2 py-0.5 rounded transition">COPY</button>
+                    <span class="text-[10px] uppercase font-bold text-gray-400">Your ID</span>
+                    <button @click="copyId" class="text-[10px] text-primary hover:text-white px-2 rounded transition">COPY</button>
                 </div>
-                <div class="text-xs text-gray-400 font-mono break-all mb-3 select-all">{{ myPeerId || 'Connecting...' }}</div>
+                <div class="text-xs font-mono text-gray-300 mb-3 truncate select-all">{{ myPeerId || 'Generating...' }}</div>
                 <div class="flex gap-2">
-                    <input v-model="targetId" placeholder="Enter Partner ID" class="flex-1 bg-[#0f1621] rounded px-3 py-1.5 text-sm text-white outline-none border border-white/5 focus:border-primary">
-                    <button @click="connect" class="w-8 bg-primary rounded flex items-center justify-center text-white hover:bg-white/20 transition">
-                        <i class="fa-solid fa-link text-xs"></i>
-                    </button>
+                    <input v-model="targetId" placeholder="Partner ID" class="flex-1 bg-black/20 rounded px-2 text-sm text-white outline-none border border-transparent focus:border-primary/50">
+                    <button @click="connect" class="w-8 bg-primary hover:bg-primary_hover rounded flex items-center justify-center text-white transition"><i class="fa-solid fa-arrow-right text-xs"></i></button>
                 </div>
             </div>
         </div>
 
         <!-- Chat List -->
-        <div class="flex-1 overflow-y-auto">
-            <div v-if="isConnected || messages.length > 0" 
+        <div class="flex-1 overflow-y-auto px-2">
+            <!-- Search Results -->
+            <div v-if="searchQuery" class="space-y-1">
+                <p class="text-xs text-gray-500 px-2 uppercase font-bold mt-2">Search Results</p>
+                <div v-for="msg in filteredMessages" :key="msg.id" @click="jumpTo(msg.id)" class="px-3 py-2 rounded-lg hover:bg-white/5 cursor-pointer">
+                    <div class="text-xs text-primary font-bold">{{ msg.sender === 'me' ? 'You' : partner.name }}</div>
+                    <div class="text-sm text-gray-400 truncate">{{ msg.content }}</div>
+                </div>
+            </div>
+
+            <!-- Active Chat -->
+            <div v-else-if="isConnected || messages.length > 0" 
                  @click="mobileView = 'chat'" 
-                 class="px-2.5 py-2 mx-2 rounded-xl flex gap-3 cursor-pointer transition relative group"
-                 :class="mobileView === 'chat' ? 'bg-[#2b5278] dark:bg-[#2b5278]' : 'hover:bg-[#242f3d]'">
+                 class="px-3 py-3 rounded-xl flex gap-3 cursor-pointer transition relative group hover:bg-white/5"
+                 :class="mobileView === 'chat' ? 'bg-primary/20' : ''">
                 
                 <div class="relative shrink-0">
-                    <img :src="partner.avatar || defaultAvatar" class="w-12 h-12 rounded-full object-cover bg-[#242f3d]">
+                    <img :src="partner.avatar || defaultAvatar" class="w-12 h-12 rounded-full object-cover bg-black/20">
                     <div v-if="partner.online" class="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-sidebar rounded-full"></div>
                 </div>
                 
-                <div class="flex-1 min-w-0 flex flex-col justify-center">
-                    <div class="flex justify-between items-center">
-                        <h3 class="font-medium text-white truncate text-[15px]">{{ partner.name || 'Unknown User' }}</h3>
-                        <span class="text-xs text-gray-400" :class="mobileView === 'chat' ? 'text-blue-200' : ''">{{ lastMsgTime }}</span>
+                <div class="flex-1 min-w-0">
+                    <div class="flex justify-between items-baseline">
+                        <h3 class="font-medium text-white truncate">{{ partner.name || 'User' }}</h3>
+                        <span class="text-[11px] text-gray-400">{{ lastMsgTime }}</span>
                     </div>
                     <div class="flex items-center gap-1">
-                        <span v-if="lastMsg?.sender === 'me'" class="text-primary text-xs">
-                            <i v-if="lastMsg.status === 'read'" class="fa-solid fa-check-double text-green-400"></i>
+                        <span v-if="lastMsg?.sender === 'me'" class="text-primary text-[10px]">
+                            <i v-if="lastMsg.status === 'read'" class="fa-solid fa-check-double"></i>
                             <i v-else class="fa-solid fa-check"></i>
                         </span>
-                        <p class="text-sm text-gray-400 truncate flex-1 leading-snug" v-html="renderEmoji(lastMsgPreview)"></p>
-                        <span v-if="unreadCount > 0" class="bg-gray-400 text-black text-[10px] font-bold px-1.5 rounded-full min-w-[18px] h-[18px] flex items-center justify-center">{{ unreadCount }}</span>
+                        <p class="text-sm text-gray-400 truncate opacity-80" v-html="renderEmoji(lastMsgPreview)"></p>
                     </div>
                 </div>
             </div>
             
-            <div v-else class="text-center mt-20 text-text-meta text-sm">
-                <p>Waiting for connection...</p>
-                <p class="opacity-50 text-xs mt-2">Share your ID to start.</p>
+            <div v-else class="text-center mt-20 text-gray-500 text-sm">
+                <i class="fa-regular fa-paper-plane mb-2 text-2xl opacity-50"></i>
+                <p>Share ID to connect</p>
             </div>
         </div>
     </aside>
 
-    <!-- ================= SETTINGS DRAWER ================= -->
-    <transition name="slide-panel">
-        <div v-if="ui.showMenu" class="absolute inset-y-0 left-0 w-72 bg-sidebar z-50 shadow-[0_0_100px_rgba(0,0,0,0.5)] border-r border-white/5 flex flex-col">
-            <div class="p-6 bg-[#242f3d]">
-                <div class="w-16 h-16 rounded-full overflow-hidden mb-3 relative group cursor-pointer" @click="$refs.editAva.click()">
-                    <img :src="user.avatar || defaultAvatar" class="w-full h-full object-cover">
-                    <div class="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition"><i class="fa-solid fa-pen text-white"></i></div>
-                </div>
-                <input type="file" ref="editAva" hidden @change="onAvatarChange">
-                <div class="font-bold text-white text-lg">{{ user.name }}</div>
-                <div class="text-sm text-gray-400">Online</div>
-            </div>
-            <div class="flex-1 p-2 space-y-1">
-                <button @click="ui.showMenu = false" class="w-full text-left px-4 py-3 hover:bg-[#242f3d] rounded-lg text-gray-300 flex items-center gap-4 transition">
-                    <i class="fa-solid fa-arrow-left w-5 text-center"></i> Back
-                </button>
-                <button @click="logout" class="w-full text-left px-4 py-3 hover:bg-red-500/10 text-red-400 rounded-lg flex items-center gap-4 transition">
-                    <i class="fa-solid fa-power-off w-5 text-center"></i> Log Out
-                </button>
-            </div>
-            <div class="p-4 text-center text-xs text-gray-600">Tweeyer v0.0.1<br>Web Edition</div>
-        </div>
-    </transition>
-
     <!-- ================= CHAT AREA ================= -->
-    <main class="flex-1 flex flex-col h-full bg-[#0f1621] relative chat-bg"
+    <main class="flex-1 flex flex-col h-full bg-[#1a1a1a] relative chat-bg"
           :class="mobileView === 'sidebar' ? 'translate-x-full md:translate-x-0 hidden md:flex' : 'translate-x-0'">
         
         <!-- Header -->
-        <header class="h-14 bg-sidebar/90 backdrop-blur-sm flex items-center justify-between px-3 border-b border-black/10 shrink-0 z-20 cursor-pointer" @click="ui.profileModal = true">
+        <header class="h-16 bg-[#2c3e50]/95 backdrop-blur flex items-center justify-between px-4 shrink-0 shadow-md z-20 cursor-pointer" @click="ui.profile = true">
             <div class="flex items-center gap-4">
-                <button @click.stop="mobileView = 'sidebar'" class="md:hidden text-gray-400 hover:text-white"><i class="fa-solid fa-arrow-left text-lg"></i></button>
+                <button @click.stop="mobileView = 'sidebar'" class="md:hidden text-gray-300"><i class="fa-solid fa-arrow-left"></i></button>
                 <div class="flex items-center gap-3">
                     <div class="relative">
-                        <img :src="partner.avatar || defaultAvatar" class="w-9 h-9 rounded-full object-cover bg-gray-700">
-                        <div v-if="partner.online" class="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-500 rounded-full border-2 border-sidebar"></div>
+                        <img :src="partner.avatar || defaultAvatar" class="w-10 h-10 rounded-full object-cover bg-black/20">
+                        <div v-if="partner.online" class="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-500 border-2 border-sidebar rounded-full"></div>
                     </div>
                     <div>
                         <h3 class="font-bold text-white text-[15px] leading-tight">{{ partner.name || 'Chat' }}</h3>
                         <p v-if="partner.typing" class="text-primary text-xs animate-pulse">typing...</p>
-                        <p v-else class="text-xs text-text-meta">{{ partner.online ? 'online' : 'last seen recently' }}</p>
+                        <p v-else class="text-xs text-gray-400">{{ partner.online ? 'Online' : 'Offline' }}</p>
                     </div>
                 </div>
             </div>
-            <div class="flex gap-2">
-                <button v-if="isConnected" @click.stop="startCall" class="w-10 h-10 rounded-full hover:bg-white/5 text-gray-400 hover:text-primary transition"><i class="fa-solid fa-phone"></i></button>
-                <button class="w-10 h-10 rounded-full hover:bg-white/5 text-gray-400 transition"><i class="fa-solid fa-ellipsis-vertical"></i></button>
+            <div class="flex gap-4 text-gray-400">
+                <button v-if="isConnected" @click.stop="startCall" class="w-10 h-10 rounded-full hover:bg-white/5 hover:text-primary transition"><i class="fa-solid fa-phone"></i></button>
+                <button class="w-10 h-10 rounded-full hover:bg-white/5 hover:text-white transition"><i class="fa-solid fa-ellipsis-vertical"></i></button>
             </div>
         </header>
 
         <!-- Messages -->
-        <div id="chatContainer" class="flex-1 overflow-y-auto p-2 md:p-4 flex flex-col gap-[2px] custom-scrollbar scroll-smooth" @scroll="checkScroll">
+        <div id="chatBox" class="flex-1 overflow-y-auto p-2 md:p-5 flex flex-col gap-1 relative z-10 custom-scrollbar scroll-smooth">
             
-            <div v-if="messages.length === 0" class="flex-1 flex flex-col items-center justify-center opacity-30 select-none">
-                <div class="bg-[#242f3d] p-6 rounded-full mb-4"><i class="fa-solid fa-comments text-4xl text-white"></i></div>
-                <p class="text-white">No messages here yet...</p>
+            <div v-if="messages.length === 0" class="flex-1 flex flex-col items-center justify-center opacity-40">
+                <div class="bg-white/5 p-6 rounded-full mb-4"><i class="fa-regular fa-comments text-4xl text-white"></i></div>
+                <p class="text-gray-400">No messages yet...</p>
             </div>
 
             <template v-for="(msg, index) in groupedMessages" :key="msg.id">
                 
                 <!-- Date Separator -->
-                <div v-if="msg.showDate" class="sticky top-2 z-10 flex justify-center my-4">
-                    <span class="bg-[#17212b]/80 backdrop-blur text-white text-xs font-bold px-3 py-1 rounded-full border border-white/5 shadow-sm">
+                <div v-if="msg.showDate" class="flex justify-center my-4 sticky top-2 z-10">
+                    <span class="bg-[#2c3e50]/80 backdrop-blur text-white text-[11px] font-bold px-3 py-1 rounded-full shadow-sm border border-white/5">
                         {{ msg.dateLabel }}
                     </span>
                 </div>
 
                 <!-- Message Wrapper -->
-                <div class="flex flex-col group w-full mb-1" 
+                <div :id="'msg-'+msg.id" class="flex flex-col group w-full mb-1" 
                      :class="msg.sender === 'me' ? 'items-end' : 'items-start'"
                      @contextmenu.prevent="showContext($event, msg)">
                     
                     <!-- Bubble -->
-                    <div class="msg-bubble max-w-[85%] md:max-w-[65%] rounded-2xl p-2 min-w-[60px] text-white animate-slide-up transition-all"
+                    <div class="msg-bubble max-w-[85%] md:max-w-[65%] rounded-2xl p-2 text-white animate-slide-up transition-all min-w-[60px]"
                          :class="[
-                             msg.sender === 'me' ? 'bg-bubble-out msg-tail-out rounded-br-none' : 'bg-bubble-in msg-tail-in rounded-bl-none',
+                             msg.sender === 'me' ? 'bg-bubble_out tail-out rounded-br-none' : 'bg-bubble_in tail-in rounded-bl-none',
                              msg.isDeleted ? 'opacity-50' : ''
                          ]">
                         
                         <!-- Reply Context -->
-                        <div v-if="msg.replyTo" class="mb-1 pl-2 border-l-2 border-white/30 cursor-pointer" @click="jumpTo(msg.replyTo.id)">
-                            <div class="text-primary text-[11px] font-bold">{{ msg.replyTo.sender === 'me' ? 'You' : partner.name }}</div>
-                            <div class="text-xs text-gray-300 truncate opacity-80">{{ msg.replyTo.content }}</div>
+                        <div v-if="msg.replyTo" class="mb-1 pl-2 border-l-2 border-white/30 cursor-pointer text-xs" @click="jumpTo(msg.replyTo.id)">
+                            <div class="font-bold opacity-80">{{ msg.replyTo.sender === 'me' ? 'You' : partner.name }}</div>
+                            <div class="truncate opacity-70">{{ msg.replyTo.content }}</div>
                         </div>
 
                         <!-- Content -->
-                        <div class="break-words whitespace-pre-wrap leading-snug text-[15.5px]" :class="{'italic text-gray-400': msg.isDeleted}">
+                        <div class="break-words whitespace-pre-wrap leading-snug text-[15px]" :class="{'italic text-gray-300': msg.isDeleted}">
                             
-                            <!-- Text with Emoji Render -->
+                            <!-- Text -->
                             <span v-if="msg.type === 'text'" v-html="renderEmoji(msg.content)"></span>
 
-                            <!-- Images -->
-                            <div v-if="msg.type === 'image'" class="rounded-lg overflow-hidden mt-1 cursor-zoom-in" @click="zoomImage = msg.content">
-                                <img :src="msg.content" class="max-w-full max-h-[400px] block">
+                            <!-- Images/Video -->
+                            <div v-if="msg.type === 'image'" class="rounded-lg overflow-hidden mt-1 cursor-zoom-in relative" @click="zoomImg = msg.content">
+                                <img :src="msg.content" class="max-w-full max-h-[350px] block">
                             </div>
 
                             <!-- Voice -->
                             <div v-if="msg.type === 'voice'" class="flex items-center gap-3 pr-2 min-w-[200px] mt-1">
-                                <button @click="playVoice(msg.id)" class="w-10 h-10 rounded-full bg-primary flex items-center justify-center shrink-0 hover:brightness-110 transition">
-                                    <i class="fa-solid text-white text-sm" :class="playingVoice === msg.id ? 'fa-pause' : 'fa-play'"></i>
+                                <button @click="playVoice(msg.id)" class="w-9 h-9 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center shrink-0 transition">
+                                    <i class="fa-solid text-white text-xs" :class="playingVoice === msg.id ? 'fa-pause' : 'fa-play'"></i>
                                 </button>
                                 <div class="flex flex-col flex-1 gap-1">
                                     <div class="h-4 flex items-center gap-[2px] opacity-70" :class="playingVoice === msg.id ? 'playing' : ''">
@@ -313,47 +283,33 @@
                                 </div>
                                 <audio :id="'aud-'+msg.id" :src="msg.content" @ended="playingVoice = null"></audio>
                             </div>
-
                         </div>
 
                         <!-- Meta -->
                         <div class="flex items-center justify-end gap-1 mt-1 select-none float-right ml-2">
-                            <span v-if="msg.edited" class="text-[10px] opacity-60 mr-1">edited</span>
-                            <span class="text-[11px] opacity-60 text-blue-100">{{ formatTime(msg.timestamp) }}</span>
-                            <span v-if="msg.sender === 'me'" class="text-[11px]">
-                                <i v-if="msg.status === 'read'" class="fa-solid fa-check-double text-[#4ade80] text-[10px]"></i>
-                                <i v-else class="fa-solid fa-check text-white/60 text-[10px]"></i>
+                            <span v-if="msg.edited" class="text-[9px] opacity-60 mr-1">edited</span>
+                            <span class="text-[10px] opacity-60">{{ formatTime(msg.timestamp) }}</span>
+                            <span v-if="msg.sender === 'me'" class="text-[10px]">
+                                <i v-if="msg.status === 'read'" class="fa-solid fa-check-double text-[#a29bfe]"></i>
+                                <i v-else class="fa-solid fa-check opacity-60"></i>
                             </span>
                         </div>
-
                     </div>
                 </div>
             </template>
-            <div id="scrollAnchor" class="h-1"></div>
+            <div id="bottomAnchor" class="h-1"></div>
         </div>
 
         <!-- Input Area -->
-        <div class="p-2 md:p-3 bg-sidebar z-30 shrink-0 relative">
-            
-            <!-- Reply Preview -->
-            <transition name="fade">
-                <div v-if="replyingTo" class="absolute bottom-full left-0 right-0 bg-sidebar border-t border-primary/30 p-2 px-4 flex justify-between items-center shadow-lg">
+        <div class="p-3 bg-[#2c3e50] z-30 shrink-0 relative">
+            <!-- Tools: Reply / Edit -->
+            <transition name="fade-in">
+                <div v-if="replyingTo || editingMsg" class="absolute bottom-full left-0 right-0 bg-[#2c3e50] border-t border-white/10 p-2 px-4 flex justify-between items-center shadow-lg">
                     <div class="border-l-2 border-primary pl-2">
-                        <div class="text-primary text-xs font-bold">Reply to {{ replyingTo.sender === 'me' ? 'You' : partner.name }}</div>
-                        <div class="text-xs text-gray-400 truncate max-w-xs">{{ replyingTo.type === 'text' ? replyingTo.content : 'Media' }}</div>
+                        <div class="text-primary text-xs font-bold">{{ editingMsg ? 'Editing' : 'Reply to ' + (replyingTo.sender === 'me' ? 'You' : partner.name) }}</div>
+                        <div class="text-xs text-gray-400 truncate max-w-xs">{{ editingMsg ? editingMsg.content : replyingTo.content }}</div>
                     </div>
-                    <button @click="replyingTo = null" class="text-gray-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
-                </div>
-            </transition>
-
-             <!-- Edit Preview -->
-             <transition name="fade">
-                <div v-if="editingMsg" class="absolute bottom-full left-0 right-0 bg-sidebar border-t border-blue-500/30 p-2 px-4 flex justify-between items-center shadow-lg">
-                    <div class="border-l-2 border-blue-500 pl-2">
-                        <div class="text-blue-500 text-xs font-bold">Editing Message</div>
-                        <div class="text-xs text-gray-400 truncate max-w-xs">{{ editingMsg.content }}</div>
-                    </div>
-                    <button @click="cancelEdit" class="text-gray-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+                    <button @click="cancelAction" class="text-gray-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
                 </div>
             </transition>
 
@@ -363,7 +319,7 @@
                 </button>
                 <input type="file" ref="fileInput" hidden @change="handleFile" accept="image/*">
 
-                <div class="flex-1 bg-[#0f1621] rounded-2xl flex items-center border border-transparent focus-within:border-primary/50 transition relative">
+                <div class="flex-1 bg-black/20 rounded-2xl flex items-center border border-transparent focus-within:border-primary/50 transition relative">
                     <textarea 
                         ref="msgInput"
                         v-model="inputMsg" 
@@ -373,100 +329,114 @@
                         placeholder="Message" 
                         class="w-full bg-transparent text-white px-4 py-3 max-h-32 min-h-[44px] resize-none outline-none custom-scrollbar"
                     ></textarea>
-                    <button class="w-10 h-10 text-gray-400 hover:text-yellow-400 transition" @click="ui.showEmoji = !ui.showEmoji">
+                    <button class="w-10 h-10 text-gray-400 hover:text-yellow-400 transition" @click="ui.emoji = !ui.emoji">
                         <i class="fa-regular fa-face-smile text-xl"></i>
                     </button>
                 </div>
 
                 <div class="w-12 h-12 flex items-center justify-center relative">
-                    <transition name="fade" mode="out-in">
-                        <button v-if="inputMsg.trim()" @click="send" class="w-12 h-12 bg-primary rounded-full text-white shadow-lg hover:bg-primary/80 transition flex items-center justify-center transform active:scale-90">
-                            <i v-if="editingMsg" class="fa-solid fa-check text-lg"></i>
-                            <i v-else class="fa-solid fa-paper-plane text-lg translate-x-px translate-y-px"></i>
-                        </button>
-                        <button v-else @mousedown="startRec" @touchstart.prevent="startRec" @mouseup="stopRec" @touchend.prevent="stopRec" class="w-12 h-12 bg-[#242f3d] rounded-full text-white hover:bg-white/10 transition flex items-center justify-center" :class="{'bg-red-500 animate-pulse': isRecording}">
-                            <i class="fa-solid fa-microphone text-xl"></i>
-                        </button>
-                    </transition>
+                    <button v-if="inputMsg.trim()" @click="send" class="w-12 h-12 bg-primary hover:bg-primary_hover rounded-full text-white shadow-lg transition flex items-center justify-center transform active:scale-90">
+                        <i v-if="editingMsg" class="fa-solid fa-check text-lg"></i>
+                        <i v-else class="fa-solid fa-paper-plane text-lg translate-x-px"></i>
+                    </button>
+                    <button v-else @mousedown="startRec" @touchstart.prevent="startRec" @mouseup="stopRec" @touchend.prevent="stopRec" 
+                        class="w-12 h-12 bg-[#34495e] rounded-full text-white hover:bg-white/10 transition flex items-center justify-center" 
+                        :class="{'bg-red-500 animate-pulse': isRecording}">
+                        <i class="fa-solid fa-microphone text-xl"></i>
+                    </button>
                 </div>
             </div>
             
             <!-- Emoji Picker -->
-            <transition name="fade">
-                <div v-if="ui.showEmoji" class="absolute bottom-20 right-4 z-50 shadow-2xl rounded-xl overflow-hidden h-80 w-80">
-                    <emoji-picker @emoji-click="insertEmoji" class="dark"></emoji-picker>
+            <transition name="fade-in">
+                <div v-if="ui.emoji" class="absolute bottom-20 right-4 z-50 shadow-2xl rounded-xl overflow-hidden h-80 w-80">
+                    <emoji-picker class="dark" @emoji-click="addEmoji"></emoji-picker>
                 </div>
             </transition>
         </div>
 
         <!-- Recording Overlay -->
-        <div v-if="isRecording" class="absolute bottom-24 left-1/2 -translate-x-1/2 bg-surface/90 backdrop-blur px-6 py-3 rounded-full text-white flex items-center gap-3 shadow-xl z-50 border border-white/10">
+        <div v-if="isRecording" class="absolute bottom-24 left-1/2 -translate-x-1/2 bg-[#2c3e50]/90 backdrop-blur px-6 py-3 rounded-full text-white flex items-center gap-3 shadow-xl z-50 border border-white/10">
             <div class="w-3 h-3 bg-red-500 rounded-full animate-ping"></div>
             <span class="font-mono text-lg">{{ recTime }}</span>
         </div>
 
     </main>
 
+    <!-- ================= 4. UTILS & OVERLAYS ================= -->
+    
     <!-- Context Menu -->
-    <div v-if="ui.contextMenu.show" 
-         class="fixed z-[90] bg-[#242f3d] w-48 rounded-xl shadow-[0_5px_20px_rgba(0,0,0,0.5)] border border-white/5 py-1 text-sm overflow-hidden animate-fade-in"
-         :style="{top: ui.contextMenu.y + 'px', left: ui.contextMenu.x + 'px'}"
+    <div v-if="ui.context.show" 
+         class="fixed z-[90] bg-[#34495e] w-48 rounded-xl shadow-2xl border border-white/10 py-1 text-sm animate-fade-in"
+         :style="{top: ui.context.y + 'px', left: ui.context.x + 'px'}"
          @click.stop="closeContext">
-        <div class="px-4 py-2 text-gray-500 text-xs font-bold border-b border-white/5 uppercase">Message</div>
-        <button @click="setReply(ui.contextMenu.msg)" class="w-full text-left px-4 py-2.5 hover:bg-white/5 text-white flex items-center gap-3"><i class="fa-solid fa-reply w-4"></i> Reply</button>
-        <button @click="copyText(ui.contextMenu.msg.content)" v-if="ui.contextMenu.msg.type==='text'" class="w-full text-left px-4 py-2.5 hover:bg-white/5 text-white flex items-center gap-3"><i class="fa-regular fa-copy w-4"></i> Copy</button>
-        
-        <template v-if="ui.contextMenu.msg.sender === 'me'">
+        <button @click="setReply(ui.context.msg)" class="w-full text-left px-4 py-2.5 hover:bg-white/5 text-white flex items-center gap-3"><i class="fa-solid fa-reply w-4"></i> Reply</button>
+        <button @click="copyText(ui.context.msg.content)" v-if="ui.context.msg.type==='text'" class="w-full text-left px-4 py-2.5 hover:bg-white/5 text-white flex items-center gap-3"><i class="fa-regular fa-copy w-4"></i> Copy</button>
+        <template v-if="ui.context.msg.sender === 'me'">
             <div class="h-px bg-white/5 my-1"></div>
-            <button v-if="ui.contextMenu.msg.type === 'text'" @click="editMessage(ui.contextMenu.msg)" class="w-full text-left px-4 py-2.5 hover:bg-white/5 text-white flex items-center gap-3"><i class="fa-solid fa-pen w-4"></i> Edit</button>
-            <button @click="deleteMessage(ui.contextMenu.msg)" class="w-full text-left px-4 py-2.5 hover:bg-red-500/10 text-red-400 flex items-center gap-3"><i class="fa-solid fa-trash w-4"></i> Delete</button>
+            <button v-if="ui.context.msg.type === 'text'" @click="setEdit(ui.context.msg)" class="w-full text-left px-4 py-2.5 hover:bg-white/5 text-white flex items-center gap-3"><i class="fa-solid fa-pen w-4"></i> Edit</button>
+            <button @click="deleteMsg(ui.context.msg)" class="w-full text-left px-4 py-2.5 hover:bg-red-500/10 text-red-400 flex items-center gap-3"><i class="fa-solid fa-trash w-4"></i> Delete</button>
         </template>
     </div>
 
     <!-- Call Overlay -->
-    <div v-if="call.active || call.incoming" class="fixed inset-0 z-[100] bg-[#1a2025] flex flex-col items-center justify-center text-white">
-        <div class="absolute inset-0 opacity-30 blur-3xl scale-125 bg-center bg-cover" :style="`background-image: url(${partner.avatar || defaultAvatar})`"></div>
+    <div v-if="call.active || call.incoming" class="fixed inset-0 z-[100] bg-[#1e1e1e] flex flex-col items-center justify-center text-white">
+        <div class="absolute inset-0 opacity-20 blur-3xl scale-125 bg-center bg-cover" :style="`background-image: url(${partner.avatar || defaultAvatar})`"></div>
         <div class="relative z-10 flex flex-col items-center">
-            <div class="w-32 h-32 rounded-full overflow-hidden mb-6 shadow-2xl border-4 border-white/10 relative">
+            <div class="w-36 h-36 rounded-full overflow-hidden mb-6 shadow-2xl border-4 border-white/5 relative">
                 <img :src="partner.avatar || defaultAvatar" class="w-full h-full object-cover">
                 <div v-if="call.incoming" class="absolute inset-0 bg-green-500/30 animate-pulse"></div>
             </div>
             <h2 class="text-3xl font-bold mb-2">{{ partner.name }}</h2>
-            <p class="text-gray-400 mb-12">{{ call.status }}</p>
+            <p class="text-primary mb-12 font-medium">{{ call.status }}</p>
             
-            <div class="flex gap-12">
-                <button v-if="call.incoming" @click="answerCall" class="w-16 h-16 bg-green-500 rounded-full flex items-center justify-center text-2xl hover:scale-110 transition shadow-[0_0_30px_rgba(34,197,94,0.4)]"><i class="fa-solid fa-phone"></i></button>
-                <button @click="endCall" class="w-16 h-16 bg-red-500 rounded-full flex items-center justify-center text-2xl hover:scale-110 transition shadow-[0_0_30px_rgba(239,68,68,0.4)]"><i class="fa-solid fa-phone-slash"></i></button>
+            <div class="flex gap-16">
+                <button v-if="call.incoming" @click="answerCall" class="w-16 h-16 bg-green-500 rounded-full flex items-center justify-center text-2xl hover:scale-110 transition shadow-lg shadow-green-500/30"><i class="fa-solid fa-phone"></i></button>
+                <button @click="endCall" class="w-16 h-16 bg-red-500 rounded-full flex items-center justify-center text-2xl hover:scale-110 transition shadow-lg shadow-red-500/30"><i class="fa-solid fa-phone-slash"></i></button>
             </div>
         </div>
         <audio ref="remoteAudio" autoplay class="hidden"></audio>
     </div>
 
-    <!-- Image Zoom -->
-    <div v-if="zoomImage" @click="zoomImage = null" class="fixed inset-0 z-[200] bg-black/95 flex items-center justify-center backdrop-blur">
-        <img :src="zoomImage" class="max-w-full max-h-full rounded shadow-2xl">
+    <!-- Settings Drawer -->
+    <div v-if="ui.drawer" class="absolute inset-0 z-50 bg-black/60 backdrop-blur-sm" @click="ui.drawer = false">
+        <div class="w-72 h-full bg-[#2c3e50] shadow-2xl animate-fade-in flex flex-col" @click.stop>
+            <div class="p-6 bg-[#34495e]">
+                <div class="flex items-center gap-4">
+                    <img :src="user.avatar || defaultAvatar" class="w-16 h-16 rounded-full border-2 border-primary">
+                    <div>
+                        <div class="font-bold text-white text-lg">{{ user.name }}</div>
+                        <div class="text-xs text-primary">v0.0.1 Web Edition</div>
+                    </div>
+                </div>
+            </div>
+            <div class="p-2 space-y-1">
+                <button @click="logout" class="w-full text-left px-4 py-3 hover:bg-red-500/10 text-red-400 rounded-lg flex items-center gap-3 transition">
+                    <i class="fa-solid fa-power-off w-5 text-center"></i> Logout
+                </button>
+            </div>
+        </div>
     </div>
 
     <!-- Profile Modal -->
-    <div v-if="ui.profileModal" class="fixed inset-0 z-[80] bg-black/50 backdrop-blur-sm flex items-center justify-center p-4" @click="ui.profileModal = false">
-        <div class="bg-[#242f3d] w-full max-w-sm rounded-2xl overflow-hidden shadow-2xl border border-white/5" @click.stop>
-            <div class="h-32 bg-gradient-to-r from-primary to-blue-600 relative">
-                <button @click="ui.profileModal = false" class="absolute top-4 left-4 w-8 h-8 rounded-full bg-black/20 text-white flex items-center justify-center"><i class="fa-solid fa-arrow-left"></i></button>
+    <div v-if="ui.profile" class="fixed inset-0 z-[80] bg-black/60 flex items-center justify-center p-4 backdrop-blur-sm" @click="ui.profile = false">
+        <div class="bg-[#2c3e50] w-full max-w-sm rounded-2xl overflow-hidden shadow-2xl border border-white/10" @click.stop>
+            <div class="h-32 bg-gradient-to-r from-primary to-primary_hover relative">
+                <button @click="ui.profile = false" class="absolute top-4 left-4 w-8 h-8 rounded-full bg-black/20 text-white flex items-center justify-center"><i class="fa-solid fa-arrow-left"></i></button>
             </div>
             <div class="px-6 relative -top-12">
-                <img :src="partner.avatar || defaultAvatar" class="w-24 h-24 rounded-full border-4 border-[#242f3d] bg-[#17212b]">
+                <img :src="partner.avatar || defaultAvatar" class="w-24 h-24 rounded-full border-4 border-[#2c3e50] bg-black/20">
                 <div class="mt-3">
                     <h2 class="text-xl font-bold text-white">{{ partner.name }}</h2>
                     <p class="text-primary text-sm font-mono mt-1">@{{ targetId }}</p>
                 </div>
-                <div class="mt-6 space-y-4">
-                    <div class="flex items-center gap-4 text-gray-300">
-                        <i class="fa-solid fa-circle-info w-5 text-gray-500"></i>
-                        <span>{{ partner.bio || 'No bio available' }}</span>
-                    </div>
-                </div>
             </div>
         </div>
+    </div>
+
+    <!-- Image Zoom -->
+    <div v-if="zoomImg" class="fixed inset-0 z-[200] bg-black/95 flex items-center justify-center p-4 backdrop-blur-md" @click="zoomImg=null">
+        <img :src="zoomImg" class="max-w-full max-h-full rounded shadow-2xl">
     </div>
 
 </div>
@@ -477,9 +447,9 @@
     createApp({
         setup() {
             // STATE
-            const ui = reactive({ showMenu: false, showEmoji: false, contextMenu: { show: false, x:0, y:0, msg: null }, profileModal: false });
+            const ui = reactive({ drawer: false, profile: false, emoji: false, context: { show: false, x:0, y:0, msg: null } });
             const user = reactive({ name: '', avatar: '', setupComplete: false });
-            const partner = reactive({ name: '', avatar: '', bio: '', online: false, typing: false });
+            const partner = reactive({ name: '', avatar: '', online: false, typing: false });
             const messages = ref([]);
             const inputMsg = ref('');
             const searchQuery = ref('');
@@ -488,262 +458,171 @@
             const myPeerId = ref('');
             const targetId = ref('');
             const isConnected = ref(false);
-            let peer = null, conn = null;
-
-            // Media / Tools
             const mobileView = ref('sidebar');
-            const replyTo = ref(null);
-            const editingMsg = ref(null);
+            
+            // Tools
             const replyingTo = ref(null);
+            const editingMsg = ref(null);
+            const zoomImg = ref(null);
             const isRecording = ref(false);
             const recTime = ref("00:00");
             const playingVoice = ref(null);
-            const zoomImage = ref(null);
             const call = reactive({ active: false, incoming: false, status: '' });
-            
-            // Refs & Timers
-            const msgInput = ref(null);
+
+            // Refs
             const tempName = ref('');
             const tempAvatar = ref('');
-            const defaultAvatar = "https://cdn-icons-png.flaticon.com/512/149/149071.png";
-            let typingTimeout = null;
-            let mediaRecorder = null, chunks = [], recTimer = null;
+            const defaultAvatar = "https://cdn-icons-png.flaticon.com/512/847/847969.png";
+            const msgInput = ref(null);
+            
+            let peer = null, conn = null, typingTimer = null;
+            let mediaRecorder = null, chunks = [], recInt = null;
             let callObj = null, localStream = null;
 
-            // Audio Context
+            // Audio Context for SFX
             const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
             const playSound = (type) => {
                 if(audioCtx.state === 'suspended') audioCtx.resume();
                 const o = audioCtx.createOscillator(); const g = audioCtx.createGain();
                 o.connect(g); g.connect(audioCtx.destination);
-                const t = audioCtx.currentTime;
-                if(type==='sent') {
-                    o.frequency.setValueAtTime(400, t); o.frequency.exponentialRampToValueAtTime(800, t+0.1);
-                    g.gain.setValueAtTime(0.05, t); g.gain.exponentialRampToValueAtTime(0, t+0.1);
-                    o.start(t); o.stop(t+0.1);
-                } else if (type==='in') {
-                    o.frequency.setValueAtTime(800, t); o.frequency.exponentialRampToValueAtTime(400, t+0.2);
-                    g.gain.setValueAtTime(0.05, t); g.gain.exponentialRampToValueAtTime(0, t+0.2);
-                    o.start(t); o.stop(t+0.2);
+                if(type === 'sent') {
+                    o.frequency.setValueAtTime(400, audioCtx.currentTime);
+                    o.frequency.exponentialRampToValueAtTime(800, audioCtx.currentTime+0.1);
+                    g.gain.setValueAtTime(0.05, audioCtx.currentTime);
+                    g.gain.exponentialRampToValueAtTime(0, audioCtx.currentTime+0.1);
+                } else {
+                    o.frequency.setValueAtTime(800, audioCtx.currentTime);
+                    o.frequency.exponentialRampToValueAtTime(400, audioCtx.currentTime+0.2);
+                    g.gain.setValueAtTime(0.05, audioCtx.currentTime);
+                    g.gain.exponentialRampToValueAtTime(0, audioCtx.currentTime+0.2);
                 }
+                o.start(); o.stop(audioCtx.currentTime+0.2);
             };
 
             // LIFECYCLE
             onMounted(() => {
-                const u = localStorage.getItem('tw_user');
+                const u = localStorage.getItem('tw_full_user');
                 if(u) Object.assign(user, JSON.parse(u));
-                const m = localStorage.getItem('tw_msgs');
+                const m = localStorage.getItem('tw_full_msgs');
                 if(m) messages.value = JSON.parse(m);
                 if(user.setupComplete) initPeer();
-                
-                // Close context menu on click elsewhere
-                document.addEventListener('click', () => {
-                    ui.contextMenu.show = false;
-                    ui.showEmoji = false;
-                });
+                document.addEventListener('click', () => { ui.context.show = false; ui.emoji = false; });
             });
 
             watch(messages, (val) => {
-                localStorage.setItem('tw_msgs', JSON.stringify(val));
+                localStorage.setItem('tw_full_msgs', JSON.stringify(val));
                 if(mobileView.value === 'chat') scrollToBottom();
             }, { deep: true });
 
-            // EMOJI RENDERING (The "Fix")
-            const renderEmoji = (text) => {
-                if(!text) return '';
-                // Use Twemoji to parse the string and replace emojis with <img> tags
-                return twemoji.parse(text, {
-                    folder: 'svg',
-                    ext: '.svg'
-                });
-            };
-
-            // PEER JS
+            // PEER LOGIC
             const initPeer = () => {
                 peer = new Peer(null);
                 peer.on('open', id => myPeerId.value = id);
                 peer.on('connection', c => setupConn(c));
                 peer.on('call', c => handleIncomingCall(c));
             };
-
-            const connect = () => {
-                if(!targetId.value) return;
-                const c = peer.connect(targetId.value);
-                setupConn(c);
-            };
-
+            const connect = () => { if(targetId.value) setupConn(peer.connect(targetId.value)); };
             const setupConn = (c) => {
                 if(conn) conn.close();
                 conn = c;
                 conn.on('open', () => {
-                    isConnected.value = true;
-                    partner.online = true;
-                    // Handshake
-                    conn.send({ type: 'sys_handshake', payload: { name: user.name, avatar: user.avatar } });
-                    // Mark sent as read
+                    isConnected.value = true; partner.online = true;
+                    conn.send({ type: 'sys_handshake', name: user.name, avatar: user.avatar });
                     messages.value.forEach(m => { if(m.status === 'sent') m.status = 'read'; });
                 });
-                conn.on('data', data => handleData(data));
+                conn.on('data', d => {
+                    if(d.type === 'sys_handshake') { partner.name = d.name; partner.avatar = d.avatar; partner.online = true; }
+                    else if(d.type === 'sys_typing') partner.typing = d.val;
+                    else if(d.type === 'sys_read') messages.value.forEach(m => { if(m.sender === 'me') m.status = 'read'; });
+                    else if(d.type === 'sys_delete') { const m = messages.value.find(x=>x.id===d.id); if(m) { m.isDeleted = true; m.content = 'Deleted'; m.type = 'text'; } }
+                    else if(d.type === 'sys_edit') { const m = messages.value.find(x=>x.id===d.id); if(m) { m.content = d.content; m.edited = true; } }
+                    else { messages.value.push({...d, sender: 'partner', status: 'read'}); playSound('in'); conn.send({type: 'sys_read'}); }
+                });
                 conn.on('close', () => { isConnected.value = false; partner.online = false; });
-            };
-
-            const handleData = (data) => {
-                // Decode if encoded (though PeerJS handles objects well, we ensure safety for "Chinese symbol" issue)
-                if (data.type === 'sys_handshake') {
-                    partner.name = data.payload.name;
-                    partner.avatar = data.payload.avatar;
-                    partner.online = true;
-                } else if (data.type === 'sys_typing') {
-                    partner.typing = data.isTyping;
-                } else if (data.type === 'sys_read') {
-                    messages.value.forEach(m => { if(m.sender === 'me') m.status = 'read'; });
-                } else if (data.type === 'sys_delete') {
-                    const m = messages.value.find(x => x.id === data.id);
-                    if(m) { m.isDeleted = true; m.content = 'This message was deleted'; m.type = 'text'; }
-                } else if (data.type === 'sys_edit') {
-                    const m = messages.value.find(x => x.id === data.id);
-                    if(m) { m.content = data.content; m.edited = true; }
-                } else {
-                    // Regular Message
-                    messages.value.push({ ...data, sender: 'partner', status: 'read' });
-                    playSound('in');
-                    if(mobileView.value === 'chat') conn.send({ type: 'sys_read' });
-                }
             };
 
             // MESSAGING
             const send = () => {
                 if(!inputMsg.value.trim() && !editingMsg.value) return;
-
-                if (editingMsg.value) {
-                    // Handle Edit
-                    const newContent = inputMsg.value;
-                    editingMsg.value.content = newContent;
+                
+                if(editingMsg.value) {
+                    editingMsg.value.content = inputMsg.value;
                     editingMsg.value.edited = true;
-                    if(conn) conn.send({ type: 'sys_edit', id: editingMsg.value.id, content: newContent });
-                    cancelEdit();
+                    if(conn) conn.send({ type: 'sys_edit', id: editingMsg.value.id, content: inputMsg.value });
+                    cancelAction();
                     return;
                 }
 
                 const msg = {
-                    id: Date.now(),
-                    type: 'text',
-                    content: inputMsg.value, // Send raw unicode, JS handles it. Twemoji fixes display.
-                    timestamp: Date.now(),
+                    id: Date.now(), type: 'text', content: inputMsg.value, timestamp: Date.now(),
                     replyTo: replyingTo.value ? { id: replyingTo.value.id, content: replyingTo.value.content, sender: replyingTo.value.sender } : null
                 };
-
-                messages.value.push({ ...msg, sender: 'me', status: 'sent' });
+                messages.value.push({...msg, sender: 'me', status: 'sent'});
                 if(conn) conn.send(msg);
-                
-                inputMsg.value = '';
-                replyingTo.value = null;
-                playSound('sent');
-                scrollToBottom();
+                inputMsg.value = ''; replyingTo.value = null; ui.emoji = false; playSound('sent');
             };
 
             const onType = () => {
                 if(conn) {
-                    conn.send({ type: 'sys_typing', isTyping: true });
-                    clearTimeout(typingTimeout);
-                    typingTimeout = setTimeout(() => conn.send({ type: 'sys_typing', isTyping: false }), 2000);
+                    conn.send({ type: 'sys_typing', val: true });
+                    clearTimeout(typingTimer);
+                    typingTimer = setTimeout(() => conn.send({ type: 'sys_typing', val: false }), 2000);
                 }
-            };
-
-            const insertEmoji = (e) => {
-                const char = e.detail.unicode;
-                inputMsg.value += char;
             };
 
             // ACTIONS
-            const showContext = (e, msg) => {
-                ui.contextMenu = { show: true, x: e.clientX, y: e.clientY, msg };
-            };
-            const closeContext = () => ui.contextMenu.show = false;
-            
-            const deleteMessage = (msg) => {
-                if(confirm("Delete for everyone?")) {
-                    msg.isDeleted = true;
-                    msg.content = "You deleted this message";
+            const showContext = (e, msg) => ui.context = { show: true, x: e.clientX, y: e.clientY, msg };
+            const closeContext = () => ui.context.show = false;
+            const setReply = (msg) => { replyingTo.value = msg; msgInput.value.focus(); closeContext(); };
+            const setEdit = (msg) => { editingMsg.value = msg; inputMsg.value = msg.content; msgInput.value.focus(); closeContext(); };
+            const deleteMsg = (msg) => {
+                if(confirm('Delete message?')) {
+                    msg.isDeleted = true; msg.content = 'You deleted this message';
                     if(conn) conn.send({ type: 'sys_delete', id: msg.id });
-                    closeContext();
+                }
+                closeContext();
+            };
+            const cancelAction = () => { replyingTo.value = null; editingMsg.value = null; inputMsg.value = ''; };
+            const copyText = (t) => { navigator.clipboard.writeText(t); closeContext(); };
+
+            // MEDIA
+            const handleFile = (e) => {
+                const f = e.target.files[0];
+                if(f) {
+                    const r = new FileReader();
+                    r.onload = ev => {
+                        const msg = { id: Date.now(), type: 'image', content: ev.target.result, timestamp: Date.now() };
+                        messages.value.push({...msg, sender: 'me', status: 'sent'});
+                        if(conn) conn.send(msg);
+                    };
+                    r.readAsDataURL(f);
                 }
             };
 
-            const editMessage = (msg) => {
-                editingMsg.value = msg;
-                inputMsg.value = msg.content;
-                msgInput.value.focus();
-                closeContext();
-            };
-
-            const cancelEdit = () => {
-                editingMsg.value = null;
-                inputMsg.value = '';
-                replyingTo.value = null;
-            };
-
-            const setReply = (msg) => {
-                replyingTo.value = msg;
-                msgInput.value.focus();
-                closeContext();
-            };
-
-            const copyText = (txt) => {
-                navigator.clipboard.writeText(txt);
-                closeContext();
-            };
-
-            const handleFile = (e) => {
-                const f = e.target.files[0];
-                if(!f) return;
-                const r = new FileReader();
-                r.onload = (ev) => {
-                    const msg = { id: Date.now(), type: 'image', content: ev.target.result, timestamp: Date.now() };
-                    messages.value.push({...msg, sender: 'me', status: 'sent'});
-                    if(conn) conn.send(msg);
-                };
-                r.readAsDataURL(f);
-            };
-
-            // RECORDING
             const startRec = async () => {
                 try {
-                    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                    mediaRecorder = new MediaRecorder(stream);
-                    chunks = [];
-                    isRecording.value = true;
+                    const s = await navigator.mediaDevices.getUserMedia({ audio: true });
+                    mediaRecorder = new MediaRecorder(s); chunks = []; isRecording.value = true;
+                    let sec = 0; recInt = setInterval(() => { sec++; recTime.value = `00:${sec.toString().padStart(2,'0')}`; }, 1000);
                     mediaRecorder.ondataavailable = e => chunks.push(e.data);
                     mediaRecorder.onstop = () => {
-                        const blob = new Blob(chunks);
-                        const r = new FileReader();
+                        const blob = new Blob(chunks); const r = new FileReader();
                         r.readAsDataURL(blob);
                         r.onloadend = () => {
                             const msg = { id: Date.now(), type: 'voice', content: r.result, timestamp: Date.now() };
                             messages.value.push({...msg, sender: 'me', status: 'sent'});
                             if(conn) conn.send(msg);
                         };
-                        stream.getTracks().forEach(t=>t.stop());
+                        s.getTracks().forEach(t=>t.stop());
                     };
-                    let s = 0;
-                    recTimer = setInterval(() => { s++; recTime.value = `00:${s.toString().padStart(2,'0')}`; }, 1000);
                     mediaRecorder.start();
-                } catch(e) { alert("Mic Error"); }
+                } catch(e) { alert('Mic access denied'); }
             };
-            const stopRec = () => {
-                if(mediaRecorder && isRecording.value) {
-                    mediaRecorder.stop();
-                    isRecording.value = false;
-                    clearInterval(recTimer);
-                    recTime.value = "00:00";
-                }
-            };
+            const stopRec = () => { if(mediaRecorder) { mediaRecorder.stop(); isRecording.value = false; clearInterval(recInt); recTime.value='00:00'; } };
             const playVoice = (id) => {
                 const aud = document.getElementById('aud-'+id);
-                document.querySelectorAll('audio').forEach(a => { if(a!==aud) { a.pause(); a.currentTime=0; }});
-                playingVoice.value = id;
-                aud.play();
-                aud.onended = () => playingVoice.value = null;
+                document.querySelectorAll('audio').forEach(a=>{if(a!==aud){a.pause();a.currentTime=0;}});
+                playingVoice.value = id; aud.play(); aud.onended = () => playingVoice.value = null;
             };
 
             // CALLS
@@ -751,22 +630,15 @@
                 localStream = await navigator.mediaDevices.getUserMedia({ audio: true });
                 callObj = peer.call(conn.peer, localStream);
                 call.active = true; call.status = 'Calling...';
-                callObj.on('stream', s => playRemote(s));
+                callObj.on('stream', s => { document.querySelector('audio.hidden').srcObject = s; });
                 callObj.on('close', endCall);
             };
-            const handleIncomingCall = (c) => {
-                call.incoming = true; callObj = c; call.status = 'Incoming Call...';
-            };
+            const handleIncomingCall = (c) => { call.incoming = true; callObj = c; call.status = 'Incoming Call'; };
             const answerCall = async () => {
                 localStream = await navigator.mediaDevices.getUserMedia({ audio: true });
                 callObj.answer(localStream);
                 call.incoming = false; call.active = true; call.status = 'Connected';
-                callObj.on('stream', s => playRemote(s));
-                callObj.on('close', endCall);
-            };
-            const playRemote = (s) => {
-                const aud = document.querySelector('audio.hidden');
-                aud.srcObject = s; aud.play();
+                callObj.on('stream', s => { document.querySelector('audio.hidden').srcObject = s; });
             };
             const endCall = () => {
                 if(callObj) callObj.close();
@@ -775,69 +647,48 @@
             };
 
             // UTILS
-            const finishSetup = () => {
-                user.name = tempName.value; user.avatar = tempAvatar.value; user.setupComplete = true;
-                localStorage.setItem('tw_user', JSON.stringify(user));
-                initPeer();
-            };
+            const finishSetup = () => { user.name = tempName.value; user.avatar = tempAvatar.value; user.setupComplete = true; localStorage.setItem('tw_full_user', JSON.stringify(user)); initPeer(); };
             const onAvatarChange = (e) => {
                 const f = e.target.files[0];
-                if(f) {
-                    const r = new FileReader();
-                    r.onload = ev => {
-                        if(!user.setupComplete) tempAvatar.value = ev.target.result;
-                        else {
-                            user.avatar = ev.target.result;
-                            localStorage.setItem('tw_user', JSON.stringify(user));
-                        }
-                    };
-                    r.readAsDataURL(f);
-                }
+                if(f) { const r = new FileReader(); r.onload = ev => { tempAvatar.value = ev.target.result; if(user.setupComplete) { user.avatar = ev.target.result; localStorage.setItem('tw_full_user', JSON.stringify(user)); } }; r.readAsDataURL(f); }
             };
-            const logout = () => { if(confirm('Logout?')) { localStorage.clear(); location.reload(); } };
+            const renderEmoji = (t) => twemoji.parse(t || '');
+            const addEmoji = (e) => inputMsg.value += e.detail.unicode;
+            const scrollToBottom = () => nextTick(() => document.getElementById('bottomAnchor')?.scrollIntoView({behavior:'smooth'}));
             const copyId = () => navigator.clipboard.writeText(myPeerId.value);
             const formatTime = (ts) => new Date(ts).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
-            const jumpTo = (id) => { document.getElementById('msg-'+id)?.scrollIntoView({behavior:'smooth'}); };
-            const scrollToBottom = () => nextTick(() => { const el = document.getElementById('chatContainer'); if(el) el.scrollTop = el.scrollHeight; });
+            const logout = () => { localStorage.clear(); location.reload(); };
+            const jumpTo = (id) => document.getElementById('msg-'+id)?.scrollIntoView({behavior:'smooth', block:'center'});
 
             // Computed
             const lastMsg = computed(() => messages.value[messages.value.length-1]);
             const lastMsgTime = computed(() => lastMsg.value ? formatTime(lastMsg.value.timestamp) : '');
-            const lastMsgPreview = computed(() => {
-                if(!lastMsg.value) return '';
-                if(lastMsg.value.type === 'image') return 'Photo';
-                if(lastMsg.value.type === 'voice') return 'Voice Message';
-                return lastMsg.value.content;
+            const lastMsgPreview = computed(() => lastMsg.value ? (lastMsg.value.type === 'image' ? 'Photo' : (lastMsg.value.type==='voice'?'Voice':lastMsg.value.content)) : '');
+            
+            const filteredMessages = computed(() => {
+                if(!searchQuery.value) return [];
+                return messages.value.filter(m => m.type === 'text' && m.content.toLowerCase().includes(searchQuery.value.toLowerCase()));
             });
-            const unreadCount = computed(() => messages.value.filter(m => m.sender === 'partner' && m.status !== 'read').length);
 
-            // Group Messages by Date
             const groupedMessages = computed(() => {
                 let lastDate = '';
                 return messages.value.map(m => {
                     const d = new Date(m.timestamp).toLocaleDateString();
-                    const showDate = d !== lastDate;
-                    lastDate = d;
-                    // Logic for "Today/Yesterday"
+                    const show = d !== lastDate; lastDate = d;
                     const today = new Date().toLocaleDateString();
-                    const yesterday = new Date(Date.now() - 86400000).toLocaleDateString();
-                    let label = d;
-                    if(d === today) label = 'Today';
-                    if(d === yesterday) label = 'Yesterday';
-                    
-                    return { ...m, showDate, dateLabel: label };
+                    const yesterday = new Date(Date.now()-86400000).toLocaleDateString();
+                    return { ...m, showDate: show, dateLabel: d === today ? 'Today' : (d === yesterday ? 'Yesterday' : d) };
                 });
             });
 
-            return { 
-                ui, user, partner, messages, inputMsg, mobileView, isConnected, 
-                myPeerId, targetId, connect, send, startRec, stopRec, playVoice,
-                call, startCall, answerCall, endCall, renderEmoji,
-                handleFile, tempName, tempAvatar, defaultAvatar, finishSetup, onAvatarChange,
-                copyId, formatTime, lastMsg, lastMsgTime, lastMsgPreview, unreadCount,
-                groupedMessages, showContext, closeContext, deleteMessage, editMessage, setReply,
-                replyingTo, editingMsg, cancelEdit, jumpTo, copyText, insertEmoji,
-                recTime, playingVoice, zoomImage, onType, logout, searchQuery
+            return {
+                ui, user, partner, messages, inputMsg, mobileView, isConnected,
+                tempName, tempAvatar, defaultAvatar, myPeerId, targetId, zoomImg, 
+                replyingTo, editingMsg, isRecording, recTime, playingVoice, call, searchQuery,
+                connect, send, startRec, stopRec, playVoice, startCall, answerCall, endCall,
+                finishSetup, onAvatarChange, handleFile, renderEmoji, addEmoji, copyId, formatTime, logout,
+                lastMsg, lastMsgTime, lastMsgPreview, groupedMessages, filteredMessages,
+                showContext, closeContext, setReply, setEdit, deleteMsg, cancelAction, copyText, jumpTo, onType
             };
         }
     }).mount('#app');
