@@ -5,15 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Tweeyer V5 Ultra</title>
     
-    <!-- Fonts -->
+    <!-- Fonts & Icons -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <!-- FontAwesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
-    <!-- Emoji Picker Module -->
+    <!-- Emoji Picker -->
     <script type="module" src="https://cdn.jsdelivr.net/npm/emoji-picker-element@^1/index.js"></script>
 
-    <!-- Libs -->
+    <!-- Libraries -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <script src="https://unpkg.com/peerjs@1.4.7/dist/peerjs.min.js"></script>
@@ -30,15 +29,23 @@
                             sidebar: '#17212b',
                             panel: '#242f3d',
                             hover: '#2b5278',
-                            self: '#766ac8', // Dark theme self bubble
-                            in: '#182533',   // Dark theme in bubble
+                            active: '#232e3c',
+                            self: '#766ac8',
                             text: '#eef3f7',
                             hint: '#7f91a4',
-                            lightBg: '#ffffff',
-                            lightPanel: '#ffffff',
-                            lightSelf: '#eeffde',
-                            lightIn: '#ffffff',
-                            blue: '#3390ec'
+                            blue: '#3390ec',
+                            red: '#ef5b5b'
+                        }
+                    },
+                    animation: {
+                        'blob': 'blob 7s infinite',
+                    },
+                    keyframes: {
+                        blob: {
+                            '0%': { transform: 'translate(0px, 0px) scale(1)' },
+                            '33%': { transform: 'translate(30px, -50px) scale(1.1)' },
+                            '66%': { transform: 'translate(-20px, 20px) scale(0.9)' },
+                            '100%': { transform: 'translate(0px, 0px) scale(1)' },
                         }
                     }
                 }
@@ -47,37 +54,35 @@
     </script>
 
     <style>
-        /* Telegram Dark Pattern */
+        /* Modern Scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.2); border-radius: 10px; }
+        .dark ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); }
+
+        /* Background Patterns */
         .chat-bg-dark {
             background-color: #0f0f0f;
-            background-image: url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M20 20.5V18H0v-2h20v-2H0v-2h20v-2H0V8h20V6H0V4h20V2H0V0h22v20h2V0h2v20h2V0h2v20h2V0h2v20h2V0h2v20h2v2H22v-2h-2z' fill='%231d2a39' fill-opacity='0.1' fill-rule='evenodd'/%3E%3C/svg%3E");
+            background-image: radial-gradient(#1d2a39 1px, transparent 1px);
+            background-size: 20px 20px;
         }
-        /* Telegram Light Pattern */
         .chat-bg-light {
-            background-color: #8da6bd;
-            background-image: url("https://web.telegram.org/img/bg_0.png");
-            background-repeat: repeat;
+            background-color: #f0f2f5;
+            background-image: radial-gradient(#d1d5db 1px, transparent 1px);
+            background-size: 20px 20px;
         }
 
-        /* Scrollbar */
-        ::-webkit-scrollbar { width: 5px; }
-        ::-webkit-scrollbar-thumb { background: rgba(127, 145, 164, 0.4); border-radius: 3px; }
-        .dark ::-webkit-scrollbar-track { background: #17212b; }
+        /* Animations */
+        .pop-enter-active, .pop-leave-active { transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); }
+        .pop-enter-from, .pop-leave-to { opacity: 0; transform: scale(0.9) translateY(10px); }
 
-        /* Transitions */
-        .slide-enter-active, .slide-leave-active { transition: transform 0.25s cubic-bezier(0.25, 0.8, 0.5, 1); }
-        .slide-enter-from, .slide-leave-to { transform: translateX(-100%); }
-        
-        .fade-enter-active, .fade-leave-active { transition: opacity 0.2s; }
-        .fade-enter-from, .fade-leave-to { opacity: 0; }
+        .slide-panel-enter-active, .slide-panel-leave-active { transition: transform 0.3s ease; }
+        .slide-panel-enter-from, .slide-panel-leave-to { transform: translateX(-100%); }
 
-        .pop-enter-active { transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-        .pop-enter-from { opacity: 0; transform: scale(0.8); }
-
-        /* Emoji Picker Styling */
+        /* Emoji Picker Customization */
         emoji-picker {
             width: 100%;
-            height: 300px;
+            height: 320px;
             --background: #ffffff;
             --border-color: #e5e7eb;
         }
@@ -85,123 +90,184 @@
             --background: #242f3d;
             --border-color: #17212b;
             --color: #ffffff;
+            --indicator-color: #3390ec;
         }
+
+        /* Video Player Custom Overlay */
+        .video-container:hover .video-controls { opacity: 1; }
+        
+        /* Audio Waveform Animation */
+        .wave-bar { animation: wave 1s infinite ease-in-out; }
+        @keyframes wave { 0%, 100% { height: 30%; } 50% { height: 100%; } }
     </style>
 </head>
-<body class="bg-white dark:bg-tg-bg text-gray-900 dark:text-tg-text h-[100dvh] w-screen overflow-hidden text-[15px]">
+<body class="bg-white dark:bg-[#0f0f0f] text-gray-900 dark:text-tg-text h-[100dvh] w-screen overflow-hidden text-[15px] select-none">
 
 <div id="app" class="h-full flex relative font-sans" @paste="handlePaste" @click="unlockAudio">
 
-    <!-- ================= SETUP SCREEN ================= -->
-    <div v-if="!user.setupComplete" class="absolute inset-0 z-[60] bg-white dark:bg-[#1c242d] flex items-center justify-center p-4">
-        <div class="w-full max-w-sm text-center">
-            <div class="w-32 h-32 mx-auto mb-6 bg-tg-blue rounded-full flex items-center justify-center shadow-2xl shadow-blue-500/20">
-                <i class="fa-brands fa-telegram text-6xl text-white"></i>
-            </div>
-            <h1 class="text-2xl font-bold mb-2">Tweeyer V5</h1>
-            <p class="text-tg-hint mb-8">Secure P2P Messaging</p>
+    <!-- ================= SETUP / LOGIN SCREEN ================= -->
+    <div v-if="!user.setupComplete" class="absolute inset-0 z-[60] bg-white dark:bg-[#0f0f0f] flex items-center justify-center p-4">
+        <div class="absolute inset-0 overflow-hidden pointer-events-none">
+            <div class="absolute top-0 left-1/4 w-96 h-96 bg-blue-500/20 rounded-full mix-blend-multiply filter blur-3xl animate-blob"></div>
+            <div class="absolute bottom-0 right-1/4 w-96 h-96 bg-purple-500/20 rounded-full mix-blend-multiply filter blur-3xl animate-blob animation-delay-2000"></div>
+        </div>
 
-            <div class="space-y-5">
+        <div class="w-full max-w-sm text-center relative z-10 backdrop-blur-xl bg-white/50 dark:bg-white/5 p-8 rounded-3xl border border-white/20 shadow-2xl">
+            <div class="w-24 h-24 mx-auto mb-6 bg-gradient-to-tr from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center shadow-lg transform rotate-3 hover:rotate-0 transition duration-300">
+                <i class="fa-solid fa-paper-plane text-4xl text-white"></i>
+            </div>
+            <h1 class="text-3xl font-bold mb-2 dark:text-white">Tweeyer V5</h1>
+            <p class="text-gray-500 dark:text-gray-400 mb-8 text-sm">Ultra Secure P2P Messaging</p>
+
+            <div class="space-y-6">
                 <div class="relative w-28 h-28 mx-auto group cursor-pointer" @click="$refs.avaInput.click()">
-                    <img :src="tempAvatar || defaultAvatar" class="w-full h-full rounded-full object-cover shadow-lg border-2 border-tg-blue">
-                    <div class="absolute inset-0 bg-black/40 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition text-white">
+                    <img :src="tempAvatar || defaultAvatar" class="w-full h-full rounded-full object-cover shadow-xl border-4 border-white dark:border-[#242f3d] transition group-hover:scale-105">
+                    <div class="absolute inset-0 bg-black/40 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition text-white backdrop-blur-sm">
                         <i class="fa-solid fa-camera text-2xl"></i>
                     </div>
                 </div>
                 <input type="file" ref="avaInput" class="hidden" accept="image/*" @change="onAvatarChange">
 
-                <input v-model="tempName" placeholder="Your Name" class="w-full bg-gray-100 dark:bg-tg-panel px-5 py-4 rounded-xl outline-none focus:ring-2 focus:ring-tg-blue text-center dark:text-white transition">
-                <input v-model="tempBio" placeholder="Bio (Optional)" class="w-full bg-transparent border-b border-gray-300 dark:border-gray-700 px-2 py-2 outline-none text-center text-sm dark:text-gray-400">
+                <div class="space-y-3">
+                    <input v-model="tempName" placeholder="Your Name" class="w-full bg-gray-50/80 dark:bg-[#17212b]/80 px-5 py-3.5 rounded-xl outline-none focus:ring-2 focus:ring-tg-blue text-center dark:text-white transition border border-transparent focus:border-tg-blue">
+                    <input v-model="tempBio" placeholder="Short Bio (Optional)" class="w-full bg-transparent border-b border-gray-200 dark:border-gray-700 px-2 py-2 outline-none text-center text-sm dark:text-gray-400 focus:border-tg-blue transition">
+                </div>
                 
-                <button @click="finishSetup" :disabled="!tempName" class="w-full bg-tg-blue text-white py-4 rounded-xl font-bold hover:bg-blue-600 transition shadow-lg shadow-blue-500/30 disabled:opacity-50">
-                    START MESSAGING
+                <button @click="finishSetup" :disabled="!tempName" class="w-full bg-gradient-to-r from-tg-blue to-purple-600 text-white py-3.5 rounded-xl font-bold hover:shadow-lg hover:shadow-blue-500/30 transition transform hover:-translate-y-0.5 disabled:opacity-50 disabled:transform-none">
+                    Start Messaging
                 </button>
             </div>
         </div>
     </div>
 
     <!-- ================= LEFT SIDEBAR ================= -->
-    <aside class="w-full md:w-[400px] bg-white dark:bg-tg-sidebar border-r border-gray-200 dark:border-black/20 flex flex-col z-20 absolute md:relative h-full transition-transform duration-300"
+    <aside class="w-full md:w-[380px] bg-white dark:bg-tg-sidebar border-r border-gray-200 dark:border-black/20 flex flex-col z-20 absolute md:relative h-full transition-transform duration-300 shadow-[2px_0_10px_rgba(0,0,0,0.1)]"
            :class="mobileView === 'chat' ? '-translate-x-full md:translate-x-0' : 'translate-x-0'">
         
         <!-- Header -->
-        <div class="h-16 px-4 flex items-center gap-4 shrink-0">
-            <button @click="ui.showDrawer = true" class="text-gray-500 dark:text-gray-400 hover:text-tg-blue transition">
-                <i class="fa-solid fa-bars text-xl"></i>
+        <div class="h-[70px] px-4 flex items-center gap-4 shrink-0 bg-white dark:bg-tg-sidebar z-20">
+            <button @click="ui.showDrawer = true" class="w-10 h-10 rounded-full hover:bg-gray-100 dark:hover:bg-white/5 flex items-center justify-center text-gray-500 dark:text-gray-400 transition">
+                <i class="fa-solid fa-bars text-lg"></i>
             </button>
-            <div class="flex-1 relative">
-                <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-sm"></i>
-                <input placeholder="Search" class="w-full bg-gray-100 dark:bg-tg-panel rounded-full h-10 pl-10 pr-4 text-sm outline-none dark:text-white focus:bg-white dark:focus:bg-[#2b3949] border border-transparent focus:border-tg-blue transition">
+            <div class="flex-1 relative group">
+                <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-tg-blue transition"></i>
+                <input v-model="searchQuery" placeholder="Global Search" class="w-full bg-gray-100 dark:bg-[#0f161e] rounded-full h-10 pl-11 pr-4 text-sm outline-none dark:text-white focus:bg-white dark:focus:bg-[#17212b] border border-transparent focus:border-tg-blue focus:shadow-md transition">
             </div>
         </div>
 
         <!-- Connection Widget -->
-        <div class="px-3 pb-3">
-            <div class="bg-tg-blue/10 dark:bg-tg-panel rounded-lg p-3 border border-tg-blue/20">
-                <div class="flex justify-between items-center mb-2">
-                    <span class="text-xs font-bold text-tg-blue uppercase tracking-wide">My ID</span>
-                    <button @click="copyId" class="text-tg-blue hover:underline text-xs">Copy</button>
+        <div class="px-4 pb-4">
+            <div class="bg-gradient-to-br from-blue-50/50 to-purple-50/50 dark:from-tg-panel dark:to-[#1f2936] rounded-xl p-4 border border-blue-100 dark:border-white/5">
+                <div class="flex justify-between items-center mb-3">
+                    <span class="text-[11px] font-bold text-tg-blue uppercase tracking-widest">Your ID</span>
+                    <button @click="copyId" class="text-tg-blue hover:text-white hover:bg-tg-blue px-2 py-0.5 rounded text-[11px] transition">COPY</button>
                 </div>
-                <div class="text-xs font-mono text-gray-600 dark:text-gray-300 break-all select-all mb-3">{{ myPeerId || 'Connecting...' }}</div>
+                <div class="text-xs font-mono text-gray-600 dark:text-gray-300 break-all select-all mb-4 bg-white/50 dark:bg-black/20 p-2 rounded border border-gray-100 dark:border-white/5">{{ myPeerId || 'Generating ID...' }}</div>
                 
                 <div class="flex gap-2">
-                    <input v-model="targetId" placeholder="Paste ID here..." class="flex-1 bg-white dark:bg-[#17212b] rounded px-3 py-2 text-sm outline-none dark:text-white border dark:border-black/20 focus:border-tg-blue">
-                    <button @click="connect" :disabled="!isNetReady" class="bg-tg-blue text-white w-10 rounded flex items-center justify-center hover:bg-blue-600 transition disabled:opacity-50">
+                    <input v-model="targetId" placeholder="Paste Partner ID..." class="flex-1 bg-white dark:bg-[#17212b] rounded-lg px-3 py-2.5 text-sm outline-none dark:text-white border border-gray-200 dark:border-black/20 focus:border-tg-blue transition shadow-sm">
+                    <button @click="connect" :disabled="!isNetReady" class="bg-tg-blue text-white w-10 rounded-lg flex items-center justify-center hover:bg-blue-600 active:scale-95 transition shadow-lg shadow-blue-500/20 disabled:opacity-50 disabled:shadow-none">
                         <i class="fa-solid fa-arrow-right"></i>
                     </button>
                 </div>
             </div>
         </div>
 
-        <!-- Chat List -->
-        <div class="flex-1 overflow-y-auto">
-            <div v-if="isConnected" @click="mobileView = 'chat'" class="px-3 py-3 hover:bg-gray-100 dark:hover:bg-tg-panel cursor-pointer flex gap-3 transition bg-tg-blue dark:bg-tg-hover text-white">
-                <div class="relative">
-                    <img :src="partner.avatar || defaultAvatar" class="w-12 h-12 rounded-full object-cover border border-white/10">
-                    <div class="absolute bottom-0 right-0 w-3.5 h-3.5 bg-green-500 border-2 border-white dark:border-tg-sidebar rounded-full"></div>
-                </div>
-                <div class="flex-1 min-w-0 overflow-hidden">
-                    <div class="flex justify-between items-center mb-0.5">
-                        <h3 class="font-semibold truncate text-[15px]">{{ partner.name || 'User' }}</h3>
-                        <span class="text-xs opacity-70">{{ lastMsgTime }}</span>
+        <!-- Chat List / Search Results -->
+        <div class="flex-1 overflow-y-auto custom-scrollbar">
+            <!-- Search Results Mode -->
+            <div v-if="searchQuery" class="px-2 pt-2">
+                <p class="px-4 text-xs font-bold text-gray-400 mb-2 uppercase">Search Results ({{ filteredMessages.length }})</p>
+                <div v-for="msg in filteredMessages" :key="msg.id" @click="jumpToMessage(msg.id)" 
+                     class="px-4 py-3 hover:bg-gray-100 dark:hover:bg-tg-active rounded-xl cursor-pointer transition mb-1 flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-full bg-tg-blue/20 flex items-center justify-center text-tg-blue text-xs">
+                        <i :class="msg.sender === 'me' ? 'fa-solid fa-arrow-up' : 'fa-solid fa-arrow-down'"></i>
                     </div>
-                    <p class="text-sm opacity-80 truncate">{{ lastMsgPreview }}</p>
+                    <div class="flex-1 min-w-0">
+                         <div class="flex justify-between">
+                             <h4 class="font-medium dark:text-white text-sm truncate">{{ msg.sender === 'me' ? 'You' : partner.name }}</h4>
+                             <span class="text-[10px] text-gray-400">{{ formatTime(msg.timestamp) }}</span>
+                         </div>
+                         <p class="text-xs text-gray-500 dark:text-gray-400 truncate" v-html="highlightText(getMsgPreview(msg))"></p>
+                    </div>
                 </div>
             </div>
-            <div v-else class="text-center mt-20 text-tg-hint text-sm">
-                <i class="fa-regular fa-paper-plane text-4xl mb-3 opacity-50"></i>
-                <p>Waiting for connection...</p>
+
+            <!-- Normal Chat List -->
+            <div v-else>
+                <div v-if="isConnected || messages.length > 0" @click="mobileView = 'chat'" 
+                     class="mx-2 p-3 rounded-xl hover:bg-gray-100 dark:hover:bg-tg-active cursor-pointer flex gap-3 transition group"
+                     :class="{'bg-tg-blue dark:bg-tg-blue text-white hover:!bg-blue-600': isConnected && mobileView === 'chat'}">
+                    <div class="relative shrink-0">
+                        <img :src="partner.avatar || defaultAvatar" class="w-14 h-14 rounded-full object-cover shadow-sm bg-gray-200 dark:bg-gray-700">
+                        <div v-if="partner.isDeleted" class="absolute inset-0 bg-black/60 flex items-center justify-center rounded-full text-white text-xs"><i class="fa-solid fa-ban"></i></div>
+                        <div v-else-if="isConnected" class="absolute bottom-0 right-0 w-3.5 h-3.5 bg-green-500 border-2 border-white dark:border-tg-sidebar rounded-full shadow-sm"></div>
+                    </div>
+                    <div class="flex-1 min-w-0 flex flex-col justify-center">
+                        <div class="flex justify-between items-center mb-1">
+                            <h3 class="font-semibold truncate text-[15px] dark:group-hover:text-white" :class="partner.isDeleted ? 'text-red-500' : 'dark:text-white'">
+                                {{ partner.name || 'Unknown User' }}
+                            </h3>
+                            <span class="text-xs opacity-70" :class="{'text-white': isConnected && mobileView === 'chat'}">{{ lastMsgTime }}</span>
+                        </div>
+                        <div class="flex items-center gap-1">
+                            <span v-if="lastMsg?.sender === 'me'" class="text-xs">
+                                <i v-if="lastMsg.status === 'read'" class="fa-solid fa-check-double text-green-500" :class="{'text-white': isConnected && mobileView === 'chat'}"></i>
+                                <i v-else class="fa-solid fa-check opacity-70"></i>
+                            </span>
+                            <p class="text-[14px] opacity-70 truncate flex-1" :class="{'text-white': isConnected && mobileView === 'chat'}">
+                                <span v-if="partner.isDeleted" class="italic opacity-50">Account Deleted</span>
+                                <span v-else>{{ lastMsgPreview }}</span>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div v-else class="flex flex-col items-center justify-center mt-32 text-center px-6">
+                    <div class="w-20 h-20 bg-gray-100 dark:bg-tg-panel rounded-full flex items-center justify-center mb-4 text-gray-300 dark:text-gray-600">
+                        <i class="fa-solid fa-comments text-3xl"></i>
+                    </div>
+                    <p class="text-tg-hint text-sm">Your chats will appear here.<br>Share your ID to start.</p>
+                </div>
             </div>
         </div>
     </aside>
 
     <!-- ================= SETTINGS DRAWER ================= -->
-    <transition name="slide">
-        <div v-if="ui.showDrawer" class="absolute inset-y-0 left-0 w-80 bg-white dark:bg-tg-sidebar z-50 shadow-2xl flex flex-col border-r border-gray-200 dark:border-black/20">
-            <div class="h-28 bg-tg-panel p-6 flex flex-col justify-end relative">
-                <div class="flex items-center gap-4">
-                    <img :src="user.avatar || defaultAvatar" class="w-16 h-16 rounded-full object-cover border-2 border-tg-blue cursor-pointer" @click="$refs.editAva.click()">
-                    <div>
-                        <div class="font-bold text-white text-lg">{{ user.name }}</div>
-                        <div class="text-sm text-gray-400">Online</div>
+    <transition name="slide-panel">
+        <div v-if="ui.showDrawer" class="absolute inset-y-0 left-0 w-80 bg-white dark:bg-tg-sidebar z-50 shadow-[0_0_50px_rgba(0,0,0,0.5)] flex flex-col border-r border-gray-200 dark:border-black/20">
+            <!-- Profile Header -->
+            <div class="relative h-40 bg-gradient-to-br from-tg-blue to-purple-700 p-6 flex flex-col justify-end overflow-hidden">
+                <div class="absolute -top-10 -right-10 w-32 h-32 bg-white/10 rounded-full blur-2xl"></div>
+                <div class="flex items-center gap-4 relative z-10">
+                    <div class="relative group cursor-pointer" @click="$refs.editAva.click()">
+                        <img :src="user.avatar || defaultAvatar" class="w-16 h-16 rounded-full object-cover border-2 border-white shadow-md">
+                        <div class="absolute inset-0 bg-black/30 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition text-white"><i class="fa-solid fa-pen"></i></div>
+                    </div>
+                    <div class="text-white">
+                        <div class="font-bold text-lg leading-tight">{{ user.name }}</div>
+                        <div class="text-xs opacity-80">{{ user.bio || 'No bio' }}</div>
                     </div>
                 </div>
                 <input type="file" ref="editAva" class="hidden" accept="image/*" @change="onAvatarChange">
             </div>
             
-            <div class="p-2 space-y-1 mt-2">
-                 <div class="p-3 hover:bg-gray-100 dark:hover:bg-tg-panel rounded-lg cursor-pointer flex items-center gap-4 transition" @click="ui.showDrawer = false">
-                    <i class="fa-solid fa-arrow-left text-gray-400 w-6"></i> Back
+            <div class="p-2 space-y-1 mt-2 flex-1">
+                 <div class="p-3 hover:bg-gray-100 dark:hover:bg-tg-panel rounded-xl cursor-pointer flex items-center gap-4 transition text-gray-700 dark:text-gray-200" @click="ui.showDrawer = false">
+                    <i class="fa-solid fa-arrow-left w-6 text-center text-gray-400"></i> <span class="font-medium">Back</span>
                 </div>
-                <div class="p-3 hover:bg-gray-100 dark:hover:bg-tg-panel rounded-lg cursor-pointer flex items-center gap-4 transition" @click="toggleTheme">
-                    <i class="fa-solid text-gray-400 w-6" :class="theme === 'dark' ? 'fa-sun' : 'fa-moon'"></i> 
-                    <span>{{ theme === 'dark' ? 'Light Mode' : 'Dark Mode' }}</span>
+                <div class="p-3 hover:bg-gray-100 dark:hover:bg-tg-panel rounded-xl cursor-pointer flex items-center gap-4 transition text-gray-700 dark:text-gray-200" @click="toggleTheme">
+                    <i class="fa-solid w-6 text-center text-gray-400" :class="theme === 'dark' ? 'fa-sun' : 'fa-moon'"></i> 
+                    <span class="font-medium">{{ theme === 'dark' ? 'Light Mode' : 'Dark Mode' }}</span>
                 </div>
-                <div class="p-3 hover:bg-red-50 dark:hover:bg-red-900/10 rounded-lg cursor-pointer flex items-center gap-4 transition text-red-500" @click="clearData">
-                    <i class="fa-solid fa-power-off w-6"></i> Log Out
+                <div class="h-px bg-gray-200 dark:bg-white/5 my-2 mx-3"></div>
+                <div class="p-3 hover:bg-red-50 dark:hover:bg-red-900/10 rounded-xl cursor-pointer flex items-center gap-4 transition text-red-500" @click="performLogout">
+                    <i class="fa-solid fa-power-off w-6 text-center"></i> <span class="font-medium">Log Out & Delete</span>
                 </div>
             </div>
-            <div class="mt-auto p-4 text-center text-xs text-tg-hint">Tweeyer v5.0 Ultra</div>
+            <div class="p-6 text-center">
+                <p class="text-xs text-tg-hint">Tweeyer V5 Ultra<br>Build 2025.12</p>
+            </div>
         </div>
     </transition>
 
@@ -209,64 +275,97 @@
     <main class="flex-1 flex flex-col h-full relative transition-colors duration-300"
           :class="theme === 'dark' ? 'chat-bg-dark' : 'chat-bg-light', mobileView === 'sidebar' ? 'translate-x-full md:translate-x-0 hidden md:flex' : 'translate-x-0'">
         
-        <!-- Chat Header -->
-        <header class="h-16 bg-white dark:bg-tg-sidebar flex items-center justify-between px-4 shrink-0 shadow-sm border-b dark:border-black/10 z-10 cursor-pointer" @click="viewProfile">
+        <!-- Top Bar -->
+        <header class="h-[70px] bg-white/90 dark:bg-tg-sidebar/95 backdrop-blur-md flex items-center justify-between px-4 shrink-0 shadow-sm border-b border-gray-100 dark:border-black/20 z-10 cursor-pointer" @click="viewProfile">
             <div class="flex items-center gap-4">
-                <button @click.stop="mobileView = 'sidebar'" class="md:hidden text-gray-500"><i class="fa-solid fa-arrow-left"></i></button>
+                <button @click.stop="mobileView = 'sidebar'" class="md:hidden w-8 h-8 flex items-center justify-center text-gray-500 dark:text-gray-300"><i class="fa-solid fa-arrow-left"></i></button>
                 <div class="flex items-center gap-3">
-                    <img :src="partner.avatar || defaultAvatar" class="w-10 h-10 rounded-full object-cover bg-gray-300">
+                    <div class="relative">
+                        <img :src="partner.avatar || defaultAvatar" class="w-10 h-10 rounded-full object-cover bg-gray-300">
+                        <div v-if="!partner.isDeleted && partner.online" class="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-500 border-2 border-white dark:border-tg-sidebar rounded-full"></div>
+                    </div>
                     <div>
-                        <h3 class="font-bold text-[15px] dark:text-white leading-tight">{{ partner.name || 'Chat' }}</h3>
-                        <p class="text-xs text-tg-blue" v-if="isConnected">online</p>
-                        <p class="text-xs text-gray-400" v-else>waiting...</p>
+                        <h3 class="font-bold text-[16px] dark:text-white leading-tight flex items-center gap-2">
+                            {{ partner.name || 'Chat' }}
+                            <i v-if="partner.isDeleted" class="fa-solid fa-ban text-red-500 text-xs"></i>
+                        </h3>
+                        <p class="text-xs" :class="partner.isDeleted ? 'text-red-400' : (partner.online ? 'text-tg-blue' : 'text-gray-400')">
+                            {{ partner.isDeleted ? 'Deleted Account' : (partner.online ? 'online' : 'last seen recently') }}
+                        </p>
                     </div>
                 </div>
             </div>
-            <div class="flex items-center gap-5 text-gray-400">
-                <button v-if="isConnected" @click.stop="startCall" class="hover:text-tg-blue transition"><i class="fa-solid fa-phone text-lg"></i></button>
-                <button class="hover:text-tg-blue transition"><i class="fa-solid fa-ellipsis-vertical text-lg"></i></button>
+            <div class="flex items-center gap-4 text-gray-400">
+                <button v-if="isConnected && !partner.isDeleted" @click.stop="startCall" class="w-10 h-10 rounded-full hover:bg-gray-100 dark:hover:bg-white/5 flex items-center justify-center transition hover:text-tg-blue"><i class="fa-solid fa-phone text-lg"></i></button>
+                <button class="w-10 h-10 rounded-full hover:bg-gray-100 dark:hover:bg-white/5 flex items-center justify-center transition"><i class="fa-solid fa-ellipsis-vertical text-lg"></i></button>
             </div>
         </header>
 
-        <!-- Messages List -->
-        <div ref="chatBox" class="flex-1 overflow-y-auto p-2 md:p-4 flex flex-col gap-1.5">
+        <!-- Messages Area -->
+        <div id="chatContainer" class="flex-1 overflow-y-auto p-3 md:p-6 flex flex-col gap-2 scroll-smooth">
+            <div v-if="messages.length === 0" class="flex-1 flex flex-col items-center justify-center opacity-40">
+                <div class="bg-gray-200 dark:bg-white/5 p-6 rounded-full mb-4"><i class="fa-regular fa-paper-plane text-4xl dark:text-white"></i></div>
+                <p class="dark:text-white">No messages yet...</p>
+            </div>
+
             <transition-group name="pop">
-                <div v-for="msg in messages" :key="msg.id" class="flex flex-col max-w-[85%] md:max-w-[70%]" :class="msg.sender === 'me' ? 'self-end items-end' : 'self-start items-start', msg.type === 'system' ? 'self-center items-center max-w-full' : ''">
+                <div v-for="(msg, index) in messages" :key="msg.id" :id="'msg-'+msg.id" 
+                     class="flex flex-col max-w-[85%] md:max-w-[65%]" 
+                     :class="msg.sender === 'me' ? 'self-end items-end' : 'self-start items-start', msg.type === 'system' ? 'self-center items-center max-w-full' : ''">
                     
-                    <!-- System Message -->
-                    <div v-if="msg.type === 'system'" class="bg-black/20 dark:bg-black/40 text-white text-xs px-3 py-1 rounded-full my-2 font-medium backdrop-blur-sm">
+                    <!-- System Message (Date/Call) -->
+                    <div v-if="msg.type === 'system'" class="bg-black/20 dark:bg-black/40 text-white text-xs px-4 py-1.5 rounded-full my-3 font-medium backdrop-blur-md shadow-sm border border-white/5">
                         {{ msg.content }}
                     </div>
 
-                    <!-- Bubble -->
-                    <div v-else class="relative px-3 py-1.5 rounded-2xl shadow-sm text-[15px] leading-snug group"
-                         :class="getMessageClass(msg)">
+                    <!-- Chat Bubble -->
+                    <div v-else class="relative shadow-sm text-[15px] leading-snug group transition-all duration-200"
+                         :class="getMessageClass(msg, index)">
                         
-                        <!-- Media Types -->
-                        <div v-if="msg.type === 'image'" class="mb-1 rounded-lg overflow-hidden cursor-zoom-in" @click="zoomImg = msg.content">
-                            <img :src="msg.content" class="max-w-full max-h-[400px] object-cover">
+                        <!-- Image -->
+                        <div v-if="msg.type === 'image'" class="rounded-lg overflow-hidden cursor-zoom-in relative" @click="zoomImg = msg.content">
+                            <img :src="msg.content" class="max-w-full max-h-[350px] object-cover block">
+                            <div class="absolute inset-0 bg-black/0 hover:bg-black/10 transition"></div>
                         </div>
-                        <div v-if="msg.type === 'video'" class="mb-1 rounded-lg overflow-hidden">
-                            <video :src="msg.content" controls class="max-w-full max-h-[400px]"></video>
-                        </div>
-                        <div v-if="msg.type === 'text'" class="whitespace-pre-wrap break-words min-w-[20px] pt-1">{{ msg.content }}</div>
 
-                        <!-- Voice Player -->
-                        <div v-if="msg.type === 'voice'" class="flex items-center gap-3 pr-2 py-1 min-w-[200px]">
-                            <button @click="playVoice(msg.id)" class="w-10 h-10 rounded-full bg-black/10 dark:bg-white/20 flex items-center justify-center flex-shrink-0 hover:bg-black/20 transition">
+                        <!-- Video Player (Beautiful) -->
+                        <div v-if="msg.type === 'video'" class="rounded-lg overflow-hidden relative max-w-[320px] bg-black group/video">
+                            <video :id="'vid-'+msg.id" :src="msg.content" class="w-full h-full object-cover max-h-[350px]" preload="metadata" @click="toggleVideo(msg.id)"></video>
+                            
+                            <!-- Custom Overlay Play Button -->
+                            <div class="absolute inset-0 flex items-center justify-center bg-black/30 opacity-100 transition duration-300 pointer-events-none" :id="'overlay-'+msg.id">
+                                <div class="w-12 h-12 rounded-full bg-black/50 backdrop-blur-sm flex items-center justify-center border border-white/20 shadow-xl">
+                                    <i class="fa-solid fa-play text-white ml-1"></i>
+                                </div>
+                            </div>
+                            <!-- Duration badge -->
+                            <div class="absolute top-2 left-2 bg-black/50 backdrop-blur px-2 py-0.5 rounded text-white text-[10px] font-mono">Video</div>
+                        </div>
+
+                        <!-- Text -->
+                        <div v-if="msg.type === 'text'" class="px-3 py-2 whitespace-pre-wrap break-words min-w-[30px]">{{ msg.content }}</div>
+
+                        <!-- Voice Player (Beautiful) -->
+                        <div v-if="msg.type === 'voice'" class="flex items-center gap-3 pl-2 pr-4 py-2 min-w-[240px]">
+                            <button @click="playVoice(msg.id)" class="w-10 h-10 rounded-full bg-white dark:bg-black/20 flex items-center justify-center flex-shrink-0 hover:bg-black/10 dark:hover:bg-white/10 transition shadow-sm">
                                 <i class="fa-solid text-sm" :class="playingVoice === msg.id ? 'fa-pause' : 'fa-play'"></i>
                             </button>
-                            <div class="flex flex-col flex-1 gap-1">
-                                <div class="h-1 bg-black/10 dark:bg-white/20 rounded-full w-full overflow-hidden">
-                                    <div class="h-full bg-white/80" :style="{width: playingVoice === msg.id ? '100%' : '0%', transition: 'width 10s linear'}"></div>
+                            <div class="flex flex-col flex-1 gap-1.5">
+                                <!-- Fake Waveform -->
+                                <div class="h-6 flex items-center gap-[2px] opacity-70">
+                                    <div v-for="i in 25" :key="i" 
+                                         class="w-[3px] bg-current rounded-full transition-all duration-300"
+                                         :class="playingVoice === msg.id ? 'wave-bar' : ''"
+                                         :style="{height: Math.max(20, Math.random()*100) + '%', animationDelay: i*0.05+'s'}"></div>
                                 </div>
-                                <span class="text-xs opacity-70 font-mono">Voice Message</span>
+                                <div class="text-[10px] opacity-60 font-mono">Voice Message</div>
                             </div>
-                            <audio :id="'aud-'+msg.id" :src="msg.content" @ended="playingVoice = null"></audio>
+                            <audio :id="'aud-'+msg.id" :src="msg.content" @ended="onVoiceEnd(msg.id)"></audio>
                         </div>
 
-                        <!-- Meta -->
-                        <div class="float-right ml-2 mt-1 flex items-center gap-1 text-[11px] opacity-60 select-none align-bottom h-full pt-1" :class="{'text-green-500': msg.sender === 'me' && theme !== 'dark'}">
+                        <!-- Meta Info -->
+                        <div class="absolute bottom-1 right-2 flex items-center gap-1 text-[10px] select-none pointer-events-none" 
+                             :class="(msg.type === 'text' || msg.type === 'voice') ? 'opacity-60' : 'text-white shadow-black drop-shadow-md bg-black/30 px-1.5 rounded-full mb-1'">
                             <span>{{ formatTime(msg.timestamp) }}</span>
                             <span v-if="msg.sender === 'me'">
                                 <i v-if="msg.status === 'read'" class="fa-solid fa-check-double text-[#4ade80] dark:text-[#64d2ff]"></i>
@@ -276,78 +375,112 @@
                     </div>
                 </div>
             </transition-group>
+            
+            <!-- Anchor for scroll -->
+            <div id="bottomAnchor" class="h-1"></div>
         </div>
 
-        <!-- Input Footer -->
-        <footer class="bg-white dark:bg-tg-sidebar p-2 md:px-4 md:py-2 flex items-end gap-2 shrink-0 z-20 shadow-[0_-1px_5px_rgba(0,0,0,0.1)]">
+        <!-- Input Area -->
+        <footer v-if="!partner.isDeleted" class="bg-white dark:bg-tg-sidebar p-2 md:px-4 md:py-3 flex items-end gap-2 shrink-0 z-20 shadow-[0_-1px_10px_rgba(0,0,0,0.05)] relative">
+            
+            <!-- Attachment Menu -->
             <div class="relative">
-                <button @click="ui.showAttach = !ui.showAttach" class="w-10 h-10 text-gray-400 hover:text-tg-blue transition"><i class="fa-solid fa-paperclip text-xl"></i></button>
-                <div v-if="ui.showAttach" class="absolute bottom-14 left-0 bg-white dark:bg-tg-panel shadow-xl rounded-xl p-2 w-48 flex flex-col gap-1 border dark:border-black/20 animate-fade-in-up">
-                    <button @click="$refs.fileInput.click(); ui.showAttach=false" class="flex items-center gap-3 px-3 py-2 hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg text-sm transition dark:text-white">
-                        <i class="fa-regular fa-image text-blue-500 w-5"></i> Photo / Video
-                    </button>
-                </div>
-                <input type="file" ref="fileInput" class="hidden" @change="handleFileSelect">
+                <button @click="ui.showAttach = !ui.showAttach" class="w-10 h-10 rounded-full hover:bg-gray-100 dark:hover:bg-white/5 text-gray-400 hover:text-tg-blue transition flex items-center justify-center">
+                    <i class="fa-solid fa-paperclip text-xl"></i>
+                </button>
+                <transition name="pop">
+                    <div v-if="ui.showAttach" class="absolute bottom-14 left-0 bg-white dark:bg-tg-panel shadow-2xl rounded-xl p-2 w-52 flex flex-col gap-1 border dark:border-black/20 z-50">
+                        <button @click="$refs.fileInput.click(); ui.showAttach=false" class="flex items-center gap-3 px-3 py-2.5 hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg text-sm transition dark:text-white">
+                            <div class="w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-500 flex items-center justify-center"><i class="fa-regular fa-image"></i></div>
+                            <span>Photo / Video</span>
+                        </button>
+                    </div>
+                </transition>
+                <input type="file" ref="fileInput" class="hidden" accept="image/*,video/*" @change="handleFileSelect">
             </div>
 
-            <textarea 
-                v-model="inputMsg" 
-                @keydown.enter.prevent="sendText"
-                @focus="markRead"
-                rows="1" 
-                placeholder="Message" 
-                class="flex-1 bg-white dark:bg-[#17212b] text-[15px] px-2 py-2.5 outline-none resize-none max-h-40 placeholder-gray-400 dark:text-white"
-            ></textarea>
-
-            <div class="relative">
-                <button class="w-10 h-10 text-gray-400 hover:text-yellow-500 transition" @click="ui.showEmoji = !ui.showEmoji">
+            <!-- Text Input -->
+            <div class="flex-1 relative bg-gray-100 dark:bg-[#17212b] rounded-[20px] transition-colors focus-within:bg-white dark:focus-within:bg-[#17212b] focus-within:ring-1 focus-within:ring-tg-blue border border-transparent dark:border-black/10">
+                <textarea 
+                    ref="msgInput"
+                    v-model="inputMsg" 
+                    @keydown.enter.prevent="sendText"
+                    @focus="markRead"
+                    rows="1" 
+                    style="min-height: 42px;"
+                    placeholder="Message" 
+                    class="w-full bg-transparent text-[15px] pl-4 pr-10 py-2.5 outline-none resize-none max-h-32 placeholder-gray-400 dark:text-white custom-scrollbar"
+                ></textarea>
+                
+                <!-- Emoji Btn -->
+                <button class="absolute bottom-1 right-1 w-9 h-9 text-gray-400 hover:text-tg-blue transition rounded-full hover:bg-gray-200/50 dark:hover:bg-white/5" @click="ui.showEmoji = !ui.showEmoji">
                     <i class="fa-regular fa-face-smile text-xl"></i>
                 </button>
-                <div v-if="ui.showEmoji" class="absolute bottom-14 right-0 z-50 shadow-2xl rounded-xl overflow-hidden border dark:border-black/20">
-                    <emoji-picker @emoji-click="onEmojiSelect" class="dark:dark"></emoji-picker>
-                </div>
             </div>
 
+            <!-- Emoji Picker Popover -->
+            <transition name="pop">
+                <div v-if="ui.showEmoji" class="absolute bottom-16 right-4 z-50 shadow-2xl rounded-xl overflow-hidden border dark:border-black/20 w-80">
+                    <emoji-picker @emoji-click="onEmojiSelect" class="dark:dark"></emoji-picker>
+                </div>
+            </transition>
+
+            <!-- Send / Record Button -->
             <div class="w-12 h-12 flex items-center justify-center">
                 <transition name="pop" mode="out-in">
-                    <button v-if="inputMsg.trim()" @click="sendText" class="w-10 h-10 rounded-full bg-tg-blue text-white hover:bg-blue-600 transition shadow-lg flex items-center justify-center">
-                        <i class="fa-solid fa-paper-plane"></i>
+                    <button v-if="inputMsg.trim()" @click="sendText" class="w-12 h-12 rounded-full bg-tg-blue text-white hover:bg-blue-600 transition shadow-lg shadow-blue-500/30 flex items-center justify-center transform active:scale-90">
+                        <i class="fa-solid fa-paper-plane text-lg translate-x-px translate-y-px"></i>
                     </button>
                     <button v-else 
-                        @mousedown="startRec" @mouseup="stopRec" @touchstart.prevent="startRec" @touchend.prevent="stopRec"
-                        class="w-10 h-10 rounded-full hover:bg-gray-100 dark:hover:bg-white/10 text-gray-500 transition flex items-center justify-center"
-                        :class="{'bg-red-500 text-white animate-pulse shadow-red-500/50 shadow-lg': isRecording}">
-                        <i class="fa-solid" :class="isRecording ? 'fa-stop' : 'fa-microphone'"></i>
+                        @mousedown="startRec" @mouseup="stopRec" @mouseleave="stopRec" @touchstart.prevent="startRec" @touchend.prevent="stopRec"
+                        class="w-12 h-12 rounded-full hover:bg-gray-100 dark:hover:bg-white/10 text-gray-500 dark:text-gray-400 transition flex items-center justify-center"
+                        :class="{'bg-red-500 text-white animate-pulse shadow-red-500/50 shadow-lg !text-white': isRecording}">
+                        <i class="fa-solid text-xl" :class="isRecording ? 'fa-stop' : 'fa-microphone'"></i>
                     </button>
                 </transition>
             </div>
         </footer>
 
-        <!-- Rec Overlay -->
-        <div v-if="isRecording" class="absolute bottom-24 left-1/2 -translate-x-1/2 bg-tg-panel text-white px-6 py-3 rounded-full shadow-2xl flex items-center gap-4 z-30 border border-white/10">
-            <div class="w-2.5 h-2.5 bg-red-500 rounded-full animate-pulse"></div>
-            <span class="font-mono text-lg">{{ recTime }}</span>
+        <!-- Deleted Account Footer -->
+        <div v-else class="p-4 bg-gray-50 dark:bg-[#17212b] border-t border-gray-200 dark:border-black/10 text-center text-sm text-gray-500 dark:text-gray-400 font-medium">
+            <i class="fa-solid fa-ban mr-2"></i> This account has been deleted.
         </div>
 
+        <!-- Rec Overlay -->
+        <transition name="pop">
+            <div v-if="isRecording" class="absolute bottom-24 left-1/2 -translate-x-1/2 bg-tg-panel/90 backdrop-blur text-white px-6 py-3 rounded-full shadow-2xl flex items-center gap-4 z-30 border border-white/10">
+                <div class="w-3 h-3 bg-red-500 rounded-full animate-pulse shadow-[0_0_10px_#ef4444]"></div>
+                <span class="font-mono text-lg font-bold tracking-wider">{{ recTime }}</span>
+                <span class="text-xs opacity-60 uppercase tracking-widest ml-2">Recording</span>
+            </div>
+        </transition>
+
         <!-- Call Screen -->
-        <div v-if="call.active || call.incoming" class="fixed inset-0 z-[100] bg-[#1a2025] flex flex-col items-center justify-center text-white">
-            <div class="absolute inset-0 overflow-hidden opacity-30 blur-3xl">
-                 <img :src="partner.avatar || defaultAvatar" class="w-full h-full object-cover">
+        <div v-if="call.active || call.incoming" class="fixed inset-0 z-[100] bg-[#1a2025] flex flex-col items-center justify-center text-white overflow-hidden">
+            <!-- Ambient Background -->
+            <div class="absolute inset-0 opacity-40">
+                 <img :src="partner.avatar || defaultAvatar" class="w-full h-full object-cover blur-3xl scale-125">
+                 <div class="absolute inset-0 bg-black/40"></div>
             </div>
             
             <div class="relative z-10 flex flex-col items-center w-full max-w-md">
-                <div class="w-32 h-32 rounded-full overflow-hidden mb-6 border-4 border-white/5 shadow-2xl relative">
-                     <div v-if="call.incoming" class="absolute inset-0 bg-green-500 opacity-30 animate-ping"></div>
-                     <img :src="partner.avatar || defaultAvatar" class="w-full h-full object-cover relative z-10">
+                <div class="w-40 h-40 rounded-full p-1 mb-8 relative">
+                     <div v-if="call.incoming" class="absolute inset-0 bg-green-500 opacity-30 animate-ping rounded-full"></div>
+                     <div v-if="call.active" class="absolute inset-0 border-2 border-green-400/50 rounded-full animate-pulse"></div>
+                     <img :src="partner.avatar || defaultAvatar" class="w-full h-full rounded-full object-cover shadow-2xl relative z-10 border-4 border-white/10">
                 </div>
-                <h2 class="text-3xl font-bold mb-2">{{ partner.name }}</h2>
-                <p class="text-gray-400 mb-20 animate-pulse text-lg">{{ call.statusText }}</p>
+                
+                <h2 class="text-3xl font-bold mb-2 tracking-tight">{{ partner.name }}</h2>
+                <p class="text-gray-300 mb-24 font-medium flex items-center gap-2 bg-black/20 px-4 py-1 rounded-full backdrop-blur-sm">
+                    <span v-if="call.active && !call.incoming" class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
+                    {{ call.statusText }}
+                </p>
 
                 <div class="flex gap-16 items-center">
-                    <button v-if="call.incoming" @click="answerCall" class="w-20 h-20 bg-green-500 rounded-full flex items-center justify-center text-3xl shadow-lg hover:scale-110 transition">
-                        <i class="fa-solid fa-phone"></i>
+                    <button v-if="call.incoming" @click="answerCall" class="group w-20 h-20 bg-green-500 rounded-full flex items-center justify-center text-3xl shadow-lg hover:scale-110 transition duration-300">
+                        <i class="fa-solid fa-phone animate-bounce"></i>
                     </button>
-                    <button @click="endCall" class="w-20 h-20 bg-red-500 rounded-full flex items-center justify-center text-3xl shadow-lg hover:scale-110 transition">
+                    <button @click="endCall" class="w-20 h-20 bg-red-500 rounded-full flex items-center justify-center text-3xl shadow-lg hover:scale-110 transition duration-300 hover:bg-red-600">
                         <i class="fa-solid fa-phone-slash"></i>
                     </button>
                 </div>
@@ -358,25 +491,38 @@
         <!-- Profile Modal -->
         <transition name="pop">
             <div v-if="ui.viewProfile" class="fixed inset-0 z-[80] bg-black/60 flex items-center justify-center p-4 backdrop-blur-sm" @click="ui.viewProfile = false">
-                <div class="bg-white dark:bg-tg-panel rounded-2xl w-full max-w-sm overflow-hidden shadow-2xl" @click.stop>
-                    <div class="h-64 relative">
-                        <img :src="partner.avatar || defaultAvatar" class="w-full h-full object-cover">
-                        <button class="absolute top-4 left-4 bg-black/40 text-white w-8 h-8 rounded-full flex items-center justify-center backdrop-blur-md" @click="ui.viewProfile = false"><i class="fa-solid fa-times"></i></button>
+                <div class="bg-white dark:bg-tg-panel rounded-3xl w-full max-w-sm overflow-hidden shadow-2xl border dark:border-white/10" @click.stop>
+                    <div class="h-80 relative group">
+                        <img :src="partner.avatar || defaultAvatar" class="w-full h-full object-cover transition duration-500 group-hover:scale-105">
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent"></div>
+                        <button class="absolute top-4 left-4 bg-black/30 hover:bg-black/50 text-white w-10 h-10 rounded-full flex items-center justify-center backdrop-blur-md transition" @click="ui.viewProfile = false">
+                            <i class="fa-solid fa-arrow-left"></i>
+                        </button>
+                        <div class="absolute bottom-0 left-0 p-6 w-full">
+                            <h2 class="text-3xl font-bold text-white mb-0.5">{{ partner.name }}</h2>
+                            <p class="text-gray-300 text-sm font-medium">{{ partner.online ? 'Online' : 'Last seen recently' }}</p>
+                        </div>
                     </div>
-                    <div class="p-6">
-                        <h2 class="text-2xl font-bold dark:text-white mb-1">{{ partner.name }}</h2>
-                        <p class="text-tg-blue text-sm mb-4">{{ isConnected ? 'Online' : 'Last seen recently' }}</p>
-                        
-                        <div class="space-y-4">
+                    <div class="p-6 space-y-6">
+                        <div class="flex items-start gap-4">
+                            <div class="w-6 text-gray-400 mt-1 text-center"><i class="fa-solid fa-circle-info"></i></div>
                             <div>
-                                <p class="text-tg-hint text-xs uppercase font-bold mb-1">Bio</p>
-                                <p class="dark:text-gray-200 text-[15px]">{{ partner.bio || 'No bio available.' }}</p>
-                            </div>
-                            <div>
-                                <p class="text-tg-hint text-xs uppercase font-bold mb-1">Username / ID</p>
-                                <p class="text-tg-blue text-[15px] font-mono cursor-pointer select-all">@{{ targetId || 'unknown' }}</p>
+                                <p class="text-sm text-gray-500 dark:text-gray-400 mb-1">Bio</p>
+                                <p class="dark:text-white text-[15px] leading-relaxed">{{ partner.bio || 'No bio available.' }}</p>
                             </div>
                         </div>
+                        <div class="h-px bg-gray-100 dark:bg-white/5"></div>
+                        <div class="flex items-start gap-4">
+                            <div class="w-6 text-gray-400 mt-1 text-center"><i class="fa-solid fa-at"></i></div>
+                            <div>
+                                <p class="text-sm text-gray-500 dark:text-gray-400 mb-1">Username / ID</p>
+                                <p class="text-tg-blue text-[15px] font-mono cursor-pointer select-all hover:underline" @click="copyPartnerId">@{{ targetId || 'unknown' }}</p>
+                            </div>
+                        </div>
+                        
+                        <button v-if="!partner.isDeleted" @click="ui.viewProfile=false; startCall()" class="w-full py-3 rounded-xl bg-tg-blue text-white font-bold shadow-lg shadow-blue-500/20 hover:bg-blue-600 transition">
+                            Call User
+                        </button>
                     </div>
                 </div>
             </div>
@@ -384,9 +530,9 @@
 
     </main>
 
-    <!-- Zoom -->
-    <div v-if="zoomImg" @click="zoomImg = null" class="fixed inset-0 z-[200] bg-black/95 flex items-center justify-center cursor-zoom-out p-2">
-        <img :src="zoomImg" class="max-w-full max-h-full rounded-lg shadow-2xl object-contain">
+    <!-- Fullscreen Media Zoom -->
+    <div v-if="zoomImg" @click="zoomImg = null" class="fixed inset-0 z-[200] bg-black/95 flex items-center justify-center cursor-zoom-out p-4 backdrop-blur-md">
+        <img :src="zoomImg" class="max-w-full max-h-full rounded-lg shadow-2xl object-contain animate-[pop_0.2s_ease-out]">
     </div>
 
 </div>
@@ -394,16 +540,9 @@
 <script>
     const { createApp, ref, reactive, onMounted, computed, watch, nextTick } = Vue;
 
-    // --- SOUNDS (Encoded Base64 for single-file portability) ---
-    // Short beep for sent, tri-tone for received, simple ringtone
-    const AUDIO_SRC = {
-        sent: "data:audio/mp3;base64,SUQzBAAAAAAAI1RTSXMAAAAPAAADTGF2ZjU4LjI5LjEwMAAAAAAAAAAAAAAA//uQZAAAAAAAALAAAAAABAAJAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA//uQZAAAAAAAALAAAAAABAAJAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA", // Placeholder for size. In real code use tiny mp3
-        // Since I cannot provide 100kb Base64 strings here without hitting limits, we will use AudioContext synthesis for High Quality feel.
-    };
-
     createApp({
         setup() {
-            // STATE
+            // STATE MANAGEMENT
             const ui = reactive({ showDrawer: false, showAttach: false, showEmoji: false, viewProfile: false });
             const myPeerId = ref('');
             const targetId = ref('');
@@ -411,11 +550,12 @@
             const isConnected = ref(false);
             const mobileView = ref('sidebar');
             const inputMsg = ref('');
+            const searchQuery = ref('');
             const theme = ref('dark');
             const messages = ref([]);
             
             const user = reactive({ name: '', avatar: '', bio: '', setupComplete: false });
-            const partner = reactive({ name: '', avatar: '', bio: '' });
+            const partner = reactive({ name: '', avatar: '', bio: '', online: false, isDeleted: false });
             
             // Media
             const isRecording = ref(false);
@@ -424,7 +564,7 @@
             const zoomImg = ref(null);
             const call = reactive({ incoming: false, active: false, statusText: '' });
             
-            // Core
+            // Core Internals
             let peer = null;
             let conn = null;
             let mediaRecorder = null;
@@ -434,39 +574,43 @@
             let recTimerInt = null;
             let callTimerInt = null;
             let callSeconds = 0;
+            let heartbeatInt = null;
 
             const tempName = ref('');
             const tempBio = ref('');
             const tempAvatar = ref('');
             const defaultAvatar = "https://cdn-icons-png.flaticon.com/512/847/847969.png";
+            const msgInput = ref(null);
 
-            // --- AUDIO ENGINE ---
+            // AUDIO CONTEXT for Sound Effects
             const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
             const unlockAudio = () => { if(audioCtx.state === 'suspended') audioCtx.resume(); };
-            
+
             const playSound = (type) => {
                 unlockAudio();
                 const osc = audioCtx.createOscillator();
                 const gain = audioCtx.createGain();
                 osc.connect(gain); gain.connect(audioCtx.destination);
-                
+                const t = audioCtx.currentTime;
+
                 if (type === 'sent') {
-                    // "Pop" sound
-                    osc.frequency.setValueAtTime(800, audioCtx.currentTime);
-                    osc.frequency.exponentialRampToValueAtTime(1200, audioCtx.currentTime + 0.05);
-                    gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
-                    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.05);
-                    osc.start(); osc.stop(audioCtx.currentTime + 0.05);
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(800, t);
+                    osc.frequency.exponentialRampToValueAtTime(1400, t + 0.1);
+                    gain.gain.setValueAtTime(0.05, t);
+                    gain.gain.exponentialRampToValueAtTime(0.001, t + 0.1);
+                    osc.start(t); osc.stop(t + 0.1);
                 } else if (type === 'in') {
-                    // "Tring" sound
-                    osc.frequency.setValueAtTime(600, audioCtx.currentTime);
-                    osc.frequency.exponentialRampToValueAtTime(400, audioCtx.currentTime + 0.2);
-                    gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
-                    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.2);
-                    osc.start(); osc.stop(audioCtx.currentTime + 0.2);
+                    // Modern "Tring"
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(500, t);
+                    osc.frequency.linearRampToValueAtTime(800, t + 0.1);
+                    gain.gain.setValueAtTime(0, t);
+                    gain.gain.linearRampToValueAtTime(0.1, t + 0.05);
+                    gain.gain.linearRampToValueAtTime(0, t + 0.3);
+                    osc.start(t); osc.stop(t + 0.3);
                 }
             };
-            // Ringer loop handled via setInterval/Oscillator if needed, simplified for strict file size.
 
             // --- LIFECYCLE ---
             onMounted(() => {
@@ -476,20 +620,31 @@
                 if(msgs) messages.value = JSON.parse(msgs);
                 const th = localStorage.getItem('tw_v5_theme');
                 if(th) setTheme(th);
+                
+                // Clear deleted state on reload until re-verified
+                partner.isDeleted = false;
+
                 if(user.setupComplete) initPeer();
             });
 
             watch(messages, (val) => {
                 localStorage.setItem('tw_v5_msgs', JSON.stringify(val));
-                if(val.length > 0) scrollToBottom();
+                if(val.length > 0 && !searchQuery.value) scrollToBottom();
             }, { deep: true });
 
-            // --- PEER JS ---
+            // --- PEER JS & CONNECTIVITY ---
             const initPeer = () => {
                 peer = new Peer(null, { config: { iceServers: [{ urls: 'stun:stun1.l.google.com:19302' }] } });
-                peer.on('open', (id) => { myPeerId.value = id; isNetReady.value = true; });
+                
+                peer.on('open', (id) => { 
+                    myPeerId.value = id; 
+                    isNetReady.value = true; 
+                });
+                
                 peer.on('connection', (c) => setupConn(c));
                 peer.on('call', (c) => handleIncomingCall(c));
+                
+                peer.on('error', err => console.error("Peer Err:", err));
             };
 
             const connect = () => {
@@ -499,40 +654,115 @@
             };
 
             const setupConn = (c) => {
+                if(conn) conn.close();
                 conn = c;
+                
                 conn.on('open', () => {
                     isConnected.value = true;
+                    partner.isDeleted = false; 
+                    partner.online = true;
                     mobileView.value = 'chat';
-                    conn.send({ type: 'handshake', payload: { name: user.name, avatar: user.avatar, bio: user.bio } });
-                    // Mark sent as read
+                    
+                    // Send Handshake
+                    conn.send({ 
+                        type: 'handshake', 
+                        payload: { name: user.name, avatar: user.avatar, bio: user.bio } 
+                    });
+                    
+                    // Mark sent messages as read
                     messages.value.forEach(m => { if(m.status === 'sent') m.status = 'read'; });
+
+                    // Start Heartbeat
+                    startHeartbeat();
                 });
+
                 conn.on('data', (data) => {
-                    if(data.type === 'handshake') {
-                        partner.name = data.payload.name;
-                        partner.avatar = data.payload.avatar;
-                        partner.bio = data.payload.bio;
-                    } else if (data.type === 'read_ack') {
-                        messages.value.forEach(m => { if(m.sender === 'me') m.status = 'read'; });
-                    } else {
-                        messages.value.push({ ...data, sender: 'partner', status: 'read' });
-                        playSound('in');
-                        if(mobileView.value === 'chat') conn.send({ type: 'read_ack' });
+                    partner.online = true; // Any data means they are here
+                    
+                    switch(data.type) {
+                        case 'handshake':
+                            partner.name = data.payload.name;
+                            partner.avatar = data.payload.avatar;
+                            partner.bio = data.payload.bio;
+                            break;
+                        case 'read_ack':
+                            messages.value.forEach(m => { if(m.sender === 'me') m.status = 'read'; });
+                            break;
+                        case 'heartbeat':
+                            partner.online = true;
+                            break;
+                        case 'status_update':
+                            if(data.status === 'deleted') handlePartnerDeleted();
+                            break;
+                        default:
+                            // Regular message
+                            messages.value.push({ ...data, sender: 'partner', status: 'read' });
+                            playSound('in');
+                            if(mobileView.value === 'chat') conn.send({ type: 'read_ack' });
+                            scrollToBottom();
                     }
                 });
-                conn.on('close', () => isConnected.value = false);
+
+                conn.on('close', () => {
+                    isConnected.value = false;
+                    partner.online = false;
+                    stopHeartbeat();
+                });
+            };
+
+            const startHeartbeat = () => {
+                stopHeartbeat();
+                heartbeatInt = setInterval(() => {
+                    if(conn && conn.open) {
+                        conn.send({ type: 'heartbeat' });
+                        // Simple timeout logic: if we don't get data back in X sec, they might be gone
+                        // For this simplified version, we just assume they are online if connection is open
+                    }
+                }, 5000);
+            };
+
+            const stopHeartbeat = () => { if(heartbeatInt) clearInterval(heartbeatInt); };
+
+            const handlePartnerDeleted = () => {
+                partner.name = "Deleted Account";
+                partner.isDeleted = true;
+                partner.avatar = null;
+                partner.online = false;
+                isConnected.value = false; // Soft disconnect UI
+                // We keep connection open technically to allow 'delete chat' but block input
+            };
+
+            const performLogout = () => {
+                if(confirm("Log out? This will delete local data and notify partner.")) {
+                    if(conn && conn.open) {
+                        conn.send({ type: 'status_update', status: 'deleted' });
+                    }
+                    setTimeout(() => {
+                        localStorage.clear();
+                        location.reload();
+                    }, 500);
+                }
             };
 
             // --- MESSAGING ---
             const sendText = () => {
-                if(!inputMsg.value.trim() || !isConnected.value) return;
-                dispatch({ id: Date.now(), type: 'text', content: inputMsg.value, timestamp: Date.now() });
+                if(!inputMsg.value.trim() || !isConnected.value || partner.isDeleted) return;
+                
+                dispatch({ 
+                    id: Date.now(), 
+                    type: 'text', 
+                    content: inputMsg.value, 
+                    timestamp: Date.now() 
+                });
+                
                 inputMsg.value = '';
                 ui.showEmoji = false;
+                // Focus back
+                nextTick(() => msgInput.value.focus());
             };
 
             const dispatch = (msg) => {
-                conn.send(msg);
+                if(conn && conn.open) conn.send(msg);
                 messages.value.push({ ...msg, sender: 'me', status: 'sent' });
                 playSound('sent');
                 scrollToBottom();
@@ -541,7 +771,10 @@
             const handleFileSelect = (e) => {
                 const f = e.target.files[0];
                 if(!f) return;
-                if(f.size > 15 * 1024 * 1024) return alert("File too large for P2P (Max 15MB).");
+                
+                // Allow slightly larger files for video (limit logic is up to browser WebRTC impl)
+                if(f.size > 50 * 1024 * 1024) return alert("File limit is 50MB for this demo.");
+
                 const reader = new FileReader();
                 reader.onload = (ev) => {
                     const type = f.type.startsWith('video') ? 'video' : 'image';
@@ -564,24 +797,38 @@
             };
 
             const onEmojiSelect = (e) => {
-                inputMsg.value += e.detail.unicode;
+                const emoji = e.detail.unicode;
+                const ta = msgInput.value;
+                if(ta) {
+                    const start = ta.selectionStart;
+                    const end = ta.selectionEnd;
+                    inputMsg.value = inputMsg.value.substring(0, start) + emoji + inputMsg.value.substring(end);
+                    nextTick(() => {
+                        ta.selectionStart = ta.selectionEnd = start + emoji.length;
+                        ta.focus();
+                    });
+                } else {
+                    inputMsg.value += emoji;
+                }
             };
 
-            // --- VOICE ---
+            // --- MEDIA PLAYERS ---
             const startRec = async () => {
-                if(!isConnected.value) return;
+                if(!isConnected.value || partner.isDeleted) return;
                 try {
                     const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
                     mediaRecorder = new MediaRecorder(stream);
                     chunks = [];
                     isRecording.value = true;
                     let sec = 0;
+                    recTime.value = '00:00';
                     recTimerInt = setInterval(() => {
                         sec++;
                         const m = Math.floor(sec/60).toString().padStart(2,'0');
                         const s = (sec%60).toString().padStart(2,'0');
                         recTime.value = `${m}:${s}`;
                     }, 1000);
+                    
                     mediaRecorder.ondataavailable = e => chunks.push(e.data);
                     mediaRecorder.onstop = () => {
                         const blob = new Blob(chunks, { type: 'audio/webm' });
@@ -591,7 +838,7 @@
                         stream.getTracks().forEach(t => t.stop());
                     };
                     mediaRecorder.start();
-                } catch(e) { alert("Mic Error"); }
+                } catch(e) { console.error(e); alert("Microphone access denied."); }
             };
 
             const stopRec = () => {
@@ -599,40 +846,58 @@
                     mediaRecorder.stop();
                     clearInterval(recTimerInt);
                     isRecording.value = false;
-                    recTime.value = '00:00';
                 }
             };
 
             const playVoice = (id) => {
                 const aud = document.getElementById('aud-'+id);
+                // Stop others
+                document.querySelectorAll('audio').forEach(a => { if(a !== aud) { a.pause(); a.currentTime = 0; } });
+                playingVoice.value = null;
+
                 if(aud) {
-                    if(playingVoice.value === id) { aud.pause(); playingVoice.value = null; }
-                    else { 
-                        document.querySelectorAll('audio').forEach(a => a.pause());
-                        aud.play(); 
-                        playingVoice.value = id; 
+                    if(aud.paused) {
+                        aud.play();
+                        playingVoice.value = id;
+                    } else {
+                        aud.pause();
                     }
+                }
+            };
+            const onVoiceEnd = (id) => { playingVoice.value = null; };
+
+            const toggleVideo = (id) => {
+                const vid = document.getElementById('vid-'+id);
+                const overlay = document.getElementById('overlay-'+id);
+                if(vid.paused) {
+                    vid.play();
+                    vid.controls = true;
+                    if(overlay) overlay.style.opacity = '0';
+                } else {
+                    vid.pause();
+                    // Keep controls visible if paused manually usually, 
+                    // but for "Telegram style", if they click the video again we might want to pause
                 }
             };
 
             // --- CALLS ---
             const startCall = async () => {
-                if(!isConnected.value) return;
+                if(!isConnected.value || partner.isDeleted) return;
                 try {
                     localStream = await navigator.mediaDevices.getUserMedia({ audio: true });
                     callObj = peer.call(conn.peer, localStream);
                     setupCallEvents(callObj);
                     call.active = true;
                     call.statusText = 'Calling...';
-                    playSound('sent'); // reuse pop
-                } catch(e) { alert("Call Error"); }
+                    playSound('sent');
+                } catch(e) { alert("Could not access microphone."); }
             };
 
             const handleIncomingCall = (c) => {
                 call.incoming = true;
                 callObj = c;
                 call.statusText = 'Incoming Audio Call';
-                playSound('in'); // reuse tring
+                playSound('in');
             };
 
             const answerCall = async () => {
@@ -641,6 +906,10 @@
                 setupCallEvents(callObj);
                 call.incoming = false;
                 call.active = true;
+                startCallTimer();
+            };
+
+            const startCallTimer = () => {
                 callSeconds = 0;
                 callTimerInt = setInterval(() => {
                     callSeconds++;
@@ -652,27 +921,32 @@
 
             const setupCallEvents = (c) => {
                 c.on('stream', (remoteStream) => {
-                    const aud = document.querySelector('audio.hidden');
+                    const aud = document.querySelector('audio.hidden'); // The hidden remote audio element
                     if(aud) { aud.srcObject = remoteStream; aud.play(); }
+                    if(!callTimerInt && !call.incoming) startCallTimer(); // Start timer if initiator
                 });
                 c.on('close', endCall);
+                c.on('error', endCall);
             };
 
             const endCall = () => {
                 if(callObj) callObj.close();
                 if(localStream) localStream.getTracks().forEach(t => t.stop());
                 
-                // Add System Message
-                if(call.active && !call.incoming) {
+                if(call.active || call.incoming) {
                     const m = Math.floor(callSeconds/60).toString().padStart(2,'0');
                     const s = (callSeconds%60).toString().padStart(2,'0');
                     const duration = callSeconds > 0 ? `${m}:${s}` : 'Cancelled';
-                    messages.value.push({ id: Date.now(), type: 'system', content: `Call ended (${duration})` });
+                    
+                    // Insert System Message
+                    const sysMsg = { id: Date.now(), type: 'system', content: `Call ended (${duration})`, timestamp: Date.now() };
+                    messages.value.push(sysMsg);
+                    // Do not send this over network, usually calls generate local sys messages independently or sync via signaling
                 }
 
                 call.active = false;
                 call.incoming = false;
-                clearInterval(callTimerInt);
+                if(callTimerInt) clearInterval(callTimerInt);
                 callSeconds = 0;
             };
 
@@ -691,14 +965,23 @@
                     const r = new FileReader();
                     r.onload = (ev) => {
                         if(!user.setupComplete) tempAvatar.value = ev.target.result;
-                        else { user.avatar = ev.target.result; localStorage.setItem('tw_v5_user', JSON.stringify(user)); }
+                        else { 
+                            user.avatar = ev.target.result; 
+                            localStorage.setItem('tw_v5_user', JSON.stringify(user)); 
+                            // Notify partner of new avatar
+                            if(isConnected.value) conn.send({ type: 'handshake', payload: user });
+                        }
                     };
                     r.readAsDataURL(f);
                 }
             };
             const copyId = () => navigator.clipboard.writeText(myPeerId.value);
+            const copyPartnerId = () => navigator.clipboard.writeText(targetId.value);
             const markRead = () => { if(isConnected.value) conn.send({ type: 'read_ack' }); };
-            const scrollToBottom = () => nextTick(() => { const el = document.querySelector('div[class*="overflow-y-auto"]'); if(el) el.scrollTop = el.scrollHeight; });
+            const scrollToBottom = () => nextTick(() => { 
+                const el = document.getElementById('chatContainer'); 
+                if(el) el.scrollTop = el.scrollHeight; 
+            });
             const formatTime = (ts) => new Date(ts).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
             
             const toggleTheme = () => setTheme(theme.value === 'dark' ? 'light' : 'dark');
@@ -709,41 +992,71 @@
                 else document.documentElement.classList.remove('dark');
             };
 
-            const getMessageClass = (msg) => {
+            const getMessageClass = (msg, index) => {
+                const base = "px-3 py-1.5 rounded-2xl ";
+                // Grouping logic visual tweaks could go here (e.g. rounded corners)
                 if(theme.value === 'dark') {
-                    return msg.sender === 'me' ? 'bg-tg-self text-white rounded-br-none' : 'bg-tg-in text-white rounded-bl-none';
+                    return base + (msg.sender === 'me' ? 'bg-tg-self text-white rounded-br-none' : 'bg-tg-panel text-white rounded-bl-none');
                 } else {
-                    return msg.sender === 'me' ? 'bg-tg-lightSelf text-black rounded-br-none' : 'bg-tg-lightIn text-black rounded-bl-none';
+                    return base + (msg.sender === 'me' ? 'bg-[#eeffde] text-black rounded-br-none shadow-sm' : 'bg-white text-black rounded-bl-none shadow-sm');
                 }
             };
 
-            const viewProfile = () => {
-                if(partner.name) ui.viewProfile = true;
-            };
-            
-            const lastMsg = computed(() => messages.value[messages.value.length-1]);
+            const viewProfile = () => { if(partner.name) ui.viewProfile = true; };
+
+            // Computed
+            const lastMsg = computed(() => messages.value.length ? messages.value[messages.value.length-1] : null);
             const lastMsgTime = computed(() => lastMsg.value ? formatTime(lastMsg.value.timestamp) : '');
             const lastMsgPreview = computed(() => {
                 if(!lastMsg.value) return '';
-                if(lastMsg.value.type === 'system') return 'Call ended';
+                if(lastMsg.value.type === 'system') return 'System Message';
                 if(lastMsg.value.type === 'image') return 'Photo';
                 if(lastMsg.value.type === 'video') return 'Video';
                 if(lastMsg.value.type === 'voice') return 'Voice Message';
                 return lastMsg.value.content;
             });
 
-            const clearData = () => { if(confirm("Clear data?")) { localStorage.clear(); location.reload(); } };
+            // Global Search Logic
+            const filteredMessages = computed(() => {
+                if(!searchQuery.value) return [];
+                const q = searchQuery.value.toLowerCase();
+                return messages.value.filter(m => m.type === 'text' && m.content.toLowerCase().includes(q));
+            });
+            
+            const getMsgPreview = (msg) => {
+                // Return context around the search term
+                return msg.content; 
+            };
+            
+            const highlightText = (text) => {
+                if(!searchQuery.value) return text;
+                const re = new RegExp(`(${searchQuery.value})`, 'gi');
+                return text.replace(re, '<span class="bg-yellow-200 dark:bg-yellow-600/50 text-black dark:text-white rounded px-0.5">$1</span>');
+            };
+
+            const jumpToMessage = (id) => {
+                mobileView.value = 'chat';
+                searchQuery.value = ''; // Close search
+                nextTick(() => {
+                    const el = document.getElementById('msg-'+id);
+                    if(el) {
+                        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        el.classList.add('ring-2', 'ring-tg-blue', 'ring-offset-2', 'dark:ring-offset-black');
+                        setTimeout(() => el.classList.remove('ring-2', 'ring-tg-blue', 'ring-offset-2', 'dark:ring-offset-black'), 2000);
+                    }
+                });
+            };
 
             return {
                 ui, user, partner, messages, inputMsg, mobileView, theme,
                 myPeerId, targetId, isNetReady, isConnected,
-                tempName, tempBio, tempAvatar, defaultAvatar,
-                isRecording, recTime, playingVoice, zoomImg, call,
-                handlePaste, handleFileSelect, startRec, stopRec, playVoice,
+                tempName, tempBio, tempAvatar, defaultAvatar, msgInput,
+                isRecording, recTime, playingVoice, zoomImg, call, searchQuery, filteredMessages,
+                handlePaste, handleFileSelect, startRec, stopRec, playVoice, onVoiceEnd, toggleVideo,
                 connect, sendText, startCall, answerCall, endCall,
-                onAvatarChange, finishSetup, copyId, formatTime, markRead,
-                getMessageClass, toggleTheme, onEmojiSelect, viewProfile,
-                lastMsgTime, lastMsgPreview, clearData, unlockAudio
+                onAvatarChange, finishSetup, copyId, copyPartnerId, formatTime, markRead,
+                getMessageClass, toggleTheme, onEmojiSelect, viewProfile, performLogout,
+                lastMsg, lastMsgTime, lastMsgPreview, unlockAudio, jumpToMessage, highlightText, getMsgPreview
             };
         }
     }).mount('#app');
