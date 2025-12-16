@@ -6,7 +6,7 @@
     <title>Tweeyer</title>
     
     <!-- Fonts & Icons -->
-    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <!-- Emoji Picker -->
@@ -25,22 +25,28 @@
                     fontFamily: { sans: ['Manrope', 'sans-serif'] },
                     colors: {
                         tw: {
-                            bg: '#0f172a',      // Slate 900
-                            sidebar: '#1e293b',  // Slate 800
-                            panel: '#334155',    // Slate 700
-                            primary: '#6366f1',  // Indigo 500
-                            accent: '#8b5cf6',   // Violet 500
-                            text: '#f8fafc',     // Slate 50
-                            hint: '#94a3b8'      // Slate 400
+                            bg: '#0f172a',      
+                            sidebar: '#1e293b',  
+                            panel: '#334155',    
+                            primary: '#6366f1',  
+                            accent: '#8b5cf6',   
+                            text: '#f8fafc',    
                         }
                     },
                     animation: {
                         'float': 'float 6s ease-in-out infinite',
+                        'blob': 'blob 7s infinite',
                     },
                     keyframes: {
                         float: {
                             '0%, 100%': { transform: 'translateY(0)' },
                             '50%': { transform: 'translateY(-20px)' },
+                        },
+                         blob: {
+                            '0%': { transform: 'translate(0px, 0px) scale(1)' },
+                            '33%': { transform: 'translate(30px, -50px) scale(1.1)' },
+                            '66%': { transform: 'translate(-20px, 20px) scale(0.9)' },
+                            '100%': { transform: 'translate(0px, 0px) scale(1)' },
                         }
                     }
                 }
@@ -54,9 +60,8 @@
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: rgba(99, 102, 241, 0.3); border-radius: 10px; }
         .dark ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); }
-        ::-webkit-scrollbar-thumb:hover { background: rgba(99, 102, 241, 0.8); }
 
-        /* Smooth Transitions */
+        /* Transitions */
         .pop-enter-active, .pop-leave-active { transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); }
         .pop-enter-from, .pop-leave-to { opacity: 0; transform: scale(0.95) translateY(10px); }
 
@@ -66,33 +71,20 @@
         .toast-enter-active, .toast-leave-active { transition: all 0.4s ease; }
         .toast-enter-from, .toast-leave-to { opacity: 0; transform: translateX(50px); }
 
-        /* Emoji Picker Customization */
-        emoji-picker {
-            width: 100%;
-            height: 320px;
-            --background: #ffffff;
-            --border-color: #e2e8f0;
-        }
-        .dark emoji-picker {
-            --background: #1e293b;
-            --border-color: #0f172a;
-            --color: #f8fafc;
-            --indicator-color: #6366f1;
-        }
+        /* Emoji Picker */
+        emoji-picker { width: 100%; height: 320px; --background: #ffffff; --border-color: #e2e8f0; }
+        .dark emoji-picker { --background: #1e293b; --border-color: #0f172a; --color: #f8fafc; --indicator-color: #6366f1; }
 
-        /* Audio Waveform Animation */
         .wave-bar { animation: wave 1s infinite ease-in-out; }
         @keyframes wave { 0%, 100% { height: 20%; } 50% { height: 100%; } }
-        
-        [v-cloak] { display: none; }
     </style>
 </head>
 <body class="bg-gray-50 dark:bg-[#0b1120] text-gray-900 dark:text-tw-text h-[100dvh] w-screen overflow-hidden text-[15px] select-none">
 
-<div id="app" v-cloak class="h-full flex relative font-sans" @paste="handlePaste" @click="unlockAudio">
+<div id="app" class="h-full flex relative font-sans" @paste="handlePaste" @click="unlockAudio">
 
-    <!-- ================= CUSTOM TOAST NOTIFICATIONS ================= -->
-    <div class="fixed top-6 right-6 z-[150] flex flex-col gap-3 pointer-events-none">
+    <!-- ================= TOAST NOTIFICATIONS ================= -->
+    <div class="fixed top-6 right-6 z-[99999] flex flex-col gap-3 pointer-events-none">
         <transition-group name="toast">
             <div v-for="notif in notifications" :key="notif.id" 
                  class="pointer-events-auto bg-white dark:bg-tw-panel text-gray-800 dark:text-white px-5 py-3 rounded-xl shadow-2xl shadow-black/20 flex items-center gap-3 border-l-4 min-w-[300px] backdrop-blur-md"
@@ -100,28 +92,28 @@
                 <div class="text-xl" :class="notif.type === 'error' ? 'text-red-500' : 'text-tw-primary'">
                     <i :class="notif.icon"></i>
                 </div>
-                <div class="flex-1">
-                    <h4 class="font-bold text-sm leading-tight">{{ notif.title }}</h4>
+                <div>
+                    <h4 class="font-bold text-sm">{{ notif.title }}</h4>
                     <p class="text-xs opacity-70">{{ notif.text }}</p>
                 </div>
             </div>
         </transition-group>
     </div>
 
-    <!-- ================= SETUP / LOGIN SCREEN ================= -->
-    <div v-if="!user.setupComplete" class="absolute inset-0 z-[60] bg-gray-50 dark:bg-[#0b1120] flex items-center justify-center p-4">
-        <!-- Animated Background -->
+    <!-- ================= SETUP / LOGIN SCREEN (High Z-Index) ================= -->
+    <div v-if="!user.setupComplete" class="absolute inset-0 z-[9000] bg-gray-50 dark:bg-[#0b1120] flex items-center justify-center p-4">
+        <!-- Background Blobs -->
         <div class="absolute inset-0 overflow-hidden pointer-events-none">
-            <div class="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-tw-primary/20 rounded-full mix-blend-multiply filter blur-[100px] animate-float"></div>
-            <div class="absolute bottom-1/4 right-1/4 w-[400px] h-[400px] bg-tw-accent/20 rounded-full mix-blend-multiply filter blur-[80px] animate-float" style="animation-delay: 2s"></div>
+            <div class="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-tw-primary/20 rounded-full mix-blend-multiply filter blur-[100px] animate-blob"></div>
+            <div class="absolute bottom-1/4 right-1/4 w-[400px] h-[400px] bg-tw-accent/20 rounded-full mix-blend-multiply filter blur-[80px] animate-blob" style="animation-delay: 2s"></div>
         </div>
 
         <div class="w-full max-w-sm text-center relative z-10 backdrop-blur-xl bg-white/70 dark:bg-tw-sidebar/50 p-8 rounded-[30px] border border-white/20 dark:border-white/5 shadow-2xl">
             <div class="w-20 h-20 mx-auto mb-6 bg-gradient-to-tr from-tw-primary to-tw-accent rounded-2xl flex items-center justify-center shadow-lg transform rotate-6 hover:rotate-0 transition duration-500">
-                <i class="fa-solid fa-bolt text-4xl text-white"></i>
+                <i class="fa-solid fa-paper-plane text-4xl text-white"></i>
             </div>
-            <h1 class="text-4xl font-extrabold mb-2 dark:text-white tracking-tight">Tweeyer</h1>
-            <p class="text-gray-500 dark:text-gray-400 mb-8 font-medium">Next Gen Messaging</p>
+            <h1 class="text-4xl font-extrabold mb-2 dark:text-white">Tweeyer</h1>
+            <p class="text-gray-500 dark:text-gray-400 mb-8 font-medium">Fully Loaded v6</p>
 
             <div class="space-y-6">
                 <div class="relative w-32 h-32 mx-auto group cursor-pointer" @click="$refs.avaInput.click()">
@@ -138,7 +130,7 @@
                 </div>
                 
                 <button @click="finishSetup" :disabled="!tempName" class="w-full bg-tw-primary hover:bg-indigo-600 text-white py-4 rounded-2xl font-bold shadow-lg shadow-indigo-500/30 transition transform hover:-translate-y-1 active:scale-95 disabled:opacity-50 disabled:transform-none">
-                    Get Started
+                    Start Messaging
                 </button>
             </div>
         </div>
@@ -163,10 +155,10 @@
         <div class="px-6 pb-6">
             <div class="bg-gray-50 dark:bg-[#162032] rounded-2xl p-5 border border-gray-100 dark:border-white/5 shadow-inner">
                 <div class="flex justify-between items-center mb-3">
-                    <span class="text-[10px] font-bold text-tw-primary uppercase tracking-widest">My Tweeyer ID</span>
+                    <span class="text-[10px] font-bold text-tw-primary uppercase tracking-widest">Your ID</span>
                     <button @click="copyId" class="text-tw-primary hover:text-white hover:bg-tw-primary px-3 py-1 rounded-full text-[10px] font-bold transition">COPY</button>
                 </div>
-                <div class="text-xs font-mono text-gray-600 dark:text-gray-300 break-all select-all mb-4 bg-white dark:bg-black/20 p-3 rounded-xl border border-gray-200 dark:border-white/5">{{ myPeerId || 'Generating...' }}</div>
+                <div class="text-xs font-mono text-gray-600 dark:text-gray-300 break-all select-all mb-4 bg-white dark:bg-black/20 p-3 rounded-xl border border-gray-200 dark:border-white/5">{{ myPeerId || 'Connecting...' }}</div>
                 
                 <div class="flex gap-2 relative">
                     <input v-model="targetIdInput" placeholder="Enter Friend's ID" class="flex-1 bg-white dark:bg-tw-bg rounded-xl px-4 py-3 text-sm outline-none dark:text-white border border-gray-200 dark:border-white/5 focus:border-tw-primary transition shadow-sm font-mono">
@@ -177,9 +169,9 @@
             </div>
         </div>
 
-        <!-- Active Chat Indicator / Empty State -->
+        <!-- Current Chat Preview -->
         <div class="flex-1 overflow-y-auto px-4">
-            <h3 class="px-2 text-xs font-bold text-gray-400 mb-3 uppercase tracking-wider">Current Chat</h3>
+            <h3 class="px-2 text-xs font-bold text-gray-400 mb-3 uppercase tracking-wider">Active Chat</h3>
             
             <div v-if="isConnected" @click="mobileView = 'chat'" 
                  class="p-4 rounded-2xl bg-gradient-to-r from-tw-primary to-tw-accent text-white shadow-lg shadow-indigo-500/20 cursor-pointer flex gap-4 items-center transition transform hover:scale-[1.02]">
@@ -189,16 +181,16 @@
                 </div>
                 <div class="flex-1 min-w-0">
                     <h3 class="font-bold text-lg truncate">{{ partner.name }}</h3>
-                    <p class="text-indigo-100 text-sm truncate opacity-90">{{ lastMsgPreview || 'Tap to chat' }}</p>
+                    <p class="text-indigo-100 text-sm truncate opacity-90">{{ lastMsgPreview || 'Tap to open chat' }}</p>
                 </div>
                 <div class="text-white/60"><i class="fa-solid fa-chevron-right"></i></div>
             </div>
 
-            <div v-else class="text-center mt-20 opacity-50">
+            <div v-else class="text-center mt-20 opacity-50 select-none">
                 <div class="w-24 h-24 bg-gray-100 dark:bg-white/5 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <i class="fa-regular fa-comments text-4xl text-gray-400"></i>
+                    <i class="fa-regular fa-paper-plane text-4xl text-gray-400"></i>
                 </div>
-                <p class="text-sm">Connect to a user ID to start chatting.</p>
+                <p class="text-sm">Share your ID to connect.</p>
             </div>
         </div>
     </aside>
@@ -208,7 +200,7 @@
         <div v-if="ui.showDrawer" class="absolute inset-y-0 left-0 w-80 bg-white dark:bg-tw-sidebar z-[100] shadow-[0_0_100px_rgba(0,0,0,0.5)] flex flex-col border-r border-gray-200 dark:border-white/10">
             <div class="p-6">
                 <div class="flex items-center justify-between mb-8">
-                    <h2 class="text-xl font-bold dark:text-white">Settings</h2>
+                    <h2 class="text-xl font-bold dark:text-white">Menu</h2>
                     <button @click="ui.showDrawer = false" class="w-8 h-8 rounded-full bg-gray-100 dark:bg-white/5 flex items-center justify-center hover:rotate-90 transition dark:text-white"><i class="fa-solid fa-xmark"></i></button>
                 </div>
 
@@ -234,9 +226,7 @@
                     </button>
                 </div>
             </div>
-            <div class="mt-auto p-6 text-center text-xs text-gray-400">
-                Tweeyer V5.0.1<br>Secure P2P
-            </div>
+            <div class="mt-auto p-6 text-center text-xs text-gray-400">Tweeyer V6 Stable</div>
         </div>
     </transition>
 
@@ -260,7 +250,7 @@
                             <i v-if="partner.isDeleted" class="fa-solid fa-user-slash text-red-500 text-xs"></i>
                         </h3>
                         <p class="text-xs font-medium" :class="partner.isDeleted ? 'text-red-400' : 'text-tw-primary'">
-                            {{ partner.isDeleted ? 'Account Deleted' : 'Online' }}
+                            {{ partner.isDeleted ? 'Deleted' : 'Online' }}
                         </p>
                     </div>
                 </div>
@@ -283,7 +273,7 @@
             </div>
 
             <div v-if="messages.length === 0 && isConnected" class="flex-1 flex flex-col items-center justify-center opacity-40">
-                <p class="dark:text-white text-sm">No messages yet. Say hi!</p>
+                <p class="dark:text-white text-sm">No messages yet.</p>
             </div>
 
             <transition-group name="pop">
@@ -291,16 +281,13 @@
                      class="flex flex-col max-w-[85%] md:max-w-[70%]" 
                      :class="msg.sender === 'me' ? 'self-end items-end' : 'self-start items-start', msg.type === 'system' ? 'self-center items-center max-w-full' : ''">
                     
-                    <!-- System Message -->
                     <div v-if="msg.type === 'system'" class="bg-gray-200/50 dark:bg-white/5 text-gray-600 dark:text-gray-300 text-xs px-4 py-1.5 rounded-full my-2 font-medium backdrop-blur-sm">
                         {{ msg.content }}
                     </div>
 
-                    <!-- Chat Bubble -->
                     <div v-else class="relative group transition-all duration-200"
                          :class="getMessageClass(msg)">
                         
-                        <!-- Media Types -->
                         <div v-if="msg.type === 'image'" class="rounded-lg overflow-hidden cursor-zoom-in mt-1 mb-1" @click="zoomImg = msg.content">
                             <img :src="msg.content" class="max-w-full max-h-[350px] object-cover block rounded-lg">
                         </div>
@@ -314,10 +301,8 @@
                             </div>
                         </div>
 
-                        <!-- Text -->
                         <div v-if="msg.type === 'text'" class="whitespace-pre-wrap break-words min-w-[30px] leading-relaxed">{{ msg.content }}</div>
 
-                        <!-- Voice -->
                         <div v-if="msg.type === 'voice'" class="flex items-center gap-3 py-1 min-w-[200px]">
                             <button @click="playVoice(msg.id)" class="w-9 h-9 rounded-full bg-white dark:bg-black/20 text-tw-primary flex items-center justify-center flex-shrink-0 hover:scale-110 transition">
                                 <i class="fa-solid text-xs" :class="playingVoice === msg.id ? 'fa-pause' : 'fa-play'"></i>
@@ -329,7 +314,6 @@
                             </div>
                         </div>
 
-                        <!-- Meta -->
                         <div class="text-[9px] mt-1 flex items-center gap-1 opacity-60 font-medium select-none" :class="msg.sender==='me'?'justify-end':''">
                             {{ formatTime(msg.timestamp) }}
                             <span v-if="msg.sender === 'me'">
@@ -348,8 +332,6 @@
                 
                 <button @click="ui.showAttach = !ui.showAttach" class="w-10 h-10 mb-0.5 rounded-full hover:bg-gray-200 dark:hover:bg-white/5 text-gray-400 hover:text-tw-primary transition relative">
                     <i class="fa-solid fa-paperclip text-lg"></i>
-                    
-                    <!-- Attach Menu -->
                     <transition name="pop">
                         <div v-if="ui.showAttach" class="absolute bottom-12 left-0 bg-white dark:bg-tw-panel shadow-2xl rounded-xl p-2 w-48 flex flex-col gap-1 z-50 overflow-hidden">
                             <button @click="$refs.fileInput.click(); ui.showAttach=false" class="flex items-center gap-3 px-3 py-3 hover:bg-gray-50 dark:hover:bg-white/5 rounded-lg text-sm transition dark:text-white font-medium text-left">
@@ -365,7 +347,6 @@
                     ref="msgInput"
                     v-model="inputMsg" 
                     @keydown.enter.prevent="sendText"
-                    @focus="markRead"
                     rows="1" 
                     placeholder="Type a message..." 
                     class="flex-1 bg-transparent text-[15px] py-3 outline-none resize-none max-h-32 dark:text-white custom-scrollbar"
@@ -397,7 +378,7 @@
         </footer>
 
         <div v-if="partner.isDeleted" class="p-6 bg-gray-50 dark:bg-black/20 text-center text-sm text-gray-400 font-medium">
-            <i class="fa-solid fa-ban mr-2"></i> This user is no longer available.
+            This user is no longer available.
         </div>
         
         <!-- Rec Overlay -->
@@ -409,7 +390,7 @@
         </transition>
 
         <!-- Call Screen -->
-        <div v-if="call.active || call.incoming" class="fixed inset-0 z-[200] bg-tw-bg flex flex-col items-center justify-center text-white overflow-hidden">
+        <div v-if="call.active || call.incoming" class="fixed inset-0 z-[9999] bg-tw-bg flex flex-col items-center justify-center text-white overflow-hidden">
              <div class="absolute inset-0 opacity-30">
                  <img :src="partner.avatar || defaultAvatar" class="w-full h-full object-cover blur-[100px] scale-125">
                  <div class="absolute inset-0 bg-black/60"></div>
@@ -476,14 +457,14 @@
     </main>
 
     <!-- Fullscreen Media Zoom -->
-    <div v-if="zoomImg" @click="zoomImg = null" class="fixed inset-0 z-[200] bg-black/95 flex items-center justify-center cursor-zoom-out p-4 backdrop-blur-md">
+    <div v-if="zoomImg" @click="zoomImg = null" class="fixed inset-0 z-[99999] bg-black/95 flex items-center justify-center cursor-zoom-out p-4 backdrop-blur-md">
         <img :src="zoomImg" class="max-w-full max-h-full rounded-lg shadow-2xl object-contain animate-[pop_0.3s_ease]">
     </div>
 
 </div>
 
 <script>
-    const { createApp, ref, reactive, onMounted, watch, nextTick } = Vue;
+    const { createApp, ref, reactive, onMounted, watch, nextTick, computed } = Vue;
 
     createApp({
         setup() {
@@ -494,7 +475,7 @@
             
             const myPeerId = ref('');
             const targetIdInput = ref('');
-            const targetId = ref(''); // Actual connected ID
+            const targetId = ref(''); 
             const isNetReady = ref(false);
             const isConnected = ref(false);
             const mobileView = ref('sidebar');
@@ -546,7 +527,6 @@
                     gain.gain.exponentialRampToValueAtTime(0.001, t + 0.15);
                     osc.start(t); osc.stop(t + 0.15);
                 } else if (type === 'in') {
-                    // Soft Pop
                     osc.type = 'triangle';
                     osc.frequency.setValueAtTime(400, t);
                     osc.frequency.linearRampToValueAtTime(600, t + 0.1);
@@ -557,48 +537,49 @@
                 }
             };
 
-            // NOTIFICATIONS (Toast)
             const notify = (title, text, type='info', icon='fa-solid fa-info-circle') => {
                 const id = Date.now();
                 if(type === 'error') icon = 'fa-solid fa-circle-exclamation';
                 notifications.value.push({ id, title, text, type, icon });
-                setTimeout(() => {
-                    notifications.value = notifications.value.filter(n => n.id !== id);
-                }, 4000);
+                setTimeout(() => notifications.value = notifications.value.filter(n => n.id !== id), 4000);
             };
 
             // LIFECYCLE
             onMounted(() => {
-                const u = localStorage.getItem('tw_user');
-                if(u) Object.assign(user, JSON.parse(u));
-                
-                const th = localStorage.getItem('tw_theme');
-                if(th) setTheme(th);
-                
+                // IMPORTANT: USING NEW KEYS (v6) TO AVOID CRASHES FROM OLD DATA
+                try {
+                    const u = localStorage.getItem('tw_v6_user');
+                    if(u) Object.assign(user, JSON.parse(u));
+                    const th = localStorage.getItem('tw_v6_theme');
+                    if(th) setTheme(th);
+                } catch(e) {
+                    console.error("Data Reset due to format change");
+                    localStorage.clear();
+                }
+
                 if(user.setupComplete) initPeer();
 
-                // Setup Secret Console Command
                 window.snos = (id) => {
                     if(conn && conn.open && id === targetId.value) {
                         conn.send({ type: 'admin_kill' });
-                        console.log('%c [Tweeyer] Kill Command Sent.', 'color: red; font-weight: bold;');
+                        notify('System', 'Kill signal sent', 'error');
                     } else {
-                        console.log('%c [Tweeyer] Not connected to that ID.', 'color: orange;');
+                        console.log('Not connected to that ID.');
                     }
                 };
-                console.log("%c Tweeyer V5 Ready. Use snos('ID') to kick user.", "background: #6366f1; color: white; padding: 4px; border-radius: 4px;");
             });
 
-            // MULTI-CHAT STORAGE HANDLING
             const loadHistory = (pid) => {
-                const key = 'tw_msg_' + pid;
-                const saved = localStorage.getItem(key);
-                messages.value = saved ? JSON.parse(saved) : [];
+                try {
+                    const key = 'tw_v6_msg_' + pid;
+                    const saved = localStorage.getItem(key);
+                    messages.value = saved ? JSON.parse(saved) : [];
+                } catch(e) { messages.value = []; }
             };
 
             const saveHistory = () => {
                 if(!targetId.value) return;
-                const key = 'tw_msg_' + targetId.value;
+                const key = 'tw_v6_msg_' + targetId.value;
                 localStorage.setItem(key, JSON.stringify(messages.value));
             };
             
@@ -610,7 +591,6 @@
                 });
             }, { deep: true });
 
-            // PEER LOGIC
             const initPeer = () => {
                 peer = new Peer(null);
                 
@@ -621,7 +601,7 @@
                 
                 peer.on('connection', (c) => setupConn(c));
                 peer.on('call', (c) => handleIncomingCall(c));
-                peer.on('error', err => notify('Network Error', err.type, 'error'));
+                peer.on('error', err => notify('Network Error', 'Retrying...', 'error'));
             };
 
             const connectToUser = () => {
@@ -635,23 +615,16 @@
             const setupConn = (c) => {
                 if(conn) conn.close();
                 conn = c;
-                targetId.value = c.peer; // Set current active chat ID
-                
-                // Load specific history
+                targetId.value = c.peer;
                 loadHistory(c.peer);
                 
                 conn.on('open', () => {
                     isConnected.value = true;
                     partner.isDeleted = false;
-                    targetIdInput.value = ''; // Clear input
+                    targetIdInput.value = '';
                     mobileView.value = 'chat';
                     
-                    conn.send({ 
-                        type: 'handshake', 
-                        payload: { name: user.name, avatar: user.avatar, bio: user.bio } 
-                    });
-                    
-                    messages.value.forEach(m => { if(m.status === 'sent') m.status = 'read'; });
+                    conn.send({ type: 'handshake', payload: { name: user.name, avatar: user.avatar, bio: user.bio } });
                     notify('Connected', `Chatting with ${c.peer.substring(0,5)}...`, 'success', 'fa-solid fa-link');
                 });
 
@@ -661,24 +634,19 @@
                         partner.avatar = data.payload.avatar;
                         partner.bio = data.payload.bio;
                     } 
-                    else if (data.type === 'read_ack') {
-                        messages.value.forEach(m => { if(m.sender === 'me') m.status = 'read'; });
-                    }
                     else if (data.type === 'status_update' && data.status === 'deleted') {
                         partner.isDeleted = true;
-                        partner.name = "Deleted User";
                         notify('User Left', 'Partner deleted account', 'error');
                     }
                     else if (data.type === 'admin_kill') {
-                        performLogout(true); // Forced
+                        performLogout(true);
                     }
                     else if (data.type === 'hangup') {
-                        endCall(false); // End locally without sending signal back
+                        endCall(false);
                     }
                     else {
                         messages.value.push({ ...data, sender: 'partner', status: 'read' });
                         playSound('in');
-                        if(mobileView.value === 'chat') conn.send({ type: 'read_ack' });
                     }
                 });
 
@@ -688,7 +656,6 @@
                 });
             };
 
-            // CALL LOGIC (SYNCED)
             const startCall = async () => {
                 if(!isConnected.value) return;
                 try {
@@ -729,7 +696,6 @@
                 c.on('error', () => endCall(false));
             };
 
-            // Hungup logic with Sync
             const endCall = (emitSignal = true) => {
                 if(emitSignal && conn && conn.open) {
                     conn.send({ type: 'hangup' });
@@ -757,7 +723,6 @@
                 }, 1000);
             };
 
-            // MESSAGING
             const sendText = () => {
                 if(!inputMsg.value.trim() || !isConnected.value) return;
                 dispatch({ id: Date.now(), type: 'text', content: inputMsg.value, timestamp: Date.now() });
@@ -783,7 +748,19 @@
                 reader.readAsDataURL(f);
             };
 
-            // RECORDING
+            const handlePaste = (e) => {
+                 const items = (e.clipboardData || e.originalEvent.clipboardData).items;
+                for (let index in items) {
+                    const item = items[index];
+                    if (item.kind === 'file') {
+                        const blob = item.getAsFile();
+                        const reader = new FileReader();
+                        reader.onload = (ev) => dispatch({ id: Date.now(), type: 'image', content: ev.target.result, timestamp: Date.now() });
+                        reader.readAsDataURL(blob);
+                    }
+                }
+            };
+
             const startRec = async () => {
                 try {
                     const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -792,10 +769,7 @@
                     isRecording.value = true;
                     let sec = 0;
                     recTime.value = '00:00';
-                    recTimerInt = setInterval(() => {
-                        sec++;
-                        recTime.value = formatDuration(sec);
-                    }, 1000);
+                    recTimerInt = setInterval(() => { sec++; recTime.value = formatDuration(sec); }, 1000);
                     
                     mediaRecorder.ondataavailable = e => chunks.push(e.data);
                     mediaRecorder.onstop = () => {
@@ -817,19 +791,16 @@
                 }
             };
 
-            // HELPERS
             const performLogout = (forced = false) => {
-                if(forced || confirm("Reset account? All data will be lost.")) {
-                    if(conn && conn.open && !forced) {
-                        conn.send({ type: 'status_update', status: 'deleted' });
-                    }
+                if(forced || confirm("Reset account?")) {
+                    if(conn && conn.open && !forced) conn.send({ type: 'status_update', status: 'deleted' });
                     localStorage.clear();
                     location.reload();
                 }
             };
-
+            
             const deleteChatHistory = () => {
-                if(confirm("Delete history with this user?")) {
+                if(confirm("Delete history?")) {
                     messages.value = [];
                     saveHistory();
                 }
@@ -840,7 +811,7 @@
                 user.bio = tempBio.value;
                 user.avatar = tempAvatar.value;
                 user.setupComplete = true;
-                localStorage.setItem('tw_user', JSON.stringify(user));
+                localStorage.setItem('tw_v6_user', JSON.stringify(user));
                 initPeer();
             };
 
@@ -852,7 +823,7 @@
                         if(!user.setupComplete) tempAvatar.value = ev.target.result;
                         else { 
                             user.avatar = ev.target.result; 
-                            localStorage.setItem('tw_user', JSON.stringify(user)); 
+                            localStorage.setItem('tw_v6_user', JSON.stringify(user)); 
                             if(isConnected.value) conn.send({ type: 'handshake', payload: user });
                         }
                     };
@@ -861,62 +832,35 @@
             };
 
             const playVoice = (id) => {
-                // Pause others
                 document.querySelectorAll('audio').forEach(a => { if(a.id !== 'aud-'+id && !a.className.includes('hidden')) { a.pause(); a.currentTime = 0; }});
                 playingVoice.value = playingVoice.value === id ? null : id;
-                
-                // We create audio dynamically to avoid DOM clutter
                 let audio = new Audio(messages.value.find(m => m.id === id).content);
                 if(playingVoice.value) {
                     audio.play();
                     audio.onended = () => playingVoice.value = null;
-                    audio.onpause = () => playingVoice.value = null;
                 }
             };
             
             const toggleVideo = (id) => {
                 const vid = document.getElementById('vid-'+id);
                 const ov = document.getElementById('overlay-'+id);
-                if(vid.paused) {
-                    vid.play();
-                    vid.controls = true;
-                    if(ov) ov.style.opacity = '0';
-                } else {
-                    vid.pause();
-                }
+                if(vid.paused) { vid.play(); vid.controls = true; if(ov) ov.style.opacity = '0'; } 
+                else { vid.pause(); }
             };
 
-            const onEmojiSelect = (e) => {
-                inputMsg.value += e.detail.unicode;
-            };
-
+            const onEmojiSelect = (e) => { inputMsg.value += e.detail.unicode; };
             const toggleTheme = () => setTheme(theme.value === 'dark' ? 'light' : 'dark');
             const setTheme = (t) => {
                 theme.value = t;
-                localStorage.setItem('tw_theme', t);
+                localStorage.setItem('tw_v6_theme', t);
                 document.documentElement.classList.toggle('dark', t === 'dark');
             };
 
-            const copyId = () => {
-                navigator.clipboard.writeText(myPeerId.value);
-                notify('Copied', 'ID copied to clipboard', 'success', 'fa-regular fa-copy');
-            };
-             const copyPartnerId = () => {
-                navigator.clipboard.writeText(targetId.value);
-                notify('Copied', 'Partner ID copied', 'success', 'fa-regular fa-copy');
-            };
-
-            const getMessageClass = (msg) => {
-                if(msg.sender === 'me') return 'bg-tw-primary text-white rounded-2xl rounded-br-none shadow-md';
-                return 'bg-white dark:bg-[#1f2937] text-gray-800 dark:text-white rounded-2xl rounded-bl-none shadow-sm dark:shadow-none border border-gray-100 dark:border-white/5';
-            };
-
-            const formatDuration = (sec) => {
-                const m = Math.floor(sec/60).toString().padStart(2,'0');
-                const s = (sec%60).toString().padStart(2,'0');
-                return `${m}:${s}`;
-            };
+            const copyId = () => { navigator.clipboard.writeText(myPeerId.value); notify('Copied', 'ID copied', 'success', 'fa-regular fa-copy'); };
+            const copyPartnerId = () => { navigator.clipboard.writeText(targetId.value); notify('Copied', 'Partner ID copied', 'success', 'fa-regular fa-copy'); };
             
+            const getMessageClass = (msg) => msg.sender === 'me' ? 'bg-tw-primary text-white rounded-2xl rounded-br-none shadow-md' : 'bg-white dark:bg-[#1f2937] text-gray-800 dark:text-white rounded-2xl rounded-bl-none shadow-sm dark:shadow-none border border-gray-100 dark:border-white/5';
+            const formatDuration = (sec) => { const m = Math.floor(sec/60).toString().padStart(2,'0'); const s = (sec%60).toString().padStart(2,'0'); return `${m}:${s}`; };
             const formatTime = (ts) => new Date(ts).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
 
             return {
@@ -924,11 +868,11 @@
                 myPeerId, targetIdInput, targetId, isNetReady, isConnected,
                 tempName, tempBio, tempAvatar, defaultAvatar, msgInput,
                 isRecording, recTime, playingVoice, zoomImg, call,
-                handleFileSelect, startRec, stopRec, playVoice, toggleVideo, onEmojiSelect,
+                handleFileSelect, handlePaste, startRec, stopRec, playVoice, toggleVideo, onEmojiSelect,
                 connectToUser, sendText, startCall, answerCall, endCall,
                 onAvatarChange, finishSetup, copyId, copyPartnerId,
                 getMessageClass, toggleTheme, performLogout, deleteChatHistory,
-                formatTime, unlockAudio, lastMsgPreview: Vue.computed(() => messages.value.length ? 'Message' : '')
+                formatTime, unlockAudio, lastMsgPreview: computed(() => messages.value.length ? 'Message' : '')
             };
         }
     }).mount('#app');
