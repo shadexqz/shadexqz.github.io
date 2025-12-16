@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Tweeyer v0.0.1 Web Edition (Full)</title>
+    <title>Tweeyer Web K</title>
     
-    <!-- Fonts -->
+    <!-- Fonts & Icons -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
@@ -23,31 +23,29 @@
                 extend: {
                     fontFamily: { sans: ['Inter', 'sans-serif'] },
                     colors: {
-                        // Gray Theme (Slate)
-                        sidebar: '#2c3e50',    
-                        panel: '#34495e',
-                        bg_dark: '#1e1e1e',
+                        // Palette: Slate (Sidebar) + Lilac (Accent) + Deep Dark (Chat)
+                        bg: '#0f172a',        // Global BG
+                        sidebar: '#1e293b',   // Slate-800
+                        sidebar_hover: '#334155',
                         
-                        // Lilac Accents
-                        primary: '#a29bfe',    
-                        primary_hover: '#6c5ce7',
+                        primary: '#8b5cf6',   // Violet-500
+                        primary_hover: '#7c3aed', // Violet-600
                         
-                        // Bubbles
-                        bubble_in: '#34495e',
-                        bubble_out: '#6c5ce7', 
+                        chat_bg: '#0B1120',   // Very dark blue/gray
                         
-                        // System
-                        danger: '#ff7675',
-                        success: '#55efc4'
+                        bubble_me: '#8b5cf6', // Violet
+                        bubble_other: '#334155', // Slate-700
+                        
+                        text_main: '#f8fafc',
+                        text_meta: '#94a3b8'
                     },
                     animation: {
-                        'fade-in': 'fadeIn 0.2s ease-out',
                         'slide-up': 'slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
-                        'pulse-slow': 'pulse 3s infinite',
+                        'fade': 'fadeIn 0.2s ease-out'
                     },
                     keyframes: {
-                        fadeIn: { '0%': { opacity: 0 }, '100%': { opacity: 1 } },
-                        slideUp: { '0%': { transform: 'translateY(10px)', opacity: 0 }, '100%': { transform: 'translateY(0)', opacity: 1 } }
+                        slideUp: { '0%': { transform: 'translateY(10px)', opacity: 0 }, '100%': { transform: 'translateY(0)', opacity: 1 } },
+                        fadeIn: { '0%': { opacity: 0 }, '100%': { opacity: 1 } }
                     }
                 }
             }
@@ -55,242 +53,231 @@
     </script>
 
     <style>
-        body { background-color: #2c3e50; color: #ecf0f1; overflow: hidden; -webkit-tap-highlight-color: transparent; }
-        
-        /* Custom Scrollbar */
+        /* CRITICAL LAYOUT FIXES */
+        html, body { 
+            height: 100%; 
+            margin: 0; 
+            padding: 0; 
+            overflow: hidden; 
+            background-color: #0f172a;
+            color: #f8fafc;
+        }
+
+        /* Doodle Pattern Background */
+        .doodle-bg {
+            background-color: #0f1117;
+            background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%2394a3b8' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+        }
+
+        /* Scrollbars */
         ::-webkit-scrollbar { width: 5px; }
-        ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
-        ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
+        ::-webkit-scrollbar-track { background: transparent; }
 
-        /* Beautiful Pattern Background */
-        .chat-bg {
-            background-color: #1a1a1a;
-            background-image: radial-gradient(#ffffff 1px, transparent 1px), radial-gradient(#ffffff 1px, transparent 1px);
-            background-position: 0 0, 20px 20px;
-            background-size: 40px 40px;
-            position: relative;
-        }
-        .chat-bg::before {
-            content: ''; position: absolute; inset: 0;
-            background: rgba(26, 26, 26, 0.93); /* Dark overlay */
-            pointer-events: none;
-        }
+        /* Emoji Sizing */
+        img.emoji { height: 1.25em; width: 1.25em; margin: 0 .05em 0 .1em; vertical-align: -0.1em; }
 
-        /* Message Bubbles */
-        .msg-bubble { position: relative; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
-        .tail-out { border-bottom-right-radius: 0 !important; }
-        .tail-in { border-bottom-left-radius: 0 !important; }
+        /* Input Glass Effect */
+        .glass { background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.05); backdrop-filter: blur(10px); }
+        .glass:focus-within { border-color: #8b5cf6; background: rgba(255, 255, 255, 0.05); }
 
-        /* Emoji */
-        img.emoji { height: 1.3em; width: 1.3em; margin: 0 .05em 0 .1em; vertical-align: -0.1em; }
-        
-        /* Audio Visualizer */
-        .bar { width: 3px; background: currentColor; border-radius: 99px; animation: sound 0s infinite ease-in-out alternate; }
-        .playing .bar { animation-duration: 0.4s; }
-        @keyframes sound { 0% { height: 20%; } 100% { height: 100%; } }
-
-        /* Glass Input */
-        .glass-input {
-            background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.05); color: white;
-        }
-        .glass-input:focus { border-color: #a29bfe; background: rgba(0,0,0,0.3); }
+        /* Animations */
+        .tail-out { border-bottom-right-radius: 2px !important; }
+        .tail-in { border-bottom-left-radius: 2px !important; }
     </style>
 </head>
 <body>
 
-<div id="app" class="h-full flex relative text-[15px] font-sans overflow-hidden">
+<div id="app" class="w-full h-[100dvh] flex overflow-hidden relative font-sans text-[15px]">
 
-    <!-- ================= AUTH SCREEN ================= -->
-    <div v-if="!user.setupComplete" class="absolute inset-0 z-[100] bg-[#2c3e50] flex items-center justify-center p-6">
-        <div class="w-full max-w-sm bg-[#34495e] rounded-2xl p-8 shadow-2xl border border-white/5 relative flex flex-col items-center animate-fade-in">
-            <div class="w-20 h-20 bg-gradient-to-br from-primary to-primary_hover rounded-2xl flex items-center justify-center shadow-lg mb-6 rotate-3">
-                <i class="fa-solid fa-paper-plane text-3xl text-white"></i>
+    <!-- ================= 1. LOGIN / SETUP (Overlay) ================= -->
+    <transition name="fade">
+        <div v-if="!user.setupComplete" class="absolute inset-0 z-[999] bg-bg flex items-center justify-center p-4">
+            <div class="w-full max-w-sm bg-sidebar p-8 rounded-3xl shadow-2xl border border-white/5 text-center relative overflow-hidden">
+                <!-- Background Glow -->
+                <div class="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-32 bg-primary/20 blur-[50px] rounded-full"></div>
+                
+                <div class="relative z-10">
+                    <div class="w-20 h-20 mx-auto bg-gradient-to-tr from-primary to-blue-500 rounded-2xl flex items-center justify-center shadow-lg mb-6 rotate-3">
+                        <i class="fa-solid fa-paper-plane text-3xl text-white"></i>
+                    </div>
+                    <h1 class="text-2xl font-bold mb-2 text-white">Tweeyer Web K</h1>
+                    <p class="text-text_meta text-sm mb-8">Secure P2P Messaging</p>
+
+                    <div class="space-y-4">
+                        <div class="flex justify-center mb-6">
+                            <div class="relative w-24 h-24 cursor-pointer group" @click="$refs.avaInput.click()">
+                                <img :src="tempAvatar || defaultAvatar" class="w-full h-full rounded-full object-cover border-4 border-sidebar bg-white/5">
+                                <div class="absolute inset-0 bg-black/40 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition">
+                                    <i class="fa-solid fa-camera text-2xl text-white"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <input type="file" ref="avaInput" hidden @change="onAvatarChange" accept="image/*">
+
+                        <input v-model="tempName" placeholder="Enter Name" class="w-full h-12 rounded-xl bg-black/20 border border-white/10 text-white text-center px-4 outline-none focus:border-primary transition">
+                        
+                        <button @click="finishSetup" :disabled="!tempName" class="w-full h-12 rounded-xl bg-primary hover:bg-primary_hover text-white font-bold shadow-lg shadow-primary/20 transition transform active:scale-95 disabled:opacity-50 disabled:transform-none">
+                            Start Chatting
+                        </button>
+                    </div>
+                </div>
             </div>
-            <h1 class="text-2xl font-bold text-white">Tweeyer</h1>
-            <p class="text-gray-400 text-sm mb-8">v0.0.1 Web Edition</p>
-
-            <div class="relative w-24 h-24 mb-6 group cursor-pointer" @click="$refs.avaInput.click()">
-                <img :src="tempAvatar || defaultAvatar" class="w-full h-full rounded-full object-cover border-4 border-[#2c3e50] shadow-md bg-black/20">
-                <div class="absolute inset-0 bg-black/40 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition"><i class="fa-solid fa-camera text-white"></i></div>
-            </div>
-            <input type="file" ref="avaInput" hidden @change="onAvatarChange" accept="image/*">
-
-            <input v-model="tempName" placeholder="Your Name" class="w-full h-12 px-4 rounded-xl glass-input outline-none text-center transition mb-4">
-            
-            <button @click="finishSetup" :disabled="!tempName" class="w-full h-12 bg-primary hover:bg-primary_hover text-white font-bold rounded-xl transition shadow-lg shadow-primary/30 disabled:opacity-50 active:scale-95">
-                Start Messaging
-            </button>
         </div>
-    </div>
+    </transition>
 
-    <!-- ================= SIDEBAR ================= -->
-    <aside class="w-full md:w-80 bg-sidebar border-r border-black/10 flex flex-col shrink-0 z-20 absolute md:relative h-full transition-transform duration-300 shadow-xl"
+    <!-- ================= 2. LEFT SIDEBAR (Slate) ================= -->
+    <aside class="w-full md:w-[350px] bg-sidebar border-r border-black/20 flex flex-col shrink-0 z-20 absolute md:relative h-full transition-transform duration-300 shadow-xl"
            :class="mobileView === 'chat' ? '-translate-x-full md:translate-x-0' : 'translate-x-0'">
         
         <!-- Header -->
-        <div class="h-16 px-4 flex items-center gap-3 shrink-0 bg-[#34495e]/30">
-            <button @click="ui.drawer = true" class="w-10 h-10 rounded-full hover:bg-white/5 flex items-center justify-center text-gray-300 transition">
+        <div class="h-[60px] px-4 flex items-center gap-3 shrink-0">
+            <button @click="ui.drawer = true" class="w-10 h-10 rounded-full hover:bg-white/5 text-gray-400 flex items-center justify-center transition">
                 <i class="fa-solid fa-bars"></i>
             </button>
-            <div class="flex-1 relative">
-                <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-xs"></i>
-                <input v-model="searchQuery" placeholder="Search" class="w-full bg-black/20 rounded-lg h-9 pl-8 pr-3 text-sm text-white outline-none focus:bg-black/30 transition placeholder-gray-500">
+            <div class="flex-1 relative group">
+                <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-xs transition group-focus-within:text-primary"></i>
+                <input v-model="searchQuery" placeholder="Search" class="w-full h-9 bg-black/20 rounded-full pl-9 pr-4 text-sm outline-none text-white focus:bg-black/30 transition border border-transparent focus:border-primary/30">
             </div>
         </div>
 
-        <!-- Connection -->
-        <div class="p-3">
+        <!-- Connection Card -->
+        <div class="px-3 pb-2">
             <div class="bg-black/20 rounded-xl p-3 border border-white/5">
                 <div class="flex justify-between items-center mb-2">
-                    <span class="text-[10px] uppercase font-bold text-gray-400">Your ID</span>
-                    <button @click="copyId" class="text-[10px] text-primary hover:text-white px-2 rounded transition">COPY</button>
+                    <span class="text-[10px] font-bold text-text_meta uppercase tracking-wider">Your ID</span>
+                    <button @click="copyId" class="text-[10px] bg-primary/20 text-primary hover:bg-primary hover:text-white px-2 py-0.5 rounded transition">COPY</button>
                 </div>
-                <div class="text-xs font-mono text-gray-300 mb-3 truncate select-all">{{ myPeerId || 'Generating...' }}</div>
+                <div class="text-xs font-mono text-gray-300 break-all select-all mb-3">{{ myPeerId || 'Generating...' }}</div>
+                
                 <div class="flex gap-2">
-                    <input v-model="targetId" placeholder="Partner ID" class="flex-1 bg-black/20 rounded px-2 text-sm text-white outline-none border border-transparent focus:border-primary/50">
-                    <button @click="connect" class="w-8 bg-primary hover:bg-primary_hover rounded flex items-center justify-center text-white transition"><i class="fa-solid fa-arrow-right text-xs"></i></button>
+                    <input v-model="targetId" placeholder="Partner ID" class="flex-1 bg-black/20 rounded-lg px-3 py-1.5 text-sm text-white outline-none border border-white/5 focus:border-primary">
+                    <button @click="connect" class="w-8 h-8 rounded-lg bg-primary hover:bg-primary_hover text-white flex items-center justify-center transition shadow-lg shadow-primary/20">
+                        <i class="fa-solid fa-arrow-right text-xs"></i>
+                    </button>
                 </div>
             </div>
         </div>
 
         <!-- Chat List -->
         <div class="flex-1 overflow-y-auto px-2">
-            <!-- Search Results -->
-            <div v-if="searchQuery" class="space-y-1">
-                <p class="text-xs text-gray-500 px-2 uppercase font-bold mt-2">Search Results</p>
-                <div v-for="msg in filteredMessages" :key="msg.id" @click="jumpTo(msg.id)" class="px-3 py-2 rounded-lg hover:bg-white/5 cursor-pointer">
-                    <div class="text-xs text-primary font-bold">{{ msg.sender === 'me' ? 'You' : partner.name }}</div>
-                    <div class="text-sm text-gray-400 truncate">{{ msg.content }}</div>
-                </div>
-            </div>
-
-            <!-- Active Chat -->
-            <div v-else-if="isConnected || messages.length > 0" 
+            <!-- If Connected -->
+            <div v-if="isConnected || messages.length > 0" 
                  @click="mobileView = 'chat'" 
-                 class="px-3 py-3 rounded-xl flex gap-3 cursor-pointer transition relative group hover:bg-white/5"
-                 :class="mobileView === 'chat' ? 'bg-primary/20' : ''">
+                 class="p-2.5 rounded-xl flex gap-3 cursor-pointer transition relative group hover:bg-sidebar_hover"
+                 :class="mobileView === 'chat' ? 'bg-primary/10' : ''">
                 
                 <div class="relative shrink-0">
-                    <img :src="partner.avatar || defaultAvatar" class="w-12 h-12 rounded-full object-cover bg-black/20">
+                    <img :src="partner.avatar || defaultAvatar" class="w-12 h-12 rounded-full object-cover bg-black/30">
                     <div v-if="partner.online" class="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-sidebar rounded-full"></div>
                 </div>
                 
-                <div class="flex-1 min-w-0">
-                    <div class="flex justify-between items-baseline">
-                        <h3 class="font-medium text-white truncate">{{ partner.name || 'User' }}</h3>
-                        <span class="text-[11px] text-gray-400">{{ lastMsgTime }}</span>
+                <div class="flex-1 min-w-0 flex flex-col justify-center">
+                    <div class="flex justify-between items-center mb-0.5">
+                        <h3 class="font-medium text-white truncate">{{ partner.name || 'Unknown' }}</h3>
+                        <span class="text-xs text-text_meta">{{ lastMsgTime }}</span>
                     </div>
                     <div class="flex items-center gap-1">
-                        <span v-if="lastMsg?.sender === 'me'" class="text-primary text-[10px]">
-                            <i v-if="lastMsg.status === 'read'" class="fa-solid fa-check-double"></i>
+                        <span v-if="lastMsg?.sender === 'me'" class="text-primary text-xs">
+                            <i v-if="lastMsg.status === 'read'" class="fa-solid fa-check-double text-green-400"></i>
                             <i v-else class="fa-solid fa-check"></i>
                         </span>
-                        <p class="text-sm text-gray-400 truncate opacity-80" v-html="renderEmoji(lastMsgPreview)"></p>
+                        <p class="text-sm text-text_meta truncate opacity-80" v-html="renderEmoji(lastMsgPreview)"></p>
                     </div>
                 </div>
             </div>
             
-            <div v-else class="text-center mt-20 text-gray-500 text-sm">
-                <i class="fa-regular fa-paper-plane mb-2 text-2xl opacity-50"></i>
-                <p>Share ID to connect</p>
+            <!-- Empty State -->
+            <div v-else class="flex flex-col items-center mt-20 text-text_meta opacity-50">
+                <i class="fa-regular fa-paper-plane text-4xl mb-3"></i>
+                <p class="text-sm">Share ID to connect</p>
             </div>
         </div>
     </aside>
 
-    <!-- ================= CHAT AREA ================= -->
-    <main class="flex-1 flex flex-col h-full bg-[#1a1a1a] relative chat-bg"
+    <!-- ================= 3. MAIN CHAT (Dark + Pattern) ================= -->
+    <main class="flex-1 flex flex-col h-full relative doodle-bg w-full transition-transform duration-300"
           :class="mobileView === 'sidebar' ? 'translate-x-full md:translate-x-0 hidden md:flex' : 'translate-x-0'">
         
-        <!-- Header -->
-        <header class="h-16 bg-[#2c3e50]/95 backdrop-blur flex items-center justify-between px-4 shrink-0 shadow-md z-20 cursor-pointer" @click="ui.profile = true">
+        <!-- Chat Header -->
+        <header class="h-[60px] bg-sidebar/80 backdrop-blur-md border-b border-black/10 flex items-center justify-between px-4 shrink-0 z-10 cursor-pointer" @click="ui.profile = true">
             <div class="flex items-center gap-4">
-                <button @click.stop="mobileView = 'sidebar'" class="md:hidden text-gray-300"><i class="fa-solid fa-arrow-left"></i></button>
+                <button @click.stop="mobileView = 'sidebar'" class="md:hidden text-gray-400 hover:text-white"><i class="fa-solid fa-arrow-left"></i></button>
                 <div class="flex items-center gap-3">
                     <div class="relative">
-                        <img :src="partner.avatar || defaultAvatar" class="w-10 h-10 rounded-full object-cover bg-black/20">
+                        <img :src="partner.avatar || defaultAvatar" class="w-9 h-9 rounded-full object-cover bg-black/30">
                         <div v-if="partner.online" class="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-500 border-2 border-sidebar rounded-full"></div>
                     </div>
                     <div>
                         <h3 class="font-bold text-white text-[15px] leading-tight">{{ partner.name || 'Chat' }}</h3>
-                        <p v-if="partner.typing" class="text-primary text-xs animate-pulse">typing...</p>
-                        <p v-else class="text-xs text-gray-400">{{ partner.online ? 'Online' : 'Offline' }}</p>
+                        <p v-if="partner.typing" class="text-primary text-xs animate-pulse font-medium">typing...</p>
+                        <p v-else class="text-xs text-text_meta">{{ partner.online ? 'Online' : 'Offline' }}</p>
                     </div>
                 </div>
             </div>
             <div class="flex gap-4 text-gray-400">
-                <button v-if="isConnected" @click.stop="startCall" class="w-10 h-10 rounded-full hover:bg-white/5 hover:text-primary transition"><i class="fa-solid fa-phone"></i></button>
-                <button class="w-10 h-10 rounded-full hover:bg-white/5 hover:text-white transition"><i class="fa-solid fa-ellipsis-vertical"></i></button>
+                <button v-if="isConnected" @click.stop="startCall" class="w-9 h-9 rounded-full hover:bg-white/5 hover:text-primary transition"><i class="fa-solid fa-phone"></i></button>
+                <button class="w-9 h-9 rounded-full hover:bg-white/5 hover:text-white transition"><i class="fa-solid fa-ellipsis-vertical"></i></button>
             </div>
         </header>
 
-        <!-- Messages -->
-        <div id="chatBox" class="flex-1 overflow-y-auto p-2 md:p-5 flex flex-col gap-1 relative z-10 custom-scrollbar scroll-smooth">
+        <!-- Messages Area -->
+        <div id="chatBox" class="flex-1 overflow-y-auto p-2 md:p-4 flex flex-col gap-1 custom-scrollbar scroll-smooth">
             
-            <div v-if="messages.length === 0" class="flex-1 flex flex-col items-center justify-center opacity-40">
-                <div class="bg-white/5 p-6 rounded-full mb-4"><i class="fa-regular fa-comments text-4xl text-white"></i></div>
-                <p class="text-gray-400">No messages yet...</p>
+            <div v-if="messages.length === 0" class="flex-1 flex flex-col items-center justify-center text-text_meta opacity-40">
+                <div class="bg-white/5 p-5 rounded-full mb-3"><i class="fa-solid fa-comments text-3xl"></i></div>
+                <p>No messages yet</p>
             </div>
 
             <template v-for="(msg, index) in groupedMessages" :key="msg.id">
                 
-                <!-- Date Separator -->
-                <div v-if="msg.showDate" class="flex justify-center my-4 sticky top-2 z-10">
-                    <span class="bg-[#2c3e50]/80 backdrop-blur text-white text-[11px] font-bold px-3 py-1 rounded-full shadow-sm border border-white/5">
-                        {{ msg.dateLabel }}
-                    </span>
+                <!-- Date Label -->
+                <div v-if="msg.showDate" class="flex justify-center my-3 sticky top-2 z-10">
+                    <span class="bg-sidebar/80 backdrop-blur text-white text-[11px] font-bold px-3 py-1 rounded-full border border-white/5 shadow-sm">{{ msg.dateLabel }}</span>
                 </div>
 
-                <!-- Message Wrapper -->
+                <!-- Message Item -->
                 <div :id="'msg-'+msg.id" class="flex flex-col group w-full mb-1" 
                      :class="msg.sender === 'me' ? 'items-end' : 'items-start'"
                      @contextmenu.prevent="showContext($event, msg)">
                     
-                    <!-- Bubble -->
-                    <div class="msg-bubble max-w-[85%] md:max-w-[65%] rounded-2xl p-2 text-white animate-slide-up transition-all min-w-[60px]"
+                    <div class="max-w-[85%] md:max-w-[70%] rounded-2xl p-2 text-white animate-slide-up relative shadow-sm min-w-[80px]"
                          :class="[
-                             msg.sender === 'me' ? 'bg-bubble_out tail-out rounded-br-none' : 'bg-bubble_in tail-in rounded-bl-none',
-                             msg.isDeleted ? 'opacity-50' : ''
+                            msg.sender === 'me' ? 'bg-bubble_me tail-out rounded-br-none' : 'bg-bubble_other tail-in rounded-bl-none',
+                            msg.isDeleted ? 'opacity-60' : ''
                          ]">
                         
-                        <!-- Reply Context -->
+                        <!-- Reply Preview -->
                         <div v-if="msg.replyTo" class="mb-1 pl-2 border-l-2 border-white/30 cursor-pointer text-xs" @click="jumpTo(msg.replyTo.id)">
-                            <div class="font-bold opacity-80">{{ msg.replyTo.sender === 'me' ? 'You' : partner.name }}</div>
+                            <div class="font-bold opacity-90">{{ msg.replyTo.sender === 'me' ? 'You' : partner.name }}</div>
                             <div class="truncate opacity-70">{{ msg.replyTo.content }}</div>
                         </div>
 
-                        <!-- Content -->
-                        <div class="break-words whitespace-pre-wrap leading-snug text-[15px]" :class="{'italic text-gray-300': msg.isDeleted}">
+                        <!-- Main Content -->
+                        <div class="text-[15px] leading-snug break-words" :class="msg.isDeleted ? 'italic text-sm' : ''">
                             
-                            <!-- Text -->
                             <span v-if="msg.type === 'text'" v-html="renderEmoji(msg.content)"></span>
-
-                            <!-- Images/Video -->
-                            <div v-if="msg.type === 'image'" class="rounded-lg overflow-hidden mt-1 cursor-zoom-in relative" @click="zoomImg = msg.content">
+                            
+                            <div v-if="msg.type === 'image'" class="rounded-lg overflow-hidden mt-1 cursor-zoom-in" @click="zoomImg = msg.content">
                                 <img :src="msg.content" class="max-w-full max-h-[350px] block">
                             </div>
 
-                            <!-- Voice -->
-                            <div v-if="msg.type === 'voice'" class="flex items-center gap-3 pr-2 min-w-[200px] mt-1">
-                                <button @click="playVoice(msg.id)" class="w-9 h-9 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center shrink-0 transition">
+                            <div v-if="msg.type === 'voice'" class="flex items-center gap-3 pr-2 mt-1">
+                                <button @click="playVoice(msg.id)" class="w-8 h-8 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center shrink-0 transition">
                                     <i class="fa-solid text-white text-xs" :class="playingVoice === msg.id ? 'fa-pause' : 'fa-play'"></i>
                                 </button>
-                                <div class="flex flex-col flex-1 gap-1">
-                                    <div class="h-4 flex items-center gap-[2px] opacity-70" :class="playingVoice === msg.id ? 'playing' : ''">
-                                        <div v-for="n in 30" :class="'bar'" :style="{height: Math.random()*100+'%', animationDelay: n*0.05+'s'}"></div>
-                                    </div>
-                                    <div class="text-[10px] opacity-60">Voice Message</div>
+                                <div class="h-4 flex items-center gap-[2px] opacity-80 w-24">
+                                    <div v-for="n in 15" class="w-[3px] bg-white rounded-full animate-pulse" :style="{height: Math.random()*100+'%'}"></div>
                                 </div>
-                                <audio :id="'aud-'+msg.id" :src="msg.content" @ended="playingVoice = null"></audio>
                             </div>
                         </div>
 
-                        <!-- Meta -->
-                        <div class="flex items-center justify-end gap-1 mt-1 select-none float-right ml-2">
-                            <span v-if="msg.edited" class="text-[9px] opacity-60 mr-1">edited</span>
-                            <span class="text-[10px] opacity-60">{{ formatTime(msg.timestamp) }}</span>
+                        <!-- Meta Info -->
+                        <div class="flex justify-end gap-1 items-center mt-1 select-none float-right ml-2">
+                            <span v-if="msg.edited" class="text-[9px] opacity-70 mr-1">edited</span>
+                            <span class="text-[10px] opacity-70">{{ formatTime(msg.timestamp) }}</span>
                             <span v-if="msg.sender === 'me'" class="text-[10px]">
-                                <i v-if="msg.status === 'read'" class="fa-solid fa-check-double text-[#a29bfe]"></i>
+                                <i v-if="msg.status === 'read'" class="fa-solid fa-check-double text-green-300"></i>
                                 <i v-else class="fa-solid fa-check opacity-60"></i>
                             </span>
                         </div>
@@ -301,12 +288,13 @@
         </div>
 
         <!-- Input Area -->
-        <div class="p-3 bg-[#2c3e50] z-30 shrink-0 relative">
-            <!-- Tools: Reply / Edit -->
-            <transition name="fade-in">
-                <div v-if="replyingTo || editingMsg" class="absolute bottom-full left-0 right-0 bg-[#2c3e50] border-t border-white/10 p-2 px-4 flex justify-between items-center shadow-lg">
-                    <div class="border-l-2 border-primary pl-2">
-                        <div class="text-primary text-xs font-bold">{{ editingMsg ? 'Editing' : 'Reply to ' + (replyingTo.sender === 'me' ? 'You' : partner.name) }}</div>
+        <div class="p-2 md:p-4 bg-sidebar shrink-0 z-20 relative shadow-[0_-5px_20px_rgba(0,0,0,0.2)]">
+            
+            <!-- Context Bar (Reply/Edit) -->
+            <transition name="fade">
+                <div v-if="replyingTo || editingMsg" class="absolute bottom-full left-0 right-0 bg-sidebar border-t border-white/10 p-2 px-4 flex justify-between items-center shadow-lg backdrop-blur-md bg-opacity-95">
+                    <div class="border-l-2 border-primary pl-3">
+                        <div class="text-primary text-xs font-bold uppercase">{{ editingMsg ? 'Editing' : 'Replying to' }}</div>
                         <div class="text-xs text-gray-400 truncate max-w-xs">{{ editingMsg ? editingMsg.content : replyingTo.content }}</div>
                     </div>
                     <button @click="cancelAction" class="text-gray-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
@@ -319,7 +307,7 @@
                 </button>
                 <input type="file" ref="fileInput" hidden @change="handleFile" accept="image/*">
 
-                <div class="flex-1 bg-black/20 rounded-2xl flex items-center border border-transparent focus-within:border-primary/50 transition relative">
+                <div class="flex-1 glass rounded-2xl flex items-center min-h-[44px] transition relative">
                     <textarea 
                         ref="msgInput"
                         v-model="inputMsg" 
@@ -327,7 +315,7 @@
                         @input="onType"
                         rows="1" 
                         placeholder="Message" 
-                        class="w-full bg-transparent text-white px-4 py-3 max-h-32 min-h-[44px] resize-none outline-none custom-scrollbar"
+                        class="w-full bg-transparent text-white px-4 py-3 max-h-32 resize-none outline-none custom-scrollbar placeholder-gray-500"
                     ></textarea>
                     <button class="w-10 h-10 text-gray-400 hover:text-yellow-400 transition" @click="ui.emoji = !ui.emoji">
                         <i class="fa-regular fa-face-smile text-xl"></i>
@@ -335,108 +323,109 @@
                 </div>
 
                 <div class="w-12 h-12 flex items-center justify-center relative">
-                    <button v-if="inputMsg.trim()" @click="send" class="w-12 h-12 bg-primary hover:bg-primary_hover rounded-full text-white shadow-lg transition flex items-center justify-center transform active:scale-90">
+                    <button v-if="inputMsg.trim()" @click="send" class="w-12 h-12 bg-primary hover:bg-primary_hover rounded-full text-white shadow-lg transition flex items-center justify-center transform active:scale-90 shadow-primary/30">
                         <i v-if="editingMsg" class="fa-solid fa-check text-lg"></i>
-                        <i v-else class="fa-solid fa-paper-plane text-lg translate-x-px"></i>
+                        <i v-else class="fa-solid fa-paper-plane text-lg translate-x-px translate-y-px"></i>
                     </button>
-                    <button v-else @mousedown="startRec" @touchstart.prevent="startRec" @mouseup="stopRec" @touchend.prevent="stopRec" 
-                        class="w-12 h-12 bg-[#34495e] rounded-full text-white hover:bg-white/10 transition flex items-center justify-center" 
-                        :class="{'bg-red-500 animate-pulse': isRecording}">
+                    <button v-else @mousedown="startRec" @mouseup="stopRec" @mouseleave="stopRec" @touchstart.prevent="startRec" @touchend.prevent="stopRec" class="w-12 h-12 bg-sidebar_hover rounded-full text-white hover:bg-white/20 transition flex items-center justify-center" :class="{'bg-red-500 animate-pulse': isRecording}">
                         <i class="fa-solid fa-microphone text-xl"></i>
                     </button>
                 </div>
             </div>
-            
+
             <!-- Emoji Picker -->
-            <transition name="fade-in">
-                <div v-if="ui.emoji" class="absolute bottom-20 right-4 z-50 shadow-2xl rounded-xl overflow-hidden h-80 w-80">
+            <transition name="fade">
+                <div v-if="ui.emoji" class="absolute bottom-20 right-4 z-50 shadow-2xl rounded-xl overflow-hidden h-80 w-80 border border-white/10">
                     <emoji-picker class="dark" @emoji-click="addEmoji"></emoji-picker>
                 </div>
             </transition>
         </div>
 
-        <!-- Recording Overlay -->
-        <div v-if="isRecording" class="absolute bottom-24 left-1/2 -translate-x-1/2 bg-[#2c3e50]/90 backdrop-blur px-6 py-3 rounded-full text-white flex items-center gap-3 shadow-xl z-50 border border-white/10">
-            <div class="w-3 h-3 bg-red-500 rounded-full animate-ping"></div>
-            <span class="font-mono text-lg">{{ recTime }}</span>
-        </div>
+        <!-- Recording HUD -->
+        <transition name="fade">
+            <div v-if="isRecording" class="absolute bottom-24 left-1/2 -translate-x-1/2 bg-sidebar/90 backdrop-blur px-6 py-3 rounded-full text-white flex items-center gap-3 shadow-2xl z-50 border border-white/10">
+                <div class="w-3 h-3 bg-red-500 rounded-full animate-ping"></div>
+                <span class="font-mono text-lg font-bold">{{ recTime }}</span>
+            </div>
+        </transition>
 
     </main>
 
-    <!-- ================= 4. UTILS & OVERLAYS ================= -->
-    
+    <!-- ================= 4. OVERLAYS & MODALS ================= -->
+
+    <!-- Settings Drawer -->
+    <transition name="fade">
+        <div v-if="ui.drawer" class="absolute inset-0 z-50 bg-black/60 backdrop-blur-sm" @click="ui.drawer = false">
+            <div class="w-72 h-full bg-sidebar shadow-2xl flex flex-col border-r border-white/5" @click.stop>
+                <div class="p-6 bg-black/20">
+                    <div class="flex items-center gap-4">
+                        <img :src="user.avatar || defaultAvatar" class="w-16 h-16 rounded-full border-2 border-primary bg-black/50">
+                        <div>
+                            <div class="font-bold text-white text-lg">{{ user.name }}</div>
+                            <div class="text-xs text-primary">Web K Edition</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="p-2 space-y-1">
+                    <button @click="logout" class="w-full text-left px-4 py-3 hover:bg-red-500/10 text-red-400 rounded-lg flex items-center gap-3 transition">
+                        <i class="fa-solid fa-power-off w-5 text-center"></i> Log Out
+                    </button>
+                </div>
+            </div>
+        </div>
+    </transition>
+
     <!-- Context Menu -->
     <div v-if="ui.context.show" 
-         class="fixed z-[90] bg-[#34495e] w-48 rounded-xl shadow-2xl border border-white/10 py-1 text-sm animate-fade-in"
+         class="fixed z-[100] bg-sidebar w-48 rounded-xl shadow-2xl border border-white/10 py-1 text-sm text-gray-200"
          :style="{top: ui.context.y + 'px', left: ui.context.x + 'px'}"
          @click.stop="closeContext">
-        <button @click="setReply(ui.context.msg)" class="w-full text-left px-4 py-2.5 hover:bg-white/5 text-white flex items-center gap-3"><i class="fa-solid fa-reply w-4"></i> Reply</button>
-        <button @click="copyText(ui.context.msg.content)" v-if="ui.context.msg.type==='text'" class="w-full text-left px-4 py-2.5 hover:bg-white/5 text-white flex items-center gap-3"><i class="fa-regular fa-copy w-4"></i> Copy</button>
+        <button @click="setReply(ui.context.msg)" class="w-full text-left px-4 py-2.5 hover:bg-white/5 flex items-center gap-3"><i class="fa-solid fa-reply w-4"></i> Reply</button>
+        <button @click="copyText(ui.context.msg.content)" v-if="ui.context.msg.type==='text'" class="w-full text-left px-4 py-2.5 hover:bg-white/5 flex items-center gap-3"><i class="fa-regular fa-copy w-4"></i> Copy</button>
+        <div v-if="ui.context.msg.sender === 'me'" class="h-px bg-white/5 my-1"></div>
         <template v-if="ui.context.msg.sender === 'me'">
-            <div class="h-px bg-white/5 my-1"></div>
-            <button v-if="ui.context.msg.type === 'text'" @click="setEdit(ui.context.msg)" class="w-full text-left px-4 py-2.5 hover:bg-white/5 text-white flex items-center gap-3"><i class="fa-solid fa-pen w-4"></i> Edit</button>
+            <button v-if="ui.context.msg.type === 'text'" @click="setEdit(ui.context.msg)" class="w-full text-left px-4 py-2.5 hover:bg-white/5 flex items-center gap-3"><i class="fa-solid fa-pen w-4"></i> Edit</button>
             <button @click="deleteMsg(ui.context.msg)" class="w-full text-left px-4 py-2.5 hover:bg-red-500/10 text-red-400 flex items-center gap-3"><i class="fa-solid fa-trash w-4"></i> Delete</button>
         </template>
     </div>
 
     <!-- Call Overlay -->
-    <div v-if="call.active || call.incoming" class="fixed inset-0 z-[100] bg-[#1e1e1e] flex flex-col items-center justify-center text-white">
-        <div class="absolute inset-0 opacity-20 blur-3xl scale-125 bg-center bg-cover" :style="`background-image: url(${partner.avatar || defaultAvatar})`"></div>
+    <div v-if="call.active || call.incoming" class="fixed inset-0 z-[100] bg-bg flex flex-col items-center justify-center text-white">
+        <div class="absolute inset-0 opacity-30 blur-3xl scale-125 bg-center bg-cover" :style="`background-image: url(${partner.avatar || defaultAvatar})`"></div>
         <div class="relative z-10 flex flex-col items-center">
-            <div class="w-36 h-36 rounded-full overflow-hidden mb-6 shadow-2xl border-4 border-white/5 relative">
+            <div class="w-36 h-36 rounded-full overflow-hidden mb-6 shadow-2xl border-4 border-white/5 relative bg-black/50">
                 <img :src="partner.avatar || defaultAvatar" class="w-full h-full object-cover">
                 <div v-if="call.incoming" class="absolute inset-0 bg-green-500/30 animate-pulse"></div>
             </div>
             <h2 class="text-3xl font-bold mb-2">{{ partner.name }}</h2>
-            <p class="text-primary mb-12 font-medium">{{ call.status }}</p>
-            
-            <div class="flex gap-16">
-                <button v-if="call.incoming" @click="answerCall" class="w-16 h-16 bg-green-500 rounded-full flex items-center justify-center text-2xl hover:scale-110 transition shadow-lg shadow-green-500/30"><i class="fa-solid fa-phone"></i></button>
-                <button @click="endCall" class="w-16 h-16 bg-red-500 rounded-full flex items-center justify-center text-2xl hover:scale-110 transition shadow-lg shadow-red-500/30"><i class="fa-solid fa-phone-slash"></i></button>
+            <p class="text-primary mb-12 font-medium bg-black/30 px-4 py-1 rounded-full backdrop-blur">{{ call.status }}</p>
+            <div class="flex gap-12">
+                <button v-if="call.incoming" @click="answerCall" class="w-16 h-16 bg-green-500 rounded-full flex items-center justify-center text-2xl hover:scale-110 transition shadow-[0_0_30px_rgba(34,197,94,0.4)]"><i class="fa-solid fa-phone"></i></button>
+                <button @click="endCall" class="w-16 h-16 bg-red-500 rounded-full flex items-center justify-center text-2xl hover:scale-110 transition shadow-[0_0_30px_rgba(239,68,68,0.4)]"><i class="fa-solid fa-phone-slash"></i></button>
             </div>
         </div>
         <audio ref="remoteAudio" autoplay class="hidden"></audio>
     </div>
 
-    <!-- Settings Drawer -->
-    <div v-if="ui.drawer" class="absolute inset-0 z-50 bg-black/60 backdrop-blur-sm" @click="ui.drawer = false">
-        <div class="w-72 h-full bg-[#2c3e50] shadow-2xl animate-fade-in flex flex-col" @click.stop>
-            <div class="p-6 bg-[#34495e]">
-                <div class="flex items-center gap-4">
-                    <img :src="user.avatar || defaultAvatar" class="w-16 h-16 rounded-full border-2 border-primary">
-                    <div>
-                        <div class="font-bold text-white text-lg">{{ user.name }}</div>
-                        <div class="text-xs text-primary">v0.0.1 Web Edition</div>
-                    </div>
-                </div>
-            </div>
-            <div class="p-2 space-y-1">
-                <button @click="logout" class="w-full text-left px-4 py-3 hover:bg-red-500/10 text-red-400 rounded-lg flex items-center gap-3 transition">
-                    <i class="fa-solid fa-power-off w-5 text-center"></i> Logout
-                </button>
-            </div>
-        </div>
-    </div>
-
     <!-- Profile Modal -->
-    <div v-if="ui.profile" class="fixed inset-0 z-[80] bg-black/60 flex items-center justify-center p-4 backdrop-blur-sm" @click="ui.profile = false">
-        <div class="bg-[#2c3e50] w-full max-w-sm rounded-2xl overflow-hidden shadow-2xl border border-white/10" @click.stop>
-            <div class="h-32 bg-gradient-to-r from-primary to-primary_hover relative">
-                <button @click="ui.profile = false" class="absolute top-4 left-4 w-8 h-8 rounded-full bg-black/20 text-white flex items-center justify-center"><i class="fa-solid fa-arrow-left"></i></button>
+    <div v-if="ui.profile" class="fixed inset-0 z-[80] bg-black/80 backdrop-blur-sm flex items-center justify-center p-4" @click="ui.profile = false">
+        <div class="bg-sidebar w-full max-w-sm rounded-2xl overflow-hidden shadow-2xl border border-white/10" @click.stop>
+            <div class="h-32 bg-gradient-to-r from-primary to-blue-600 relative">
+                <button @click="ui.profile = false" class="absolute top-4 left-4 w-8 h-8 rounded-full bg-black/20 text-white flex items-center justify-center hover:bg-black/40 transition"><i class="fa-solid fa-arrow-left"></i></button>
             </div>
             <div class="px-6 relative -top-12">
-                <img :src="partner.avatar || defaultAvatar" class="w-24 h-24 rounded-full border-4 border-[#2c3e50] bg-black/20">
+                <img :src="partner.avatar || defaultAvatar" class="w-24 h-24 rounded-full border-4 border-sidebar bg-black/20">
                 <div class="mt-3">
-                    <h2 class="text-xl font-bold text-white">{{ partner.name }}</h2>
-                    <p class="text-primary text-sm font-mono mt-1">@{{ targetId }}</p>
+                    <h2 class="text-2xl font-bold text-white">{{ partner.name }}</h2>
+                    <p class="text-primary font-mono text-sm mt-1 select-all cursor-pointer">@{{ targetId }}</p>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Image Zoom -->
-    <div v-if="zoomImg" class="fixed inset-0 z-[200] bg-black/95 flex items-center justify-center p-4 backdrop-blur-md" @click="zoomImg=null">
-        <img :src="zoomImg" class="max-w-full max-h-full rounded shadow-2xl">
+    <!-- Zoom -->
+    <div v-if="zoomImg" class="fixed inset-0 z-[200] bg-black/95 flex items-center justify-center p-2 backdrop-blur-md cursor-zoom-out" @click="zoomImg=null">
+        <img :src="zoomImg" class="max-w-full max-h-full rounded-lg shadow-2xl animate-fade">
     </div>
 
 </div>
@@ -454,13 +443,12 @@
             const inputMsg = ref('');
             const searchQuery = ref('');
             
-            // Connection
             const myPeerId = ref('');
             const targetId = ref('');
             const isConnected = ref(false);
             const mobileView = ref('sidebar');
             
-            // Tools
+            // Interaction State
             const replyingTo = ref(null);
             const editingMsg = ref(null);
             const zoomImg = ref(null);
@@ -479,42 +467,38 @@
             let mediaRecorder = null, chunks = [], recInt = null;
             let callObj = null, localStream = null;
 
-            // Audio Context for SFX
+            // Audio Context
             const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
             const playSound = (type) => {
                 if(audioCtx.state === 'suspended') audioCtx.resume();
                 const o = audioCtx.createOscillator(); const g = audioCtx.createGain();
                 o.connect(g); g.connect(audioCtx.destination);
+                const t = audioCtx.currentTime;
                 if(type === 'sent') {
-                    o.frequency.setValueAtTime(400, audioCtx.currentTime);
-                    o.frequency.exponentialRampToValueAtTime(800, audioCtx.currentTime+0.1);
-                    g.gain.setValueAtTime(0.05, audioCtx.currentTime);
-                    g.gain.exponentialRampToValueAtTime(0, audioCtx.currentTime+0.1);
+                    o.frequency.setValueAtTime(400, t); o.frequency.exponentialRampToValueAtTime(800, t+0.1);
+                    g.gain.setValueAtTime(0.05, t); g.gain.exponentialRampToValueAtTime(0, t+0.1);
                 } else {
-                    o.frequency.setValueAtTime(800, audioCtx.currentTime);
-                    o.frequency.exponentialRampToValueAtTime(400, audioCtx.currentTime+0.2);
-                    g.gain.setValueAtTime(0.05, audioCtx.currentTime);
-                    g.gain.exponentialRampToValueAtTime(0, audioCtx.currentTime+0.2);
+                    o.frequency.setValueAtTime(800, t); o.frequency.exponentialRampToValueAtTime(400, t+0.2);
+                    g.gain.setValueAtTime(0.05, t); g.gain.exponentialRampToValueAtTime(0, t+0.2);
                 }
-                o.start(); o.stop(audioCtx.currentTime+0.2);
+                o.start(t); o.stop(t+0.2);
             };
 
-            // LIFECYCLE
             onMounted(() => {
-                const u = localStorage.getItem('tw_full_user');
+                const u = localStorage.getItem('tw_k_user');
                 if(u) Object.assign(user, JSON.parse(u));
-                const m = localStorage.getItem('tw_full_msgs');
+                const m = localStorage.getItem('tw_k_msgs');
                 if(m) messages.value = JSON.parse(m);
                 if(user.setupComplete) initPeer();
                 document.addEventListener('click', () => { ui.context.show = false; ui.emoji = false; });
             });
 
             watch(messages, (val) => {
-                localStorage.setItem('tw_full_msgs', JSON.stringify(val));
+                localStorage.setItem('tw_k_msgs', JSON.stringify(val));
                 if(mobileView.value === 'chat') scrollToBottom();
             }, { deep: true });
 
-            // PEER LOGIC
+            // Core Logic
             const initPeer = () => {
                 peer = new Peer(null);
                 peer.on('open', id => myPeerId.value = id);
@@ -541,7 +525,6 @@
                 conn.on('close', () => { isConnected.value = false; partner.online = false; });
             };
 
-            // MESSAGING
             const send = () => {
                 if(!inputMsg.value.trim() && !editingMsg.value) return;
                 
@@ -570,14 +553,14 @@
                 }
             };
 
-            // ACTIONS
-            const showContext = (e, msg) => ui.context = { show: true, x: e.clientX, y: e.clientY, msg };
+            // Actions
+            const showContext = (e, msg) => { ui.context = { show: true, x: e.clientX, y: e.clientY, msg }; };
             const closeContext = () => ui.context.show = false;
             const setReply = (msg) => { replyingTo.value = msg; msgInput.value.focus(); closeContext(); };
             const setEdit = (msg) => { editingMsg.value = msg; inputMsg.value = msg.content; msgInput.value.focus(); closeContext(); };
             const deleteMsg = (msg) => {
-                if(confirm('Delete message?')) {
-                    msg.isDeleted = true; msg.content = 'You deleted this message';
+                if(confirm('Delete?')) {
+                    msg.isDeleted = true; msg.content = 'Deleted message';
                     if(conn) conn.send({ type: 'sys_delete', id: msg.id });
                 }
                 closeContext();
@@ -585,18 +568,14 @@
             const cancelAction = () => { replyingTo.value = null; editingMsg.value = null; inputMsg.value = ''; };
             const copyText = (t) => { navigator.clipboard.writeText(t); closeContext(); };
 
-            // MEDIA
+            // Files & Media
             const handleFile = (e) => {
                 const f = e.target.files[0];
-                if(f) {
-                    const r = new FileReader();
-                    r.onload = ev => {
-                        const msg = { id: Date.now(), type: 'image', content: ev.target.result, timestamp: Date.now() };
-                        messages.value.push({...msg, sender: 'me', status: 'sent'});
-                        if(conn) conn.send(msg);
-                    };
-                    r.readAsDataURL(f);
-                }
+                if(f) { const r = new FileReader(); r.onload = ev => {
+                    const msg = { id: Date.now(), type: 'image', content: ev.target.result, timestamp: Date.now() };
+                    messages.value.push({...msg, sender: 'me', status: 'sent'});
+                    if(conn) conn.send(msg);
+                }; r.readAsDataURL(f); }
             };
 
             const startRec = async () => {
@@ -612,33 +591,31 @@
                             const msg = { id: Date.now(), type: 'voice', content: r.result, timestamp: Date.now() };
                             messages.value.push({...msg, sender: 'me', status: 'sent'});
                             if(conn) conn.send(msg);
-                        };
-                        s.getTracks().forEach(t=>t.stop());
+                        }; s.getTracks().forEach(t=>t.stop());
                     };
                     mediaRecorder.start();
-                } catch(e) { alert('Mic access denied'); }
+                } catch { alert('Mic blocked'); }
             };
             const stopRec = () => { if(mediaRecorder) { mediaRecorder.stop(); isRecording.value = false; clearInterval(recInt); recTime.value='00:00'; } };
             const playVoice = (id) => {
-                const aud = document.getElementById('aud-'+id);
-                document.querySelectorAll('audio').forEach(a=>{if(a!==aud){a.pause();a.currentTime=0;}});
+                const aud = new Audio(messages.value.find(m=>m.id===id).content);
                 playingVoice.value = id; aud.play(); aud.onended = () => playingVoice.value = null;
             };
 
-            // CALLS
+            // Calls
             const startCall = async () => {
                 localStream = await navigator.mediaDevices.getUserMedia({ audio: true });
                 callObj = peer.call(conn.peer, localStream);
                 call.active = true; call.status = 'Calling...';
-                callObj.on('stream', s => { document.querySelector('audio.hidden').srcObject = s; });
+                callObj.on('stream', s => document.querySelector('audio.hidden').srcObject = s);
                 callObj.on('close', endCall);
             };
-            const handleIncomingCall = (c) => { call.incoming = true; callObj = c; call.status = 'Incoming Call'; };
+            const handleIncomingCall = (c) => { call.incoming = true; callObj = c; call.status = 'Incoming Audio Call'; };
             const answerCall = async () => {
                 localStream = await navigator.mediaDevices.getUserMedia({ audio: true });
                 callObj.answer(localStream);
-                call.incoming = false; call.active = true; call.status = 'Connected';
-                callObj.on('stream', s => { document.querySelector('audio.hidden').srcObject = s; });
+                call.incoming = false; call.active = true; call.status = 'In Call';
+                callObj.on('stream', s => document.querySelector('audio.hidden').srcObject = s);
             };
             const endCall = () => {
                 if(callObj) callObj.close();
@@ -646,12 +623,9 @@
                 call.active = false; call.incoming = false;
             };
 
-            // UTILS
-            const finishSetup = () => { user.name = tempName.value; user.avatar = tempAvatar.value; user.setupComplete = true; localStorage.setItem('tw_full_user', JSON.stringify(user)); initPeer(); };
-            const onAvatarChange = (e) => {
-                const f = e.target.files[0];
-                if(f) { const r = new FileReader(); r.onload = ev => { tempAvatar.value = ev.target.result; if(user.setupComplete) { user.avatar = ev.target.result; localStorage.setItem('tw_full_user', JSON.stringify(user)); } }; r.readAsDataURL(f); }
-            };
+            // Helpers
+            const finishSetup = () => { user.name = tempName.value; user.avatar = tempAvatar.value; user.setupComplete = true; localStorage.setItem('tw_k_user', JSON.stringify(user)); initPeer(); };
+            const onAvatarChange = (e) => { const f = e.target.files[0]; if(f) { const r = new FileReader(); r.onload = ev => tempAvatar.value = ev.target.result; r.readAsDataURL(f); } };
             const renderEmoji = (t) => twemoji.parse(t || '');
             const addEmoji = (e) => inputMsg.value += e.detail.unicode;
             const scrollToBottom = () => nextTick(() => document.getElementById('bottomAnchor')?.scrollIntoView({behavior:'smooth'}));
@@ -665,19 +639,13 @@
             const lastMsgTime = computed(() => lastMsg.value ? formatTime(lastMsg.value.timestamp) : '');
             const lastMsgPreview = computed(() => lastMsg.value ? (lastMsg.value.type === 'image' ? 'Photo' : (lastMsg.value.type==='voice'?'Voice':lastMsg.value.content)) : '');
             
-            const filteredMessages = computed(() => {
-                if(!searchQuery.value) return [];
-                return messages.value.filter(m => m.type === 'text' && m.content.toLowerCase().includes(searchQuery.value.toLowerCase()));
-            });
-
             const groupedMessages = computed(() => {
                 let lastDate = '';
                 return messages.value.map(m => {
                     const d = new Date(m.timestamp).toLocaleDateString();
                     const show = d !== lastDate; lastDate = d;
                     const today = new Date().toLocaleDateString();
-                    const yesterday = new Date(Date.now()-86400000).toLocaleDateString();
-                    return { ...m, showDate: show, dateLabel: d === today ? 'Today' : (d === yesterday ? 'Yesterday' : d) };
+                    return { ...m, showDate: show, dateLabel: d === today ? 'Today' : d };
                 });
             });
 
@@ -687,7 +655,7 @@
                 replyingTo, editingMsg, isRecording, recTime, playingVoice, call, searchQuery,
                 connect, send, startRec, stopRec, playVoice, startCall, answerCall, endCall,
                 finishSetup, onAvatarChange, handleFile, renderEmoji, addEmoji, copyId, formatTime, logout,
-                lastMsg, lastMsgTime, lastMsgPreview, groupedMessages, filteredMessages,
+                lastMsg, lastMsgTime, lastMsgPreview, groupedMessages,
                 showContext, closeContext, setReply, setEdit, deleteMsg, cancelAction, copyText, jumpTo, onType
             };
         }
