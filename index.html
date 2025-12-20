@@ -1,118 +1,232 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SA:MP Audio Link Generator</title>
+    <title>Audio Management System | SA:MP</title>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <style>
+        :root {
+            --bg: #0a0a0c;
+            --card: #141417;
+            --accent: #3b82f6;
+            --text: #e2e8f0;
+            --text-dim: #94a3b8;
+            --border: #2d2d35;
+        }
+
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #0f0f13;
-            color: #ffffff;
+            background-color: var(--bg);
+            color: var(--text);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
+            min-height: 100vh;
             margin: 0;
         }
+
         .container {
-            background-color: #1a1a24;
-            padding: 30px;
-            border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
             width: 100%;
-            max-width: 500px;
-            text-align: center;
+            max-width: 600px;
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 40px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
         }
-        h1 { color: #007bff; margin-bottom: 10px; }
-        p { color: #888; font-size: 14px; margin-bottom: 25px; }
-        input {
+
+        h2 { font-weight: 600; font-size: 24px; margin-bottom: 8px; letter-spacing: -0.5px; }
+        p.subtitle { color: var(--text-dim); font-size: 14px; margin-bottom: 30px; }
+
+        .form-group { margin-bottom: 20px; }
+        label { display: block; font-size: 12px; font-weight: 700; text-transform: uppercase; color: var(--text-dim); margin-bottom: 8px; }
+        
+        input[type="text"], input[type="file"] {
             width: 100%;
             padding: 12px;
-            margin-bottom: 20px;
-            border: 1px solid #333;
-            border-radius: 5px;
-            background: #252533;
+            background: #0a0a0c;
+            border: 1px solid var(--border);
+            border-radius: 6px;
             color: white;
             box-sizing: border-box;
             outline: none;
         }
-        input:focus { border-color: #007bff; }
-        button {
-            background-color: #007bff;
+
+        input[type="file"] { padding: 8px; font-size: 13px; }
+
+        .btn {
+            background: var(--accent);
             color: white;
             border: none;
-            padding: 12px 25px;
-            border-radius: 5px;
+            padding: 14px 20px;
+            border-radius: 6px;
+            width: 100%;
+            font-weight: 600;
             cursor: pointer;
-            font-weight: bold;
-            transition: 0.3s;
+            transition: all 0.2s;
+            margin-top: 10px;
         }
-        button:hover { background-color: #0056b3; }
-        .result-area {
-            margin-top: 25px;
+
+        .btn:hover { background: #2563eb; transform: translateY(-1px); }
+        .btn:disabled { background: #1e293b; cursor: not-allowed; }
+
+        #status {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 6px;
+            font-size: 13px;
             display: none;
-            text-align: left;
-        }
-        .result-label { font-size: 12px; color: #007bff; margin-bottom: 5px; }
-        .link-box {
-            background: #0f0f13;
-            padding: 10px;
-            border-radius: 5px;
+            background: #1e293b;
+            border: 1px solid var(--accent);
             word-break: break-all;
-            font-family: monospace;
-            border: 1px dashed #444;
-            cursor: pointer;
         }
-        .footer { margin-top: 20px; font-size: 11px; color: #444; }
+
+        .copy-hint { font-size: 11px; color: var(--accent); margin-top: 8px; cursor: pointer; }
+
+        .stats {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: var(--text-dim);
+        }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h1>SA:MP Audio Host</h1>
-    <p>Вставь ссылку на файл из GitHub репозитория, чтобы получить прямой URL для PlayAudioStreamForPlayer</p>
-    
-    <input type="text" id="githubUrl" placeholder="https://github.com/shadexqz/shadexqz.github.io/blob/main/music.mp3">
-    <button onclick="generateLink()">Сгенерировать прямую ссылку</button>
+    <h2>Cloud Audio Host</h2>
+    <p class="subtitle">Direct CDN link generator for SA:MP streamers.</p>
 
-    <div id="resultArea" class="result-area">
-        <div class="result-label">Прямая ссылка для SA:MP:</div>
-        <div id="directLink" class="link-box" onclick="copyLink()"></div>
-        <p style="margin-top:10px; font-size:12px; color: #4caf50;">Нажми на ссылку, чтобы скопировать</p>
+    <div class="form-group">
+        <label>GitHub Access Token</label>
+        <input type="text" id="token" placeholder="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" onchange="saveToken()">
     </div>
 
-    <div class="footer">
-        shadexqz.github.io
+    <div class="form-group">
+        <label>Audio File (MP3, WAV, AAC)</label>
+        <input type="file" id="audioFile" accept=".mp3,.wav,.aac">
+    </div>
+
+    <button class="btn" id="uploadBtn" onclick="handleUpload()">Upload to Repository</button>
+
+    <div id="status"></div>
+
+    <div class="stats">
+        <span>Repo: shadexqz.github.io</span>
+        <span id="fileCount">Checking storage...</span>
     </div>
 </div>
 
 <script>
-    function generateLink() {
-        const input = document.getElementById('githubUrl').value.trim();
-        const resultArea = document.getElementById('resultArea');
-        const directLink = document.getElementById('directLink');
+    const USER = 'shadexqz';
+    const REPO = 'shadexqz.github.io';
+    const FOLDER = 'Music';
 
-        if (input.includes('github.com')) {
-            // Преобразуем обычную ссылку GitHub в Raw ссылку
-            // Пример: github.com/user/repo/blob/main/file.mp3 -> raw.githubusercontent.com/user/repo/main/file.mp3
-            let rawUrl = input
-                .replace('github.com', 'raw.githubusercontent.com')
-                .replace('/blob/', '/');
+    // Load token from local storage
+    document.getElementById('token').value = localStorage.getItem('gh_token') || '';
 
-            directLink.innerText = rawUrl;
-            resultArea.style.display = 'block';
-        } else {
-            alert('Пожалуйста, введи корректную ссылку на файл в GitHub репозитории.');
+    function saveToken() {
+        localStorage.setItem('gh_token', document.getElementById('token').value);
+    }
+
+    async function handleUpload() {
+        const token = document.getElementById('token').value;
+        const fileInput = document.getElementById('audioFile');
+        const btn = document.getElementById('uploadBtn');
+        const status = document.getElementById('status');
+
+        if (!token) return alert('Please enter your GitHub Token');
+        if (!fileInput.files[0]) return alert('Select a file first');
+
+        const file = fileInput.files[0];
+        const fileName = `${Date.now()}_${file.name.replace(/\s+/g, '_')}`;
+        const path = `${FOLDER}/${fileName}`;
+
+        btn.disabled = true;
+        btn.innerText = 'Uploading...';
+        status.style.display = 'block';
+        status.innerText = 'Connecting to GitHub API...';
+
+        try {
+            // 1. Check file count
+            const contents = await axios.get(`https://api.github.com/repos/${USER}/${REPO}/contents/${FOLDER}`, {
+                headers: { Authorization: `token ${token}` }
+            }).catch(() => ({ data: [] }));
+
+            if (contents.data.length >= 30) {
+                status.innerText = 'Error: Storage limit reached (30 songs). Please delete old files in GitHub.';
+                btn.disabled = false;
+                return;
+            }
+
+            // 2. Read file as Base64
+            const base64Content = await toBase64(file);
+
+            // 3. Upload to GitHub
+            await axios.put(`https://api.github.com/repos/${USER}/${REPO}/contents/${path}`, {
+                message: `Upload audio: ${fileName}`,
+                content: base64Content.split(',')[1]
+            }, {
+                headers: { Authorization: `token ${token}` }
+            });
+
+            const directLink = `https://raw.githubusercontent.com/${USER}/${REPO}/main/${path}`;
+            
+            status.innerHTML = `
+                <div style="color: #4ade80; margin-bottom: 8px;">Successfully uploaded!</div>
+                <div id="finalLink" style="font-family: monospace; background: #000; padding: 10px; border-radius: 4px;">${directLink}</div>
+                <div class="copy-hint" onclick="copyToClipboard()">[Click here to copy link]</div>
+            `;
+
+            updateFileCount(contents.data.length + 1);
+
+        } catch (err) {
+            status.innerText = 'Error: ' + (err.response?.data?.message || err.message);
+            console.error(err);
+        } finally {
+            btn.disabled = false;
+            btn.innerText = 'Upload to Repository';
         }
     }
 
-    function copyLink() {
-        const link = document.getElementById('directLink').innerText;
-        navigator.clipboard.writeText(link).then(() => {
-            alert('Ссылка скопирована!');
-        });
+    const toBase64 = file => new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = error => reject(error);
+    });
+
+    function copyToClipboard() {
+        const text = document.getElementById('finalLink').innerText;
+        navigator.clipboard.writeText(text);
+        alert('Copied to clipboard!');
     }
+
+    async function updateFileCount(count = null) {
+        const display = document.getElementById('fileCount');
+        if (count !== null) {
+            display.innerText = `Storage: ${count}/30 songs`;
+            return;
+        }
+        // Initial check
+        const token = localStorage.getItem('gh_token');
+        if (!token) { display.innerText = 'Storage: Enter token to see'; return; }
+        
+        try {
+            const res = await axios.get(`https://api.github.com/repos/${USER}/${REPO}/contents/${FOLDER}`, {
+                headers: { Authorization: `token ${token}` }
+            });
+            display.innerText = `Storage: ${res.data.length}/30 songs`;
+        } catch {
+            display.innerText = `Storage: 0/30 songs`;
+        }
+    }
+
+    updateFileCount();
 </script>
 
 </body>
