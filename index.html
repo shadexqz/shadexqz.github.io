@@ -3,230 +3,269 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Audio Management System | SA:MP</title>
+    <title>CDN Engine | Audio Streaming Service</title>
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Inter:wght@400;600&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg: #0a0a0c;
-            --card: #141417;
-            --accent: #3b82f6;
-            --text: #e2e8f0;
-            --text-dim: #94a3b8;
-            --border: #2d2d35;
+            --bg: #050505; --card: #111111; --accent: #ffffff;
+            --text: #ededed; --dim: #666666; --border: #222222;
+            --success: #00ff41; --error: #ff3131;
         }
 
         body {
             background-color: var(--bg);
             color: var(--text);
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            font-family: 'Inter', sans-serif;
+            margin: 0;
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
-            margin: 0;
         }
 
-        .container {
+        .app-container {
             width: 100%;
-            max-width: 600px;
+            max-width: 480px;
             background: var(--card);
             border: 1px solid var(--border);
-            border-radius: 12px;
             padding: 40px;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+            box-shadow: 0 30px 60px rgba(0,0,0,0.8);
         }
 
-        h2 { font-weight: 600; font-size: 24px; margin-bottom: 8px; letter-spacing: -0.5px; }
-        p.subtitle { color: var(--text-dim); font-size: 14px; margin-bottom: 30px; }
+        .status-bar {
+            display: flex;
+            align-items: center;
+            font-size: 10px;
+            color: var(--dim);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 30px;
+        }
 
-        .form-group { margin-bottom: 20px; }
-        label { display: block; font-size: 12px; font-weight: 700; text-transform: uppercase; color: var(--text-dim); margin-bottom: 8px; }
+        .status-dot {
+            width: 6px;
+            height: 6px;
+            background: var(--success);
+            border-radius: 50%;
+            margin-right: 10px;
+            box-shadow: 0 0 10px var(--success);
+        }
+
+        h1 {
+            font-size: 20px;
+            font-weight: 600;
+            margin: 0 0 10px 0;
+            letter-spacing: -1px;
+        }
+
+        .description {
+            font-size: 13px;
+            color: var(--dim);
+            margin-bottom: 30px;
+            line-height: 1.5;
+        }
+
+        .input-group { margin-bottom: 25px; }
         
-        input[type="text"], input[type="file"] {
+        label {
+            display: block;
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--dim);
+            margin-bottom: 10px;
+            text-transform: uppercase;
+        }
+
+        input[type="password"], input[type="file"] {
             width: 100%;
             padding: 12px;
-            background: #0a0a0c;
+            background: #000;
             border: 1px solid var(--border);
-            border-radius: 6px;
-            color: white;
+            color: #fff;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 13px;
             box-sizing: border-box;
             outline: none;
         }
 
-        input[type="file"] { padding: 8px; font-size: 13px; }
+        input[type="password"]:focus { border-color: var(--dim); }
 
-        .btn {
-            background: var(--accent);
-            color: white;
-            border: none;
-            padding: 14px 20px;
-            border-radius: 6px;
+        .btn-deploy {
             width: 100%;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s;
-            margin-top: 10px;
-        }
-
-        .btn:hover { background: #2563eb; transform: translateY(-1px); }
-        .btn:disabled { background: #1e293b; cursor: not-allowed; }
-
-        #status {
-            margin-top: 20px;
             padding: 15px;
-            border-radius: 6px;
+            background: var(--accent);
+            color: #000;
+            border: none;
+            font-weight: 700;
             font-size: 13px;
-            display: none;
-            background: #1e293b;
-            border: 1px solid var(--accent);
-            word-break: break-all;
+            text-transform: uppercase;
+            cursor: pointer;
+            letter-spacing: 1px;
+            transition: 0.3s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
-        .copy-hint { font-size: 11px; color: var(--accent); margin-top: 8px; cursor: pointer; }
+        .btn-deploy:hover { transform: translateY(-2px); filter: invert(0.1); }
+        .btn-deploy:disabled { background: var(--border); color: var(--dim); cursor: not-allowed; }
 
-        .stats {
+        #output {
             margin-top: 30px;
             padding-top: 20px;
             border-top: 1px solid var(--border);
-            display: flex;
-            justify-content: space-between;
-            font-size: 12px;
-            color: var(--text-dim);
+            display: none;
         }
+
+        .stream-link {
+            background: #000;
+            padding: 15px;
+            border: 1px solid var(--border);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            word-break: break-all;
+            color: var(--success);
+            margin-bottom: 15px;
+            cursor: pointer;
+        }
+
+        audio {
+            width: 100%;
+            height: 35px;
+            filter: invert(1);
+            margin-bottom: 10px;
+        }
+
+        .footer {
+            margin-top: 40px;
+            font-size: 10px;
+            color: var(--dim);
+            text-align: center;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .error-msg { color: var(--error); font-size: 11px; margin-top: 10px; font-family: 'JetBrains Mono'; }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <h2>Cloud Audio Host</h2>
-    <p class="subtitle">Direct CDN link generator for SA:MP streamers.</p>
-
-    <div class="form-group">
-        <label>GitHub Access Token</label>
-        <input type="text" id="token" placeholder="bla bla bla" onchange="saveToken()">
+<div class="app-container">
+    <div class="status-bar">
+        <div class="status-dot"></div>
+        CDN System Active
     </div>
 
-    <div class="form-group">
-        <label>Audio File (MP3, WAV, AAC)</label>
-        <input type="file" id="audioFile" accept=".mp3,.wav,.aac">
+    <h1>AUDIO STREAM ENGINE</h1>
+    <p class="description">Securely upload high-fidelity audio assets to GitHub infrastructure for immediate SA:MP streaming.</p>
+
+    <div class="input-group">
+        <label>System Access Token</label>
+        <input type="password" id="token" placeholder="ghp_********************" onchange="saveToken()">
     </div>
 
-    <button class="btn" id="uploadBtn" onclick="handleUpload()">Upload to Repository</button>
+    <div class="input-group">
+        <label>Resource Payload (MP3/WAV/AAC)</label>
+        <input type="file" id="fileInput" accept="audio/*">
+    </div>
 
-    <div id="status"></div>
+    <button class="btn-deploy" id="uploadBtn" onclick="startDeployment()">Initialize Deployment</button>
 
-    <div class="stats">
-        <span>Repo: shadexqz.github.io</span>
-        <span id="fileCount">Checking storage...</span>
+    <div id="output">
+        <label>Streaming Preview</label>
+        <audio id="preview" controls></audio>
+        
+        <label style="margin-top: 15px;">Direct Stream URL (Click to copy)</label>
+        <div class="stream-link" id="finalUrl" onclick="copyLink()"></div>
+    </div>
+
+    <div id="errorBox" class="error-msg"></div>
+
+    <div class="footer">
+        PROJECT: shadexqz.github.io | STORAGE: Music/
     </div>
 </div>
 
 <script>
-    const USER = 'shadexqz';
-    const REPO = 'shadexqz.github.io';
-    const FOLDER = 'Music';
+    const CONFIG = {
+        owner: 'shadexqz',
+        repo: 'shadexqz.github.io',
+        folder: 'Music'
+    };
 
-    // Load token from local storage
-    document.getElementById('token').value = localStorage.getItem('gh_token') || '';
+    // Load saved token
+    document.getElementById('token').value = localStorage.getItem('gh_token_samp') || '';
 
     function saveToken() {
-        localStorage.setItem('gh_token', document.getElementById('token').value);
+        localStorage.setItem('gh_token_samp', document.getElementById('token').value.trim());
     }
 
-    async function handleUpload() {
-        const token = document.getElementById('token').value;
-        const fileInput = document.getElementById('audioFile');
+    async function startDeployment() {
+        const token = document.getElementById('token').value.trim();
+        const file = document.getElementById('fileInput').files[0];
         const btn = document.getElementById('uploadBtn');
-        const status = document.getElementById('status');
+        const output = document.getElementById('output');
+        const errorBox = document.getElementById('errorBox');
 
-        if (!token) return alert('Please enter your GitHub Token');
-        if (!fileInput.files[0]) return alert('Select a file first');
+        if (!token) return showError('AUTH_ERROR: Access Token required.');
+        if (!file) return showError('DATA_ERROR: No payload selected.');
 
-        const file = fileInput.files[0];
-        const fileName = `${Date.now()}_${file.name.replace(/\s+/g, '_')}`;
-        const path = `${FOLDER}/${fileName}`;
-
+        errorBox.innerText = '';
         btn.disabled = true;
-        btn.innerText = 'Uploading...';
-        status.style.display = 'block';
-        status.innerText = 'Connecting to GitHub API...';
+        btn.innerText = 'Deploying...';
 
         try {
-            // 1. Check file count
-            const contents = await axios.get(`https://api.github.com/repos/${USER}/${REPO}/contents/${FOLDER}`, {
-                headers: { Authorization: `token ${token}` }
-            }).catch(() => ({ data: [] }));
+            // Clean filename
+            const timestamp = Date.now();
+            const cleanName = file.name.replace(/[^a-z0-9.]/gi, '_').toLowerCase();
+            const fileName = `${timestamp}_${cleanName}`;
+            const path = `${CONFIG.folder}/${fileName}`;
 
-            if (contents.data.length >= 30) {
-                status.innerText = 'Error: Storage limit reached (30 songs). Please delete old files in GitHub.';
-                btn.disabled = false;
-                return;
-            }
+            // Convert to Base64
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = async () => {
+                const base64Content = reader.result.split(',')[1];
 
-            // 2. Read file as Base64
-            const base64Content = await toBase64(file);
+                try {
+                    await axios.put(`https://api.github.com/repos/${CONFIG.owner}/${CONFIG.repo}/contents/${path}`, {
+                        message: `sys: automated stream deployment [${fileName}]`,
+                        content: base64Content
+                    }, {
+                        headers: { 'Authorization': `token ${token}` }
+                    });
 
-            // 3. Upload to GitHub
-            await axios.put(`https://api.github.com/repos/${USER}/${REPO}/contents/${path}`, {
-                message: `Upload audio: ${fileName}`,
-                content: base64Content.split(',')[1]
-            }, {
-                headers: { Authorization: `token ${token}` }
-            });
+                    // THE DIRECT RAW LINK
+                    const directLink = `https://raw.githubusercontent.com/${CONFIG.owner}/${CONFIG.repo}/main/${path}`;
+                    
+                    // Show results
+                    output.style.display = 'block';
+                    document.getElementById('finalUrl').innerText = directLink;
+                    document.getElementById('preview').src = directLink;
+                    
+                    btn.innerText = 'Deployment Successful';
+                    setTimeout(() => { btn.innerText = 'Initialize Deployment'; btn.disabled = false; }, 3000);
 
-            const directLink = `https://raw.githubusercontent.com/${USER}/${REPO}/main/${path}`;
-            
-            status.innerHTML = `
-                <div style="color: #4ade80; margin-bottom: 8px;">Successfully uploaded!</div>
-                <div id="finalLink" style="font-family: monospace; background: #000; padding: 10px; border-radius: 4px;">${directLink}</div>
-                <div class="copy-hint" onclick="copyToClipboard()">[Click here to copy link]</div>
-            `;
-
-            updateFileCount(contents.data.length + 1);
-
-        } catch (err) {
-            status.innerText = 'Error: ' + (err.response?.data?.message || err.message);
-            console.error(err);
-        } finally {
+                } catch (err) {
+                    showError(`API_ERROR: ${err.response?.status || 'Unknown'} - Check token permissions.`);
+                    btn.disabled = false;
+                    btn.innerText = 'Initialize Deployment';
+                }
+            };
+        } catch (e) {
+            showError('CRITICAL_SYSTEM_FAILURE');
             btn.disabled = false;
-            btn.innerText = 'Upload to Repository';
         }
     }
 
-    const toBase64 = file => new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.readAsDataURL(file);
-        reader.onload = () => resolve(reader.result);
-        reader.onerror = error => reject(error);
-    });
-
-    function copyToClipboard() {
-        const text = document.getElementById('finalLink').innerText;
-        navigator.clipboard.writeText(text);
-        alert('Copied to clipboard!');
+    function showError(text) {
+        document.getElementById('errorBox').innerText = `> ${text}`;
     }
 
-    async function updateFileCount(count = null) {
-        const display = document.getElementById('fileCount');
-        if (count !== null) {
-            display.innerText = `Storage: ${count}/30 songs`;
-            return;
-        }
-        // Initial check
-        const token = localStorage.getItem('gh_token');
-        if (!token) { display.innerText = 'Storage: Enter token to see'; return; }
-        
-        try {
-            const res = await axios.get(`https://api.github.com/repos/${USER}/${REPO}/contents/${FOLDER}`, {
-                headers: { Authorization: `token ${token}` }
-            });
-            display.innerText = `Storage: ${res.data.length}/30 songs`;
-        } catch {
-            display.innerText = `Storage: 0/30 songs`;
-        }
+    function copyLink() {
+        const url = document.getElementById('finalUrl').innerText;
+        navigator.clipboard.writeText(url);
+        const originalText = document.getElementById('finalUrl').innerText;
+        document.getElementById('finalUrl').innerText = 'COPIED TO CLIPBOARD';
+        setTimeout(() => { document.getElementById('finalUrl').innerText = url; }, 1000);
     }
-
-    updateFileCount();
 </script>
 
 </body>
