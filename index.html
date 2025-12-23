@@ -1,360 +1,222 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Audio Management System | SA:MP</title>
-    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <title>MEME COMPRESSOR 3000</title>
     <style>
-        :root {
-            --bg: #0a0a0c;
-            --card: #141417;
-            --accent: #3b82f6;
-            --danger: #ef4444;
-            --success: #22c55e;
-            --text: #e2e8f0;
-            --text-dim: #94a3b8;
-            --border: #2d2d35;
-        }
-
         body {
-            background-color: var(--bg);
-            color: var(--text);
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: #000;
+            color: #0f0;
+            font-family: "Comic Sans MS", cursive, sans-serif;
             display: flex;
+            flex-direction: column;
+            align-items: center;
             justify-content: center;
-            align-items: flex-start;
             min-height: 100vh;
             margin: 0;
-            padding: 40px 20px;
+            overflow-x: hidden;
+        }
+
+        h1 {
+            text-shadow: 3px 3px #f00;
+            font-size: 3rem;
+            text-align: center;
         }
 
         .container {
-            width: 100%;
-            max-width: 700px;
-            background: var(--card);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 40px;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+            border: 5px dashed #f0f;
+            padding: 20px;
+            background: #111;
+            box-shadow: 0 0 20px #0ff;
+            max-width: 90%;
+            text-align: center;
         }
 
-        h2 { font-weight: 600; font-size: 24px; margin: 0 0 8px 0; letter-spacing: -0.5px; }
-        p.subtitle { color: var(--text-dim); font-size: 14px; margin-bottom: 30px; }
-
-        .form-group { margin-bottom: 20px; }
-        label { display: block; font-size: 12px; font-weight: 700; text-transform: uppercase; color: var(--text-dim); margin-bottom: 8px; }
-        
-        input[type="text"], input[type="file"] {
-            width: 100%;
-            padding: 12px;
-            background: #0a0a0c;
-            border: 1px solid var(--border);
-            border-radius: 6px;
-            color: white;
-            box-sizing: border-box;
-            outline: none;
+        input[type="file"] {
+            margin: 20px 0;
+            color: #fff;
         }
 
-        .btn {
-            background: var(--accent);
-            color: white;
+        button {
+            background: #f00;
+            color: #fff;
             border: none;
-            padding: 14px 20px;
-            border-radius: 6px;
-            width: 100%;
-            font-weight: 600;
+            padding: 15px 30px;
+            font-size: 1.2rem;
             cursor: pointer;
-            transition: all 0.2s;
+            font-weight: bold;
+            text-transform: uppercase;
         }
 
-        .btn:hover { background: #2563eb; transform: translateY(-1px); }
-        .btn:disabled { background: #1e293b; cursor: not-allowed; opacity: 0.5; }
+        button:hover {
+            background: #ff0;
+            color: #000;
+        }
 
-        /* Status Box */
-        #status {
+        button:disabled {
+            background: #555;
+            cursor: not-allowed;
+        }
+
+        video {
             margin-top: 20px;
-            padding: 15px;
-            border-radius: 6px;
-            font-size: 13px;
+            max-width: 100%;
+            border: 2px solid #fff;
+            image-rendering: pixelated; /* Делает пиксели четкими при увеличении */
+        }
+
+        .status {
+            margin-top: 10px;
+            font-weight: bold;
+            color: #ff0;
+        }
+
+        canvas {
             display: none;
-            background: #1e293b;
-            border: 1px solid var(--accent);
         }
-
-        /* Library Styles */
-        .library-section {
-            margin-top: 40px;
-            border-top: 1px solid var(--border);
-            padding-top: 30px;
-        }
-
-        .library-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-
-        .refresh-btn {
-            background: transparent;
-            border: 1px solid var(--border);
-            color: var(--text-dim);
-            padding: 6px 12px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 12px;
-        }
-
-        .refresh-btn:hover { color: white; border-color: var(--accent); }
-
-        .song-list {
-            list-style: none;
-            padding: 0;
-            max-height: 400px;
-            overflow-y: auto;
-        }
-
-        .song-item {
-            background: #0a0a0c;
-            border: 1px solid var(--border);
-            padding: 12px 15px;
-            border-radius: 8px;
-            margin-bottom: 10px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            transition: border-color 0.2s;
-        }
-
-        .song-item:hover { border-color: #3b82f655; }
-
-        .song-info { overflow: hidden; margin-right: 15px; }
-        .song-name { 
-            display: block; 
-            font-size: 14px; 
-            white-space: nowrap; 
-            overflow: hidden; 
-            text-overflow: ellipsis; 
-            margin-bottom: 4px;
-        }
-        .song-meta { font-size: 11px; color: var(--text-dim); }
-
-        .actions { display: flex; gap: 8px; }
-        .action-btn {
-            padding: 6px 10px;
-            font-size: 11px;
-            border-radius: 4px;
-            cursor: pointer;
-            border: none;
-            font-weight: 600;
-        }
-
-        .copy-btn { background: #1e293b; color: var(--accent); }
-        .copy-btn:hover { background: var(--accent); color: white; }
-        .del-btn { background: #271717; color: var(--danger); }
-        .del-btn:hover { background: var(--danger); color: white; }
-
-        .stats {
-            margin-top: 20px;
-            font-size: 12px;
-            color: var(--text-dim);
-        }
-
-        /* Scrollbar */
-        ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 10px; }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <h2>Cloud Audio Host</h2>
-    <p class="subtitle">Direct CDN link generator for SA:MP streamers.</p>
-
-    <div class="form-group">
-        <label>GitHub Access Token</label>
-        <input type="text" id="token" placeholder="ghp_xxxxxxxxxxxx" onchange="saveToken()">
-    </div>
-
-    <div class="form-group">
-        <label>Upload New Audio (MP3, WAV, AAC)</label>
-        <input type="file" id="audioFile" accept=".mp3,.wav,.aac">
-    </div>
-
-    <button class="btn" id="uploadBtn" onclick="handleUpload()">Upload to Repository</button>
-
-    <div id="status"></div>
-
-    <div class="library-section">
-        <div class="library-header">
-            <h3 style="margin:0; font-size: 18px;">Your Library</h3>
-            <button class="refresh-btn" onclick="fetchLibrary()">↻ Refresh</button>
-        </div>
+    <h1>MEME COMPRESSOR</h1>
+    
+    <div class="container">
+        <p>ЗАГРУЗИ ВИДЕО — ПОЛУЧИ ГОВНО (144p + Earrape)</p>
+        <input type="file" id="upload" accept="video/*">
+        <br>
+        <button id="processBtn">УШАТАТЬ КАЧЕСТВО</button>
         
-        <ul class="song-list" id="songList">
-            <div style="text-align: center; color: var(--text-dim); padding: 20px;">
-                Enter token to load library...
-            </div>
-        </ul>
-
-        <div class="stats">
-            <span id="fileCount">Storage: 0/250 songs</span>
+        <div class="status" id="status">Жду видос...</div>
+        
+        <div id="resultArea" style="display:none;">
+            <h3>РЕЗУЛЬТАТ (МЕМНО):</h3>
+            <video id="outputVideo" controls autoplay loop></video>
+            <br>
+            <a id="downloadLink" style="color: #0f0; text-decoration: underline; font-size: 1.5rem;" download="meme_garbage.webm">СКАЧАТЬ ШЕДЕВР</a>
         </div>
     </div>
-</div>
 
-<script>
-    const USER = 'shadexqz';
-    const REPO = 'shadexqz.github.io';
-    const FOLDER = 'Music';
-    const MAX_FILES = 250;
+    <canvas id="canvas"></canvas>
 
-    // Load token from local storage
-    document.getElementById('token').value = localStorage.getItem('gh_token') || '';
-
-    function saveToken() {
-        localStorage.setItem('gh_token', document.getElementById('token').value);
-        fetchLibrary();
-    }
-
-    async function handleUpload() {
-        const token = document.getElementById('token').value;
-        const fileInput = document.getElementById('audioFile');
-        const btn = document.getElementById('uploadBtn');
+    <script>
+        const upload = document.getElementById('upload');
+        const processBtn = document.getElementById('processBtn');
         const status = document.getElementById('status');
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        const outputVideo = document.getElementById('outputVideo');
+        const resultArea = document.getElementById('resultArea');
+        const downloadLink = document.getElementById('downloadLink');
 
-        if (!token) return alert('Please enter your GitHub Token');
-        if (!fileInput.files[0]) return alert('Select a file first');
-
-        const file = fileInput.files[0];
-        // Remove spaces and special chars, add timestamp to prevent collisions
-        const fileName = `${Date.now()}_${file.name.replace(/[^a-zA-Z0-9.]/g, '_')}`;
-        const path = `${FOLDER}/${fileName}`;
-
-        btn.disabled = true;
-        btn.innerText = 'Uploading...';
-        status.style.display = 'block';
-        status.innerText = 'Checking storage and uploading...';
-
-        try {
-            // Check current count
-            const res = await axios.get(`https://api.github.com/repos/${USER}/${REPO}/contents/${FOLDER}`, {
-                headers: { Authorization: `token ${token}` }
-            }).catch(() => ({ data: [] }));
-
-            if (res.data.length >= MAX_FILES) {
-                throw new Error(`Storage limit reached (${MAX_FILES} songs).`);
-            }
-
-            const base64Content = await toBase64(file);
-
-            await axios.put(`https://api.github.com/repos/${USER}/${REPO}/contents/${path}`, {
-                message: `Upload audio: ${fileName}`,
-                content: base64Content.split(',')[1]
-            }, {
-                headers: { Authorization: `token ${token}` }
-            });
-
-            status.style.background = '#064e3b';
-            status.innerHTML = `<div style="color: #4ade80">Success! File uploaded to library.</div>`;
-            
-            fileInput.value = ''; // Reset input
-            fetchLibrary(); // Refresh list
-
-        } catch (err) {
-            status.style.background = '#450a0a';
-            status.innerText = 'Error: ' + (err.response?.data?.message || err.message);
-        } finally {
-            btn.disabled = false;
-            btn.innerText = 'Upload to Repository';
-        }
-    }
-
-    async function fetchLibrary() {
-        const token = document.getElementById('token').value;
-        const listContainer = document.getElementById('songList');
-        const countDisplay = document.getElementById('fileCount');
-
-        if (!token) return;
-
-        listContainer.innerHTML = '<div style="text-align: center; padding: 20px;">Loading files...</div>';
-
-        try {
-            const res = await axios.get(`https://api.github.com/repos/${USER}/${REPO}/contents/${FOLDER}`, {
-                headers: { Authorization: `token ${token}` }
-            });
-
-            const files = Array.isArray(res.data) ? res.data.filter(f => f.name !== '.gitkeep') : [];
-            countDisplay.innerText = `Storage: ${files.length}/${MAX_FILES} songs`;
-
-            if (files.length === 0) {
-                listContainer.innerHTML = '<div style="text-align: center; padding: 20px; color: var(--text-dim);">No songs found.</div>';
+        processBtn.addEventListener('click', async () => {
+            const file = upload.files[0];
+            if (!file) {
+                alert("Сначала выбери файл, гений!");
                 return;
             }
 
-            // Sort by newest first (using the timestamp we added to filename)
-            files.sort((a, b) => b.name.split('_')[0] - a.name.split('_')[0]);
+            processBtn.disabled = true;
+            status.innerText = "ШАКАЛИЗИРУЕМ... ПОДОЖДИ...";
 
-            listContainer.innerHTML = files.map(file => {
-                const cleanName = file.name.includes('_') ? file.name.split('_').slice(1).join('_') : file.name;
-                const rawUrl = `https://raw.githubusercontent.com/${USER}/${REPO}/main/${file.path}`;
-                
-                return `
-                    <li class="song-item">
-                        <div class="song-info">
-                            <span class="song-name" title="${cleanName}">${cleanName}</span>
-                            <span class="song-meta">${(file.size / 1024 / 1024).toFixed(2)} MB</span>
-                        </div>
-                        <div class="actions">
-                            <button class="action-btn copy-btn" onclick="copyLink('${rawUrl}')">Copy Link</button>
-                            <button class="action-btn del-btn" onclick="deleteFile('${file.path}', '${file.sha}')">Delete</button>
-                        </div>
-                    </li>
-                `;
-            }).join('');
+            const videoUrl = URL.createObjectURL(file);
+            const tempVideo = document.createElement('video');
+            tempVideo.src = videoUrl;
+            tempVideo.muted = false; // Нужно для захвата звука
+            tempVideo.crossOrigin = "anonymous";
+            
+            await tempVideo.play();
 
-        } catch (err) {
-            listContainer.innerHTML = `<div style="text-align: center; color: var(--danger); padding: 20px;">Failed to load: ${err.message}</div>`;
-        }
-    }
+            // Устанавливаем размер "шакальности" (чем меньше, тем хуже)
+            const targetWidth = 128;
+            const targetHeight = (tempVideo.videoHeight / tempVideo.videoWidth) * targetWidth;
+            canvas.width = targetWidth;
+            canvas.height = targetHeight;
 
-    async function deleteFile(path, sha) {
-        if (!confirm('Are you sure you want to delete this file?')) return;
-        const token = document.getElementById('token').value;
-
-        try {
-            await axios.delete(`https://api.github.com/repos/${USER}/${REPO}/contents/${path}`, {
-                headers: { Authorization: `token ${token}` },
-                data: {
-                    message: `Delete audio: ${path}`,
-                    sha: sha
+            // Настройка звука (Web Audio API для эффекта Earrape)
+            const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            const source = audioCtx.createMediaElementSource(tempVideo);
+            
+            // Дисторшн (перегруз)
+            const distortion = audioCtx.createWaveShaper();
+            function makeDistortionCurve(amount) {
+                let k = typeof amount === 'number' ? amount : 50,
+                    n_samples = 44100,
+                    curve = new Float32Array(n_samples),
+                    deg = Math.PI / 180,
+                    i = 0, x;
+                for ( ; i < n_samples; ++i ) {
+                    x = i * 2 / n_samples - 1;
+                    curve[i] = ( 3 + k ) * x * 20 * deg / ( Math.PI + k * Math.abs(x) );
                 }
+                return curve;
+            }
+            distortion.curve = makeDistortionCurve(400); // Сильный дисторшн
+            distortion.oversample = '4x';
+
+            // Фильтр для эффекта "телефонного динамика"
+            const filter = audioCtx.createBiquadFilter();
+            filter.type = "bandpass";
+            filter.frequency.value = 1000; // Оставляем только средние частоты
+
+            // Усиление громкости (Earrape)
+            const gainNode = audioCtx.createGain();
+            gainNode.gain.value = 5.0; // В 5 раз громче
+
+            const dest = audioCtx.createMediaStreamDestination();
+
+            source.connect(distortion);
+            distortion.connect(filter);
+            filter.connect(gainNode);
+            gainNode.connect(dest);
+            // Чтобы мы слышали во время процесса (опционально)
+            // gainNode.connect(audioCtx.destination); 
+
+            // Захват видео потока с канваса
+            const videoStream = canvas.captureStream(10); // 10 FPS для мемности
+            const combinedStream = new MediaStream([
+                ...videoStream.getVideoTracks(),
+                ...dest.stream.getAudioTracks()
+            ]);
+
+            // Запись
+            const recorder = new MediaRecorder(combinedStream, {
+                mimeType: 'video/webm;codecs=vp8',
+                videoBitsPerSecond: 50000 // Очень низкий битрейт (50kbps)
             });
-            fetchLibrary();
-        } catch (err) {
-            alert('Delete failed: ' + err.message);
-        }
-    }
 
-    function copyLink(url) {
-        navigator.clipboard.writeText(url);
-        alert('Direct link copied!');
-    }
+            const chunks = [];
+            recorder.ondataavailable = e => chunks.push(e.data);
+            recorder.onstop = () => {
+                const blob = new Blob(chunks, { type: 'video/webm' });
+                const url = URL.createObjectURL(blob);
+                outputVideo.src = url;
+                downloadLink.href = url;
+                resultArea.style.display = 'block';
+                status.innerText = "ГОТОВО! НАСЛАЖДАЙСЯ ГОВНОМ!";
+                processBtn.disabled = false;
+                audioCtx.close();
+            };
 
-    const toBase64 = file => new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.readAsDataURL(file);
-        reader.onload = () => resolve(reader.result);
-        reader.onerror = error => reject(error);
-    });
+            recorder.start();
 
-    // Initial load
-    if (document.getElementById('token').value) {
-        fetchLibrary();
-    }
-</script>
+            // Цикл отрисовки
+            const drawFrame = () => {
+                if (!tempVideo.paused && !tempVideo.ended) {
+                    ctx.drawImage(tempVideo, 0, 0, targetWidth, targetHeight);
+                    requestAnimationFrame(drawFrame);
+                } else {
+                    recorder.stop();
+                    tempVideo.pause();
+                }
+            };
 
+            drawFrame();
+            
+            tempVideo.onended = () => {
+                recorder.stop();
+            };
+        });
+    </script>
 </body>
 </html>
