@@ -3,220 +3,202 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MEME COMPRESSOR 3000</title>
+    <title>SHAKAL GENERATOR 720p</title>
     <style>
         body {
-            background-color: #000;
-            color: #0f0;
-            font-family: "Comic Sans MS", cursive, sans-serif;
+            background-color: #1a1a1a;
+            color: #ff00ff;
+            font-family: 'Impact', sans-serif;
+            text-align: center;
+            padding: 20px;
+        }
+        .main-card {
+            background: #000;
+            border: 5px solid #0f0;
+            padding: 20px;
+            max-width: 800px;
+            margin: 0 auto;
+            box-shadow: 10px 10px 0px #f00;
+        }
+        .controls {
             display: flex;
             flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            min-height: 100vh;
-            margin: 0;
-            overflow-x: hidden;
-        }
-
-        h1 {
-            text-shadow: 3px 3px #f00;
-            font-size: 3rem;
-            text-align: center;
-        }
-
-        .container {
-            border: 5px dashed #f0f;
-            padding: 20px;
-            background: #111;
-            box-shadow: 0 0 20px #0ff;
-            max-width: 90%;
-            text-align: center;
-        }
-
-        input[type="file"] {
+            gap: 15px;
             margin: 20px 0;
-            color: #fff;
+            text-align: left;
+            background: #222;
+            padding: 15px;
         }
-
+        label { color: #0ff; display: block; margin-bottom: 5px; }
+        input[type="range"] { width: 100%; cursor: pointer; }
+        
         button {
             background: #f00;
             color: #fff;
+            font-size: 24px;
+            padding: 15px;
             border: none;
-            padding: 15px 30px;
-            font-size: 1.2rem;
             cursor: pointer;
-            font-weight: bold;
-            text-transform: uppercase;
+            width: 100%;
+            transition: 0.2s;
         }
-
-        button:hover {
-            background: #ff0;
-            color: #000;
-        }
-
-        button:disabled {
-            background: #555;
-            cursor: not-allowed;
-        }
+        button:hover { transform: scale(1.02); background: #fff; color: #000; }
+        button:disabled { background: #555; cursor: wait; }
 
         video {
+            width: 100%;
+            max-width: 1280px;
             margin-top: 20px;
-            max-width: 100%;
             border: 2px solid #fff;
-            image-rendering: pixelated; /* Делает пиксели четкими при увеличении */
+            image-rendering: pixelated; /* Критично для мемного вида */
         }
-
-        .status {
-            margin-top: 10px;
-            font-weight: bold;
-            color: #ff0;
-        }
-
-        canvas {
-            display: none;
-        }
+        .status { color: #ffff00; font-size: 18px; margin: 10px 0; }
     </style>
 </head>
 <body>
 
-    <h1>MEME COMPRESSOR</h1>
-    
-    <div class="container">
-        <p>ЗАГРУЗИ ВИДЕО — ПОЛУЧИ ГОВНО (144p + Earrape)</p>
-        <input type="file" id="upload" accept="video/*">
-        <br>
-        <button id="processBtn">УШАТАТЬ КАЧЕСТВО</button>
+    <div class="main-card">
+        <h1>SHAKALIZATOR 3000 (720p Edition)</h1>
         
-        <div class="status" id="status">Жду видос...</div>
+        <input type="file" id="videoInput" accept="video/*">
         
+        <div class="controls">
+            <div>
+                <label>УРОВЕНЬ ПИКСЕЛИЗАЦИИ (ШАКАЛЬНОСТЬ):</label>
+                <input type="range" id="shakalRange" min="5" max="40" value="15">
+            </div>
+            <div>
+                <label>EARRAPE (ПЕРЕГРУЗ ЗВУКА):</label>
+                <input type="range" id="earrapeRange" min="1" max="20" value="5" step="0.5">
+            </div>
+        </div>
+
+        <button id="startBtn">УШАТАТЬ В КАШУ</button>
+        <div id="status" class="status">Выбери видео, чтобы начать...</div>
+
         <div id="resultArea" style="display:none;">
-            <h3>РЕЗУЛЬТАТ (МЕМНО):</h3>
-            <video id="outputVideo" controls autoplay loop></video>
-            <br>
-            <a id="downloadLink" style="color: #0f0; text-decoration: underline; font-size: 1.5rem;" download="meme_garbage.webm">СКАЧАТЬ ШЕДЕВР</a>
+            <h2 style="color: #0f0;">ШЕДЕВР ГОТОВ:</h2>
+            <video id="preview" controls></video>
+            <br><br>
+            <a id="downloadBtn" href="#" download="shakal_meme.mp4" style="color: yellow; font-size: 24px;">СКАЧАТЬ MP4</a>
         </div>
     </div>
 
-    <canvas id="canvas"></canvas>
+    <!-- Невидимые холсты для обработки -->
+    <canvas id="offscreen" style="display:none;"></canvas>
+    <canvas id="onscreen" width="1280" height="720" style="display:none;"></canvas>
 
     <script>
-        const upload = document.getElementById('upload');
-        const processBtn = document.getElementById('processBtn');
+        const videoInput = document.getElementById('videoInput');
+        const startBtn = document.getElementById('startBtn');
         const status = document.getElementById('status');
-        const canvas = document.getElementById('canvas');
-        const ctx = canvas.getContext('2d');
-        const outputVideo = document.getElementById('outputVideo');
+        const shakalRange = document.getElementById('shakalRange');
+        const earrapeRange = document.getElementById('earrapeRange');
+        const preview = document.getElementById('preview');
         const resultArea = document.getElementById('resultArea');
-        const downloadLink = document.getElementById('downloadLink');
+        const downloadBtn = document.getElementById('downloadBtn');
 
-        processBtn.addEventListener('click', async () => {
-            const file = upload.files[0];
-            if (!file) {
-                alert("Сначала выбери файл, гений!");
-                return;
-            }
+        const offCanvas = document.getElementById('offscreen');
+        const onCanvas = document.getElementById('onscreen');
+        const offCtx = offCanvas.getContext('2d');
+        const onCtx = onCanvas.getContext('2d');
 
-            processBtn.disabled = true;
-            status.innerText = "ШАКАЛИЗИРУЕМ... ПОДОЖДИ...";
+        startBtn.onclick = async () => {
+            const file = videoInput.files[0];
+            if (!file) return alert("Где видос?");
+
+            startBtn.disabled = true;
+            status.innerText = "Идет процесс уничтожения... Не закрывай вкладку!";
 
             const videoUrl = URL.createObjectURL(file);
-            const tempVideo = document.createElement('video');
-            tempVideo.src = videoUrl;
-            tempVideo.muted = false; // Нужно для захвата звука
-            tempVideo.crossOrigin = "anonymous";
-            
-            await tempVideo.play();
+            const v = document.createElement('video');
+            v.src = videoUrl;
+            v.crossOrigin = "anonymous";
+            await v.play();
 
-            // Устанавливаем размер "шакальности" (чем меньше, тем хуже)
-            const targetWidth = 128;
-            const targetHeight = (tempVideo.videoHeight / tempVideo.videoWidth) * targetWidth;
-            canvas.width = targetWidth;
-            canvas.height = targetHeight;
+            // Настройка размеров: 
+            // Мы берем маленькое разрешение и растягиваем его до 720p
+            const scaleDown = parseInt(shakalRange.value);
+            const lowWidth = Math.floor(1280 / scaleDown);
+            const lowHeight = Math.floor(720 / scaleDown);
+            offCanvas.width = lowWidth;
+            offCanvas.height = lowHeight;
 
-            // Настройка звука (Web Audio API для эффекта Earrape)
+            // Настройка аудио (Earrape)
             const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-            const source = audioCtx.createMediaElementSource(tempVideo);
+            const source = audioCtx.createMediaElementSource(v);
             
-            // Дисторшн (перегруз)
             const distortion = audioCtx.createWaveShaper();
-            function makeDistortionCurve(amount) {
-                let k = typeof amount === 'number' ? amount : 50,
-                    n_samples = 44100,
-                    curve = new Float32Array(n_samples),
-                    deg = Math.PI / 180,
-                    i = 0, x;
-                for ( ; i < n_samples; ++i ) {
-                    x = i * 2 / n_samples - 1;
-                    curve[i] = ( 3 + k ) * x * 20 * deg / ( Math.PI + k * Math.abs(x) );
+            distortion.curve = (function(amount) {
+                let k = amount * 10, n = 44100, curve = new Float32Array(n), i = 0, x;
+                for ( ; i < n; ++i ) {
+                    x = i * 2 / n - 1;
+                    curve[i] = (3 + k) * x * 20 * (Math.PI / 180) / (Math.PI + k * Math.abs(x));
                 }
                 return curve;
-            }
-            distortion.curve = makeDistortionCurve(400); // Сильный дисторшн
-            distortion.oversample = '4x';
+            })(parseFloat(earrapeRange.value));
 
-            // Фильтр для эффекта "телефонного динамика"
-            const filter = audioCtx.createBiquadFilter();
-            filter.type = "bandpass";
-            filter.frequency.value = 1000; // Оставляем только средние частоты
-
-            // Усиление громкости (Earrape)
             const gainNode = audioCtx.createGain();
-            gainNode.gain.value = 5.0; // В 5 раз громче
+            gainNode.gain.value = parseFloat(earrapeRange.value);
 
             const dest = audioCtx.createMediaStreamDestination();
-
             source.connect(distortion);
-            distortion.connect(filter);
-            filter.connect(gainNode);
+            distortion.connect(gainNode);
             gainNode.connect(dest);
-            // Чтобы мы слышали во время процесса (опционально)
-            // gainNode.connect(audioCtx.destination); 
 
-            // Захват видео потока с канваса
-            const videoStream = canvas.captureStream(10); // 10 FPS для мемности
-            const combinedStream = new MediaStream([
-                ...videoStream.getVideoTracks(),
-                ...dest.stream.getAudioTracks()
+            // Подготовка записи
+            const vStream = onCanvas.captureStream(15); // 15 FPS для мемности
+            const combined = new MediaStream([
+                vStream.getVideoTracks()[0],
+                dest.stream.getAudioTracks()[0]
             ]);
 
-            // Запись
-            const recorder = new MediaRecorder(combinedStream, {
-                mimeType: 'video/webm;codecs=vp8',
-                videoBitsPerSecond: 50000 // Очень низкий битрейт (50kbps)
+            // Пытаемся сохранить в mp4, если нет - в webm
+            let mimeType = 'video/mp4;codecs=avc1,mp4a.40.2';
+            if (!MediaRecorder.isTypeSupported(mimeType)) {
+                mimeType = 'video/webm;codecs=vp8,opus';
+                downloadBtn.download = "shakal_meme.webm";
+                downloadBtn.innerText = "СКАЧАТЬ WEBM (MP4 не поддержан)";
+            }
+
+            const recorder = new MediaRecorder(combined, {
+                mimeType: mimeType,
+                videoBitsPerSecond: 100000, // Очень низкий битрейт для артефактов
+                audioBitsPerSecond: 8000
             });
 
             const chunks = [];
             recorder.ondataavailable = e => chunks.push(e.data);
             recorder.onstop = () => {
-                const blob = new Blob(chunks, { type: 'video/webm' });
+                const blob = new Blob(chunks, { type: mimeType });
                 const url = URL.createObjectURL(blob);
-                outputVideo.src = url;
-                downloadLink.href = url;
+                preview.src = url;
+                downloadBtn.href = url;
                 resultArea.style.display = 'block';
-                status.innerText = "ГОТОВО! НАСЛАЖДАЙСЯ ГОВНОМ!";
-                processBtn.disabled = false;
+                status.innerText = "ГОТОВО!";
+                startBtn.disabled = false;
                 audioCtx.close();
             };
 
             recorder.start();
 
-            // Цикл отрисовки
-            const drawFrame = () => {
-                if (!tempVideo.paused && !tempVideo.ended) {
-                    ctx.drawImage(tempVideo, 0, 0, targetWidth, targetHeight);
-                    requestAnimationFrame(drawFrame);
+            // Цикл рендеринга "Шакалов"
+            function draw() {
+                if (!v.paused && !v.ended) {
+                    // 1. Рисуем в маленьком размере на невидимый холст
+                    offCtx.drawImage(v, 0, 0, lowWidth, lowHeight);
+                    
+                    // 2. Растягиваем до 720p на основной холст (без сглаживания)
+                    onCtx.imageSmoothingEnabled = false;
+                    onCtx.drawImage(offCanvas, 0, 0, lowWidth, lowHeight, 0, 0, 1280, 720);
+                    
+                    requestAnimationFrame(draw);
                 } else {
                     recorder.stop();
-                    tempVideo.pause();
                 }
-            };
-
-            drawFrame();
-            
-            tempVideo.onended = () => {
-                recorder.stop();
-            };
-        });
+            }
+            draw();
+        };
     </script>
 </body>
 </html>
