@@ -2,322 +2,303 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>ШАКАЛИЗАТОР 3000: ULTIMATE EDITION</title>
+    <title>ШАКАЛИЗАТОР 3000 v2.0</title>
     <style>
-        /* Retro Windows 98 Style */
         body {
-            background-color: #008080; /* Тот самый сине-зеленый */
-            margin: 0;
-            padding: 20px;
+            background-color: #008080;
             font-family: "MS Sans Serif", "Tahoma", sans-serif;
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
+            margin: 0;
+            overflow: hidden;
         }
 
-        .window {
+        .win98-window {
+            width: 700px;
             background: #c0c0c0;
             border: 2px solid;
-            border-color: #ffffff #808080 #808080 #ffffff;
-            width: 100%;
-            max-width: 700px;
-            box-shadow: 4px 4px 0 #000;
+            border-color: #dfdfdf #0a0a0a #0a0a0a #dfdfdf;
+            padding: 2px;
+            box-shadow: 2px 2px 10px rgba(0,0,0,0.5);
         }
 
         .title-bar {
             background: linear-gradient(90deg, #000080, #1084d0);
             padding: 3px 5px;
+            color: white;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            color: white;
             font-weight: bold;
+            font-size: 14px;
         }
-
-        .title-bar-text { font-size: 14px; cursor: help; }
-        .title-bar-text:active::after { content: " (ТЫ ЧЁ ЖМЁШЬ?)"; color: yellow; }
 
         .window-body {
             padding: 15px;
         }
 
+        .clippy {
+            position: absolute;
+            right: 20px;
+            bottom: 20px;
+            width: 150px;
+            cursor: pointer;
+            z-index: 100;
+        }
+
+        .speech-bubble {
+            position: absolute;
+            right: 150px;
+            bottom: 120px;
+            background: #ffffe1;
+            border: 1px solid black;
+            padding: 10px;
+            border-radius: 10px;
+            font-size: 12px;
+            width: 180px;
+            display: none;
+            box-shadow: 2px 2px 0 rgba(0,0,0,0.2);
+        }
+
         .fieldset {
             border: 2px solid;
-            border-color: #808080 #ffffff #ffffff #808080;
+            border-color: #808080 #dfdfdf #dfdfdf #808080;
             padding: 15px;
             margin-bottom: 15px;
-            background: #d6d6d6;
         }
 
-        legend { background: #c0c0c0; padding: 0 5px; font-weight: bold; }
+        label { display: block; margin-bottom: 10px; font-size: 12px; }
 
-        .control-row {
-            margin-bottom: 15px;
-        }
-
-        label { display: block; margin-bottom: 5px; font-size: 13px; }
-
-        /* Стилизация ползунков под Win98 */
         input[type="range"] {
             width: 100%;
-            height: 4px;
-            cursor: pointer;
+            margin-bottom: 15px;
         }
 
         .btn {
             background: #c0c0c0;
             border: 2px solid;
-            border-color: #ffffff #000 #000 #ffffff;
-            padding: 8px 20px;
+            border-color: #dfdfdf #0a0a0a #0a0a0a #dfdfdf;
+            padding: 10px 20px;
             font-family: inherit;
-            cursor: pointer;
-            outline: none;
             font-weight: bold;
+            cursor: pointer;
         }
 
         .btn:active {
-            border-color: #000 #ffffff #ffffff #000;
-            padding: 9px 19px 7px 21px;
+            border-color: #0a0a0a #dfdfdf #dfdfdf #0a0a0a;
         }
 
-        .btn-big {
-            width: 100%;
-            font-size: 18px;
+        .status-bar {
+            border: 2px solid;
+            border-color: #808080 #dfdfdf #dfdfdf #808080;
+            background: #c0c0c0;
+            padding: 3px;
             margin-top: 10px;
+            font-size: 11px;
+            height: 20px;
         }
 
-        .error-icon {
-            float: left;
-            margin-right: 15px;
-            cursor: pointer;
-        }
-
-        #status {
-            background: #fff;
-            border: 1px inset #808080;
-            padding: 4px;
-            margin-top: 10px;
-            font-size: 12px;
-            color: #000;
-        }
-
-        #preview-container {
-            margin-top: 20px;
-            text-align: center;
+        #result {
+            margin-top: 15px;
             display: none;
+            text-align: center;
         }
 
         video {
             width: 100%;
+            max-height: 400px;
             background: #000;
             border: 2px inset #fff;
-            image-rendering: pixelated;
         }
 
-        .easter-egg {
-            display: none;
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            z-index: 999;
-            pointer-events: none;
+        .marquee {
+            background: #000;
+            color: #0f0;
+            padding: 2px;
+            font-size: 12px;
+            margin-bottom: 10px;
         }
     </style>
 </head>
 <body>
 
-    <div class="window">
+    <div class="win98-window">
         <div class="title-bar">
-            <div class="title-bar-text" title="Нажми меня!">🚀 ШАКАЛИЗАТОР 3000 v.1.4.8.8</div>
-            <div style="font-size: 12px;">[ ? ] [ X ]</div>
+            <span>💾 ШАКАЛИЗАТОР 3000 — [3GP_COMPRESSOR]</span>
+            <div style="font-size: 16px;"> _ ❐ ☒ </div>
         </div>
         
         <div class="window-body">
-            <img src="https://win98icons.alexmeub.com/icons/png/msg_error-2.png" class="error-icon" id="errorIcon" title="УДОЛИ">
-            
-            <p style="margin-top: 0;"><b>ВНИМАНИЕ:</b> Вы собираетесь совершить акт деградации контента. Продолжить?</p>
+            <div class="marquee"><marquee scrollamount="5">ВНИМАНИЕ: СЛИШКОМ МНОГО АРТЕФАКТОВ МОГУТ ВЫЗВАТЬ НОСТАЛЬГИЮ...</marquee></div>
 
             <div class="fieldset">
-                <div class="control-row">
-                    <label>ИСХОДНЫЙ ФАЙЛ:</label>
-                    <input type="file" id="videoInput" accept="video/*" style="width: 100%;">
-                </div>
+                <label>ВЫБЕРИТЕ ИСХОДНИК (AVI/MP4/MOV):</label>
+                <input type="file" id="videoInput" accept="video/*">
+                
+                <hr>
 
-                <div class="control-row">
-                    <label>СТЕПЕНЬ ШАКАЛЬНОСТИ: <span id="shakalVal">1x</span></label>
-                    <input type="range" id="shakalRange" min="1" max="60" value="1">
-                </div>
+                <label>УРОВЕНЬ ШАКАЛИЗАЦИИ (БИТРЕЙТ): <span id="shakalVal">5</span></label>
+                <input type="range" id="shakalRange" min="1" max="10" value="5">
 
-                <div class="control-row">
-                    <label>УРОВЕНЬ EARRAPE: <span id="audioVal">НОРМА</span></label>
-                    <input type="range" id="earrapeRange" min="1" max="40" value="1" step="0.5">
-                </div>
+                <label>ЭФФЕКТ ПРИЗРАКА (GHOSTING): <span id="ghostVal">Выкл</span></label>
+                <input type="range" id="ghostRange" min="0" max="90" value="0">
+
+                <label>ГРОМКОСТЬ ПЕРЕРЕДЫВАНИЯ (EARRAPE): <span id="audioVal">1x</span></label>
+                <input type="range" id="audioRange" min="1" max="15" value="1" step="0.5">
             </div>
 
-            <button id="startBtn" class="btn btn-big">УШАТАТЬ В КАШУ</button>
+            <button id="startBtn" class="btn">УШАТАТЬ В ХЛАМ</button>
             
-            <div id="status">Система готова к уничтожению.</div>
+            <div class="status-bar" id="statusBar">Система готова.</div>
 
-            <div id="preview-container">
-                <label><b>РЕЗУЛЬТАТ ОБРАБОТКИ:</b></label>
-                <video id="preview" controls></video>
+            <div id="result">
+                <video id="preview" controls autoplay loop></video>
                 <br>
-                <a id="downloadBtn" href="#" style="color: blue;">Скачать_шедевр_без_смс.mp4</a>
+                <a id="downloadBtn" href="#" style="color: blue; font-weight: bold;">Скачать_шедевр_2007.mp4</a>
             </div>
         </div>
     </div>
 
-    <!-- Пасхалка 1 -->
-    <div id="dancingMeme" class="easter-egg">
-        <img src="https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExNHJtczF6NWFwaXJ0M2pxZzR4ZWt6Mnp4ZWt6Mnp4ZWt6Mnp4ZWt6JmVwPXYxX2ludGVybmFsX2dpZl9ieV9pZCZjdD1n/11BAxHG7paxJqE/giphy.gif" width="200">
-    </div>
+    <!-- Клиппи (Пасхалка) -->
+    <div class="speech-bubble" id="bubble">Кажется, вы пытаетесь испортить хорошее видео? Могу я вам помочь?</div>
+    <img src="https://upload.wikimedia.org/wikipedia/en/thumb/8/83/Clippy-letter.png/150px-Clippy-letter.png" class="clippy" id="clippy">
 
     <canvas id="offscreen" style="display:none;"></canvas>
-    <canvas id="onscreen" width="1280" height="720" style="display:none;"></canvas>
+    <canvas id="onscreen" width="640" height="480" style="display:none;"></canvas>
 
     <script>
         const videoInput = document.getElementById('videoInput');
         const shakalRange = document.getElementById('shakalRange');
-        const earrapeRange = document.getElementById('earrapeRange');
+        const ghostRange = document.getElementById('ghostRange');
+        const audioRange = document.getElementById('audioRange');
         const startBtn = document.getElementById('startBtn');
-        const status = document.getElementById('status');
         const preview = document.getElementById('preview');
+        const statusBar = document.getElementById('statusBar');
         const downloadBtn = document.getElementById('downloadBtn');
-        const previewContainer = document.getElementById('preview-container');
 
-        // Индикаторы
-        shakalRange.oninput = () => {
-            const v = shakalRange.value;
-            document.getElementById('shakalVal').innerText = v + 'x';
-            if(v > 50) document.getElementById('shakalVal').innerText += " (АДСКИЙ ШАКАЛ)";
-        };
-        
-        earrapeRange.oninput = () => {
-            const v = earrapeRange.value;
-            document.getElementById('audioVal').innerText = v == 1 ? "НОРМА" : (v > 30 ? "СМЕРТЬ УШАМ" : "ГРОМКО");
+        // Для работы с канвасом
+        const offCanvas = document.getElementById('offscreen');
+        const onCanvas = document.getElementById('onscreen');
+        const offCtx = offCanvas.getContext('2d');
+        const onCtx = onCanvas.getContext('2d');
+
+        // Пасхалка Клиппи
+        document.getElementById('clippy').onclick = () => {
+            const b = document.getElementById('bubble');
+            b.style.display = b.style.display === 'block' ? 'none' : 'block';
+            setTimeout(() => b.style.display = 'none', 5000);
         };
 
-        // Пасхалка на иконку
-        document.getElementById('errorIcon').onclick = () => {
-            const meme = document.getElementById('dancingMeme');
-            meme.style.display = 'block';
-            setTimeout(() => meme.style.display = 'none', 2000);
-        };
+        // Обновление цифр
+        shakalRange.oninput = () => document.getElementById('shakalVal').innerText = shakalRange.value;
+        ghostRange.oninput = () => document.getElementById('ghostVal').innerText = ghostRange.value + '%';
+        audioRange.oninput = () => document.getElementById('audioVal').innerText = audioRange.value + 'x';
 
         startBtn.onclick = async () => {
             const file = videoInput.files[0];
-            if (!file) return alert("ГДЕ ВИДЕО, ЛЕБОВСКИ?");
+            if (!file) return alert("Файл где?");
 
             startBtn.disabled = true;
-            status.innerText = "ШАКАЛИЗАЦИЯ ЗАПУЩЕНА... НЕ ТРОГАЙ НИЧЕГО.";
+            statusBar.innerText = "ШАКАЛИЗАЦИЯ: 0% [################----]";
 
             const videoUrl = URL.createObjectURL(file);
             const v = document.createElement('video');
             v.src = videoUrl;
-            v.muted = false;
             v.crossOrigin = "anonymous";
-            
             await v.play();
 
-            const offCanvas = document.getElementById('offscreen');
-            const onCanvas = document.getElementById('onscreen');
-            const offCtx = offCanvas.getContext('2d');
-            const onCtx = onCanvas.getContext('2d');
+            // Настройка "старого" разрешения
+            const lowResW = 160; 
+            const lowResH = 120;
+            offCanvas.width = lowResW;
+            offCanvas.height = lowResH;
 
-            const factor = parseFloat(shakalRange.value);
-            const lowW = Math.max(1, Math.floor(1280 / factor));
-            const lowH = Math.max(1, Math.floor(720 / factor));
-            offCanvas.width = lowW;
-            offCanvas.height = lowH;
-
-            // Аудио
-            const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            // Звук
+            const audioCtx = new AudioContext();
             const source = audioCtx.createMediaElementSource(v);
             const dest = audioCtx.createMediaStreamDestination();
-            let lastNode = source;
+            
+            // Цепочка уничтожения звука
+            const distortion = audioCtx.createWaveShaper();
+            distortion.curve = makeDistortionCurve(audioRange.value * 100);
+            
+            const filter = audioCtx.createBiquadFilter();
+            filter.type = "lowpass";
+            filter.frequency.value = 2500; // Эффект "глухого" звука
 
-            if (parseFloat(earrapeRange.value) > 1) {
-                const distortion = audioCtx.createWaveShaper();
-                distortion.curve = (function(k) {
-                    let n = 44100, curve = new Float32Array(n), i = 0, x;
-                    for ( ; i < n; ++i ) {
-                        x = i * 2 / n - 1;
-                        curve[i] = (3 + k) * x * 20 * (Math.PI / 180) / (Math.PI + k * Math.abs(x));
-                    }
-                    return curve;
-                })(parseFloat(earrapeRange.value) * 100);
-                
-                const gain = audioCtx.createGain();
-                gain.gain.value = parseFloat(earrapeRange.value);
+            const gain = audioCtx.createGain();
+            gain.gain.value = audioRange.value;
 
-                source.connect(distortion);
-                distortion.connect(gain);
-                lastNode = gain;
-            }
-            lastNode.connect(dest);
+            source.connect(distortion).connect(filter).connect(gain).connect(dest);
 
-            // Рекордер
-            let mime = 'video/mp4;codecs=avc1';
-            if (!MediaRecorder.isTypeSupported(mime)) mime = 'video/webm;codecs=vp8';
-
-            const stream = new MediaStream([
-                onCanvas.captureStream(24).getVideoTracks()[0],
-                dest.stream.getAudioTracks()[0]
-            ]);
-
-            const recorder = new MediaRecorder(stream, {
-                mimeType: mime,
-                videoBitsPerSecond: factor > 10 ? 50000 : 2500000, // Вот тут главные артефакты
-                audioBitsPerSecond: 8000
+            // Стрим и рекордер
+            const outStream = onCanvas.captureStream(12); // Низкий FPS
+            const combined = new MediaStream([outStream.getVideoTracks()[0], dest.stream.getAudioTracks()[0]]);
+            
+            const recorder = new MediaRecorder(combined, {
+                mimeType: 'video/webm;codecs=vp8',
+                videoBitsPerSecond: (11 - shakalRange.value) * 8000 // Вот тут реальное сжатие битрейта
             });
 
             const chunks = [];
             recorder.ondataavailable = e => chunks.push(e.data);
             recorder.onstop = () => {
-                const blob = new Blob(chunks, { type: mime });
-                preview.src = URL.createObjectURL(blob);
-                downloadBtn.href = preview.src;
-                previewContainer.style.display = 'block';
-                status.innerText = "ШАКАЛИЗАЦИЯ ЗАВЕРШЕНА. ПОКАЙТЕСЬ.";
+                const blob = new Blob(chunks, { type: 'video/mp4' });
+                const url = URL.createObjectURL(blob);
+                preview.src = url;
+                downloadBtn.href = url;
+                document.getElementById('result').style.display = 'block';
+                statusBar.innerText = "ГОТОВО. ВИДЕО УСПЕШНО ИСПОРЧЕНО.";
                 startBtn.disabled = false;
                 audioCtx.close();
             };
 
             recorder.start();
 
-            function renderFrame() {
+            // Рендер кадра с "умным" сжатием
+            function process() {
                 if (!v.paused && !v.ended) {
-                    // Рисуем маленькую картинку
-                    offCtx.drawImage(v, 0, 0, lowW, lowH);
-                    
-                    // Эффект "Грязного сжатия" через наложение шума (если шакалим)
-                    if(factor > 10) {
-                        offCtx.fillStyle = `rgba(255,255,255,${Math.random() * 0.05})`;
-                        offCtx.fillRect(0, 0, lowW, lowH);
-                    }
+                    // 1. Рисуем на малый канвас
+                    offCtx.drawImage(v, 0, 0, lowResW, lowResH);
 
-                    // Растягиваем обратно
-                    onCtx.imageSmoothingEnabled = false;
+                    // 2. СЕКРЕТ ШАКАЛА: Экспортируем кадр в низкокачественный JPEG и рисуем обратно
+                    // Это создает те самые "звоны" и "грязь" кодека
+                    const quality = (11 - shakalRange.value) / 15; // 0.1 - 0.7
+                    const frameData = offCanvas.toDataURL('image/jpeg', quality);
                     
-                    // Хроматическая аберрация (сдвиг каналов для мемности)
-                    if (factor > 20) {
-                        onCtx.globalAlpha = 0.5;
-                        onCtx.drawImage(offCanvas, -2, 0, lowW, lowH, 0, 0, 1280, 720);
-                        onCtx.drawImage(offCanvas, 2, 0, lowW, lowH, 0, 0, 1280, 720);
-                        onCtx.globalAlpha = 1.0;
-                    } else {
-                        onCtx.drawImage(offCanvas, 0, 0, lowW, lowH, 0, 0, 1280, 720);
-                    }
-                    
-                    requestAnimationFrame(renderFrame);
-                } else if (v.ended) {
+                    const img = new Image();
+                    img.onload = () => {
+                        // Эффект Ghosting: не очищаем экран полностью
+                        onCtx.globalAlpha = 1 - (ghostRange.value / 100);
+                        onCtx.fillStyle = "black";
+                        onCtx.fillRect(0,0,640,480);
+                        onCtx.globalAlpha = 1;
+                        
+                        onCtx.imageSmoothingEnabled = true; // Мыло - наш друг
+                        onCtx.drawImage(img, 0, 0, lowResW, lowResH, 0, 0, 640, 480);
+                        
+                        requestAnimationFrame(process);
+                    };
+                    img.src = frameData;
+                } else {
                     recorder.stop();
+                    v.pause();
                 }
             }
-            renderFrame();
+
+            process();
         };
+
+        function makeDistortionCurve(amount) {
+            let k = amount, n = 44100, curve = new Float32Array(n), i = 0, x;
+            for ( ; i < n; ++i ) {
+                x = i * 2 / n - 1;
+                curve[i] = (3 + k) * x * 20 * (Math.PI / 180) / (Math.PI + k * Math.abs(x));
+            }
+            return curve;
+        }
     </script>
 </body>
 </html>
