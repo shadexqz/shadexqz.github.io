@@ -2,8 +2,17 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>ШАКАЛИЗАТОР 3000 v2.0</title>
+    <title>MEDIA DEGRADATION SUITE PRO v3.0</title>
     <style>
+        :root {
+            --win-bg: #c0c0c0;
+            --win-blue: #000080;
+            --win-blue-light: #1084d0;
+            --win-border-light: #dfdfdf;
+            --win-border-dark: #0a0a0a;
+            --win-border-shadow: #808080;
+        }
+
         body {
             background-color: #008080;
             font-family: "MS Sans Serif", "Tahoma", sans-serif;
@@ -13,233 +22,402 @@
             min-height: 100vh;
             margin: 0;
             overflow: hidden;
+            color: #000;
         }
 
-        .win98-window {
-            width: 700px;
-            background: #c0c0c0;
+        /* Окно системы */
+        .win-window {
+            width: 850px;
+            background: var(--win-bg);
             border: 2px solid;
-            border-color: #dfdfdf #0a0a0a #0a0a0a #dfdfdf;
+            border-color: var(--win-border-light) var(--win-border-dark) var(--win-border-dark) var(--win-border-light);
             padding: 2px;
-            box-shadow: 2px 2px 10px rgba(0,0,0,0.5);
+            box-shadow: 2px 2px 15px rgba(0,0,0,0.4);
         }
 
-        .title-bar {
-            background: linear-gradient(90deg, #000080, #1084d0);
-            padding: 3px 5px;
+        .win-title {
+            background: linear-gradient(90deg, var(--win-blue), var(--win-blue-light));
+            padding: 3px 8px;
             color: white;
             display: flex;
             justify-content: space-between;
             align-items: center;
             font-weight: bold;
-            font-size: 14px;
+            font-size: 13px;
         }
 
-        .window-body {
-            padding: 15px;
-        }
-
-        .clippy {
-            position: absolute;
-            right: 20px;
-            bottom: 20px;
-            width: 150px;
+        .win-title-controls span {
+            border: 1px solid white;
+            padding: 0 4px;
+            margin-left: 2px;
             cursor: pointer;
-            z-index: 100;
+            background: var(--win-bg);
+            color: black;
+            font-size: 10px;
         }
 
-        .speech-bubble {
-            position: absolute;
-            right: 150px;
-            bottom: 120px;
-            background: #ffffe1;
-            border: 1px solid black;
+        /* Контент */
+        .win-body {
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            gap: 10px;
             padding: 10px;
-            border-radius: 10px;
-            font-size: 12px;
-            width: 180px;
-            display: none;
-            box-shadow: 2px 2px 0 rgba(0,0,0,0.2);
+        }
+
+        /* Боковая панель параметров */
+        .sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
         }
 
         .fieldset {
             border: 2px solid;
-            border-color: #808080 #dfdfdf #dfdfdf #808080;
-            padding: 15px;
-            margin-bottom: 15px;
+            border-color: var(--win-border-shadow) var(--win-border-light) var(--win-border-light) var(--win-border-shadow);
+            padding: 12px;
+            position: relative;
         }
 
-        label { display: block; margin-bottom: 10px; font-size: 12px; }
+        .legend {
+            position: absolute;
+            top: -10px;
+            left: 10px;
+            background: var(--win-bg);
+            padding: 0 5px;
+            font-size: 11px;
+            font-weight: bold;
+        }
 
+        label { display: block; margin-top: 10px; font-size: 11px; }
+        
         input[type="range"] {
             width: 100%;
-            margin-bottom: 15px;
+            height: 15px;
+            margin: 5px 0;
+        }
+
+        /* Основная рабочая зона */
+        .main-area {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .preview-box {
+            background: #000;
+            height: 380px;
+            border: 2px inset var(--win-border-light);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            position: relative;
+        }
+
+        #previewMedia, #previewImg {
+            max-width: 100%;
+            max-height: 100%;
         }
 
         .btn {
-            background: #c0c0c0;
+            background: var(--win-bg);
             border: 2px solid;
-            border-color: #dfdfdf #0a0a0a #0a0a0a #dfdfdf;
-            padding: 10px 20px;
+            border-color: var(--win-border-light) var(--win-border-dark) var(--win-border-dark) var(--win-border-light);
+            padding: 6px 15px;
             font-family: inherit;
-            font-weight: bold;
+            font-size: 12px;
             cursor: pointer;
+            outline: none;
         }
 
         .btn:active {
-            border-color: #0a0a0a #dfdfdf #dfdfdf #0a0a0a;
+            border-color: var(--win-border-dark) var(--win-border-light) var(--win-border-light) var(--win-border-dark);
+            padding: 7px 14px 5px 16px;
         }
 
+        .btn-primary {
+            font-weight: bold;
+            height: 40px;
+            background: #d0d0d0;
+        }
+
+        /* Статус бар */
         .status-bar {
-            border: 2px solid;
-            border-color: #808080 #dfdfdf #dfdfdf #808080;
-            background: #c0c0c0;
-            padding: 3px;
-            margin-top: 10px;
+            display: grid;
+            grid-template-columns: 1fr 150px 100px;
+            gap: 2px;
+            margin-top: 4px;
+        }
+
+        .status-cell {
+            border: 2px inset var(--win-border-light);
+            padding: 2px 6px;
             font-size: 11px;
-            height: 20px;
+            background: var(--win-bg);
         }
 
-        #result {
-            margin-top: 15px;
-            display: none;
-            text-align: center;
+        /* CLIPPY SVG */
+        .clippy-container {
+            position: fixed;
+            bottom: 20px;
+            right: 40px;
+            width: 120px;
+            z-index: 1000;
+            pointer-events: none;
         }
 
-        video {
+        .clippy-svg {
             width: 100%;
-            max-height: 400px;
-            background: #000;
-            border: 2px inset #fff;
+            height: auto;
+            filter: drop-shadow(5px 5px 5px rgba(0,0,0,0.2));
+            animation: float 4s ease-in-out infinite;
+            pointer-events: all;
+            cursor: help;
         }
 
-        .marquee {
-            background: #000;
-            color: #0f0;
-            padding: 2px;
-            font-size: 12px;
-            margin-bottom: 10px;
+        @keyframes float {
+            0%, 100% { transform: translateY(0) rotate(0); }
+            50% { transform: translateY(-15px) rotate(2deg); }
         }
+
+        .bubble {
+            position: absolute;
+            bottom: 130px;
+            right: 0;
+            background: #ffffca;
+            border: 1px solid #000;
+            padding: 10px;
+            font-size: 11px;
+            width: 150px;
+            box-shadow: 3px 3px 0 rgba(0,0,0,0.1);
+            display: none;
+        }
+
+        .blink { animation: blink-eye 5s infinite; }
+        @keyframes blink-eye {
+            0%, 95%, 100% { transform: scaleY(1); }
+            97% { transform: scaleY(0.1); }
+        }
+
+        .hidden { display: none; }
+
     </style>
 </head>
 <body>
 
-    <div class="win98-window">
-        <div class="title-bar">
-            <span>💾 ШАКАЛИЗАТОР 3000 — [3GP_COMPRESSOR]</span>
-            <div style="font-size: 16px;"> _ ❐ ☒ </div>
+    <div class="win-window">
+        <div class="win-title">
+            <span>MEDIA_ENCODER_PROFESSIONAL_3.0.exe</span>
+            <div class="win-title-controls">
+                <span>_</span><span>[ ]</span><span>X</span>
+            </div>
         </div>
         
-        <div class="window-body">
-            <div class="marquee"><marquee scrollamount="5">ВНИМАНИЕ: СЛИШКОМ МНОГО АРТЕФАКТОВ МОГУТ ВЫЗВАТЬ НОСТАЛЬГИЮ...</marquee></div>
+        <div class="win-body">
+            <!-- Сайдбар управления -->
+            <div class="sidebar">
+                <div class="fieldset">
+                    <div class="legend">Входной поток</div>
+                    <label>Источник данных:</label>
+                    <input type="file" id="mediaInput" accept="video/*,image/*" style="width: 100%; font-size: 10px;">
+                    <div id="fileInfo" style="font-size: 10px; margin-top: 5px; color: #555;">Ожидание файла...</div>
+                </div>
 
-            <div class="fieldset">
-                <label>ВЫБЕРИТЕ ИСХОДНИК (AVI/MP4/MOV):</label>
-                <input type="file" id="videoInput" accept="video/*">
-                
-                <hr>
+                <div class="fieldset">
+                    <div class="legend">Параметры сжатия</div>
+                    
+                    <label>Битрейт / Качество: <span id="qVal">50</span>%</label>
+                    <input type="range" id="qRange" min="1" max="100" value="50">
 
-                <label>УРОВЕНЬ ШАКАЛИЗАЦИИ (БИТРЕЙТ): <span id="shakalVal">5</span></label>
-                <input type="range" id="shakalRange" min="1" max="10" value="5">
+                    <label>Частота дискретизации: <span id="resVal">120</span>p</label>
+                    <input type="range" id="resRange" min="32" max="480" value="120">
 
-                <label>ЭФФЕКТ ПРИЗРАКА (GHOSTING): <span id="ghostVal">Выкл</span></label>
-                <input type="range" id="ghostRange" min="0" max="90" value="0">
+                    <label>Насыщение аудио: <span id="gainVal">1.0</span>x</label>
+                    <input type="range" id="gainRange" min="1" max="20" value="1" step="0.5">
+                    
+                    <label>Искажение цвета:</label>
+                    <select id="colorMode" style="width: 100%; font-size: 11px;">
+                        <option value="none">Стандартный кодек</option>
+                        <option value="ghost">Шлейф (Ghosting)</option>
+                        <option value="mono">1-bit Монохром</option>
+                    </select>
+                </div>
 
-                <label>ГРОМКОСТЬ ПЕРЕРЕДЫВАНИЯ (EARRAPE): <span id="audioVal">1x</span></label>
-                <input type="range" id="audioRange" min="1" max="15" value="1" step="0.5">
+                <button id="processBtn" class="btn btn-primary">ЗАПУСТИТЬ ПРОЦЕСС</button>
+                <a id="downloadLink" class="hidden"><button class="btn" style="width:100%; color: blue;">СОХРАНИТЬ РЕЗУЛЬТАТ</button></a>
             </div>
 
-            <button id="startBtn" class="btn">УШАТАТЬ В ХЛАМ</button>
-            
-            <div class="status-bar" id="statusBar">Система готова.</div>
+            <!-- Зона предпросмотра -->
+            <div class="main-area">
+                <div class="preview-box">
+                    <video id="previewVideo" controls class="hidden"></video>
+                    <img id="previewImg" class="hidden">
+                    <div id="placeholderText" style="color: #444; font-size: 12px;">ПРЕДПРОСМОТР ОТКЛЮЧЕН</div>
+                </div>
 
-            <div id="result">
-                <video id="preview" controls autoplay loop></video>
-                <br>
-                <a id="downloadBtn" href="#" style="color: blue; font-weight: bold;">Скачать_шедевр_2007.mp4</a>
+                <div class="fieldset" style="flex-grow: 1;">
+                    <div class="legend">Системный журнал</div>
+                    <div id="log" style="font-family: monospace; font-size: 10px; height: 60px; overflow-y: auto; background: #eee; padding: 5px;">
+                        [SYSTEM]: Инициализация модулей...<br>
+                        [SYSTEM]: Ядро обработки готово.
+                    </div>
+                </div>
             </div>
+        </div>
+
+        <div class="status-bar">
+            <div class="status-cell" id="statusMsg">Система готова.</div>
+            <div class="status-cell">CPU: 2% (IDLE)</div>
+            <div class="status-cell">RAM: 14.2 MB</div>
         </div>
     </div>
 
-    <!-- Клиппи (Пасхалка) -->
-    <div class="speech-bubble" id="bubble">Кажется, вы пытаетесь испортить хорошее видео? Могу я вам помочь?</div>
-    <img src="https://upload.wikimedia.org/wikipedia/en/thumb/8/83/Clippy-letter.png/150px-Clippy-letter.png" class="clippy" id="clippy">
+    <!-- CLIPPY -->
+    <div class="clippy-container">
+        <div class="bubble" id="clippyBubble">Я вижу, вы хотите уничтожить этот файл. Помочь?</div>
+        <svg class="clippy-svg" id="clippy" viewBox="0 0 100 120" xmlns="http://www.w3.org/2000/svg">
+            <!-- Body -->
+            <path d="M40,20 L40,80 C40,95 60,95 60,80 L60,30 C60,20 50,15 45,25" fill="none" stroke="black" stroke-width="3"/>
+            <path d="M45,25 C40,35 75,35 75,70 C75,100 25,100 25,60 L25,20 C25,5 50,0 70,15" fill="none" stroke="black" stroke-width="3"/>
+            <!-- Eyes -->
+            <g transform="translate(42, 40)">
+                <ellipse cx="0" cy="0" rx="4" ry="6" fill="white" stroke="black"/>
+                <circle class="blink" cx="1" cy="1" r="2" fill="black"/>
+            </g>
+            <g transform="translate(58, 40)">
+                <ellipse cx="0" cy="0" rx="4" ry="6" fill="white" stroke="black"/>
+                <circle class="blink" cx="-1" cy="1" r="2" fill="black"/>
+            </g>
+            <!-- Eyebrows -->
+            <path d="M38,30 Q42,28 46,30" fill="none" stroke="black" stroke-width="1.5"/>
+            <path d="M54,30 Q58,28 62,30" fill="none" stroke="black" stroke-width="1.5"/>
+        </svg>
+    </div>
 
-    <canvas id="offscreen" style="display:none;"></canvas>
-    <canvas id="onscreen" width="640" height="480" style="display:none;"></canvas>
+    <canvas id="procCanvas" class="hidden"></canvas>
+    <canvas id="outCanvas" class="hidden"></canvas>
 
     <script>
-        const videoInput = document.getElementById('videoInput');
-        const shakalRange = document.getElementById('shakalRange');
-        const ghostRange = document.getElementById('ghostRange');
-        const audioRange = document.getElementById('audioRange');
-        const startBtn = document.getElementById('startBtn');
-        const preview = document.getElementById('preview');
-        const statusBar = document.getElementById('statusBar');
-        const downloadBtn = document.getElementById('downloadBtn');
+        const $ = id => document.getElementById(id);
+        const logBox = $('log');
 
-        // Для работы с канвасом
-        const offCanvas = document.getElementById('offscreen');
-        const onCanvas = document.getElementById('onscreen');
-        const offCtx = offCanvas.getContext('2d');
-        const onCtx = onCanvas.getContext('2d');
+        function addLog(msg) {
+            logBox.innerHTML += `[${new Date().toLocaleTimeString()}]: ${msg}<br>`;
+            logBox.scrollTop = logBox.scrollHeight;
+        }
 
-        // Пасхалка Клиппи
-        document.getElementById('clippy').onclick = () => {
-            const b = document.getElementById('bubble');
+        // Clippy Logic
+        $('clippy').onclick = () => {
+            const b = $('clippyBubble');
             b.style.display = b.style.display === 'block' ? 'none' : 'block';
-            setTimeout(() => b.style.display = 'none', 5000);
+            setTimeout(() => b.style.display = 'none', 4000);
         };
 
-        // Обновление цифр
-        shakalRange.oninput = () => document.getElementById('shakalVal').innerText = shakalRange.value;
-        ghostRange.oninput = () => document.getElementById('ghostVal').innerText = ghostRange.value + '%';
-        audioRange.oninput = () => document.getElementById('audioVal').innerText = audioRange.value + 'x';
+        // UI Updates
+        $('qRange').oninput = e => $('qVal').innerText = e.target.value;
+        $('resRange').oninput = e => $('resVal').innerText = e.target.value;
+        $('gainRange').oninput = e => $('gainVal').innerText = e.target.value;
 
-        startBtn.onclick = async () => {
-            const file = videoInput.files[0];
-            if (!file) return alert("Файл где?");
+        $('mediaInput').onchange = e => {
+            const file = e.target.files[0];
+            if (file) {
+                $('fileInfo').innerText = `Имя: ${file.name}\nРазмер: ${(file.size/1024).toFixed(1)} KB`;
+                addLog(`Файл загружен: ${file.type}`);
+            }
+        };
 
-            startBtn.disabled = true;
-            statusBar.innerText = "ШАКАЛИЗАЦИЯ: 0% [################----]";
+        $('processBtn').onclick = async () => {
+            const file = $('mediaInput').files[0];
+            if (!file) return addLog("ОШИБКА: Файл не выбран.");
 
-            const videoUrl = URL.createObjectURL(file);
-            const v = document.createElement('video');
-            v.src = videoUrl;
-            v.crossOrigin = "anonymous";
-            await v.play();
+            const isVideo = file.type.startsWith('video');
+            const isImage = file.type.startsWith('image');
 
-            // Настройка "старого" разрешения
-            const lowResW = 160; 
-            const lowResH = 120;
-            offCanvas.width = lowResW;
-            offCanvas.height = lowResH;
+            $('processBtn').disabled = true;
+            $('statusMsg').innerText = "ОБРАБОТКА...";
 
-            // Звук
+            if (isVideo) {
+                processVideo(file);
+            } else if (isImage) {
+                processImage(file);
+            } else {
+                addLog("ОШИБКА: Формат не поддерживается.");
+                $('processBtn').disabled = false;
+            }
+        };
+
+        // --- ЛОГИКА СЖАТИЯ ФОТО ---
+        async function processImage(file) {
+            addLog("Запуск деградации изображения...");
+            const img = new Image();
+            img.src = URL.createObjectURL(file);
+            await img.decode();
+
+            const canvas = $('procCanvas');
+            const ctx = canvas.getContext('2d');
+            
+            // Установка низкого разрешения
+            const scale = $('resRange').value / Math.max(img.width, img.height);
+            canvas.width = img.width * scale;
+            canvas.height = img.height * scale;
+
+            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+            // Экспорт с потерей качества
+            const quality = $('qRange').value / 100;
+            const dataUrl = canvas.toDataURL('image/jpeg', quality);
+
+            $('previewImg').src = dataUrl;
+            $('previewImg').classList.remove('hidden');
+            $('previewVideo').classList.add('hidden');
+            $('placeholderText').classList.add('hidden');
+            
+            $('downloadLink').href = dataUrl;
+            $('downloadLink').download = "degraded_result.jpg";
+            $('downloadLink').classList.remove('hidden');
+            
+            addLog("Изображение перекодировано успешно.");
+            $('statusMsg').innerText = "ГОТОВО";
+            $('processBtn').disabled = false;
+        }
+
+        // --- ЛОГИКА СЖАТИЯ ВИДЕО (БЕЗ ИЗМЕНЕНИЙ ЯДРА) ---
+        async function processVideo(file) {
+            addLog("Инициализация видео-кодека...");
+            const video = document.createElement('video');
+            video.src = URL.createObjectURL(file);
+            video.muted = true;
+            await video.play();
+
+            const lowRes = parseInt($('resRange').value);
+            const procCanvas = $('procCanvas');
+            const outCanvas = $('outCanvas');
+            const pCtx = procCanvas.getContext('2d');
+            const oCtx = outCanvas.getContext('2d');
+
+            const aspect = video.videoWidth / video.videoHeight;
+            procCanvas.width = lowRes;
+            procCanvas.height = lowRes / aspect;
+            outCanvas.width = video.videoWidth;
+            outCanvas.height = video.videoHeight;
+
+            // Аудио движок
             const audioCtx = new AudioContext();
-            const source = audioCtx.createMediaElementSource(v);
-            const dest = audioCtx.createMediaStreamDestination();
-            
-            // Цепочка уничтожения звука
+            const source = audioCtx.createMediaElementSource(video);
             const distortion = audioCtx.createWaveShaper();
-            distortion.curve = makeDistortionCurve(audioRange.value * 100);
-            
-            const filter = audioCtx.createBiquadFilter();
-            filter.type = "lowpass";
-            filter.frequency.value = 2500; // Эффект "глухого" звука
-
+            distortion.curve = makeDistortionCurve($('gainRange').value * 50);
             const gain = audioCtx.createGain();
-            gain.gain.value = audioRange.value;
+            gain.gain.value = $('gainRange').value;
+            
+            const dest = audioCtx.createMediaStreamDestination();
+            source.connect(distortion).connect(gain).connect(dest);
 
-            source.connect(distortion).connect(filter).connect(gain).connect(dest);
-
-            // Стрим и рекордер
-            const outStream = onCanvas.captureStream(12); // Низкий FPS
+            const outStream = outCanvas.captureStream(15);
             const combined = new MediaStream([outStream.getVideoTracks()[0], dest.stream.getAudioTracks()[0]]);
             
             const recorder = new MediaRecorder(combined, {
                 mimeType: 'video/webm;codecs=vp8',
-                videoBitsPerSecond: (11 - shakalRange.value) * 8000 // Вот тут реальное сжатие битрейта
+                videoBitsPerSecond: $('qRange').value * 1000
             });
 
             const chunks = [];
@@ -247,49 +425,45 @@
             recorder.onstop = () => {
                 const blob = new Blob(chunks, { type: 'video/mp4' });
                 const url = URL.createObjectURL(blob);
-                preview.src = url;
-                downloadBtn.href = url;
-                document.getElementById('result').style.display = 'block';
-                statusBar.innerText = "ГОТОВО. ВИДЕО УСПЕШНО ИСПОРЧЕНО.";
-                startBtn.disabled = false;
+                $('previewVideo').src = url;
+                $('previewVideo').classList.remove('hidden');
+                $('previewImg').classList.add('hidden');
+                $('placeholderText').classList.add('hidden');
+                $('downloadLink').href = url;
+                $('downloadLink').download = "shakal_archive.mp4";
+                $('downloadLink').classList.remove('hidden');
+                addLog("Поток закрыт. Файл готов.");
+                $('statusMsg').innerText = "ГОТОВО";
+                $('processBtn').disabled = false;
                 audioCtx.close();
             };
 
             recorder.start();
+            addLog("Запись потока...");
 
-            // Рендер кадра с "умным" сжатием
-            function process() {
-                if (!v.paused && !v.ended) {
-                    // 1. Рисуем на малый канвас
-                    offCtx.drawImage(v, 0, 0, lowResW, lowResH);
+            const ghosting = $('colorMode').value === 'ghost';
 
-                    // 2. СЕКРЕТ ШАКАЛА: Экспортируем кадр в низкокачественный JPEG и рисуем обратно
-                    // Это создает те самые "звоны" и "грязь" кодека
-                    const quality = (11 - shakalRange.value) / 15; // 0.1 - 0.7
-                    const frameData = offCanvas.toDataURL('image/jpeg', quality);
+            function render() {
+                if (!video.paused && !video.ended) {
+                    pCtx.drawImage(video, 0, 0, procCanvas.width, procCanvas.height);
+                    
+                    const quality = $('qRange').value / 150;
+                    const frameData = procCanvas.toDataURL('image/jpeg', quality);
                     
                     const img = new Image();
                     img.onload = () => {
-                        // Эффект Ghosting: не очищаем экран полностью
-                        onCtx.globalAlpha = 1 - (ghostRange.value / 100);
-                        onCtx.fillStyle = "black";
-                        onCtx.fillRect(0,0,640,480);
-                        onCtx.globalAlpha = 1;
-                        
-                        onCtx.imageSmoothingEnabled = true; // Мыло - наш друг
-                        onCtx.drawImage(img, 0, 0, lowResW, lowResH, 0, 0, 640, 480);
-                        
-                        requestAnimationFrame(process);
+                        if (!ghosting) oCtx.clearRect(0,0,outCanvas.width, outCanvas.height);
+                        oCtx.globalAlpha = ghosting ? 0.2 : 1.0;
+                        oCtx.drawImage(img, 0, 0, outCanvas.width, outCanvas.height);
+                        requestAnimationFrame(render);
                     };
                     img.src = frameData;
                 } else {
                     recorder.stop();
-                    v.pause();
                 }
             }
-
-            process();
-        };
+            render();
+        }
 
         function makeDistortionCurve(amount) {
             let k = amount, n = 44100, curve = new Float32Array(n), i = 0, x;
