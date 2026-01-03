@@ -1,121 +1,248 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <title>Audio Cloud Admin | Sync Radio</title>
-    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <title>DDNet Web Online</title>
     <style>
-        :root { --bg: #0a0a0c; --card: #141417; --accent: #3b82f6; --text: #e2e8f0; --border: #2d2d35; }
-        body { background: var(--bg); color: var(--text); font-family: sans-serif; display: flex; justify-content: center; padding: 20px; }
-        .container { width: 100%; max-width: 600px; background: var(--card); padding: 30px; border-radius: 12px; border: 1px solid var(--border); }
-        input, button { width: 100%; padding: 12px; margin: 10px 0; border-radius: 6px; border: 1px solid var(--border); background: #0a0a0c; color: #fff; box-sizing: border-box; }
-        button { background: var(--accent); cursor: pointer; font-weight: bold; border: none; }
-        .song-item { padding: 10px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; font-size: 13px; }
-        .radio-link { background: #1e293b; padding: 10px; border-radius: 5px; color: #4ade80; font-family: monospace; font-size: 12px; word-break: break-all; }
+        body { margin: 0; overflow: hidden; background: #74b9ff; font-family: sans-serif; }
+        canvas { display: block; }
+        #ui { position: absolute; top: 10px; left: 10px; color: white; text-shadow: 1px 1px 2px black; pointer-events: none; }
     </style>
 </head>
 <body>
-
-<div class="container">
-    <h2>Radio Admin Panel</h2>
-    <p style="color: #94a3b8; font-size: 12px;">Загружай музыку, и она будет играть в синхронном эфире.</p>
-    
-    <input type="text" id="token" placeholder="GitHub Access Token" onchange="saveToken()">
-    <input type="file" id="audioFile" accept="audio/*">
-    <button id="uploadBtn" onclick="handleUpload()">Загрузить в эфир</button>
-
-    <div id="status"></div>
-
-    <h3>Ваша ссылка на радио (для CEF/браузера):</h3>
-    <div class="radio-link" id="radioLink">Загрузите токен...</div>
-
-    <div class="library-section">
-        <h3>Список песен в эфире:</h3>
-        <div id="songList"></div>
+    <div id="ui">
+        <b>DDNet Online</b><br>
+        A,D - Бег | Space - Прыжок | ЛКМ - Хук
     </div>
-</div>
+    <canvas id="game"></canvas>
 
+<script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
 <script>
-    const USER = 'shadexqz'; // ТВОЙ НИК ГИТХАБ
-    const REPO = 'shadexqz.github.io'; // ТВОЙ РЕПОЗИТОРИЙ
-    const FOLDER = 'Music';
+const socket = io('URL_ТВОЕГО_СЕРВЕРА_НА_RENDER'); // ЗАМЕНИ МЕНЯ
+const canvas = document.getElementById('game');
+const ctx = canvas.getContext('2d');
 
-    document.getElementById('token').value = localStorage.getItem('gh_token') || '';
-    document.getElementById('radioLink').innerText = `https://${USER}.github.io/radio.html`;
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
 
-    function saveToken() { localStorage.setItem('gh_token', document.getElementById('token').value); }
+// --- НАСТРОЙКИ ---
+const GRAVITY = 0.45;
+const FRICTION = 0.92;
+const JUMP_FORCE = 11;
+const ACCEL = 0.6;
+const TILE_SIZE = 50;
+const HOOK_MAX_DIST = 400;
+const HOOK_SPEED = 20;
 
-    const getDuration = (file) => new Promise((resolve) => {
-        const audio = new Audio();
-        audio.src = URL.createObjectURL(file);
-        audio.onloadedmetadata = () => resolve(Math.round(audio.duration));
-    });
+const map = [
+    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+    [1,0,0,0,0,0,0,0,0,0,0,1,1,1,0,0,0,0,0,0,0,0,0,0,0,1,1,1,0,0,0,0,0,0,0,1],
+    [1,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,0,0,0,0,0,1,1,0,0,1],
+    [1,0,0,0,0,1,1,1,1,0,0,0,0,0,0,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,1],
+    [1,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,1,1,1,0,0,0,1],
+    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+];
 
-    async function handleUpload() {
-        const token = document.getElementById('token').value;
-        const fileInput = document.getElementById('audioFile');
-        if (!token || !fileInput.files[0]) return alert('Нужен токен и файл!');
+let otherPlayers = {};
+let keys = {};
+let mouse = { x: 0, y: 0, down: false };
 
-        const file = fileInput.files[0];
-        const btn = document.getElementById('uploadBtn');
-        const status = document.getElementById('status');
-        btn.disabled = true;
-        status.innerText = "Измеряем длину и загружаем...";
+class Camera {
+    constructor() { this.x = 0; this.y = 0; }
+    follow(player) {
+        this.x = player.x - canvas.width / 2;
+        this.y = player.y - canvas.height / 2;
+    }
+}
 
-        try {
-            const duration = await getDuration(file);
-            const fileName = `${Date.now()}_${file.name.replace(/[^a-zA-Z0-9.]/g, '_')}`;
-            const path = `${FOLDER}/${fileName}`;
-
-            // 1. Загрузка MP3
-            const reader = new FileReader();
-            reader.readAsDataURL(file);
-            reader.onload = async () => {
-                const content = reader.result.split(',')[1];
-                await axios.put(`https://api.github.com/repos/${USER}/${REPO}/contents/${path}`, {
-                    message: "Add song to radio",
-                    content: content
-                }, { headers: { Authorization: `token ${token}` } });
-
-                // 2. Обновление плейлиста
-                await updatePlaylist(token, { name: file.name, url: fileName, duration });
-                alert('Готово! Песня в эфире.');
-                location.reload();
-            };
-        } catch (err) {
-            alert('Ошибка: ' + err.message);
-        } finally { btn.disabled = false; }
+class Player {
+    constructor(id, isLocal) {
+        this.id = id;
+        this.isLocal = isLocal;
+        this.x = 200; this.y = 200;
+        this.vx = 0; this.vy = 0;
+        this.angle = 0;
+        this.color = '#ff7675';
+        this.grounded = false;
+        
+        // Хук (полная механика)
+        this.hook = { active: false, x: 0, y: 0, state: 'idle' }; 
     }
 
-    async function updatePlaylist(token, newSong) {
-        const path = 'playlist.json';
-        let sha = '';
-        let songs = [];
-        try {
-            const res = await axios.get(`https://api.github.com/repos/${USER}/${REPO}/contents/${path}`, {
-                headers: { Authorization: `token ${token}` }
-            });
-            sha = res.data.sha;
-            songs = JSON.parse(atob(res.data.content));
-        } catch (e) {}
+    update() {
+        if (!this.isLocal) return;
 
-        songs.push(newSong);
-        await axios.put(`https://api.github.com/repos/${USER}/${REPO}/contents/${path}`, {
-            message: "Update radio playlist",
-            content: btoa(JSON.stringify(songs)),
-            sha: sha
-        }, { headers: { Authorization: `token ${token}` } });
+        // Движение
+        if (keys['KeyA']) this.vx -= ACCEL;
+        if (keys['KeyD']) this.vx += ACCEL;
+        if (keys['Space'] && this.grounded) { this.vy = -JUMP_FORCE; this.grounded = false; }
+
+        this.vy += GRAVITY;
+        this.vx *= FRICTION;
+        this.x += this.vx;
+        this.y += this.vy;
+
+        this.angle = Math.atan2(mouse.y - (this.y - cam.y), mouse.x - (this.x - cam.x));
+
+        this.checkCollisions();
+        this.handleHook();
+
+        // Отправка на сервер
+        socket.emit('playerMovement', { x: this.x, y: this.y, angle: this.angle, hook: this.hook });
     }
 
-    async function loadSongs() {
-        try {
-            const res = await axios.get(`https://raw.githubusercontent.com/${USER}/${REPO}/main/playlist.json?t=` + Date.now());
-            document.getElementById('songList').innerHTML = res.data.map(s => `
-                <div class="song-item"><span>${s.name}</span> <b>${s.duration} сек.</b></div>
-            `).join('');
-        } catch (e) {}
+    handleHook() {
+        if (mouse.down && !this.hook.active) {
+            // Выстрел
+            this.hook.active = true;
+            this.hook.state = 'flying';
+            let dx = Math.cos(this.angle);
+            let dy = Math.sin(this.angle);
+            
+            for (let d = 0; d < HOOK_MAX_DIST; d += 10) {
+                let tx = this.x + dx * d;
+                let ty = this.y + dy * d;
+                if (this.isWall(tx, ty)) {
+                    this.hook.x = tx;
+                    this.hook.y = ty;
+                    this.hook.state = 'latched';
+                    break;
+                }
+                if (d >= HOOK_MAX_DIST - 10) this.hook.active = false;
+            }
+        }
+        if (!mouse.down) this.hook.active = false;
+
+        if (this.hook.active && this.hook.state === 'latched') {
+            let dx = this.hook.x - this.x;
+            let dy = this.hook.y - this.y;
+            let dist = Math.sqrt(dx*dx + dy*dy);
+            if (dist > 20) {
+                this.vx += (dx / dist) * 0.75;
+                this.vy += (dy / dist) * 0.75;
+            }
+        }
     }
-    loadSongs();
+
+    isWall(x, y) {
+        let col = Math.floor(x / TILE_SIZE);
+        let row = Math.floor(y / TILE_SIZE);
+        return map[row] && map[row][col] === 1;
+    }
+
+    checkCollisions() {
+        let row = Math.floor((this.y + 20) / TILE_SIZE);
+        let col = Math.floor(this.x / TILE_SIZE);
+        if (this.isWall(this.x, this.y + 20)) {
+            this.y = row * TILE_SIZE - 20;
+            this.vy = 0;
+            this.grounded = true;
+        } else {
+            this.grounded = false;
+        }
+    }
+
+    draw() {
+        const drawX = this.x - cam.x;
+        const drawY = this.y - cam.y;
+
+        // Рисуем хук
+        if (this.hook.active) {
+            ctx.strokeStyle = '#eee';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(drawX, drawY);
+            ctx.lineTo(this.hook.x - cam.x, this.hook.y - cam.y);
+            ctx.stroke();
+        }
+
+        // Тело Tee
+        ctx.fillStyle = this.color;
+        ctx.beginPath();
+        ctx.arc(drawX, drawY, 20, 0, Math.PI*2);
+        ctx.fill();
+        ctx.strokeStyle = '#333';
+        ctx.lineWidth = 3;
+        ctx.stroke();
+
+        // Глаза
+        ctx.fillStyle = 'white';
+        const ex = Math.cos(this.angle) * 8;
+        const ey = Math.sin(this.angle) * 5;
+        ctx.beginPath(); ctx.arc(drawX + ex - 6, drawY + ey, 5, 0, Math.PI*2); ctx.fill(); ctx.stroke();
+        ctx.beginPath(); ctx.arc(drawX + ex + 6, drawY + ey, 5, 0, Math.PI*2); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = 'black';
+        ctx.beginPath(); ctx.arc(drawX + ex - 6 + Math.cos(this.angle)*2, drawY + ey + Math.sin(this.angle)*2, 2, 0, Math.PI*2); ctx.fill();
+        ctx.beginPath(); ctx.arc(drawX + ex + 6 + Math.cos(this.angle)*2, drawY + ey + Math.sin(this.angle)*2, 2, 0, Math.PI*2); ctx.fill();
+    }
+}
+
+const me = new Player('me', true);
+const cam = new Camera();
+
+function drawSky() {
+    // Небо и облака
+    ctx.fillStyle = '#74b9ff';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = 'rgba(255,255,255,0.5)';
+    for(let i=0; i<5; i++) {
+        ctx.beginPath();
+        ctx.arc((i*400 - cam.x*0.2) % canvas.width + 100, 100 + i*50, 50, 0, Math.PI*2);
+        ctx.fill();
+    }
+}
+
+function drawMap() {
+    ctx.fillStyle = '#6ab04c'; // Трава
+    for(let r=0; r<map.length; r++) {
+        for(let c=0; c<map[r].length; c++) {
+            if(map[r][c] === 1) {
+                ctx.fillRect(c*TILE_SIZE - cam.x, r*TILE_SIZE - cam.y, TILE_SIZE, TILE_SIZE);
+                ctx.strokeStyle = '#2d3436';
+                ctx.strokeRect(c*TILE_SIZE - cam.x, r*TILE_SIZE - cam.y, TILE_SIZE, TILE_SIZE);
+            }
+        }
+    }
+}
+
+function gameLoop() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    
+    cam.follow(me);
+    drawSky();
+    drawMap();
+
+    me.update();
+    me.draw();
+
+    for (let id in otherPlayers) {
+        let p = otherPlayers[id];
+        // Отрисовка других игроков
+        let remoteTee = new Player(id, false);
+        Object.assign(remoteTee, p);
+        remoteTee.draw();
+    }
+
+    requestAnimationFrame(gameLoop);
+}
+
+// Сетевые события
+socket.on('currentPlayers', (players) => {
+    delete players[socket.id];
+    otherPlayers = players;
+});
+socket.on('newPlayer', (data) => otherPlayers[data.id] = data.player);
+socket.on('playerMoved', (data) => otherPlayers[data.id] = data);
+socket.on('playerDisconnected', (id) => delete otherPlayers[id]);
+
+// Ввод
+window.addEventListener('keydown', e => keys[e.code] = true);
+window.addEventListener('keyup', e => keys[e.code] = false);
+window.addEventListener('mousemove', e => { mouse.x = e.clientX; mouse.y = e.clientY; });
+window.addEventListener('mousedown', () => mouse.down = true);
+window.addEventListener('mouseup', () => mouse.down = false);
+
+gameLoop();
 </script>
 </body>
 </html>
