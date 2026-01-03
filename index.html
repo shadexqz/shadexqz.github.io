@@ -1,248 +1,276 @@
 <!DOCTYPE html>
-<html>
+<html lang="ru">
 <head>
-    <title>DDNet Web Online</title>
+    <meta charset="UTF-8">
+    <title>DDNet Pro Clone</title>
     <style>
-        body { margin: 0; overflow: hidden; background: #74b9ff; font-family: sans-serif; }
+        body { margin: 0; overflow: hidden; background: #5691c8; font-family: 'Arial', sans-serif; }
         canvas { display: block; }
-        #ui { position: absolute; top: 10px; left: 10px; color: white; text-shadow: 1px 1px 2px black; pointer-events: none; }
+        #overlay { position: absolute; top: 10px; left: 10px; color: white; text-shadow: 2px 2px 4px rgba(0,0,0,0.5); pointer-events: none; }
     </style>
 </head>
 <body>
-    <div id="ui">
-        <b>DDNet Online</b><br>
-        A,D - Бег | Space - Прыжок | ЛКМ - Хук
+    <div id="overlay">
+        <h2>DDNet JS Web</h2>
+        <p>A, D - Движение | Space - Прыжок | ЛКМ - Хук | Мышь - Прицел</p>
     </div>
     <canvas id="game"></canvas>
 
 <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
 <script>
-const socket = io('https://shadexqz-github-io.onrender.com'); // ЗАМЕНИ МЕНЯ
+const socket = io('https://ТВОЙ-ПРОЕКТ.onrender.com'); // ВСТАВЬ СВОЮ ССЫЛКУ
 const canvas = document.getElementById('game');
 const ctx = canvas.getContext('2d');
 
-canvas.width = window.innerWidth;
-canvas.height = window.innerHeight;
+// --- ГЛОБАЛЬНЫЕ ПАРАМЕТРЫ ---
+const TILE_SIZE = 64;
+const GRAVITY = 0.5;
+const ACCEL = 1.2;
+const FRICTION = 0.88;
+const JUMP_FORCE = 13;
+const HOOK_FORCE = 0.9;
+const TEE_RADIUS = 24;
 
-// --- НАСТРОЙКИ ---
-const GRAVITY = 0.45;
-const FRICTION = 0.92;
-const JUMP_FORCE = 11;
-const ACCEL = 0.6;
-const TILE_SIZE = 50;
-const HOOK_MAX_DIST = 400;
-const HOOK_SPEED = 20;
+let myId = null;
+let players = {};
+const keys = {};
+const mouse = { x: 0, y: 0, left: false };
 
+// --- КАРТА (0-пусто, 1-блок, 2-платформа) ---
 const map = [
-    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
-    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-    [1,0,0,0,0,0,0,0,0,0,0,1,1,1,0,0,0,0,0,0,0,0,0,0,0,1,1,1,0,0,0,0,0,0,0,1],
-    [1,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,0,0,0,0,0,1,1,0,0,1],
-    [1,0,0,0,0,1,1,1,1,0,0,0,0,0,0,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,1],
-    [1,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,1,1,1,0,0,0,1],
-    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+    [1,0,0,0,0,0,0,0,0,0,1,1,1,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,1],
+    [1,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,0,0,0,0,0,0,0,0,0,0,1],
+    [1,0,1,1,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,1,1,1,0,0,0,1],
+    [1,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,1],
+    [1,0,0,0,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
 ];
 
-let otherPlayers = {};
-let keys = {};
-let mouse = { x: 0, y: 0, down: false };
-
-class Camera {
-    constructor() { this.x = 0; this.y = 0; }
-    follow(player) {
-        this.x = player.x - canvas.width / 2;
-        this.y = player.y - canvas.height / 2;
-    }
-}
-
 class Player {
-    constructor(id, isLocal) {
+    constructor(id, data) {
         this.id = id;
-        this.isLocal = isLocal;
-        this.x = 200; this.y = 200;
-        this.vx = 0; this.vy = 0;
+        this.x = data.x || 200;
+        this.y = data.y || 200;
+        this.vx = 0;
+        this.vy = 0;
+        this.color = data.color || '#ff5e5e';
         this.angle = 0;
-        this.color = '#ff7675';
         this.grounded = false;
-        
-        // Хук (полная механика)
-        this.hook = { active: false, x: 0, y: 0, state: 'idle' }; 
+        this.walkAnim = 0;
+        this.hook = { active: false, x: 0, y: 0, length: 0 };
     }
 
     update() {
-        if (!this.isLocal) return;
+        if (this.id !== myId) return;
 
-        // Движение
-        if (keys['KeyA']) this.vx -= ACCEL;
-        if (keys['KeyD']) this.vx += ACCEL;
+        // Ввод
+        if (keys['KeyA']) { this.vx -= ACCEL; this.walkAnim += 0.15; }
+        if (keys['KeyD']) { this.vx += ACCEL; this.walkAnim += 0.15; }
         if (keys['Space'] && this.grounded) { this.vy = -JUMP_FORCE; this.grounded = false; }
 
+        // Физика
         this.vy += GRAVITY;
         this.vx *= FRICTION;
+
+        // Механика хука
+        if (mouse.left) {
+            if (!this.hook.active) this.shootHook();
+            if (this.hook.active) {
+                let dx = this.hook.x - this.x;
+                let dy = this.hook.y - this.y;
+                let dist = Math.sqrt(dx*dx + dy*dy);
+                this.vx += (dx / dist) * HOOK_FORCE;
+                this.vy += (dy / dist) * HOOK_FORCE;
+            }
+        } else {
+            this.hook.active = false;
+        }
+
+        // Коллизии (X)
         this.x += this.vx;
+        this.resolveCollisions(true);
+        // Коллизии (Y)
         this.y += this.vy;
+        this.resolveCollisions(false);
 
-        this.angle = Math.atan2(mouse.y - (this.y - cam.y), mouse.x - (this.x - cam.x));
-
-        this.checkCollisions();
-        this.handleHook();
+        this.angle = Math.atan2(mouse.y - (this.y - camera.y), mouse.x - (this.x - camera.x));
 
         // Отправка на сервер
-        socket.emit('playerMovement', { x: this.x, y: this.y, angle: this.angle, hook: this.hook });
+        socket.emit('update', { x: this.x, y: this.y, angle: this.angle, hook: this.hook, color: this.color });
     }
 
-    handleHook() {
-        if (mouse.down && !this.hook.active) {
-            // Выстрел
-            this.hook.active = true;
-            this.hook.state = 'flying';
-            let dx = Math.cos(this.angle);
-            let dy = Math.sin(this.angle);
-            
-            for (let d = 0; d < HOOK_MAX_DIST; d += 10) {
-                let tx = this.x + dx * d;
-                let ty = this.y + dy * d;
-                if (this.isWall(tx, ty)) {
-                    this.hook.x = tx;
-                    this.hook.y = ty;
-                    this.hook.state = 'latched';
-                    break;
-                }
-                if (d >= HOOK_MAX_DIST - 10) this.hook.active = false;
-            }
-        }
-        if (!mouse.down) this.hook.active = false;
-
-        if (this.hook.active && this.hook.state === 'latched') {
-            let dx = this.hook.x - this.x;
-            let dy = this.hook.y - this.y;
-            let dist = Math.sqrt(dx*dx + dy*dy);
-            if (dist > 20) {
-                this.vx += (dx / dist) * 0.75;
-                this.vy += (dy / dist) * 0.75;
+    shootHook() {
+        let dx = Math.cos(this.angle);
+        let dy = Math.sin(this.angle);
+        for (let i = 0; i < 600; i += 10) {
+            let tx = this.x + dx * i;
+            let ty = this.y + dy * i;
+            let col = Math.floor(tx / TILE_SIZE);
+            let row = Math.floor(ty / TILE_SIZE);
+            if (map[row] && map[row][col] === 1) {
+                this.hook = { active: true, x: tx, y: ty };
+                break;
             }
         }
     }
 
-    isWall(x, y) {
-        let col = Math.floor(x / TILE_SIZE);
-        let row = Math.floor(y / TILE_SIZE);
-        return map[row] && map[row][col] === 1;
-    }
-
-    checkCollisions() {
-        let row = Math.floor((this.y + 20) / TILE_SIZE);
+    resolveCollisions(isX) {
         let col = Math.floor(this.x / TILE_SIZE);
-        if (this.isWall(this.x, this.y + 20)) {
-            this.y = row * TILE_SIZE - 20;
-            this.vy = 0;
-            this.grounded = true;
-        } else {
-            this.grounded = false;
+        let row = Math.floor(this.y / TILE_SIZE);
+
+        for (let r = row - 1; r <= row + 1; r++) {
+            for (let c = col - 1; c <= col + 1; c++) {
+                if (map[r] && map[r][c] === 1) {
+                    let bx = c * TILE_SIZE;
+                    let by = r * TILE_SIZE;
+
+                    if (this.x + TEE_RADIUS > bx && this.x - TEE_RADIUS < bx + TILE_SIZE &&
+                        this.y + TEE_RADIUS > by && this.y - TEE_RADIUS < by + TILE_SIZE) {
+                        
+                        if (isX) {
+                            if (this.vx > 0) this.x = bx - TEE_RADIUS;
+                            else if (this.vx < 0) this.x = bx + TILE_SIZE + TEE_RADIUS;
+                            this.vx = 0;
+                        } else {
+                            if (this.vy > 0) {
+                                this.y = by - TEE_RADIUS;
+                                this.grounded = true;
+                            } else if (this.vy < 0) {
+                                this.y = by + TILE_SIZE + TEE_RADIUS;
+                            }
+                            this.vy = 0;
+                        }
+                    }
+                }
+            }
         }
     }
 
     draw() {
-        const drawX = this.x - cam.x;
-        const drawY = this.y - cam.y;
+        const screenX = this.x - camera.x;
+        const screenY = this.y - camera.y;
 
-        // Рисуем хук
+        // Рисуем хук (цепь)
         if (this.hook.active) {
-            ctx.strokeStyle = '#eee';
-            ctx.lineWidth = 2;
+            ctx.strokeStyle = '#d1d1d1';
+            ctx.lineWidth = 3;
+            ctx.setLineDash([5, 5]);
             ctx.beginPath();
-            ctx.moveTo(drawX, drawY);
-            ctx.lineTo(this.hook.x - cam.x, this.hook.y - cam.y);
+            ctx.moveTo(screenX, screenY);
+            ctx.lineTo(this.hook.x - camera.x, this.hook.y - camera.y);
             ctx.stroke();
+            ctx.setLineDash([]);
         }
 
-        // Тело Tee
+        // НОГИ (анимация)
+        ctx.fillStyle = this.color;
+        const footY = screenY + 15;
+        const moveOffset = Math.sin(this.walkAnim) * 10;
+        
+        // Левая нога
+        ctx.beginPath();
+        ctx.ellipse(screenX - 12 + moveOffset, footY + (this.grounded?0:-5), 10, 6, 0, 0, Math.PI*2);
+        ctx.fill(); ctx.stroke();
+        // Правая нога
+        ctx.beginPath();
+        ctx.ellipse(screenX + 12 - moveOffset, footY + (this.grounded?0:-5), 10, 6, 0, 0, Math.PI*2);
+        ctx.fill(); ctx.stroke();
+
+        // ТЕЛО (Tee)
         ctx.fillStyle = this.color;
         ctx.beginPath();
-        ctx.arc(drawX, drawY, 20, 0, Math.PI*2);
+        ctx.arc(screenX, screenY, TEE_RADIUS, 0, Math.PI * 2);
         ctx.fill();
-        ctx.strokeStyle = '#333';
-        ctx.lineWidth = 3;
+        ctx.strokeStyle = '#000';
+        ctx.lineWidth = 2;
         ctx.stroke();
 
-        // Глаза
+        // ГЛАЗА
+        const eyeX = screenX + Math.cos(this.angle) * 10;
+        const eyeY = screenY + Math.sin(this.angle) * 8;
         ctx.fillStyle = 'white';
-        const ex = Math.cos(this.angle) * 8;
-        const ey = Math.sin(this.angle) * 5;
-        ctx.beginPath(); ctx.arc(drawX + ex - 6, drawY + ey, 5, 0, Math.PI*2); ctx.fill(); ctx.stroke();
-        ctx.beginPath(); ctx.arc(drawX + ex + 6, drawY + ey, 5, 0, Math.PI*2); ctx.fill(); ctx.stroke();
+        ctx.beginPath(); ctx.arc(eyeX - 7, eyeY, 6, 0, Math.PI*2); ctx.fill(); ctx.stroke();
+        ctx.beginPath(); ctx.arc(eyeX + 7, eyeY, 6, 0, Math.PI*2); ctx.fill(); ctx.stroke();
+        
         ctx.fillStyle = 'black';
-        ctx.beginPath(); ctx.arc(drawX + ex - 6 + Math.cos(this.angle)*2, drawY + ey + Math.sin(this.angle)*2, 2, 0, Math.PI*2); ctx.fill();
-        ctx.beginPath(); ctx.arc(drawX + ex + 6 + Math.cos(this.angle)*2, drawY + ey + Math.sin(this.angle)*2, 2, 0, Math.PI*2); ctx.fill();
+        ctx.beginPath(); ctx.arc(eyeX - 7 + Math.cos(this.angle)*3, eyeY + Math.sin(this.angle)*3, 2.5, 0, Math.PI*2); ctx.fill();
+        ctx.beginPath(); ctx.arc(eyeX + 7 + Math.cos(this.angle)*3, eyeY + Math.sin(this.angle)*3, 2.5, 0, Math.PI*2); ctx.fill();
     }
 }
 
-const me = new Player('me', true);
-const cam = new Camera();
-
-function drawSky() {
-    // Небо и облака
-    ctx.fillStyle = '#74b9ff';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-    ctx.fillStyle = 'rgba(255,255,255,0.5)';
-    for(let i=0; i<5; i++) {
-        ctx.beginPath();
-        ctx.arc((i*400 - cam.x*0.2) % canvas.width + 100, 100 + i*50, 50, 0, Math.PI*2);
-        ctx.fill();
+const camera = { x: 0, y: 0 };
+function updateCamera() {
+    if (players[myId]) {
+        camera.x += (players[myId].x - canvas.width / 2 - camera.x) * 0.1;
+        camera.y += (players[myId].y - canvas.height / 2 - camera.y) * 0.1;
     }
 }
 
 function drawMap() {
-    ctx.fillStyle = '#6ab04c'; // Трава
-    for(let r=0; r<map.length; r++) {
-        for(let c=0; c<map[r].length; c++) {
-            if(map[r][c] === 1) {
-                ctx.fillRect(c*TILE_SIZE - cam.x, r*TILE_SIZE - cam.y, TILE_SIZE, TILE_SIZE);
-                ctx.strokeStyle = '#2d3436';
-                ctx.strokeRect(c*TILE_SIZE - cam.x, r*TILE_SIZE - cam.y, TILE_SIZE, TILE_SIZE);
+    ctx.fillStyle = '#4a76a8'; // Цвет блоков
+    for (let r = 0; r < map.length; r++) {
+        for (let c = 0; c < map[r].length; c++) {
+            if (map[r][c] === 1) {
+                const x = c * TILE_SIZE - camera.x;
+                const y = r * TILE_SIZE - camera.y;
+                ctx.fillRect(x, y, TILE_SIZE, TILE_SIZE);
+                ctx.strokeStyle = '#355375';
+                ctx.strokeRect(x, y, TILE_SIZE, TILE_SIZE);
+                
+                // Трава сверху
+                ctx.fillStyle = '#71bc4b';
+                ctx.fillRect(x, y, TILE_SIZE, 8);
+                ctx.fillStyle = '#4a76a8';
             }
         }
     }
 }
 
-function gameLoop() {
+function loop() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     
-    cam.follow(me);
-    drawSky();
+    // Фон (небо)
+    const grad = ctx.createLinearGradient(0, 0, 0, canvas.height);
+    grad.addColorStop(0, '#74b9ff');
+    grad.addColorStop(1, '#a29bfe');
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    updateCamera();
     drawMap();
 
-    me.update();
-    me.draw();
-
-    for (let id in otherPlayers) {
-        let p = otherPlayers[id];
-        // Отрисовка других игроков
-        let remoteTee = new Player(id, false);
-        Object.assign(remoteTee, p);
-        remoteTee.draw();
+    for (let id in players) {
+        players[id].update();
+        players[id].draw();
     }
 
-    requestAnimationFrame(gameLoop);
+    requestAnimationFrame(loop);
 }
 
 // Сетевые события
-socket.on('currentPlayers', (players) => {
-    delete players[socket.id];
-    otherPlayers = players;
+socket.on('init', (data) => {
+    myId = data.id;
+    for (let id in data.players) players[id] = new Player(id, data.players[id]);
 });
-socket.on('newPlayer', (data) => otherPlayers[data.id] = data.player);
-socket.on('playerMoved', (data) => otherPlayers[data.id] = data);
-socket.on('playerDisconnected', (id) => delete otherPlayers[id]);
+socket.on('newPlayer', (data) => players[data.id] = new Player(data.id, data.player));
+socket.on('playerUpdated', (data) => {
+    if (players[data.id]) Object.assign(players[data.id], data);
+});
+socket.on('playerLeave', (id) => delete players[id]);
 
 // Ввод
-window.addEventListener('keydown', e => keys[e.code] = true);
-window.addEventListener('keyup', e => keys[e.code] = false);
-window.addEventListener('mousemove', e => { mouse.x = e.clientX; mouse.y = e.clientY; });
-window.addEventListener('mousedown', () => mouse.down = true);
-window.addEventListener('mouseup', () => mouse.down = false);
+window.onkeydown = (e) => keys[e.code] = true;
+window.onkeyup = (e) => keys[e.code] = false;
+window.onmousemove = (e) => { mouse.x = e.clientX; mouse.y = e.clientY; };
+window.onmousedown = () => mouse.left = true;
+window.onmouseup = () => mouse.left = false;
+window.onresize = () => { canvas.width = window.innerWidth; canvas.height = window.innerHeight; };
+window.onresize();
 
-gameLoop();
+loop();
 </script>
 </body>
 </html>
